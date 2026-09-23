@@ -89,6 +89,36 @@ not shipping art.** For every generated asset:
 
 Watch total uncompressed texture memory — WebGL builds get unstable well before desktop would.
 
+## Shadows: never bake them
+
+The model renders "contact shadow" as a **cream/white ellipse**, which reads as a bright patch on
+grass, not a shadow. Do not ask for one. Every prompt should say:
+
+> no shadow, no cast shadow, no ground shadow, no glow beneath the subject
+
+Shadows belong in the engine: a separate soft dark ellipse sprite parented under each prop, tinted
+and scaled per item. That also lets shadows sit correctly on slopes, water edges and varied terrain,
+which a baked ellipse never can.
+
+## Keeping the set consistent
+
+Generated blind, assets drift badly between calls: the first pine tree came back as a soft 3D
+claymation render with no outline at all, while the rock hill next to it came back correctly as
+outlined vector. They do not belong in the same game.
+
+So, in order:
+
+1. Generate one asset and approve it by eye. `Assets/Art/Source/Hill_Gray.png` is the current
+   reference for outlined props.
+2. Generate everything else with `--ref` against an approved asset, and open the prompt with:
+   "Match the attached image's rendering style, outline weight, shading and palette EXACTLY.
+   Draw instead: ..."
+3. Never state a rule as a negative the model can over-apply. "The canopy has no outline" produced
+   a tree with no outline anywhere. Say what you want, not what you don't.
+
+Always composite a new asset over the grass colour (#7FAF4F) before judging it. A sprite viewed on
+a dark background hides both halos and wrong-coloured shadows.
+
 ## Rate limit
 
 ~5 images/minute. Generate sequentially, never in parallel.

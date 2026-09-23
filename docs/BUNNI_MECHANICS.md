@@ -10,8 +10,9 @@ Raw copies are in `docs/reference/`.
 | Value | Amount |
 |---|---|
 | Starting wood | 1000 |
-| Starting rock | 1500 |
+| Starting gold (XML: `startrock`) | 1500 |
 | Starting gems | 0 (no startgem key; gems are earned) |
+| Starting bunnies | 0 (confirmed by play-test) |
 | World size | 4500 square units |
 | Minimap | false |
 
@@ -23,8 +24,12 @@ explicit world coordinates.
 
 ## Resources
 
-Three spendable currencies: **wood**, **rock**, **gem**. They come from harvesting *source
+Three spendable currencies: **wood**, **gold**, **gem**. They come from harvesting *source
 items* placed on the map. Each source has a yield value and a regrowth (seed) rate.
+
+> **Naming.** The XML calls the second currency `rock` (`startrock`, `costrock`), but the game's
+> HUD shows it as **gold** with a coin icon. Field names below keep the XML spelling; the player
+> sees gold. Bronze/silver/gold hills are what you mine it from.
 
 | Source | Category | Yield | Seed rate |
 |---|---|---|---|
@@ -52,10 +57,13 @@ Flowers are valued far above wood and stone (500-1600) because they are food, no
 
 ## Animals and the job system
 
-There is no job-assignment table. Each animal has a base **speed** (harvest rate) plus per-item
-**modifiers** that override it for specific resources. An animal near a resource it specializes
-in works several times faster. That is the entire job system: specialization by species, not
-assignment by the player.
+> **Corrected by play-testing.** Reading the XML alone suggested there was no job assignment.
+> There is: workers are dragged onto a **workplace building** (Sawmill for wood, Mine for gold).
+> Without a mill in range, a forest yields nothing. See the play-test findings at the end.
+
+Each animal has a base **speed** (harvest rate) plus per-item **modifiers** that override it for
+specific resources. Species specialization sits *on top of* the workplace assignment: you choose
+which animal to station at which mill, and the right species there works several times faster.
 
 | Animal | Base speed | Food/turn | Specializations |
 |---|---|---|---|
@@ -75,7 +83,9 @@ maple or tulip where they become the best worker in the game.
 
 ## Placement
 
-Every store item carries `inner` and `outer` radii, so placement is **free-position, not grid**.
+Every store item carries `inner` and `outer` radii, so placement is **free-position, not grid**
+(confirmed by play-test: drag-and-drop, no snapping, blocked only by another item's footprint or
+by water, where the item slides along the shoreline).
 `inner` is the footprint (collision - nothing else may overlap) and `outer` is the effect or
 attraction radius. Gardens keep inner at 22 while outer scales 100-200 with size, so a bigger
 garden feeds animals from further away without occupying more ground.
@@ -295,3 +305,94 @@ quest chain that gates progression.
   final balancing".
 - **Food economy.** Pandas cost 2/turn and deer 0.005/turn, but what a "turn" is, and how food is
   drawn from gardens, is not in the XML.
+
+### Play-test findings (2026-09-23)
+
+Observed by playing a fresh game. The archive.org emulator boots the wrong SWF (`vector_art.swf`,
+an art library) and hangs on "Loading Art". The findings below come from the real entry point,
+`LandOfBunnies.swf`, served locally with its sibling files in Ruffle 0.6.0. Timestamps come from
+reading the HUD's wood-counter pixels every 250 ms.
+
+#### 1. A single harvest, timed
+
+**Setup:** 1 Bunni assigned to 1 Sawmill, next to the tutorial's free Medium Pine Forest (5 trees).
+A Medium Posie Garden sits within range so the bunni stays fed.
+
+**Yield: +3 wood per trip**, every time (19 trips across the session, 990 → 1047 wood). This matches
+the tutorial card "Pine + Sawmill + Bunni = 3 wood" and `price/pine = 3` in `game.xml`. So the
+`price` block is the yield of one trip, not a sale value.
+
+**Cycle: ~45 s per trip (median 45.7 s, mean 48.6 s).** Six consecutive trips, timed from one
+deposit to the next:
+
+| Deposit at (s) | Wood | Interval (s) |
+|---|---|---|
+| 539.2 | 1029 | - |
+| 582.5 | 1032 | 43.3 |
+| 627.5 | 1035 | 45.0 |
+| 677.7 | 1038 | 50.2 |
+| 750.2 | 1041 | 72.5 (includes a detour to eat) |
+| 784.2 | 1044 | 34.0 |
+| 830.5 | 1047 | 46.3 |
+
+- **Throughput:** 18 wood in 291.3 s, about 3.7 wood/min for one pine bunni.
+- **Loop:** the bunni walks to a tree with an axe out, chops, carries a log back to the mill, and
+  the wood is credited on arrival. Trip length depends on how far the chosen tree is. The first
+  trip after assignment finished in under 12 s because the trees were right next to the mill.
+- **Hunger stops work.** With no food placed, the first bunni stopped after 2 deliveries. It fell
+  asleep ("z") beside the mill with a posie in a thought bubble. After a posie garden went down
+  in range, it walked over, ate, and was back to chopping in about 9 s. Fed bunnies still detour
+  to eat now and then; the 72.5 s interval above is one of those detours.
+- **Caveat:** the SWF runs at 30 fps and uses both `ENTER_FRAME` and `getTimer`. If the game logic
+  is frame-driven, these times are only as accurate as Ruffle's frame pacing.
+
+#### 2. How placing an item works
+
+- **Getting an item:** new items appear as floating bubbles on the map with an arrow above them.
+  Clicking one shows a "You found a new item!" card, and the item then sits on a small pedestal
+  at the avatar's feet. Items bought from a shop land in the same spot (see Bunni House below).
+- **Input is drag-and-drop, not click-then-place.** You press on the held item and drag it into
+  place ("Planting time! Click and drag the tree to plant it"; hover hint: "Click and hold to
+  place **X**"). Clicking empty ground does nothing. The avatar is draggable too, which is how
+  you move it, and the camera follows the avatar.
+- **Preview while dragging:**
+  - The real sprite follows the pointer at full opacity.
+  - The rest of the screen dims.
+  - A dark flattened ellipse (2:1 isometric) shows the item's `outer` radius. A Medium Pine
+    Forest's ellipse measured about 400 px wide, so `outer: 200` is a radius.
+  - Every other item shows a dark footprint shadow, which is its `inner` collision circle.
+  - A status line reads "You can place your **X** here".
+  - Dragging near the view's edge scrolls the camera.
+- **Snapping: no grid.** Position is free. The one constraint is land: drag the pointer out
+  over water and the item stops at the nearest point on the shoreline. It never shows an invalid
+  state for water; it just slides along the coast.
+- **Invalid spot (overlapping another item's footprint):**
+  - The item turns into a faded, translucent ghost.
+  - The status reads "Placement is blocked".
+  - The avatar lights up with a yellow ring, marking it as a place to put the item back.
+  - Releasing there cancels the drop with "You dropped a **X** item back into your inventory".
+    The item goes back to the avatar's feet, and nothing is placed or charged.
+- **Valid release:** you see "You created a **Medium Pine Forest**!"
+  - One forest item scatters **5 separate trees** around the drop point. They grow from saplings
+    to full size in about 4 s.
+  - A posie garden likewise drops several separate flower clumps.
+  - Forests spread over time; a new sapling appeared nearby within about a minute.
+- **Assigning jobs uses the same drag.**
+  - The Bunni House is a shop. Clicking the bunni on its pedestal opens a
+    Cancel/Purchase dialog (Bunni: 10 wood, 10 gold, 0 gems), and a bought bunni lands at the
+    avatar's feet.
+  - Dragging a bunni makes each valid workplace glow with a yellow ring under it. The status
+    reads "Place your **Bunni** on **Sawmill**", or "…on **You**" over the avatar.
+  - Dropping it on the Sawmill gives "You set a **Bunni** to work on a **Sawmill**", and the HUD
+    bunni counter goes up by 1.
+
+#### Corrections to the data-derived sections above
+
+- **The second currency is gold, not rock.** The HUD shows 1000 wood / 1500 gold (coin icon) /
+  0 gems. `startrock` / `costrock` are gold.
+- **There is a job system.** Workers are assigned by dragging them onto a Sawmill (wood) or a
+  Mine (gold). Without a mill, a forest yields nothing. The Bunni card says: "Add a Bunni to a
+  Sawmill to harvest wood. Add a Bunni to a Mine to harvest gold."
+- **New-game opening:** 1000 wood, 1500 gold, 0 gems, 0 bunnies, on island 1 with an empty map.
+  The tutorial then hands out free items in this order: Medium Pine Forest → Sawmill →
+  Bunni House → Medium Posie Garden. A bunni costs 10 wood + 10 gold.
