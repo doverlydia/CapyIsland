@@ -1,0 +1,1080 @@
+<storeitems>	<store name="Small Posie Garden"> 
+		<id>1</id> 
+		<description>A delicate garden of tasty flowers.  Feeds up to 1 hungry bunni.</description> 
+		<costwood>1</costwood> 
+		<costrock>3</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Terrain.GardenItems.PosieItem</itemclass> 
+		<inner>22</inner> 
+		<outer>100</outer> 
+		<frame>2</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Bomb"> 
+		<id>2</id> 
+		<description>A great way to eliminate unwanted deer.</description> 
+		<costwood>10</costwood> 
+		<costrock>10</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Terrain.BombItem</itemclass> 
+		<inner>20</inner> 
+		<outer>300</outer> 
+		<frame>1</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Medium Posie Garden"> 
+		<id>3</id> 
+		<description>A beautiful larder for wild creatures.  Feeds up to 2 bunnies.</description> 
+		<costwood>5</costwood> 
+		<costrock>1</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Terrain.GardenItems.PosieItem</itemclass> 
+		<inner>22</inner> 
+		<outer>150</outer> 
+		<frame>3</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Large Posie Garden"> 
+		<id>4</id> 
+		<description>A large posie garden that feeds more bunnies</description> 
+		<costwood>25</costwood> 
+		<costrock>10</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Terrain.GardenItems.PosieItem</itemclass> 
+		<inner>22</inner> 
+		<outer>200</outer> 
+		<frame>4</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Small Tulip Garden"> 
+		<id>5</id> 
+		<description>Yellow, Tasty, Gorgeous. The butter of flowers.   Feeds up to 2 bunnies.</description> 
+		<costwood>5</costwood> 
+		<costrock>3</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Terrain.GardenItems.TulipItem</itemclass> 
+		<inner>22</inner> 
+		<outer>100</outer> 
+		<frame>5</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Medium Tulip Garden"> 
+		<id>6</id> 
+		<description>A moderate sized patch of belly filling tulips.  Feeds up to 3 bunnies</description> 
+		<costwood>20</costwood> 
+		<costrock>5</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Terrain.GardenItems.TulipItem</itemclass> 
+		<inner>22</inner> 
+		<outer>150</outer> 
+		<frame>6</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Large Tulip Garden"> 
+		<id>7</id> 
+		<description>Real men plants large fields of flowers, not flower gardens</description> 
+		<costwood>30</costwood> 
+		<costrock>15</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Terrain.GardenItems.TulipItem</itemclass> 
+		<inner>22</inner> 
+		<outer>200</outer> 
+		<frame>7</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Small Rose Garden"> 
+		<id>8</id> 
+		<description>The perfect way to show your love.  Feeds up to 3 bunnies.</description> 
+		<costwood>0</costwood> 
+		<costrock>0</costrock> 
+		<costgem>5</costgem> 
+		<itemclass>MapItems.Terrain.GardenItems.RoseItem</itemclass> 
+		<inner>22</inner> 
+		<outer>100</outer> 
+		<frame>8</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Medium Rose Garden"> 
+		<id>9</id> 
+		<description>A medium sized patch of gorgeous red roses.  Feeds up to 4 bunnies</description> 
+		<costwood>0</costwood> 
+		<costrock>0</costrock> 
+		<costgem>10</costgem> 
+		<itemclass>MapItems.Terrain.GardenItems.RoseItem</itemclass> 
+		<inner>22</inner> 
+		<outer>150</outer> 
+		<frame>9</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Large Rose Garden"> 
+		<id>10</id> 
+		<description>Those who plant a forest of roses shall find true love</description> 
+		<costwood>0</costwood> 
+		<costrock>0</costrock> 
+		<costgem>20</costgem> 
+		<itemclass>MapItems.Terrain.GardenItems.RoseItem</itemclass> 
+		<inner>22</inner> 
+		<outer>200</outer> 
+		<frame>10</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Small Pine Forest"> 
+		<id>11</id> 
+		<description>A solitary grove of talk dark pines. Yields 1 wood per tree.</description> 
+		<costwood>0</costwood> 
+		<costrock>2</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Terrain.ForestItems.PineItem</itemclass> 
+		<inner>36</inner> 
+		<outer>150</outer> 
+		<frame>11</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Medium Pine Forest"> 
+		<id>12</id> 
+		<description>Creaking pines full of ghostly whispers. Yields 1 wood per tree.</description> 
+		<costwood>0</costwood> 
+		<costrock>5</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Terrain.ForestItems.PineItem</itemclass> 
+		<inner>36</inner> 
+		<outer>200</outer> 
+		<frame>12</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Large Pine Forest"> 
+		<id>13</id> 
+		<description>ark things lurk inside the tangled branches. Yields 1 wood per tree.</description> 
+		<costwood>25</costwood> 
+		<costrock>12</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Terrain.ForestItems.PineItem</itemclass> 
+		<inner>36</inner> 
+		<outer>300</outer> 
+		<frame>13</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Small Maple Forest"> 
+		<id>14</id> 
+		<description>A bright grove filled with birdsong. Yields 3 wood per tree.</description> 
+		<costwood>8</costwood> 
+		<costrock>3</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Terrain.ForestItems.MapleItem</itemclass> 
+		<inner>36</inner> 
+		<outer>150</outer> 
+		<frame>14</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Medium Maple Forest"> 
+		<id>15</id> 
+		<description>A forest all a flutter with vibrant greens and spots of light. Yields 3 wood per tree.</description> 
+		<costwood>10</costwood> 
+		<costrock>8</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Terrain.ForestItems.MapleItem</itemclass> 
+		<inner>36</inner> 
+		<outer>200</outer> 
+		<frame>15</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Large Maple Forest"> 
+		<id>16</id> 
+		<description>A sun streaked paradise for small creatures. Yields 3 wood per tree.</description> 
+		<costwood>20</costwood> 
+		<costrock>10</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Terrain.ForestItems.MapleItem</itemclass> 
+		<inner>36</inner> 
+		<outer>300</outer> 
+		<frame>16</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Small Ironwood Forest"> 
+		<id>17</id> 
+		<description>A small grove ancient trees. Yields 15 wood per tree.</description> 
+		<costwood>0</costwood> 
+		<costrock>0</costrock> 
+		<costgem>5</costgem> 
+		<itemclass>MapItems.Terrain.ForestItems.IronwoodItem</itemclass> 
+		<inner>36</inner> 
+		<outer>150</outer> 
+		<frame>17</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Medium Ironwood Forest"> 
+		<id>18</id> 
+		<description>A magical forest populated by whispering spirits. Yields 15 wood per tree.</description> 
+		<costwood>0</costwood> 
+		<costrock>0</costrock> 
+		<costgem>10</costgem> 
+		<itemclass>MapItems.Terrain.ForestItems.IronwoodItem</itemclass> 
+		<inner>36</inner> 
+		<outer>200</outer> 
+		<frame>18</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Large Ironwood Forest"> 
+		<id>19</id> 
+		<description>The vast and powerful stronghold of tree gods. Yields 15 wood per tree.</description> 
+		<costwood>0</costwood> 
+		<costrock>0</costrock> 
+		<costgem>20</costgem> 
+		<itemclass>MapItems.Terrain.ForestItems.IronwoodItem</itemclass> 
+		<inner>36</inner> 
+		<outer>300</outer> 
+		<frame>19</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Bunni House"> 
+		<id>20</id> 
+		<description>A good Catholic home</description> 
+		<costwood>500</costwood> 
+		<costrock>500</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Building.Houses.BunnyHouseItem</itemclass> 
+		<inner>41</inner> 
+		<outer>0</outer> 
+		<frame>20</frame> 
+		<persistent>1</persistent> 
+        <max>1</max> 
+	</store> 
+		<store name="Pirate House"> 
+		<id>21</id> 
+		<description>A shanty filled with the raucous chattering of besotted parrots</description> 
+		<costwood>15000</costwood> 
+		<costrock>0</costrock> 
+		<costgem>20</costgem> 
+		<itemclass>MapItems.Building.Houses.PirateHouseItem</itemclass> 
+		<inner>41</inner> 
+		<outer>0</outer> 
+		<frame>20</frame> 
+		<persistent>1</persistent> 
+        <max>1</max> 
+	</store> 
+		<store name="Panda House"> 
+		<id>22</id> 
+		<description>A peaceful abode that seems poorly kept up</description> 
+		<costwood>1000</costwood> 
+		<costrock>300</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Building.Houses.PandaHouseItem</itemclass> 
+		<inner>41</inner> 
+		<outer>0</outer> 
+		<frame>20</frame> 
+		<persistent>1</persistent> 
+        <max>1</max> 
+	</store> 
+		<store name="Fox House"> 
+		<id>23</id> 
+		<description>A neat, tidy house with a suspiciously Scandinavian gnome ornament out front</description> 
+		<costwood>400</costwood> 
+		<costrock>25</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Building.Houses.FoxHouseItem</itemclass> 
+		<inner>41</inner> 
+		<outer>0</outer> 
+		<frame>20</frame> 
+		<persistent>1</persistent> 
+        <max>1</max> 
+	</store> 
+		<store name="Monster House"> 
+		<id>24</id> 
+		<description>A dark pit in the earth inscribed with complex runes obscured by blackish sap stains</description> 
+		<costwood>500</costwood> 
+		<costrock>400</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Building.Houses.MonsterHouseItem</itemclass> 
+		<inner>41</inner> 
+		<outer>0</outer> 
+		<frame>20</frame> 
+		<persistent>1</persistent> 
+        <max>1</max> 
+	</store> 
+		<store name="Deer House"> 
+		<id>25</id> 
+		<description>Unspeakable evil emanates from the tiny home</description> 
+		<costwood>50</costwood> 
+		<costrock>0</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Building.Houses.DeerHouseItem</itemclass> 
+		<inner>41</inner> 
+		<outer>0</outer> 
+		<frame>20</frame> 
+		<persistent>1</persistent> 
+        <max>1</max> 
+	</store> 
+		<store name="Bunni"> 
+		<id>26</id> 
+		<description>A cuddly creature with floppy soft ears and a quivering nose.  Bunnies earn you gold and wood.</description> 
+		<costwood>10</costwood> 
+		<costrock>10</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Animals.BunnyItem</itemclass> 
+		<inner>0</inner> 
+		<outer>0</outer> 
+		<frame>29</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Pirate"> 
+		<id>27</id> 
+		<description>A swashbuckling hero bent on discovering glittering treasure who will be there next time you login.</description> 
+		<costwood>0</costwood> 
+		<costrock>0</costrock> 
+		<costgem>10</costgem> 
+		<itemclass>MapItems.Animals.PirateItem</itemclass> 
+		<inner>0</inner> 
+		<outer>0</outer> 
+		<frame>30</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Panda"> 
+		<id>28</id> 
+		<description>A slow and steady worker.  Did I mention 'slow?'</description> 
+		<costwood>5</costwood> 
+		<costrock>3</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Animals.PandaItem</itemclass> 
+		<inner>0</inner> 
+		<outer>0</outer> 
+		<frame>31</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Fox"> 
+		<id>29</id> 
+		<description>Fast, hard working and rather fond of small red potatoes</description> 
+		<costwood>30</costwood> 
+		<costrock>15</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Animals.FoxItem</itemclass> 
+		<inner>0</inner> 
+		<outer>0</outer> 
+		<frame>32</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Monster"> 
+		<id>30</id> 
+		<description>A rageful forest spirit full of fury and hunger because you keep chopping down his trees!</description> 
+		<costwood>1500</costwood> 
+		<costrock>0</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Animals.MonsterItem</itemclass> 
+		<inner>0</inner> 
+		<outer>0</outer> 
+		<frame>33</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Deer"> 
+		<id>31</id> 
+		<description>A ancient demon that hungers for your trees.  Their warcry is "Ungulate, Ungulate, Ungulate!"</description> 
+		<costwood>10</costwood> 
+		<costrock>0</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Animals.DeerItem</itemclass> 
+		<inner>0</inner> 
+		<outer>0</outer> 
+		<frame>34</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Sawmill"> 
+		<id>32</id> 
+		<description>A useful building that helps turn forest into wood</description> 
+		<costwood>0</costwood> 
+		<costrock>250</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Building.MillItem</itemclass> 
+		<inner>41</inner> 
+		<outer>0</outer> 
+		<frame>21</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Mine"> 
+		<id>33</id> 
+		<description>Mines help turn the wastelands of rock into gold.</description> 
+		<costwood>100</costwood> 
+		<costrock>50</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Building.MineItem</itemclass> 
+		<inner>41</inner> 
+		<outer>0</outer> 
+		<frame>22</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="General Store"> 
+		<id>34</id> 
+		<description>Mama Flo's franchised convenience store</description> 
+		<costwood>25</costwood> 
+		<costrock>25</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Building.Stores.GeneralStore</itemclass> 
+		<inner>41</inner> 
+		<outer>0</outer> 
+		<frame>23</frame> 
+		<persistent>1</persistent> 
+        <max>1</max> 
+	</store> 
+		<store name="Bronze Store"> 
+		<id>35</id> 
+		<description>Basic utilities for frontier living.  New stores give you new items to buy.</description> 
+		<costwood>200</costwood> 
+		<costrock>900</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Building.Stores.BronzeStore</itemclass> 
+		<inner>41</inner> 
+		<outer>0</outer> 
+		<frame>24</frame> 
+		<persistent>1</persistent> 
+        <max>1</max> 
+	</store> 
+		<store name="Steel Store"> 
+		<id>36</id> 
+		<description>Miner's best friend is the bunni who sells him his pickax.  More glorious shopping awaits!</description> 
+		<costwood>12250</costwood> 
+		<costrock>125</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Building.Stores.SteelStore</itemclass> 
+		<inner>41</inner> 
+		<outer>0</outer> 
+		<frame>25</frame> 
+		<persistent>1</persistent> 
+        <max>1</max> 
+	</store> 
+		<store name="Silver Store"> 
+		<id>37</id> 
+		<description>A sophisticated store for sophisticated shoppers.  Pretty girls love to shop here.</description> 
+		<costwood>1750</costwood> 
+		<costrock>1150</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Building.Stores.SilverStore</itemclass> 
+		<inner>41</inner> 
+		<outer>0</outer> 
+		<frame>26</frame> 
+		<persistent>1</persistent> 
+        <max>1</max> 
+	</store> 
+		<store name="Gold Store"> 
+		<id>38</id> 
+		<description>The final purchasing emporium.  You can buy a Church here!</description> 
+		<costwood>12000</costwood> 
+		<costrock>11500</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Building.Stores.GoldStore</itemclass> 
+		<inner>41</inner> 
+		<outer>0</outer> 
+		<frame>27</frame> 
+		<persistent>1</persistent> 
+        <max>1</max> 
+	</store> 
+		<store name="Church"> 
+		<id>39</id> 
+		<description>A chapel of Love.  A bunni could get married here.</description> 
+		<costwood>2500</costwood> 
+		<costrock>3000</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Building.CastleItem</itemclass> 
+		<inner>92</inner> 
+		<outer>0</outer> 
+		<frame>28</frame> 
+		<persistent>1</persistent> 
+        <max>1</max> 
+	</store> 
+		<store name="Apple Tree"> 
+		<id>40</id> 
+		<description>A magical tree that produces food and gold.  A tree spirit lives inside.</description> 
+		<costwood>500</costwood> 
+		<costrock>250</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.FruitTrees.AppleTree</itemclass> 
+		<inner>50</inner> 
+		<outer>0</outer> 
+		<frame>35</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Pear Tree"> 
+		<id>41</id> 
+		<description>A magical tree that produces food and gold.  A tree spirit lives inside.</description> 
+		<costwood>1000</costwood> 
+		<costrock>250</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.FruitTrees.PearTree</itemclass> 
+		<inner>50</inner> 
+		<outer>0</outer> 
+		<frame>36</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Legendary Plum Tree"> 
+		<id>42</id> 
+		<description>Juicy plums grow heavily from the sweeping branches.  Plum trees produce valuable items when shaken.</description> 
+		<costwood>0</costwood> 
+		<costrock>0</costrock> 
+		<costgem>100</costgem> 
+		<itemclass>MapItems.FruitTrees.PlumTree</itemclass> 
+		<inner>50</inner> 
+		<outer>0</outer> 
+		<frame>37</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Legendary Gem Store"> 
+		<id>43</id> 
+		<description>A store that contains items for decorating your island.  Most items cost gems.</description> 
+		<costwood>0</costwood> 
+		<costrock>0</costrock> 
+		<costgem>100</costgem> 
+		<itemclass>MapItems.Building.Stores.GemStore</itemclass> 
+		<inner>41</inner> 
+		<outer>0</outer> 
+		<frame>42</frame> 
+		<persistent>1</persistent> 
+        <max>1</max> 
+	</store> 
+		<store name="Legendary Sawmill"> 
+		<id>44</id> 
+		<description>A sawmill hewn of ironwood.  Legendary sawmills produce more wood than basic sawmills</description> 
+		<costwood>0</costwood> 
+		<costrock>0</costrock> 
+		<costgem>10</costgem> 
+		<itemclass>MapItems.Building.LedgendMillItem</itemclass> 
+		<inner>41</inner> 
+		<outer>0</outer> 
+		<frame>43</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Legendary Mine"> 
+		<id>45</id> 
+		<description>A gleaming mine of shining brass and joyous machinery.  Legendary mines produce more gold than basic mines.</description> 
+		<costwood>0</costwood> 
+		<costrock>0</costrock> 
+		<costgem>20</costgem> 
+		<itemclass>MapItems.Building.LedgendMineItem</itemclass> 
+		<inner>41</inner> 
+		<outer>0</outer> 
+		<frame>44</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="White Flower Tree"> 
+		<id>46</id> 
+		<description>Ivory blossoms waft clouds of heavenly scent from bedecked bows.  Decorate your islands!</description> 
+		<costwood>1500</costwood> 
+		<costrock>1000</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Statues.WhiteTreeStatue</itemclass> 
+		<inner>41</inner> 
+		<outer>0</outer> 
+		<frame>38</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Pink Flower Tree"> 
+		<id>47</id> 
+		<description>Incandescent pink flowers make every girl swoon. Decorate your island!</description> 
+		<costwood>1000</costwood> 
+		<costrock>2000</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Statues.PinkTreeStatue</itemclass> 
+		<inner>41</inner> 
+		<outer>0</outer> 
+		<frame>39</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Holy Statue"> 
+		<id>48</id> 
+		<description>A stone monument to the great Bunni Gods.   The priests say that man's true worth is measured in the number of statues he owns.</description> 
+		<costwood>5000</costwood> 
+		<costrock>10000</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Statues.HolyStatue</itemclass> 
+		<inner>41</inner> 
+		<outer>0</outer> 
+		<frame>40</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Gem Statue"> 
+		<id>49</id> 
+		<description>A gem encrusted monument to the greater Bunni Gods.   This statue improves your score</description> 
+		<costwood>0</costwood> 
+		<costrock>0</costrock> 
+		<costgem>50</costgem> 
+		<itemclass>MapItems.Statues.GemStatue</itemclass> 
+		<inner>41</inner> 
+		<outer>0</outer> 
+		<frame>41</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Small Gray Hill"> 
+		<id>50</id> 
+		<description>Place a rock garden and mine it for gold.  Gold is good since it lets you buy more stuff!</description> 
+		<costwood>2</costwood> 
+		<costrock>0</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Terrain.HillItems.BronzeItem</itemclass> 
+		<inner>36</inner> 
+		<outer>150</outer> 
+		<frame>45</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Medium Gray Hill"> 
+		<id>51</id> 
+		<description>A common stone that yields a small amount of gold when mined</description> 
+		<costwood>5</costwood> 
+		<costrock>0</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Terrain.HillItems.BronzeItem</itemclass> 
+		<inner>36</inner> 
+		<outer>200</outer> 
+		<frame>46</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Large Gray Hill"> 
+		<id>52</id> 
+		<description>A common stone that yields a small amount of gold when mined</description> 
+		<costwood>12</costwood> 
+		<costrock>25</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Terrain.HillItems.BronzeItem</itemclass> 
+		<inner>36</inner> 
+		<outer>300</outer> 
+		<frame>47</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Small Black Hill"> 
+		<id>53</id> 
+		<description>A unique black rock that yields moderate amounts of gold, but some rare items when mined.</description> 
+		<costwood>5</costwood> 
+		<costrock>8</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Terrain.HillItems.SilverItem</itemclass> 
+		<inner>36</inner> 
+		<outer>150</outer> 
+		<frame>48</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Medium Black Hill"> 
+		<id>54</id> 
+		<description>A unique black rock that yields moderate amounts of gold, but some rare items when mined.</description> 
+		<costwood>8</costwood> 
+		<costrock>20</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Terrain.HillItems.SilverItem</itemclass> 
+		<inner>36</inner> 
+		<outer>200</outer> 
+		<frame>49</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Large Black Hill"> 
+		<id>55</id> 
+		<description>A unique black rocks that yields moderate amounts of gold, but some rare items when mined.</description> 
+		<costwood>10</costwood> 
+		<costrock>30</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Terrain.HillItems.SilverItem</itemclass> 
+		<inner>36</inner> 
+		<outer>300</outer> 
+		<frame>50</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Small Gold Hill"> 
+		<id>56</id> 
+		<description>A rich vein of gold that yields vast amounts of gold when mined</description> 
+		<costwood>0</costwood> 
+		<costrock>0</costrock> 
+		<costgem>5</costgem> 
+		<itemclass>MapItems.Terrain.HillItems.GoldItem</itemclass> 
+		<inner>36</inner> 
+		<outer>150</outer> 
+		<frame>51</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Medium Gold Hill"> 
+		<id>57</id> 
+		<description>A rich vein of gold that yields vast amounts of gold when mined</description> 
+		<costwood>0</costwood> 
+		<costrock>0</costrock> 
+		<costgem>10</costgem> 
+		<itemclass>MapItems.Terrain.HillItems.GoldItem</itemclass> 
+		<inner>36</inner> 
+		<outer>200</outer> 
+		<frame>52</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Large Gold Hill"> 
+		<id>58</id> 
+		<description>A rich vein of gold that yields vast amounts of gold when mined</description> 
+		<costwood>0</costwood> 
+		<costrock>0</costrock> 
+		<costgem>20</costgem> 
+		<itemclass>MapItems.Terrain.HillItems.GoldItem</itemclass> 
+		<inner>36</inner> 
+		<outer>300</outer> 
+		<frame>53</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Tower Of Love"> 
+		<id>59</id> 
+		<description>The mystical Tower of Love measures all the Love on the island.  The island won't be completely healed until the Tower is completely full.</description> 
+		<costwood>0</costwood> 
+		<costrock>0</costrock> 
+		<costgem>200</costgem> 
+		<itemclass> MapItems.Tower.TowerItem</itemclass> 
+		<inner>83</inner> 
+		<outer>0</outer> 
+		<frame>54</frame> 
+		<persistent>1</persistent> 
+        <max>1</max> 
+	</store> 
+		<store name="Ghost"> 
+		<id>80</id> 
+		<description>The soul of a dead bunni forced to walk the earth until unfinished business is completed.</description> 
+		<costwood>100</costwood> 
+		<costrock>100</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Ghosts.GhostItem</itemclass> 
+		<inner>30</inner> 
+		<outer>0</outer> 
+		<frame>55</frame> 
+		<persistent>1</persistent> 
+        <max>1</max> 
+	</store> 
+		<store name="Pirate Pete"> 
+		<id>83</id> 
+		<description>A Pirate who will buy things you no longer need.</description> 
+		<costwood>100</costwood> 
+		<costrock>100</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.PiratePete.PiratePete</itemclass> 
+		<inner>0</inner> 
+		<outer>0</outer> 
+		<frame>58</frame> 
+		<persistent>1</persistent> 
+        <max>1</max> 
+	</store> 
+		<store name="Pirate Peach"> 
+		<id>82</id> 
+		<description>She's a lusty wench with an eyepatch and taste for men.  She'll take your money, but you won't miss it.</description> 
+		<costwood>100</costwood> 
+		<costrock>100</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Peach.PeachItem</itemclass> 
+		<inner>30</inner> 
+		<outer>0</outer> 
+		<frame>57</frame> 
+		<persistent>1</persistent> 
+        <max>1</max> 
+	</store> 
+		<store name="Coriander"> 
+		<id>81</id> 
+		<description>The girl next door.  She lost her mother and now she is all alone.</description> 
+		<costwood>100</costwood> 
+		<costrock>100</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Coriander.CorianderItem</itemclass> 
+		<inner>30</inner> 
+		<outer>0</outer> 
+		<frame>56</frame> 
+		<persistent>1</persistent> 
+        <max>1</max> 
+	</store> 
+		<store name="Wedding Dress"> 
+		<id>84</id> 
+		<description>A pure white gown.  So elegant and classic that you could wear it on a romantic summer picnic.  Or your could wear it to a wedding.</description> 
+		<costwood>100</costwood> 
+		<costrock>100</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Decorations.Dress</itemclass> 
+		<inner>0</inner> 
+		<outer>0</outer> 
+		<frame>59</frame> 
+		<persistent>1</persistent> 
+        <max>1</max> 
+	</store> 
+		<store name="String of Pearls"> 
+		<id>85</id> 
+		<description>A beautiful pearl necklace.  A great gift for a lovely girl.</description> 
+		<costwood>100</costwood> 
+		<costrock>100</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Decorations.Pearls</itemclass> 
+		<inner>0</inner> 
+		<outer>0</outer> 
+		<frame>60</frame> 
+		<persistent>1</persistent> 
+        <max>1</max> 
+	</store> 
+		<store name="Tiara"> 
+		<id>86</id> 
+		<description>The traditional symbol of shared Love on Bunni Island.  It's a bit like giving a girl your class ring.</description> 
+		<costwood>100</costwood> 
+		<costrock>100</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Decorations.Tiara</itemclass> 
+		<inner>0</inner> 
+		<outer>0</outer> 
+		<frame>61</frame> 
+		<persistent>1</persistent> 
+        <max>1</max> 
+	</store> 
+		<store name="Verdant Bay"> 
+		<id>87</id> 
+		<description>You look lazy.  I only let non-lazy bunnies through to Verdant Bay.  This petty whim is my one joy.</description> 
+		<costwood>100</costwood> 
+		<costrock>100</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.StoreItems.BridgeAngelItem</itemclass> 
+		<inner>0</inner> 
+		<outer>0</outer> 
+		<frame>62</frame> 
+		<persistent>1</persistent> 
+        <max>1</max> 
+	</store> 
+		<store name="Ginger Cove"> 
+		<id>88</id> 
+		<description>I can let you through to the next island, Ginger Cove.  For a small fee.</description> 
+		<costwood>100</costwood> 
+		<costrock>100</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.StoreItems.BridgeAngelItem</itemclass> 
+		<inner>0</inner> 
+		<outer>0</outer> 
+		<frame>62</frame> 
+		<persistent>1</persistent> 
+        <max>1</max> 
+	</store> 
+		<store name="Wedding Isle"> 
+		<id>89</id> 
+		<description>Wedding Isle was shut down due to the tragedy at the old church.  Are you sure you want to visit?</description> 
+		<costwood>100</costwood> 
+		<costrock>100</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.StoreItems.BridgeAngelItem</itemclass> 
+		<inner>0</inner> 
+		<outer>0</outer> 
+		<frame>62</frame> 
+		<persistent>1</persistent> 
+        <max>1</max> 
+	</store> 
+		<store name="Pirate Cove"> 
+		<id>90</id> 
+		<description>Peach's Pleasure Palace awaits on yonder island.  It's a paid trip.  You get new ghosts, new items and more land.</description> 
+		<costwood>0</costwood> 
+		<costrock>0</costrock> 
+		<costgem>100</costgem> 
+		<itemclass>MapItems.StoreItems.BridgeAngelItem</itemclass> 
+		<inner>0</inner> 
+		<outer>0</outer> 
+		<frame>62</frame> 
+		<persistent>1</persistent> 
+        <max>1</max> 
+	</store> 
+		<store name="Monster Isle"> 
+		<id>91</id> 
+		<description>Only the foolish visit Monster Isle.  Once there was a large forest, until the greedy Bunnies chopped it down.</description> 
+		<costwood>100</costwood> 
+		<costrock>100</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.StoreItems.BridgeAngelItem</itemclass> 
+		<inner>0</inner> 
+		<outer>0</outer> 
+		<frame>62</frame> 
+		<persistent>1</persistent> 
+        <max>1</max> 
+	</store> 
+		<store name="Bank"> 
+		<id>92</id> 
+		<description>A place where you can trade and buy currency.</description> 
+		<costwood>0</costwood> 
+		<costrock>0</costrock> 
+		<costgem>5</costgem> 
+		<itemclass>MapItems.Building.Stores.BankStore</itemclass> 
+		<inner>41</inner> 
+		<outer>0</outer> 
+		<frame>63</frame> 
+		<persistent>1</persistent> 
+        <max>1</max> 
+	</store> 
+		<store name="Buy Gems"> 
+		<id>93</id> 
+		<description>Sick of shaking trees? Get gems by donating real money and unlock a new store!</description> 
+		<costwood>0</costwood> 
+		<costrock>0</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.StoreItems.GemStoreItem</itemclass> 
+		<inner>10</inner> 
+		<outer>0</outer> 
+		<frame>66</frame> 
+		<persistent>1</persistent> 
+        <max>1</max> 
+	</store> 
+		<store name="Buy Wood"> 
+		<id>94</id> 
+		<description>Trade Gems for Wood</description> 
+		<costwood>0</costwood> 
+		<costrock>0</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.StoreItems.WoodStoreItem</itemclass> 
+		<inner>10</inner> 
+		<outer>0</outer> 
+		<frame>64</frame> 
+		<persistent>1</persistent> 
+        <max>1</max> 
+	</store> 
+		<store name="Buy Gold"> 
+		<id>95</id> 
+		<description>Trade Gems for Gold</description> 
+		<costwood>0</costwood> 
+		<costrock>0</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.StoreItems.GoldStoreItem</itemclass> 
+		<inner>10</inner> 
+		<outer>0</outer> 
+		<frame>65</frame> 
+		<persistent>1</persistent> 
+        <max>1</max> 
+	</store> 
+		<store name="Deer Bomb"> 
+		<id>97</id> 
+		<description>Remove unwanted deer and monsters</description> 
+		<costwood>10</costwood> 
+		<costrock>10</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Terrain.DeerBombItem</itemclass> 
+		<inner>20</inner> 
+		<outer>300</outer> 
+		<frame>67</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Fancy Store"> 
+		<id>98</id> 
+		<description>A special store for people who donate</description> 
+		<costwood>100</costwood> 
+		<costrock>100</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Building.Stores.FancyStore</itemclass> 
+		<inner>41</inner> 
+		<outer>0</outer> 
+		<frame>42</frame> 
+		<persistent>1</persistent> 
+        <max>1</max> 
+	</store> 
+		<store name="Bushy Tree"> 
+		<id>99</id> 
+		<description>A big bushy tree</description> 
+		<costwood>500</costwood> 
+		<costrock>200</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Statues.BushyTree</itemclass> 
+		<inner>50</inner> 
+		<outer>0</outer> 
+		<frame>68</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Fall Color"> 
+		<id>100</id> 
+		<description>A tree out of season</description> 
+		<costwood>0</costwood> 
+		<costrock>0</costrock> 
+		<costgem>70</costgem> 
+		<itemclass>MapItems.Statues.FallTree</itemclass> 
+		<inner>50</inner> 
+		<outer>0</outer> 
+		<frame>69</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Tiny Bush"> 
+		<id>101</id> 
+		<description>What a cutie</description> 
+		<costwood>0</costwood> 
+		<costrock>0</costrock> 
+		<costgem>2</costgem> 
+		<itemclass>MapItems.Statues.TinyBush</itemclass> 
+		<inner>31</inner> 
+		<outer>0</outer> 
+		<frame>70</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Little Greeny"> 
+		<id>102</id> 
+		<description>A tree sparkle tree</description> 
+		<costwood>0</costwood> 
+		<costrock>0</costrock> 
+		<costgem>120</costgem> 
+		<itemclass>MapItems.Statues.LittleGreeny</itemclass> 
+		<inner>40</inner> 
+		<outer>0</outer> 
+		<frame>71</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Splash Fountain"> 
+		<id>103</id> 
+		<description>A fountain... oh yes... a fountain</description> 
+		<costwood>0</costwood> 
+		<costrock>0</costrock> 
+		<costgem>300</costgem> 
+		<itemclass>MapItems.Statues.SplashFountain</itemclass> 
+		<inner>65</inner> 
+		<outer>0</outer> 
+		<frame>72</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+		<store name="Monster Den"> 
+		<id>104</id> 
+		<description>Monsters used to live underground. Wouldn't you if you looked like that?</description> 
+		<costwood>400</costwood> 
+		<costrock>1000</costrock> 
+		<costgem>0</costgem> 
+		<itemclass>MapItems.Statues.MonsterDen</itemclass> 
+		<inner>53</inner> 
+		<outer>0</outer> 
+		<frame>73</frame> 
+		<persistent>1</persistent> 
+        <max>0</max> 
+	</store> 
+	</storeitems>

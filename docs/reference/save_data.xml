@@ -1,0 +1,1183 @@
+<map_data><wood>0</wood> 
+<gold>0</gold> 
+        <bridge name="first_bridge"> 
+        	<id>1</id> 
+			<name>first_bridge</name> 
+            <loc>[562,1485,0]</loc> 
+            <collected>false</collected> 
+		</bridge> 
+		        <bridge name="second_bridge"> 
+        	<id>2</id> 
+			<name>second_bridge</name> 
+            <loc>[562,2970,0]</loc> 
+            <collected>false</collected> 
+		</bridge> 
+		        <bridge name="pete_isle"> 
+        	<id>3</id> 
+			<name>pete_isle</name> 
+            <loc>[2250,3712,1]</loc> 
+            <collected>false</collected> 
+		</bridge> 
+		        <bridge name="pirate_cove"> 
+        	<id>4</id> 
+			<name>pirate_cove</name> 
+            <loc>[1125,2250,1],[1687,2970,0]</loc> 
+            <collected>false</collected> 
+		</bridge> 
+		        <bridge name="wedding_isle"> 
+        	<id>5</id> 
+			<name>wedding_isle</name> 
+            <loc>[3937,2970,0]</loc> 
+            <collected>false</collected> 
+		</bridge> 
+		        <bridge name="monster_isle"> 
+        	<id>6</id> 
+			<name>monster_isle</name> 
+            <loc>[2812,1485,0],[2812,2970,0],[3375,2250,1],[2250,2250,1]</loc> 
+            <collected>false</collected> 
+		</bridge> 
+		        <mote name="First Love"> 
+        	<id>1</id> 
+			<description>Every heart mote you collect gets you closer to healing the island.  Collect them all!</description> 
+            <func>first_mote</func> 
+            <collected>false</collected> 
+		</mote> 
+		        <mote name="Welcome Back"> 
+        	<id>2</id> 
+			<description>Welcome back!  You saved your game and logged back into Bunni Island a second day in a row. You are a regular now!</description> 
+            <func>welcome_back</func> 
+            <collected>false</collected> 
+		</mote> 
+		        <mote name="Fox Importer"> 
+        	<id>4</id> 
+			<description>You found a fox! </description> 
+            <func>fox1</func> 
+            <collected>false</collected> 
+		</mote> 
+		        <mote name="Swedish Fox Party"> 
+        	<id>5</id> 
+			<description>You gathered a total of 5 foxes.  Maybe you'll be invited to the after party?</description> 
+            <func>fox5</func> 
+            <collected>false</collected> 
+		</mote> 
+		        <mote name="Everyone loves Pandas"> 
+        	<id>6</id> 
+			<description>You found a Panda! Everyone loves you. Except Grandpa Angel.</description> 
+            <func>panda1</func> 
+            <collected>false</collected> 
+		</mote> 
+		        <mote name="Silver Store"> 
+        	<id>7</id> 
+			<description>You created a marvel of consumer design and elegance. Oh, the shopping you'll share. </description> 
+            <func>silver_store</func> 
+            <collected>false</collected> 
+		</mote> 
+		        <mote name="Steel Store"> 
+        	<id>8</id> 
+			<description>A manly store for manly...bunnies?</description> 
+            <func>steel_store</func> 
+            <collected>false</collected> 
+		</mote> 
+		        <mote name="The Most Glorious Gold Store"> 
+        	<id>9</id> 
+			<description>You rebuilt the Gold Store, home to Harold Optimier the world renowned Church architect. </description> 
+            <func>gold_store</func> 
+            <collected>false</collected> 
+		</mote> 
+		        <mote name="Build a church"> 
+        	<id>10</id> 
+			<description>You built a glorious church, a place of love and community.</description> 
+            <func>built_church</func> 
+            <collected>false</collected> 
+		</mote> 
+		        <mote name="Tulips for Coriander"> 
+        	<id>12</id> 
+			<description>You plants from Coriander.  She looked so hungry.</description> 
+            <func>girl_quest_1</func> 
+            <collected>false</collected> 
+		</mote> 
+		        <mote name="The Girl's New Dress"> 
+        	<id>13</id> 
+			<description>You bought Coriander a sparkling new dress!  Mmm, mmm. How you like those spaghetti straps.</description> 
+            <func>girl_quest_2</func> 
+            <collected>false</collected> 
+		</mote> 
+		        <mote name="Priate Tales"> 
+        	<id>14</id> 
+			<description>You found a pirate and heard lurid tales of delightful decadence.</description> 
+            <func>girl_quest_3</func> 
+            <collected>false</collected> 
+		</mote> 
+		        <mote name="Red roses, Red lips"> 
+        	<id>15</id> 
+			<description>You planted roses for Peach.  When she sees them, she thinks of nibbling on your lips. </description> 
+            <func>girl_quest_5</func> 
+            <collected>false</collected> 
+		</mote> 
+		        <mote name="The Girl's New Necklace"> 
+        	<id>16</id> 
+			<description>You had your first fight (and you didn't even notice.)  Luckily a pretty necklace helps bring back her smile. </description> 
+            <func>girl_quest_6</func> 
+            <collected>false</collected> 
+		</mote> 
+		        <mote name="Destroyer of Deer"> 
+        	<id>17</id> 
+			<description>You freed the world from the deadly hunger of the deer.</description> 
+            <func>girl_quest_8</func> 
+            <collected>false</collected> 
+		</mote> 
+		        <mote name="Madly in Love"> 
+        	<id>18</id> 
+			<description>You've found someone so special she makes your heart burst into delirious song.</description> 
+            <func>girl_quest_10</func> 
+            <collected>false</collected> 
+		</mote> 
+		        <mote name="The wedding bells toll for thee"> 
+        	<id>19</id> 
+			<description>You and your beautiful wife will be extremely busy living happily ever after.  True love does exist.  Just in case you were wondering. </description> 
+            <func>wedding_mote</func> 
+            <collected>false</collected> 
+		</mote> 
+		        <mote name="Legendary Store"> 
+        	<id>22</id> 
+			<description>Forbidden delights are available for purchase with sparkling gems </description> 
+            <func>gem_store</func> 
+            <collected>false</collected> 
+		</mote> 
+		        <mote name="Holy Statue"> 
+        	<id>23</id> 
+			<description>You built a holy statue! One of those hasn't been standing since before the Cataclysm. For every holy statue that you build, your score will go up.  Some statues are worth more than others.</description> 
+            <func>holy_statue</func> 
+            <collected>false</collected> 
+		</mote> 
+		        <mote name="Bronze Store"> 
+        	<id>24</id> 
+			<description>You built the Bronze store.  More goodies await!</description> 
+            <func>bronze_store</func> 
+            <collected>false</collected> 
+		</mote> 
+		        <mote name="Put that panda to work!"> 
+        	<id>26</id> 
+			<description>You have a panda working for Pirate Peach.  Check out that waddle! </description> 
+            <func>panda_sawmill</func> 
+            <collected>false</collected> 
+		</mote> 
+		        <mote name="Plum orchard"> 
+        	<id>27</id> 
+			<description>Under the shadow of these purple globes, lovers steal moments of passion. </description> 
+            <func>5_plum</func> 
+            <collected>false</collected> 
+		</mote> 
+		        <mote name="Hired monsters"> 
+        	<id>28</id> 
+			<description>You bribed five monsters to do you bidding. </description> 
+            <func>monster_tame</func> 
+            <collected>false</collected> 
+		</mote> 
+		        <mote name="Dancing Queen"> 
+        	<id>29</id> 
+			<description>She's your private dancer.  With an eye patch.  </description> 
+            <func>peach_dance</func> 
+            <collected>false</collected> 
+		</mote> 
+		        <mote name="The Girl's Tiara"> 
+        	<id>30</id> 
+			<description>You bought Coriander a tiara, a symbol of young love. </description> 
+            <func>girl_crown</func> 
+            <collected>false</collected> 
+		</mote> 
+		        <mote name="You Placed a Mine"> 
+        	<id>31</id> 
+			<description>Well done for you!</description> 
+            <func>place_mine</func> 
+            <collected>false</collected> 
+		</mote> 
+		 <mote name="Visit Forums"> 
+        	<id>35</id> 
+			<description>Welcome to the bunni community</description> 
+            <func>visit_forums</func> 
+            <collected>false</collected> 
+		</mote> 
+		        <card name="General Store"> 
+        	<id>1</id> 
+			<description>Place to purchase exciting new items.</description> 
+            <frame>1</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>General Store</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Bronze Store"> 
+        	<id>2</id> 
+			<description>Place to purchase exciting new items.</description> 
+            <frame>2</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Bronze Store</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Steel Store"> 
+        	<id>3</id> 
+			<description>Place to purchase exciting new items. </description> 
+            <frame>3</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Steel Store</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Silver Store"> 
+        	<id>4</id> 
+			<description>Place to purchase exciting new items.</description> 
+            <frame>3</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Silver Store</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Gold Store"> 
+        	<id>5</id> 
+			<description>Place to purchase exciting new items.</description> 
+            <frame>4</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Gold Store</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Gray Hill"> 
+        	<id>7</id> 
+			<description>Place a hill to uncover precious stones.  Place a Mine and a Bunni nearby to harvest gold.</description> 
+            <frame>5</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Small Gray Hill</func> 
+                				<func>Medium Gray Hill</func> 
+                				<func>Large Gray Hill</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Black Hill"> 
+        	<id>8</id> 
+			<description>Place a hill to uncover precious stones.  Place a Mine and a Bunni nearby to harvest gold.</description> 
+            <frame>6</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Small Black Hill</func> 
+                				<func>Medium Black Hill</func> 
+                				<func>Large Black Hill</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Gold Hill"> 
+        	<id>9</id> 
+			<description>Place a hill to uncover precious stones.  Place a Mine and a Bunni nearby to harvest gold.</description> 
+            <frame>7</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Small Gold Hill</func> 
+                				<func>Medium Gold Hill</func> 
+                				<func>Large Gold Hill</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Pine Tree"> 
+        	<id>10</id> 
+			<description>Plant pine trees to grow lovely forests.  Place a Sawmill and a Bunni nearby to harvest wood.</description> 
+            <frame>8</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Small Pine Forest</func> 
+                				<func>Medium Pine Forest</func> 
+                				<func>Large Pine Forest</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Maple Tree"> 
+        	<id>11</id> 
+			<description>Plant maple trees to grow lovely forests.  Place a Sawmill and a Bunni nearby to harvest wood</description> 
+            <frame>9</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Small Maple Forest</func> 
+                				<func>Medium Maple Forest</func> 
+                				<func>Large Maple Forest</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Ironwood Tree"> 
+        	<id>12</id> 
+			<description>Plant ironwood trees to grow lovely forests.  Place a Sawmill and a Bunni nearby to harvest wood.</description> 
+            <frame>10</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Small Ironwood Forest</func> 
+                				<func>Medium Ironwood Forest</func> 
+                				<func>Large Ironwood Forest</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Sawmill"> 
+        	<id>13</id> 
+			<description>Place a Sawmill next to a Forest. Add a Bunni to harvest wood.</description> 
+            <frame>11</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Sawmill</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Legendary Mill"> 
+        	<id>14</id> 
+			<description>Harvests 3 times a much wood as a regular sawmill.  A capital investment! </description> 
+            <frame>12</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Legendary Sawmill</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Mine"> 
+        	<id>15</id> 
+			<description>Place a Mine next to a Hill. Add a Bunni to harvest gold.</description> 
+            <frame>13</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Mine</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Legendary Mine"> 
+        	<id>16</id> 
+			<description>Harvests 3 times as much gold as a regular mine. The true path to riches. </description> 
+            <frame>14</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Legendary Mine</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Bunni"> 
+        	<id>18</id> 
+			<description>Bunnies are hard workers! Add a Bunni to a Sawmill to harvest wood. Add a Bunni to a Mine to harvest gold.</description> 
+            <frame>15</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Bunni</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Panda"> 
+        	<id>19</id> 
+			<description>Pandas are a bit lazy  Add a Panda to a Sawmill to harvest wood. Add a Panda to a Mine to harvest gold.</description> 
+            <frame>16</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Panda</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Fox"> 
+        	<id>20</id> 
+			<description>Foxes are fast.  And Swedish. Add a Fox to a Sawmill to harvest wood. Add a Fox to a Mine to harvest gold.</description> 
+            <frame>17</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Fox</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Monster"> 
+        	<id>22</id> 
+			<description>Monsters are the spirits from murdered trees. Add a Monster to a Sawmill to harvest wood. Add a Monster to a Mine to harvest gold.</description> 
+            <frame>18</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Monster</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Posies"> 
+        	<id>23</id> 
+			<description>Flowers feed hungry bunnies.  Place flowers next to a Bunni and they will feed themselves</description> 
+            <frame>19</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Small Posie Garden</func> 
+                				<func>Medium Posie Garden</func> 
+                				<func>Large Posie Garden</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Tulips"> 
+        	<id>24</id> 
+			<description>Flowers feed hungry bunnies.  Place flowers next to a Bunni and they will feed themselves</description> 
+            <frame>20</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Small Tulip Garden</func> 
+                				<func>Medium Tulip Garden</func> 
+                				<func>Large Tulip Garden</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Roses"> 
+        	<id>25</id> 
+			<description>Flowers feed hungry bunnies.  Place flowers next to a Bunni and they will feed themselves</description> 
+            <frame>21</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Small Rose Garden</func> 
+                				<func>Medium Rose Garden</func> 
+                				<func>Large Rose Garden</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Coriander"> 
+        	<id>26</id> 
+			<description>You’ve met a lovely girl.  Why don’t you say hello?</description> 
+            <frame>22</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Coriander</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Pirate Peach"> 
+        	<id>27</id> 
+			<description>You’ve met a spicy girl with a killer eye patch.  Why don’t you say hello?</description> 
+            <frame>23</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Pirate Peach</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Pirate Pete"> 
+        	<id>28</id> 
+			<description>You’ve met a saucy pirate with an eye for loot.  He’ll buy anything you drag onto him.</description> 
+            <frame>24</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Pirate Pete</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Church"> 
+        	<id>29</id> 
+			<description>In the hallowed halls of this sacred church you may marry your true love.   A church is now built on Wedding island in the far north east. </description> 
+            <frame>25</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Church</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Tower Of Love"> 
+        	<id>30</id> 
+			<description>When the Tower is full, the land of bunnies will be saved.  Will you find all the hearts?</description> 
+            <frame>26</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Tower Of Love</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Pink Flowering Tree"> 
+        	<id>31</id> 
+			<description>Plant to decorate your islands.  Only the most weathy and sophisticated bunnies have such shrubbery.</description> 
+            <frame>27</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Pink Flower Tree</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="White Flowering Tree"> 
+        	<id>32</id> 
+			<description>Plant to decorate your islands.  A gift from a friend or perhaps a lover.</description> 
+            <frame>28</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>White Flower Tree</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Holy Statue"> 
+        	<id>33</id> 
+			<description>Plant to decorate your islands.  These statues increase your score.</description> 
+            <frame>29</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Holy Statue</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Gem Statue"> 
+        	<id>34</id> 
+			<description>Plant to decorate your islands.  These statues dramatically increase your score.</description> 
+            <frame>30</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Gem Statue</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Fox House"> 
+        	<id>35</id> 
+			<description>Hire speedy Foxes from a Fox house to help harvest wood and gold. </description> 
+            <frame>34</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Fox House</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Monster House"> 
+        	<id>36</id> 
+			<description>Hire hungry Monsters from a Monster house to terrorize the world</description> 
+            <frame>35</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Monster House</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Deer House"> 
+        	<id>37</id> 
+			<description>Never hire a deer. </description> 
+            <frame>36</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Deer House</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Pirate House"> 
+        	<id>38</id> 
+			<description>Bribe Pirates with sparkly gems to help find hidden treasure</description> 
+            <frame>37</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Pirate House</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Bunni House"> 
+        	<id>39</id> 
+			<description>Purchase Bunnies from a Bunni house to help harvest wood and gold. </description> 
+            <frame>32</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Bunni House</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Panda House"> 
+        	<id>40</id> 
+			<description>Hire slow Pandas from a Panda house to help harvest wood and gold. </description> 
+            <frame>33</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Panda House</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Apple Tree"> 
+        	<id>41</id> 
+			<description>Click to shake fruit trees.  All sorts of goodies (including gems) are hidden in the branches. </description> 
+            <frame>39</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Apple Tree</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Pear Tree"> 
+        	<id>42</id> 
+			<description>Click to shake fruit trees.  All sorts of goodies (including gems) are hidden in the branches. </description> 
+            <frame>40</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Pear Tree</func> 
+                            
+            
+            
+            
+		</card> 
+		        <card name="Plum Tree"> 
+        	<id>43</id> 
+			<description>Click to shake fruit trees.  All sorts of goodies (including gems) are hidden in the branches. </description> 
+            <frame>41</frame> 
+            <collected>false</collected> 
+            
+            
+            				<func>Legendary Plum Tree</func> 
+                            
+            
+            
+            
+		</card> 
+		        
+        <ghost> 
+        	<id>1</id> 
+        	<intro>*Boo!* I'm Fredrickson...Friend of foxes, fatally fond of vodka. Skol![br]Long ago foxes lived in small neat cottages along the edges of the ironwood forests.[br]I wish I could go drinking with a Swede again. *sigh*</intro> 
+			<during>Have you found a fox yet? My ghostly liver is pining for their companionship.</during> 
+            <complete>You say a fox now lives on our island?  Finally a drinking companion...[br]...who can keep up with someone who has already drunk themselves to death.[br]I'm off to the before party.  Here's a little something that was growing on my grave.</complete> 
+            <trigger_mote>Bronze Store</trigger_mote> 
+            <set_up>second_island</set_up> 
+            <complete_mote>Fox Importer</complete_mote> 
+            <reward_item>Large Posie Garden</reward_item> 
+            <wood>0</wood> 
+            <gold>0</gold> 
+            <gems>0</gems> 
+            <collected>false</collected> 
+		</ghost> 
+		        
+        <ghost> 
+        	<id>3</id> 
+        	<intro>*Boo!* Fredrickson again. The foxes are feeling homesick  Once they had an entire village by the old fjord.[br]They would gather during the dark of mid winter, stoically drink mulled grog, light candles and eat lingon berry smothered meatballs.[br]Good times.  *sigh*[br]I have an idea!  If there were more foxes, the ones we had wouldn't be so lonely.  Do you think you could round up a total of 5?</intro> 
+			<during>*sigh* We still don't have 5 foxes. You can't have a proper drinking party with so few foxes.</during> 
+            <complete>The foxes are so happy to have friends![br]Sven even offered me salt licorice as a present.  (But it was soaked in vodka)[br]For your troubles, here's a little something...</complete> 
+            <trigger_mote>Fox Importer</trigger_mote> 
+            <set_up></set_up> 
+            <complete_mote>Swedish Fox Party</complete_mote> 
+            <reward_item>Medium Ironwood Forest</reward_item> 
+            <wood>0</wood> 
+            <gold>0</gold> 
+            <gems>0</gems> 
+            <collected>false</collected> 
+		</ghost> 
+		        
+        <ghost> 
+        	<id>8</id> 
+        	<intro>*Fawooo* I'm Chappy, the local church ghost...have you considered the afterlife?[br]It's true. We all die. Then Grandpa Angel judges our eternal souls.  As a former ghost, I must say that he can be a bit...harsh.[br]...you haven't ever done anything wrong, have you? Nothing involving...Pandas?[br]Luckily, we in the Church have a guaranteed way to smooth over past transgressions. [br]A penitent parishioner can build a holy statue.  For each one they build, they erase a single sin.  Simple!  Profitable!</intro> 
+			<during>Hmm...so many pandas.  So few statues.  What Would Grandpa Angel Do?</during> 
+            <complete>Ah, you built a statue!  If you noticed, your score increased substancially. The higher the score the better chance of getting into heaven. </complete> 
+            <trigger_mote>Legendary Store</trigger_mote> 
+            <set_up></set_up> 
+            <complete_mote>Holy Statue</complete_mote> 
+            <reward_item></reward_item> 
+            <wood>0</wood> 
+            <gold>0</gold> 
+            <gems>0</gems> 
+            <collected>false</collected> 
+		</ghost> 
+		        
+        <coriander> 
+        	<id>16</id> 
+        	<intro>The best items are at stores. [br] I think all the old ones got destroyed. [br] We went from shopping at the local shopping malls to digging for roots like starving animals. [br] Here's one store I saved.  At each store there is a blueprint to another store. [br] See if you can buy the Bronze store. </intro> 
+			<during>You can get maple trees at the bronze store.  And bombs! </during> 
+            <complete>Ah, you found the Bronze store! [br] You should stock up on a few bombs in case the evil creatures come back. </complete> 
+            <set_up>create_store</set_up> 
+            <complete_mote>Bronze Store</complete_mote> 
+            <reward_item></reward_item> 
+            <wood>0</wood> 
+            <gold>0</gold> 
+            <gems>0</gems> 
+		</coriander> 
+		        
+        <coriander> 
+        	<id>1</id> 
+        	<intro>It is certainly rather lonely around here. [br] My mother used to tell me pirate tales!  She made seafaring sound so exciting. [br] Have you talked to pirate lately? </intro> 
+			<during>Talk to a pirate and tell me a swashbuckling, knee-trembling tale!  Pretty please?</during> 
+            <complete>I hear that you found a pirate to chat with? [br] You won't tell me what the pirate said?  Why are you blushing!? [br] Was it naughty?  I'll give you something if you tell me. [br] *whisper, whisper* [br] He told you what!  I don't even know if that's physically possible...  </complete> 
+            <set_up>create_pete</set_up> 
+            <complete_mote>Priate Tales</complete_mote> 
+            <reward_item>Small Ironwood Forest</reward_item> 
+            <wood>0</wood> 
+            <gold>0</gold> 
+            <gems>0</gems> 
+		</coriander> 
+		        
+        <coriander> 
+        	<id>2</id> 
+        	<intro>When I was a little girl, this island was covered by a bustling city. [br]There was this amazing store full of shiny, pretty things [br]Before my parents died, we used to go there.  It was called the "Silver Store" [br] Hmm...maybe you can find some plans and start a new store?</intro> 
+			<during>What?  No Silver Store has open around here yet?  Maybe I should stop dreaming.... </during> 
+            <complete>The Silver Store is up!  Ooooh! Shopping here I come! [br]You should buy something too. (Shopping is more fun together)</complete> 
+            <set_up></set_up> 
+            <complete_mote>Silver Store</complete_mote> 
+            <reward_item></reward_item> 
+            <wood>0</wood> 
+            <gold>1000</gold> 
+            <gems>0</gems> 
+		</coriander> 
+		        
+        <coriander> 
+        	<id>8</id> 
+        	<intro>Have you seen the beautiful dress they have over at the Silver store? [br] So divine. I love cute clothes...it is the little things that makes a girl happy.    </intro> 
+			<during>I still keep dreaming about that beautiful dress at the Silver store.</during> 
+            <complete>Wow!  Thank you so much for the beautiful dress. [br]Wearing something so pretty and cute makes everything that happened before seem like a bad dream. [br] So what do you think?  Am I adorable?</complete> 
+            <set_up>dress_store</set_up> 
+            <complete_mote>The Girl's New Dress</complete_mote> 
+            <reward_item></reward_item> 
+            <wood>0</wood> 
+            <gold>0</gold> 
+            <gems>0</gems> 
+		</coriander> 
+		        
+        <coriander> 
+        	<id>5</id> 
+        	<intro>Do you hear the munching?  It is happening again!  They are here! [br] You don't know? They are a vile creature with four hoofed feet.  I have nightmares about them.[br]They call themselves...Deer.[br]All they do is eat.  Years ago, a plague of them appeared and destroyed all our farmlands.  [br]My family, all innocent bunnies, faded away in the dark times that followed.[br]If you see them, please be careful.  Take some bombs with you!</intro> 
+			<during>I hear the deer munching, munching, munching in my dreams. [br]I wonder if you could be defeat them mano-amano with bombs?</during> 
+            <complete>You are a hero!  The latest plague of deer is destroyed. [br]I think  I'll be able to sleep again at night.  Please accept my heartfelt thanks.</complete> 
+            <set_up>create_deer</set_up> 
+            <complete_mote>Destroyer of Deer</complete_mote> 
+            <reward_item></reward_item> 
+            <wood>0</wood> 
+            <gold>0</gold> 
+            <gems>10</gems> 
+		</coriander> 
+		        
+        <coriander> 
+        	<id>4</id> 
+        	<intro>Why hello there Mr. Charming.  I'm even starting to like your little crown.[br]It is so exciting to see you running around build up the island again.[br]We used to have a Steel Store that had all sorts of useful building supplies.  Have you thought of getting one?</intro> 
+			<during>Still no Steel Store has reopened, eh?  What a shame.</during> 
+            <complete>The Steel Store is Open!  Here's some money my dad left me in his will.  Maybe you can use it to buy yourself something manly.</complete> 
+            <set_up></set_up> 
+            <complete_mote>Steel Store</complete_mote> 
+            <reward_item></reward_item> 
+            <wood>1000</wood> 
+            <gold>0</gold> 
+            <gems>0</gems> 
+		</coriander> 
+		        
+        <coriander> 
+        	<id>9</id> 
+        	<intro>We should go shopping together, you and I. [br]I've been dying to check out the jewelry section in the newest shop and...[br]What?...you don't like jewelry?  Not even earrings or rings or pretty pearl necklaces? [br]Such a typical boy. I guess...I thought...we could do something together. </intro> 
+			<during>I don't know if I want to talk to a boy who doesn't want to go shopping for necklaces with me.  </during> 
+            <complete>You went out and *bought* me a necklace?!  I just was going to look with you![br]Oh my goodness...you certainly know how to make a girl feel giddy. </complete> 
+            <set_up>pearl_store</set_up> 
+            <complete_mote>The Girl's New Necklace</complete_mote> 
+            <reward_item></reward_item> 
+            <wood>0</wood> 
+            <gold>0</gold> 
+            <gems>0</gems> 
+		</coriander> 
+		        
+        <coriander> 
+        	<id>6</id> 
+        	<intro>Hello, cutie pie.  I was just reminiscing. [br]An ancient hare with a jeweled cane ran a store on the edge of the island. [br]There was a sign has golden lettering.  And a spicy smell of decadent, luxurious things. [br]So mysterious.  I used to daydream that I was rich beyond belief and could shop there...</intro> 
+			<during>What?  Oh, I've been daydreaming about shopping at the old Gold Store.  [br]I think it burnt down during the Cataclysm. </during> 
+            <complete>You brought the Gold store back!  I shall have to go shopping and relive old memories. [br] Here's something my mother purchased there...Old Harold only stocked the best. </complete> 
+            <set_up>create_wedding</set_up> 
+            <complete_mote>The Most Glorious Gold Store</complete_mote> 
+            <reward_item></reward_item> 
+            <wood>1500</wood> 
+            <gold>0</gold> 
+            <gems>0</gems> 
+		</coriander> 
+		        
+        <coriander> 
+        	<id>10</id> 
+        	<intro>My mother...Susanna was her name...had a beautiful tiara. My father gave it to her. [br] He saved up every penny of his money while they were dating.  He barely ate. [br] On this island, a man gives his love a tiara.  To let her know she will always be his princess. [br] Old traditions are lost now.  I even lost my mother's tiara. </intro> 
+			<during>I saw a tiara in the window of the Gold Store.  Perhaps a boy will make some lucky girl out there happy. </during> 
+            <complete>I'm speechless.  I've never had a boy give me a tiara...[br] I like you so very much and you are such an amazing person.  Could you give me a little time to think?</complete> 
+            <set_up>crown_store</set_up> 
+            <complete_mote>The Girl's Tiara</complete_mote> 
+            <reward_item></reward_item> 
+            <wood>0</wood> 
+            <gold>0</gold> 
+            <gems>0</gems> 
+		</coriander> 
+		        
+        <coriander> 
+        	<id>7</id> 
+        	<intro>Well, hello again, Mr. Handsome.  I think you deserve a nice hug and perhaps a little kiss.[br]I was up all night thinking.  Just tossing and turning.[br]I really need to tell you something...[br]I...I love you.[br]You've been so wonderful.  I could love you until the earth falls into the sun.[br]What do you say?  I'm so nervous!</intro> 
+			<during>What do you say?  I'm so nervous!</during> 
+            <complete>Oh, I'm so happy you feel the same![br]Go find the priest!  We should get married! I've been saving up a bit.</complete> 
+            <set_up>create_priest</set_up> 
+            <complete_mote>Madly in Love</complete_mote> 
+            <reward_item></reward_item> 
+            <wood>0</wood> 
+            <gold>0</gold> 
+            <gems>15</gems> 
+		</coriander> 
+		        
+        <piratepeach> 
+        	<id>5</id> 
+        	<intro>Shiver me feminine timbers! That cursed bubble was cramped.  [br] I'm a pirate and I'm girl.  And you are one tall cool drink of handsome after the longest dry spell in my life.  [br]Fetch me a rose and I may just lay a juicy one on those tasty lips of yours. </intro> 
+			<during>I would so love to have some roses planted nearby...</during> 
+            <complete>You planted a rose for me! *Kiss*[br]Here is a little something I've been saving for a special someone who I think is delectable. </complete> 
+            <set_up></set_up> 
+            <complete_mote>Red roses, Red lips</complete_mote> 
+            <reward_item>Large Maple Forest</reward_item> 
+            <wood>0</wood> 
+            <gold>0</gold> 
+            <gems>0</gems> 
+		</piratepeach> 
+		        
+        <piratepeach> 
+        	<id>6</id> 
+        	<intro>This island is reminds me of a cheap flat in Stockholm.  Efficient, functional, but where's the glitter!?  [br]You, building boy, need to give this place a makeover. Fetch me the Legendary Gem Store and we'll start decorating.[br]I saw one for 30% off at the Steel Store.</intro> 
+			<during>Have you procured the Legendary Store yet? I can't wait to decorate.</during> 
+            <complete>Now the real fun begins.  Everything you've been building so far has been...drab.  [br]Now you can begin spicing up this island with fabulous and decadent gem items. [br]Come here, you.  All this talk of gems makes me want to squeeze you like you've never been squeezed before. </complete> 
+            <set_up></set_up> 
+            <complete_mote>Legendary Store</complete_mote> 
+            <reward_item></reward_item> 
+            <wood>0</wood> 
+            <gold>2000</gold> 
+            <gems>0</gems> 
+		</piratepeach> 
+		        
+        <piratepeach> 
+        	<id>2</id> 
+        	<intro>I love biting into a plum and having the fruit juice dribble down my chin.[br]It is really too bad there isn't a grove of plum trees.</intro> 
+			<during>Five plum trees on Pirate Cove would be perfect.</during> 
+            <complete>Now I have plums!  But I've got no one to lick off the plum juice.[br]Ah, well.  Back to being a lonely temptress, albeit a sticky one.</complete> 
+            <set_up></set_up> 
+            <complete_mote>Plum orchard</complete_mote> 
+            <reward_item>Large Ironwood Forest</reward_item> 
+            <wood>0</wood> 
+            <gold>0</gold> 
+            <gems>0</gems> 
+		</piratepeach> 
+		        
+        <piratepeach> 
+        	<id>1</id> 
+        	<intro>I've been kind of lonely...[br] I figured if I was all vivacious, you'd hang around more.[br]"Pirate Peach's Private Passion Party!" sounds a lot better than "Yet another brunette alone on a Saturday night."[br]Ah well...I've got a little private pleasure when I'm feeling down.[br]It's a Panda! (A cuddly panda doesn't judge me.)[br]Could you put this one to work?  When Pandas waddle they cheer me up. </intro> 
+			<during>Have you tried having the Panda help out with gathering maple trees? I can't wait to see him waddle! </during> 
+            <complete>Seeing that Panda waddling about is nearly enough cuteness to distract me from ogling your cute little bum. All this running about gives you impressive muscle tone. </complete> 
+            <set_up>create_panda</set_up> 
+            <complete_mote>Put that panda to work!</complete_mote> 
+            <reward_item></reward_item> 
+            <wood>0</wood> 
+            <gold>100</gold> 
+            <gems>0</gems> 
+		</piratepeach> 
+		        
+        <piratepeach> 
+        	<id>3</id> 
+        	<intro>When I first came to this island to pillage all the native men, I was terrified by the trees spirits. You know...the MONSTERS. [br]*Nom, Nom, Nom* And only my toes would be left.[br]Scary! Though at least my amazing pedicure would survive.[br]If you happen to see about five wild monsters, could you tame them?  I have an urge to tame cute creatures. </intro> 
+			<during>If you could bring me 5 trained monsters, I would be more grateful than Coriander might like. </during> 
+            <complete>Ah, you used bribery on the monsters!  That's quite clever.[br]Now you have cute monsters that follow you around like little doggies.  Kawaii! [br]Do you want to be tamed next? Just curious. </complete> 
+            <set_up>create_monsters</set_up> 
+            <complete_mote>Hired monsters</complete_mote> 
+            <reward_item></reward_item> 
+            <wood>2000</wood> 
+            <gold>0</gold> 
+            <gems>0</gems> 
+		</piratepeach> 
+		        
+        <piratepeach> 
+        	<id>4</id> 
+        	<intro>Hey there, handsome.  I've been taking some dance lessons lately in my spare time.[br]I'd love to perform for you, but I need some sparkly gems for my ballroom dancing outfit.[br]If only I could a 500 gems, I could put on a little show for you!
+		</intro> 
+			<during>The offer still stands.  500 gems, and I'll dance.</during> 
+            <complete>Did you like it?  It is really too bad that I've already paid for college.[br]Um...I didn't really need all those gems for my dress.[br]It is just nice having someone so who's cute spending money on me. :-)</complete> 
+            <set_up></set_up> 
+            <complete_mote>Dancing Queen</complete_mote> 
+            <reward_item></reward_item> 
+            <wood>0</wood> 
+            <gold>0</gold> 
+            <gems>0</gems> 
+		</piratepeach> 
+		        
+        <coriander_comment> 
+        	<comment>Do you ever get lonely? Sometimes I stare out into the fields and dream of finding someone.</comment> 
+			<level>33</level> 
+		</coriander_comment> 
+		        
+        <coriander_comment> 
+        	<comment>When I was a little girl, my father would read to me stories of princes and princesses.  But that isn't real life.</comment> 
+			<level>33</level> 
+		</coriander_comment> 
+		        
+        <coriander_comment> 
+        	<comment>I've looked after my sisters ever since my parents passed. I wasn't much older than they were, but sometimes a girl grows up quickly.</comment> 
+			<level>33</level> 
+		</coriander_comment> 
+		        
+        <coriander_comment> 
+        	<comment>I remember a happier time when I was much younger.  Before everyone went away.</comment> 
+			<level>33</level> 
+		</coriander_comment> 
+		        
+        <coriander_comment> 
+        	<comment>I feel that my chances of finding someone special are so very slim.</comment> 
+			<level>33</level> 
+		</coriander_comment> 
+		        
+        <coriander_comment> 
+        	<comment>Yesterday after doing laundry, I was left with a single sock that had no match.  I feel like that at times.</comment> 
+			<level>33</level> 
+		</coriander_comment> 
+		        
+        <coriander_comment> 
+        	<comment>What a pretty day to sit and chat with someone new.</comment> 
+			<level>33</level> 
+		</coriander_comment> 
+		        
+        <coriander_comment> 
+        	<comment>It makes me sad that the land is so barren.  No trees, no flowers, no cute shoes.</comment> 
+			<level>33</level> 
+		</coriander_comment> 
+		        
+        <coriander_comment> 
+        	<comment>You've been stopping by a lot lately.  Why might that be?</comment> 
+			<level>66</level> 
+		</coriander_comment> 
+		        
+        <coriander_comment> 
+        	<comment>When you say hello, I feel like bouncing a little higher.</comment> 
+			<level>66</level> 
+		</coriander_comment> 
+		        
+        <coriander_comment> 
+        	<comment>It feels like spring these days.  Even the butterflies are giddy.</comment> 
+			<level>66</level> 
+		</coriander_comment> 
+		        
+        <coriander_comment> 
+        	<comment>So you want to be King? A baseball cap just wouldn't do, eh?</comment> 
+			<level>66</level> 
+		</coriander_comment> 
+		        
+        <coriander_comment> 
+        	<comment>Mmm...I like a bunni who is a hard worker.</comment> 
+			<level>66</level> 
+		</coriander_comment> 
+		        
+        <coriander_comment> 
+        	<comment>I want to marry my best friend.  Or a cabana boy.</comment> 
+			<level>66</level> 
+		</coriander_comment> 
+		        
+        <coriander_comment> 
+        	<comment>I wonder if you can handle a smart woman? What about one with ears longer than yours?</comment> 
+			<level>66</level> 
+		</coriander_comment> 
+		        
+        <coriander_comment> 
+        	<comment>Why do you look at me so intently?  You make me blush.</comment> 
+			<level>66</level> 
+		</coriander_comment> 
+		        
+        <coriander_comment> 
+        	<comment>What delightfully beady eyes you have.</comment> 
+			<level>66</level> 
+		</coriander_comment> 
+		        
+        <coriander_comment> 
+        	<comment>Last time I talked to a pirate, he told me "I'd love to drop me anchor in your lagoon". Eew!</comment> 
+			<level>66</level> 
+		</coriander_comment> 
+		        
+        <coriander_comment> 
+        	<comment>Have you thought much about kids? After all, we are bunnies.</comment> 
+			<level>80</level> 
+		</coriander_comment> 
+		        
+        <coriander_comment> 
+        	<comment>I do like a man with crown.</comment> 
+			<level>80</level> 
+		</coriander_comment> 
+		        
+        <coriander_comment> 
+        	<comment>*giggle* I feel like we are going steady.</comment> 
+			<level>80</level> 
+		</coriander_comment> 
+		        
+        <coriander_comment> 
+        	<comment>If we had kids, they would have the cutest ears.</comment> 
+			<level>80</level> 
+		</coriander_comment> 
+		        
+        <coriander_comment> 
+        	<comment>Come any closer and I might just nibble on your carrot.</comment> 
+			<level>80</level> 
+		</coriander_comment> 
+		        
+        <peach_comment> 
+        	<comment>The problem with leather is that it itches when it gets wet.  We've all been there.</comment> 
+			<level>0</level> 
+		</peach_comment> 
+		        
+        <peach_comment> 
+        	<comment>Mascara is my only real friend.  My nail polish is more of an abused pet.</comment> 
+			<level>0</level> 
+		</peach_comment> 
+		        
+        <peach_comment> 
+        	<comment>Pillaging is so much more fun when you are woman. Want me to show you?</comment> 
+			<level>0</level> 
+		</peach_comment> 
+		        
+        <peach_comment> 
+        	<comment>My father was the Dred Pirate Hareold.  I miss him.</comment> 
+			<level>0</level> 
+		</peach_comment> 
+		        
+        <peach_comment> 
+        	<comment>My mother was the daughter of a king.  Not that he could admit to the relationship in public.</comment> 
+			<level>0</level> 
+		</peach_comment> 
+		        
+        <peach_comment> 
+        	<comment>Everyone leaves you eventually. That is one lesson I've learned.</comment> 
+			<level>0</level> 
+		</peach_comment> 
+		        
+        <peach_comment> 
+        	<comment>I felt suffocated in my tiny hometown.  So I left everything behind and hitched a ship here.  Where there is nothing.</comment> 
+			<level>0</level> 
+		</peach_comment> 
+		        
+        <peach_comment> 
+        	<comment>Pirates came to this island after the Cataclysm and buried their treasure amidst the rubble.  Stupid Pirates.</comment> 
+			<level>0</level> 
+		</peach_comment> 
+		        
+        <peach_comment> 
+        	<comment>If Deer took over the island...why are there none left?  Did you know that salted venison lasts three months on a sea voyage?</comment> 
+			<level>0</level> 
+		</peach_comment> 
+		        
+        <peach_comment> 
+        	<comment>My club entertains all sorts. In all sorts of different ways.  Sometimes with candy.</comment> 
+			<level>0</level> 
+		</peach_comment> 
+		        
+        <peach_comment> 
+        	<comment>What is up with blonde hair on a bunny?  That is so not her natural color.</comment> 
+			<level>0</level> 
+		</peach_comment> 
+		        
+        <peach_comment> 
+        	<comment>I had a boy once.  He would bring me ripe, fresh cherries from the local market.</comment> 
+			<level>0</level> 
+		</peach_comment> 
+		        
+        <peach_comment> 
+        	<comment>Have you ever tasted a cherry? Popped it in your mouth and sunk your teeth into the skin?</comment> 
+			<level>0</level> 
+		</peach_comment> 
+		        
+        <peach_comment> 
+        	<comment>Gems sparkle so delightfully.  Perhaps one day I'll fall in love, but for now money keeps me warm at night.</comment> 
+			<level>0</level> 
+		</peach_comment> 
+		        
+        <peach_comment> 
+        	<comment>Want to hear a secret? This goes no further!  I actually have a Phd in physical chemistry.  I just play the bad Bunni for fun.</comment> 
+			<level>0</level> 
+		</peach_comment> 
+		</map_data> 

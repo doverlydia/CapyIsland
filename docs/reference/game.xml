@@ -1,0 +1,241 @@
+<landofbunnies>
+<startwood>1000</startwood>
+<startrock>1500</startrock>
+<worldsize>4500</worldsize>
+<minimap>false</minimap>
+
+<seedrates>
+
+	  <bronze>100</bronze>
+	  <silver>50</silver>
+	  <gold>25</gold>
+	  
+  	  <pine>100</pine>
+	  <maple>50</maple>
+	  <ironwood>25</ironwood>
+	  
+	  <posie>300</posie>
+	  <tulip>200</tulip>
+	  <rose>100</rose>
+	  
+</seedrates>
+
+<speedup>1</speedup> <!-- (1-10) NOT ACCURATE SPEED UP... not suitable for final balancing -->
+
+<price>
+	<pine>3</pine>
+	
+<!-- Intent: Staple that is moderately valuable, and not easy to overharvest-->	
+	<maple>7</maple>
+	
+<!-- Intent: ironwood is very valuable, but very easy to overharvest-->	
+	<ironwood>15</ironwood>
+	
+<!-- Intent: Stone value is less important than finding the right treasure hill-->	
+	<bronze>2</bronze>
+	<silver>7</silver>
+	<gold>20</gold>
+
+<!-- Intent: Basic flower. Inexpensive Easy to overharvest-->	
+	<posie>500</posie>
+	
+<!-- Intent: Staple flower.  Hard to overharvest-->	
+	<tulip>750</tulip>
+
+<!-- Intent: Non-renewable flower resource.  Easy to overharvest, but it takes you a while to realize that you are doing it-->	
+	<rose>1600</rose>
+</price>
+
+<!-- NEW -->
+
+
+
+<animals>
+	<bunni>
+		<speed>3</speed>
+	</bunni>
+	<pirate>
+		<speed>4</speed>
+		<modifiers>
+			<item name="PosieItem">
+				<speed>8</speed>
+			</item>
+			
+		</modifiers>
+	</pirate>
+	<panda>
+		<speed>2</speed>
+		<food>2</food>
+		<modifiers>
+			<item name="MapleItem">
+				<speed>8</speed>
+			</item>
+			<item name="TulipItem">
+				<speed>8</speed>
+			</item>
+		</modifiers>
+	</panda>
+	<fox>
+		<speed>6</speed>
+		<modifiers>
+			<item name="TulipItem">
+				<speed>12</speed>
+			</item>
+			<item name="IronwoodItem">
+				<speed>12</speed>
+			</item>
+		</modifiers>
+	</fox>
+	<monster>
+		<speed>6</speed>
+		<modifiers>
+			<item name="BronzeItem">
+				<speed>12</speed>
+			</item>
+			<item name="SilverItem">
+				<speed>12</speed>
+			</item>
+			<item name="GoldItem">
+				<speed>12</speed>
+			</item>
+		</modifiers>
+	</monster>
+	<deer>
+		<speed>5</speed>
+		<food>0.005</food>
+		<modifiers>
+			<item name="BronzeItem">
+				<can_find>false</can_find>
+			</item>
+			<item name="SilverItem">
+				<can_find>false</can_find>
+			</item>
+			<item name="GoldItem">
+				<can_find>false</can_find>
+			</item>
+			<item name="PineItem">
+				<can_find>false</can_find>
+			</item>
+			<item name="MapleItem">
+				<can_find>false</can_find>
+			</item>
+			<item name="IronwoodItem">
+				<can_find>false</can_find>
+			</item>
+		</modifiers>
+	</deer>
+</animals>
+
+<!-- END NEW -->
+
+<stores>
+	<general_store>
+		<item>Small Posie Garden</item>
+		<item>Medium Posie Garden</item>
+		<item>Medium Pine Forest</item>
+		<item>Medium Gray Hill</item>
+		<item>Mine</item>
+		<item>Bronze Store</item>
+	</general_store>
+	
+	<bronze_store>
+		<item>Deer Bomb</item>
+		<item>Medium Tulip Garden</item>
+		<item>Medium Maple Forest</item>
+		<item>Fox House</item>
+		<item>Sawmill</item>
+		<item>Silver Store</item>
+	</bronze_store>
+	
+	<silver_store>
+		<item>Legendary Sawmill</item>
+		<item>Medium Black Hill</item>
+		<item>Wedding Dress</item>
+		<item>Small Rose Garden</item>
+		<item>Bomb</item>
+		<item>Small Gold Hill</item>
+		<item>Steel Store</item>
+	</silver_store>
+	
+	
+	<steel_store>
+		<item>Legendary Gem Store</item>
+		<item>Legendary Mine</item>
+		<item>String of Pearls</item>
+		<item>Bank</item>
+		<item>Medium Ironwood Forest</item>
+		<item>Gold Store</item>
+	</steel_store>
+	
+	<bank>
+		<item>Buy Gems</item>
+		<item>Buy Gold</item>
+		<item>Buy Wood</item>
+	</bank>
+	
+	<gold_store>
+		<item>Large Gold Hill</item>
+		<item>Large Ironwood Forest</item>
+		<item>Medium Rose Garden</item>
+		<item>Tiara</item>
+		<item>Church</item>
+	</gold_store>
+	
+	<gem_store>
+		<item>Large Rose Garden</item>
+		<item>Legendary Plum Tree</item>
+		<item>White Flower Tree</item>
+		<item>Pink Flower Tree</item>
+		<item>Holy Statue</item>
+		<item>Gem Statue</item>
+	</gem_store>
+	
+	<fancy_store>
+		<item>Bushy Tree</item>
+		<item>Fall Color</item>
+		<item>Tiny Bush</item>
+		<item>Little Greeny</item>
+		<item>Splash Fountain</item>
+		<item>Monster Den</item>
+	</fancy_store>
+</stores>
+
+<islands>
+
+	<island>
+		<rect><width>0.25</width><height>0.33</height><x>0</x><y>0</y></rect>
+		<item name="Avatar">
+			<location><x>0.5</x><y>0.3</y></location>
+		</item>
+	</island>
+
+	<island>
+		<rect><width>0.25</width><height>0.33</height><x>0.0</x><y>0.33</y></rect>	
+	</island>
+
+	<island>
+		<rect><width>0.5</width><height>0.33</height><x>0</x><y>0.66</y></rect>
+	</island>
+
+	<island>
+		<rect><width>0.5</width><height>0.33</height><x>0.5</x><y>0.66</y></rect>
+	</island>
+	
+	<island>
+		<rect><width>0.25</width><height>0.66</height><x>0.75</x><y>0</y></rect>
+	</island>
+	
+	<island>
+		<rect><width>0.5</width><height>0.33</height><x>0.25</x><y>0</y></rect>
+		<rect><width>0.25</width><height>0.66</height><x>0.25</x><y>0</y></rect>
+	</island>
+	
+	<island>
+		<rect><width>0.25</width><height>0.33</height><x>.5</x><y>0.33</y></rect>
+	</island>
+	
+</islands>
+
+
+
+</landofbunnies>
