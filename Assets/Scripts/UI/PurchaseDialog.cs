@@ -30,7 +30,15 @@ namespace CapyIsland.UI
 
         IPurchasable _item;
 
-        void Awake() => Close();
+        static PurchaseDialog _instance;
+
+        public static bool IsOpen => _instance != null && _instance.panel != null && _instance.panel.activeSelf;
+
+        void Awake()
+        {
+            _instance = this;
+            Close();
+        }
 
         void OnEnable()
         {

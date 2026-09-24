@@ -106,6 +106,7 @@ namespace CapyIsland.Game
         static void Announce(string name, GameObject item)
         {
             Cards.FoundItem(name);
+            StoreData.InvalidateCounts();
             Motes.PurchaseMote(name);
             Acquired?.Invoke(name, item);
         }

@@ -90,7 +90,19 @@ namespace CapyIsland.UI
             }
             if (nameLabel != null) nameLabel.text = speaker ?? "";
             if (panel != null) panel.SetActive(true);
+            FitWidth();
             ShowPage();
+        }
+
+        /// <summary>Narrow portrait phones: never wider than the safe area allows.</summary>
+        void FitWidth()
+        {
+            if (panel == null) return;
+            var rect = panel.GetComponent<RectTransform>();
+            var parent = rect.parent as RectTransform;
+            if (parent == null) return;
+            float max = parent.rect.width - 40f;
+            rect.sizeDelta = new Vector2(Mathf.Min(1000f, max), rect.sizeDelta.y);
         }
 
         void ShowPage()

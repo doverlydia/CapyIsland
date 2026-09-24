@@ -58,6 +58,7 @@ namespace CapyIsland.CameraRig
         Game.DraggableActor _heldActor;
         Game.ITappable _pendingTap;
 
+        bool _ignorePress;
         bool _pinching;
         float _pinchStartDistance;
         float _pinchStartZoom;
@@ -126,6 +127,11 @@ namespace CapyIsland.CameraRig
             if (pressed && !_pressing)
             {
                 _pressing = true;
+
+                // A dialog is up, or the finger is on the HUD: the world does not hear this press
+                // (the original pauses map input while a menu is open).
+                _ignorePress = ModalOpen || PointerOverUI();
+                if (_ignorePress) { SteerTarget = null; return; }
                 _movedBeyondSlop = false;
                 _pressStartScreen = screen;
                 _pressStartTime = Time.unscaledTime;
@@ -155,6 +161,7 @@ namespace CapyIsland.CameraRig
             // --- press continues ---
             if (pressed)
             {
+                if (_ignorePress) return;
                 if (!_movedBeyondSlop && Vector2.Distance(screen, _pressStartScreen) > tapSlopPixels)
                     _movedBeyondSlop = true;
 
@@ -171,6 +178,7 @@ namespace CapyIsland.CameraRig
             {
                 _pressing = false;
                 SteerTarget = null;
+                if (_ignorePress) { _ignorePress = false; return; }
 
                 if (_pendingTap != null)
                 {
@@ -199,6 +207,16 @@ namespace CapyIsland.CameraRig
 
                 Tapped?.Invoke(world);
             }
+        }
+
+        static bool ModalOpen => UI.SpeechDialog.IsOpen || UI.CardPopup.IsShowing || UI.PurchaseDialog.IsOpen;
+
+        static bool PointerOverUI()
+        {
+            var es = UnityEngine.EventSystems.EventSystem.current;
+            if (es == null) return false;
+            if (Input.touchCount > 0) return es.IsPointerOverGameObject(Input.GetTouch(0).fingerId);
+            return es.IsPointerOverGameObject();
         }
 
         void GetPointer(out Vector2 screen, out bool pressed, out bool released)

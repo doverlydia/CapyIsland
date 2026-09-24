@@ -89,19 +89,29 @@ namespace CapyIsland.Game
         /// </summary>
         public static int CountByName(string name)
         {
-            int n = 0;
-            foreach (var tag in Object.FindObjectsByType<CatalogItem>(FindObjectsSortMode.None))
-                if (tag.StoreName == name) n++;
-            foreach (var display in Object.FindObjectsByType<SaleDisplay>(FindObjectsSortMode.None))
-                if (display.StoreName == name) n++;
-            foreach (var bubble in Object.FindObjectsByType<Bubble>(FindObjectsSortMode.None))
+            // Counted once per frame for every name at once: shop displays ask every frame.
+            if (_countedFrame != Time.frameCount)
             {
-                if (bubble.Taken || bubble.Contents == null) continue;
-                var tag = bubble.Contents.GetComponent<CatalogItem>();
-                if (tag != null && tag.StoreName == name) n++;
+                _countedFrame = Time.frameCount;
+                _counts.Clear();
+                void Add(string n) { if (!string.IsNullOrEmpty(n)) _counts[n] = _counts.TryGetValue(n, out var c) ? c + 1 : 1; }
+                foreach (var tag in Object.FindObjectsByType<CatalogItem>(FindObjectsSortMode.None)) Add(tag.StoreName);
+                foreach (var display in Object.FindObjectsByType<SaleDisplay>(FindObjectsSortMode.None)) Add(display.StoreName);
+                foreach (var bubble in Object.FindObjectsByType<Bubble>(FindObjectsSortMode.None))
+                {
+                    if (bubble.Taken || bubble.Contents == null) continue;
+                    var tag = bubble.Contents.GetComponent<CatalogItem>();
+                    if (tag != null) Add(tag.StoreName);
+                }
             }
-            return n;
+            return _counts.TryGetValue(name, out var n2) ? n2 : 0;
         }
+
+        static int _countedFrame = -1;
+        static readonly Dictionary<string, int> _counts = new();
+
+        /// <summary>Forget this frame's counts (after creating or destroying things mid-frame).</summary>
+        public static void InvalidateCounts() => _countedFrame = -1;
 
         // ---------------------------------------------------------------- dynamic prices
 

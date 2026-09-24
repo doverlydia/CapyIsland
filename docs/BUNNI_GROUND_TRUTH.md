@@ -46,7 +46,7 @@ Every tree, flower and rock is one node with a `scale` value that doubles as its
 ### Parent vs child — the single most important structural fact
 
 When you place a garden/forest/hill from the store you create **one parent node**. The parent
-immediately spawns `outerRadius / 10` children at random points inside its outer circle (each only
+immediately spawns `outerRadius / 10` children (`outerRadius / 5` for hills, `HillItem.initStateMachine`) at random points inside its outer circle (each only
 if the child's inner circle still fits on the map). Radii come from the `inner`/`outer` fields in
 `store_items.xml`.
 
@@ -65,7 +65,7 @@ parent goes, and the grove only comes back if the player replants it.
 
 ### Spawning and the seeding cap
 
-A placed parent tries `outerRadius / 10` children at once, each at a random point in its outer
+A placed parent tries `outerRadius / 10` children at once (hills: `outerRadius / 5`), each at a random point in its outer
 circle. A child's inner radius is the store item's `inner` × the child's final scale. It is only
 created if `TestCollision.CircleOnMap` passes: the circle must lie inside the land **and must not
 intersect any other item's inner circle** (animals, the avatar and carried items excluded).
@@ -180,9 +180,11 @@ FindWood ──► GetWood ──► HarvestWood ──► TakeWoodToMill ──
 
 Among nodes that are **unreserved, fully grown, of an allowed type, and whose centre is inside the
 workplace boundary**: take the **nearest child**; only if there is no child at all, take the
-**nearest parent**. The chosen node is marked reserved so no other worker targets it. An animal's
-"find first" types (those with a modifier in `game.xml`, e.g. fox → ironwood) are searched before
-its other types. A bunni has no modifiers, so it treats all trees alike.
+**nearest parent**. The chosen node is marked reserved so no other worker targets it. The parser supports
+"find first" types searched before the rest, but the shipped `game.xml` has no `<find_first>`
+entries, so every find-first list is empty: modifiers change **speed only**, and every species
+treats all trees (or rocks, or flowers) alike. For fruit trees and the hungry search, see
+`docs/PROGRESSION.md` B10.
 
 A Mill's and a Mine's boundary is a fixed **800-unit** circle (`MillItem`: `mBoundry = new
 Circle(x, y, 800)`), not the store item's outer radius (which is 0 for both).
@@ -243,4 +245,4 @@ Becoming hungry **interrupts the current job immediately** and restarts the FSM 
 
 - Exact placement radii per store item are in `store_items.xml` (`inner`/`outer`) but their
   world-unit scale relative to the 4500-unit world is not verified against the visuals.
-- Quest/ghost gating logic lives in `Quests/` and has not been read yet.
+- Quest, ghost, store and bridge logic: now read — see `docs/PROGRESSION.md`.

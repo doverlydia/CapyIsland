@@ -107,9 +107,25 @@ namespace CapyIsland.Game
             _age = 0;
         }
 
+        float _bornAt = -1f;
+        bool _nudged;
+
         void Update()
         {
             if (_taken) return;
+
+            // Left alone for 30 seconds: the original's "free item" nudge (after the tutorial).
+            if (_bornAt < 0f) _bornAt = Time.time;
+            if (!_nudged && Time.time - _bornAt > 30f && contents != null)
+            {
+                var tutorial = FindFirstObjectByType<TutorialDirector>();
+                if (tutorial == null || tutorial.Finished)
+                {
+                    _nudged = true;
+                    var tag = contents.GetComponent<CatalogItem>();
+                    Hints.Show("You've discovered a free <b>" + (tag != null ? tag.StoreName : contents.name) + "</b>! Tap to pick it up.");
+                }
+            }
 
             if (_lifeFrames >= 0)
             {
