@@ -4,19 +4,18 @@ using UnityEngine;
 namespace CapyIsland.Game
 {
     /// <summary>
-    /// A sawmill or a mine. Workers are assigned to the building, not to the resource — without a
-    /// workplace in range a forest yields nothing, which is the rule the original's tutorial teaches.
-    ///
-    /// The workplace owns the search for nodes so every worker stationed here shares one radius and
-    /// one definition of "nearby".
+    /// A sawmill or a mine. Workers are posted to the building, not to a tree, and only work nodes
+    /// inside its boundary — a fixed 800-unit circle in the original (MillItem.mBoundry), not the
+    /// store item's outer radius. Hungry workers also only look for food inside it, so a garden must
+    /// be planted within reach of the mill whose workers it is meant to feed.
     /// </summary>
     public class Workplace : MonoBehaviour
     {
         [Header("What this building harvests")]
         [SerializeField] ResourceKind accepts = ResourceKind.Wood;
 
-        [Tooltip("How far this building will send a worker to find a node.")]
-        [SerializeField] float workRadius = 8f;
+        [Tooltip("A Legendary Mill or Mine doubles the value of everything delivered to it.")]
+        [SerializeField] bool legendary;
 
         [Tooltip("How many workers may be stationed here.")]
         [SerializeField] int maxWorkers = 4;
@@ -24,16 +23,11 @@ namespace CapyIsland.Game
         readonly List<Worker> _workers = new();
 
         public ResourceKind Accepts => accepts;
-        public float WorkRadius => workRadius;
         public bool HasRoom => _workers.Count < maxWorkers;
-
-        /// <summary>
-        /// True when this building is staffed but has no resource node inside its radius — the
-        /// "you built the sawmill too far from the trees" case, which otherwise looks like a bug
-        /// because the worker just stands there.
-        /// </summary>
-        public bool StaffedButIdle => _workers.Count > 0 && FindNode() == null;
         public int WorkerCount => _workers.Count;
+
+        /// <summary>The family of node this building's workers harvest.</summary>
+        public NodeFamily WorkFamily => accepts == ResourceKind.Wood ? NodeFamily.Tree : NodeFamily.Rock;
 
         public bool TryAssign(Worker worker)
         {
@@ -49,59 +43,49 @@ namespace CapyIsland.Game
             _workers.Remove(worker);
         }
 
+        /// <summary>True when this building has anything of its kind in reach. Reserves nothing.</summary>
+        public bool HasWorkInReach() => Find(WorkFamily, transform.position, reserve: false) != null;
+
         /// <summary>
-        /// Nearest node in range that still has stock and matches what this building accepts.
-        /// Returns null when there is nothing left to work, which parks the worker.
+        /// The original's FindItem: among grown, unreserved nodes of the family whose centre is
+        /// inside this building's boundary, the nearest **child**; only if there is no child at all,
+        /// the nearest **parent**. The winner is reserved when <paramref name="reserve"/> is set.
         /// </summary>
-        public Harvestable FindNode()
+        public Harvestable Find(NodeFamily family, Vector2 from, bool reserve)
         {
-            Harvestable best = null;
-            float bestDistance = float.MaxValue;
+            Harvestable bestChild = null, bestParent = null;
+            float childDistance = float.MaxValue, parentDistance = float.MaxValue;
 
-            foreach (var node in HarvestableRegistry.All)
+            foreach (var node in FindObjectsByType<Harvestable>(FindObjectsSortMode.None))
             {
-                if (node == null || node.Kind != accepts) continue;
-                // A forest still in the inventory trail is an icon, not a forest.
-                if (!node.IsWorkable) continue;
+                if (node.Family != family || !node.InWorld || !node.CanHarvest || node.Reserved) continue;
+                if (BunniSpace.WorldDistance(transform.position, node.transform.position) > BunniRules.WorkplaceBoundary) continue;
 
-                float d = Vector2.Distance(node.transform.position, transform.position);
-                if (d > workRadius || d >= bestDistance) continue;
-                best = node;
-                bestDistance = d;
+                float d = BunniSpace.WorldDistance(from, node.transform.position);
+                if (node.IsParent)
+                {
+                    if (d < parentDistance) { parentDistance = d; bestParent = node; }
+                }
+                else if (d < childDistance) { childDistance = d; bestChild = node; }
             }
-            return best;
+
+            var chosen = bestChild != null ? bestChild : bestParent;
+            if (chosen != null && reserve) chosen.Reserved = true;
+            return chosen;
         }
 
-        /// <summary>Credits a completed trip. All earning funnels through here.</summary>
+        /// <summary>Credits a delivered load, doubled at a Legendary building.</summary>
         public void Deposit(int amount)
         {
             if (amount <= 0 || ResourceStore.Instance == null) return;
-            ResourceStore.Instance.Add(accepts, amount);
+            ResourceStore.Instance.Add(accepts, legendary ? amount * 2 : amount);
         }
 
         void OnDrawGizmosSelected()
         {
+            var r = BunniSpace.ToUnity(new Vector2(BunniRules.WorkplaceBoundary, BunniRules.WorkplaceBoundary));
             Gizmos.color = new Color(1f, 0.9f, 0.3f, 0.5f);
-            Gizmos.DrawWireSphere(transform.position, workRadius);
+            Gizmos.DrawWireCube(transform.position, new Vector3(r.x * 2f, r.y * 2f, 0f));
         }
-    }
-
-    /// <summary>
-    /// Flat list of every live node, so a workplace does not run a physics query or a FindObjects
-    /// scan every time a worker needs somewhere to go.
-    /// </summary>
-    public static class HarvestableRegistry
-    {
-        static readonly List<Harvestable> _all = new();
-        public static IReadOnlyList<Harvestable> All => _all;
-
-        public static void Register(Harvestable h)
-        {
-            if (h != null && !_all.Contains(h)) _all.Add(h);
-        }
-
-        public static void Unregister(Harvestable h) => _all.Remove(h);
-
-        public static void Clear() => _all.Clear();
     }
 }

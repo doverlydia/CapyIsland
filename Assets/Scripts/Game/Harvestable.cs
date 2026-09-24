@@ -1,229 +1,248 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace CapyIsland.Game
 {
     /// <summary>
-    /// A resource node a worker chops or mines: a forest, an ore hill.
+    /// One tree, rock or flower — the original's resource node. Its <see cref="Scale"/> is both its
+    /// size on screen and its health: it grows in from 0.2, can only be harvested once fully grown,
+    /// and every hit takes scale off until it falls.
     ///
-    /// Every strike pays out immediately and wears down one tree, so work is visible the whole way
-    /// through. A forest is felled tree by tree; when the last one goes, the item returns to the
-    /// world as a bubble for the player to collect and replant.
+    /// Placing a forest or garden creates one **parent**. The parent immediately tries
+    /// outerRadius/10 **children** around itself, and once grown keeps seeding one more every
+    /// seed-rate frames — each only if it fits on land without overlapping anything, so a grove fills
+    /// its circle and then stops by itself. Children never seed. Felling a child removes it; felling
+    /// the parent turns it back into a bubble for the player to replant.
     ///
-    /// Yields come from the original's `price` block: pine 3, maple 7, ironwood 15, bronze 2,
-    /// silver 7, gold 20.
+    /// Rules and numbers: docs/BUNNI_GROUND_TRUTH.md via <see cref="BunniRules"/>.
     /// </summary>
     public class Harvestable : MonoBehaviour
     {
-        [Header("What this node gives")]
-        [SerializeField] ResourceKind kind = ResourceKind.Wood;
+        enum Phase { Unplanted, Growing, Seeding, Grown }
 
-        [Tooltip("Granted per strike. Pine 3, maple 7, ironwood 15, bronze 2, silver 7, gold 20.")]
-        [SerializeField] int yieldPerTrip = 3;
+        [Header("What this node is")]
+        [SerializeField] NodeResource resource = NodeResource.Pine;
 
-        [Header("Depletion")]
-        [Tooltip("How many strikes this node supports before it is used up.")]
-        [SerializeField] int capacity = 30;
+        [Tooltip("True for the node a placed store item becomes. Spawned children set this false.")]
+        [SerializeField] bool isParent = true;
 
-        [Tooltip("Size a tree has shrunk to just before its final strike fells it.")]
-        [Range(0.05f, 0.9f)]
-        [SerializeField] float minScale = 0.3f;
+        [Header("Footprint (original world units, from store_items.xml)")]
+        [Tooltip("The store item's `inner`. A node's own radius is this × its final scale.")]
+        [SerializeField] float innerSize = 36f;
 
-        [Tooltip("Seconds each shrink step eases over.")]
-        [SerializeField] float shrinkSeconds = 0.25f;
+        [Tooltip("The store item's `outer`: where children spawn and seed. Parents only.")]
+        [SerializeField] float outerRadius = 200f;
 
-        [Header("Regrowth")]
-        [Tooltip("Trees regrow; ore does not (the wiki is explicit that rock never replenishes).")]
-        [SerializeField] bool renewable;
+        [Header("Look")]
+        [Tooltip("Unity scale of the art at a node scale of 1. Presentation only.")]
+        [SerializeField] float artScale = 1.4f;
 
-        [SerializeField] float regrowSeconds = 30f;
+        [Tooltip("Sprite once planted, if different from the carried icon (a garden's icon is a bed, " +
+                 "but the planted parent is a single flower). Children always use it.")]
+        [SerializeField] Sprite plantedSprite;
 
-        int _remaining;
-        float _regrowTimer;
+        Phase _phase = Phase.Unplanted;
+        FrameClock _clock;
+        float _scale;
+        float _finalScale;
+        float _innerRadius;
+        int _seedCounter;
+        Sprite _iconSprite;
+        SpriteRenderer _body;
+        Placeable _placeable;
 
-        // The individual trees. Resolved lazily: a forest's trees do not exist until it is planted
-        // (ScatterOnPlace creates them then), so caching them in Awake found only the hidden icon
-        // and "shrank" something nobody could see.
-        readonly List<Transform> _clumps = new();
-        readonly List<Vector3> _clumpFull = new();
-        bool _clumpsDirty = true;
+        public NodeResource Resource => resource;
+        public NodeFamily Family => BunniRules.FamilyOf(resource);
+        public bool IsParent => isParent;
+        public float Scale => _scale;
 
-        float _shrinkT = 1f;
-        Transform _shrinking;
-        Vector3 _shrinkFrom, _shrinkTo;
+        /// <summary>Only a fully grown node can be harvested (the original's mCanHarvest).</summary>
+        public bool CanHarvest => _phase == Phase.Seeding || _phase == Phase.Grown;
 
-        public ResourceKind Kind => kind;
-        public int YieldPerTrip => yieldPerTrip;
-        public bool HasStock => _remaining > 0;
-        public bool Depleted => _remaining <= 0;
+        /// <summary>Claimed by a worker already heading for it, so no one else targets it.</summary>
+        public bool Reserved { get; set; }
 
-        /// <summary>0..1 of the node's original stock still standing.</summary>
-        public float Fullness => capacity <= 0 ? 0f : (float)_remaining / capacity;
+        /// <summary>This node's own inner radius, in world units.</summary>
+        public float InnerRadius => _innerRadius;
 
-        /// <summary>
-        /// Only a planted node can be worked. A forest still riding in the inventory trail is an
-        /// icon, not a forest, and a worker must not wander over to chop it.
-        /// </summary>
-        public bool IsWorkable
+        /// <summary>Value when harvested: the resource's price, doubled for a parent.</summary>
+        public int Value => BunniRules.Price(resource) * (isParent ? 2 : 1);
+
+        /// <summary>Out in the world rather than riding in the trail or sitting in a bubble.</summary>
+        public bool InWorld => isActiveAndEnabled && _phase != Phase.Unplanted;
+
+        /// <summary>Whether this node occupies ground that new items and seeds must avoid.</summary>
+        public bool BlocksPlacement => InWorld;
+
+        void Awake()
         {
-            get
-            {
-                if (!HasStock || !isActiveAndEnabled) return false;
-                var placeable = GetComponent<Placeable>();
-                return placeable == null || placeable.Placed;
-            }
+            var sprite = transform.Find("Sprite");
+            _body = sprite != null ? sprite.GetComponent<SpriteRenderer>() : null;
+            if (_body != null) _iconSprite = _body.sprite;
+            _placeable = GetComponent<Placeable>();
         }
 
-        /// <summary>The tree currently being felled — what a worker walks to and what shakes when struck.</summary>
-        public Transform CurrentVisual
+        /// <summary>
+        /// Configures a spawned child. Children are plain nodes: no Placeable, never picked up,
+        /// never seeding.
+        /// </summary>
+        public void InitChild(NodeResource res, float inner, float art, Sprite sprite)
         {
-            get
-            {
-                RefreshClumps();
-                int i = CurrentClumpIndex();
-                return i >= 0 && i < _clumps.Count ? _clumps[i] : transform;
-            }
+            resource = res;
+            isParent = false;
+            innerSize = inner;
+            outerRadius = 0f;
+            artScale = art;
+            plantedSprite = sprite;
+            Awake();
+            BeginGrowing();
         }
 
-        /// <summary>Where a worker stands to strike the current tree: beside it, not inside it.</summary>
-        public Vector2 WorkPoint => (Vector2)CurrentVisual.position + new Vector2(0.75f, -0.25f);
+        // ---------------------------------------------------------------- planting
 
-        void Awake() => _remaining = capacity;
+        /// <summary>A parent was planted: grow, and scatter the first children around it.</summary>
+        void OnPlacedInWorld()
+        {
+            if (!isParent) return;
+            if (_body != null && plantedSprite != null) _body.sprite = plantedSprite;
+            BeginGrowing();
 
-        void OnEnable() => HarvestableRegistry.Register(this);
-        void OnDisable() => HarvestableRegistry.Unregister(this);
+            // The first burst: outerRadius/10 attempts, each tested with the parent's own radius.
+            int attempts = BunniRules.InitialChildAttempts(outerRadius);
+            for (int i = 0; i < attempts; i++) TrySpawnChild(childInnerSize: innerSize);
+        }
 
-        /// <summary>Planted: the trees are about to exist, so look them up again before the first strike.</summary>
-        void OnPlacedInWorld() => _clumpsDirty = true;
-
-        /// <summary>
-        /// Bubbled again. Restock completely — without this a replanted forest kept its stock of
-        /// zero, so workers saw an empty node and never went back to it.
-        /// </summary>
+        /// <summary>Bubbled again: forget everything, ready to be replanted fresh.</summary>
         void OnReturnedToBubble()
         {
-            _remaining = capacity;
-            _shrinking = null;
-            _clumps.Clear();
-            _clumpFull.Clear();
-            _clumpsDirty = true;
+            _phase = Phase.Unplanted;
+            Reserved = false;
+            _scale = 0f;
+            if (_body != null && _iconSprite != null) _body.sprite = _iconSprite;
         }
 
-        void RefreshClumps()
+        void BeginGrowing()
         {
-            if (!_clumpsDirty) return;
-            _clumps.Clear();
-            _clumpFull.Clear();
-
-            foreach (Transform child in transform)
-            {
-                if (!child.name.StartsWith("Clump")) continue;
-                _clumps.Add(child);
-                // A sapling may still be growing; its real size is where GrowIn is heading.
-                var grow = child.GetComponent<GrowIn>();
-                _clumpFull.Add(grow != null ? Vector3.one * grow.TargetScale : child.localScale);
-            }
-
-            if (_clumps.Count == 0)
-            {
-                // A single-piece node, like an ore hill: wear the sprite itself.
-                var sprite = transform.Find("Sprite");
-                if (sprite != null) { _clumps.Add(sprite); _clumpFull.Add(sprite.localScale); }
-            }
-
-            // Only settle once the trees are really there, so a strike before planting finishes
-            // does not lock in the wrong set.
-            _clumpsDirty = _clumps.Count == 0;
+            var range = BunniRules.FinalScaleRange(Family, isParent);
+            _finalScale = Random.Range(range.x, range.y);
+            _innerRadius = innerSize * _finalScale;
+            _scale = BunniRules.SpawnScale;
+            _seedCounter = 0;
+            _phase = Phase.Growing;
+            Reserved = false;
+            ApplyScale();
         }
 
-        int StrikesPerClump => Mathf.Max(1, capacity / Mathf.Max(1, _clumps.Count));
-
-        int CurrentClumpIndex()
-        {
-            if (_clumps.Count == 0) return -1;
-            int used = capacity - _remaining;
-            return Mathf.Clamp(used / StrikesPerClump, 0, _clumps.Count - 1);
-        }
+        // ---------------------------------------------------------------- per frame
 
         void Update()
         {
-            TickShrink();
+            if (_phase == Phase.Unplanted || _phase == Phase.Grown) return;
 
-            if (!renewable || _remaining >= capacity) return;
-            _regrowTimer += Time.deltaTime;
-            if (_regrowTimer < regrowSeconds) return;
-            _regrowTimer = 0f;
-            _remaining++;
+            int frames = _clock.Consume(Time.deltaTime);
+            for (int i = 0; i < frames; i++) TickFrame();
         }
 
-        /// <summary>
-        /// One strike. Pays out at once, wears the current tree down a step, fells it when its
-        /// share of strikes is spent, and retires the whole node on the last one.
-        /// </summary>
-        public int Strike()
+        void TickFrame()
         {
-            if (_remaining <= 0) return 0;
-            RefreshClumps();
-
-            int before = CurrentClumpIndex();
-            _remaining--;
-
-            if (before >= 0)
+            if (_phase == Phase.Growing)
             {
-                var tree = _clumps[before];
-                var grow = tree.GetComponent<GrowIn>();
-                if (grow != null) grow.enabled = false;   // growth must not overwrite the wear
-
-                int used = capacity - _remaining;
-                int intoTree = used - before * StrikesPerClump;
-                bool felled = intoTree >= StrikesPerClump || _remaining <= 0;
-
-                if (felled)
+                _scale += BunniRules.GrowthPerFrame(Family);
+                if (_scale > _finalScale)
                 {
-                    tree.gameObject.SetActive(false);
-                    if (_shrinking == tree) _shrinking = null;
+                    _scale = _finalScale;
+                    // Grown: harvestable. Parents go on to seed; children just stand.
+                    _phase = isParent ? Phase.Seeding : Phase.Grown;
                 }
-                else
-                {
-                    float wear = Mathf.Clamp01((float)intoTree / StrikesPerClump);
-                    _shrinking = tree;
-                    _shrinkFrom = tree.localScale;
-                    _shrinkTo = _clumpFull[before] * Mathf.Lerp(1f, minScale, wear);
-                    _shrinkT = 0f;
-                }
+                ApplyScale();
+                return;
             }
 
-            if (_remaining <= 0) Exhaust();
-            return yieldPerTrip;
-        }
-
-        void TickShrink()
-        {
-            if (_shrinking == null) return;
-            _shrinkT += Time.deltaTime / Mathf.Max(0.01f, shrinkSeconds);
-            float t = Mathf.Clamp01(_shrinkT);
-            // Ease out, so each strike lands with a visible settle.
-            _shrinking.localScale = Vector3.Lerp(_shrinkFrom, _shrinkTo, 1f - Mathf.Pow(1f - t, 3f));
-            if (t >= 1f) _shrinking = null;
+            if (_phase == Phase.Seeding)
+            {
+                _seedCounter++;
+                if (_seedCounter <= BunniRules.SeedRateFrames(resource)) return;
+                _seedCounter = 0;
+                // A seeded child's inner size is the parent's own radius — the original passes
+                // the parent's inner circle through, so seeded children run slightly larger.
+                TrySpawnChild(childInnerSize: _innerRadius);
+            }
         }
 
         /// <summary>
-        /// Used up. A renewable node just waits to regrow; a felled forest hands its item back to
-        /// the world as a bubble, ready to be collected and replanted.
+        /// One seed: a random point in the outer circle, kept only if a circle the size of this
+        /// parent fits there on land without touching anything. A miss simply does nothing.
         /// </summary>
-        void Exhaust()
+        void TrySpawnChild(float childInnerSize)
         {
-            if (renewable) return;
+            var at = BunniSpace.RandomPointInCircle(transform.position, outerRadius);
+            float testRadius = innerSize * _finalScale;
+            if (!BunniSpace.CircleOnMap(at, testRadius)) return;
 
-            var placeable = GetComponent<Placeable>();
-            if (placeable != null) BubbleSpawner.ReturnToBubble(placeable);
-            else gameObject.SetActive(false);
+            var child = new GameObject(resource + "Child");
+            child.transform.SetParent(transform.parent, false);   // a sibling: it outlives the parent
+            child.transform.position = new Vector3(at.x, at.y, transform.position.z);
+
+            var shadowSource = transform.Find("Shadow");
+            if (shadowSource != null)
+            {
+                var shadow = Instantiate(shadowSource.gameObject, child.transform);
+                shadow.name = "Shadow";
+                shadow.transform.localPosition = shadowSource.localPosition;
+                shadow.SetActive(true);
+            }
+
+            var body = new GameObject("Sprite");
+            body.transform.SetParent(child.transform, false);
+            var sr = body.AddComponent<SpriteRenderer>();
+            sr.sprite = plantedSprite != null ? plantedSprite : _iconSprite;
+
+            var node = child.AddComponent<Harvestable>();
+            node.InitChild(resource, childInnerSize, artScale, sr.sprite);
+            child.AddComponent<YSorter>();
+        }
+
+        // ---------------------------------------------------------------- harvesting
+
+        /// <summary>
+        /// One hit: takes <paramref name="amount"/> off the node's scale. Returns true when that hit
+        /// felled it — a child is removed, a parent turns back into a bubble.
+        /// </summary>
+        public bool Hit(float amount)
+        {
+            if (!CanHarvest) return false;
+            _scale -= amount;
+            if (_scale >= 0f) { ApplyScale(); return false; }
+
+            _scale = 0f;
+            Reserved = false;
+            Fell();
+            return true;
+        }
+
+        void Fell()
+        {
+            if (isParent && _placeable != null)
+            {
+                BubbleSpawner.ReturnToBubble(_placeable);
+                return;
+            }
+            Destroy(gameObject);
+        }
+
+        void ApplyScale()
+        {
+            transform.localScale = Vector3.one * (artScale * Mathf.Max(0.001f, _scale));
         }
 
         void OnDrawGizmosSelected()
         {
-            Gizmos.color = kind == ResourceKind.Wood ? Color.green : new Color(1f, 0.85f, 0.2f);
-            Gizmos.DrawWireSphere(transform.position, 0.6f);
+            var r = BunniSpace.ToUnity(new Vector2(_innerRadius, _innerRadius));
+            Gizmos.color = new Color(1f, 0.5f, 0.3f, 0.9f);
+            Gizmos.DrawWireCube(transform.position, new Vector3(r.x * 2f, r.y * 2f, 0f));
+            if (!isParent) return;
+            var o = BunniSpace.ToUnity(new Vector2(outerRadius, outerRadius));
+            Gizmos.color = new Color(0.4f, 0.9f, 0.4f, 0.4f);
+            Gizmos.DrawWireCube(transform.position, new Vector3(o.x * 2f, o.y * 2f, 0f));
         }
     }
 }

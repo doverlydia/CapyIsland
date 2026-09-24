@@ -1,16 +1,9 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace CapyIsland.Game
 {
-    /// <summary>
-    /// A capybara that works. Assigned to a <see cref="Workplace"/>, it walks to a node, harvests,
-    /// carries the load back, and the yield is credited on arrival — the same loop the original runs.
-    ///
-    /// Timing is calibrated to the play-test: one bunni on pine delivered +3 wood on a ~45s median
-    /// cycle. `speed` is the original's relative rate (bunni 3, fox 6, panda 2, and x8/x12 species
-    /// bonuses on their specialisms), so harvest time is <see cref="HarvestSecondsAtSpeedOne"/>
-    /// divided by speed, and walking makes up the rest of the trip.
-    /// </summary>
     /// <summary>What a worker is visibly doing, for animation and UI to read.</summary>
     public enum WorkerActivity
     {
@@ -24,111 +17,132 @@ namespace CapyIsland.Game
         Waiting,
     }
 
+    /// <summary>A species' speed against one resource — a row of game.xml's &lt;modifiers&gt;.</summary>
+    [Serializable]
+    public struct SpeedModifier
+    {
+        public NodeResource resource;
+        public int speed;
+    }
+
+    /// <summary>
+    /// A capybara at work. Runs the original's job machine, one step per 30 Hz frame:
+    ///
+    ///   FindWood ─► GetWood ─► HarvestWood ─► TakeWoodToMill ─► FindWood
+    ///
+    /// FindWood searches every 61 frames — food if hungry, otherwise its workplace's resource, always
+    /// inside the workplace boundary. Finding nothing, it walks to a nap spot beside the workplace and
+    /// sleeps, dreaming of whatever it lacks. GetWood walks to the target at the species' speed for
+    /// that resource. HarvestWood swings on the original's frame timing, each hit taking
+    /// 0.1 × speed / 3 off the node. TakeWoodToMill carries the value home.
+    ///
+    /// Hunger starts at 1500 and drains one per frame only while walking to a target, harvesting, or
+    /// walking to the nap spot. Dropping below 1000 interrupts whatever it was doing.
+    ///
+    /// Rules: docs/BUNNI_GROUND_TRUTH.md.
+    /// </summary>
     public class Worker : MonoBehaviour
     {
-        /// <summary>Chop/mine seconds for a worker of speed 1. Speed 3 gives ~33s, plus walking ~= 45s.</summary>
-        public const float HarvestSecondsAtSpeedOne = 100f;
-
-        /// <summary>Seconds per strike for a worker of speed 1. Speed 3 gives a strike every ~2.7s.</summary>
-        public const float SecondsPerStrikeAtSpeedOne = 8f;
+        enum State { Following, FindWood, GetWood, HarvestWood, TakeWoodToMill }
 
         /// <summary>How near a station a dropped worker must land to take the job.</summary>
         public const float DropOnStationRadius = 2.2f;
 
-        enum State { Following, Idle, ToNode, Harvesting, ToWorkplace, ToFood, Eating }
+        [Header("Species (game.xml <animals>; the capybara stands in for the bunni)")]
+        [SerializeField] string speciesName = "Capybara";
+        [SerializeField] int normalSpeed = BunniRules.CapybaraSpeed;
+        [SerializeField] float foodRate = BunniRules.CapybaraFoodRate;
+        [SerializeField] List<SpeedModifier> modifiers = new();
 
-        [Header("Species")]
-        [Tooltip("The original's relative rate: bunni 3, pirate 4, panda 2, fox 6, monster 6.")]
-        [SerializeField] float speed = 3f;
-        [Tooltip("Walking pace in world units per second.")]
-        [SerializeField] float moveSpeed = 2.2f;
-
-        [Header("Hunger")]
-        [Tooltip("Strikes this worker makes before it needs to eat. 0 disables hunger.")]
-                [SerializeField] int tripsBeforeHungry = 12;
-
-        [Tooltip("While asleep, how often to check whether a garden has appeared nearby.")]
-        [SerializeField] float wakeCheckSeconds = 0.5f;
+        /// <summary>Raised with the original's hint lines when a worker runs out of work or food.</summary>
+        public static event Action<string> Hint;
 
         State _state = State.Following;
-        FoodSource _food;
-        float _eatTimer;
-        float _wakeTimer;
+        FrameClock _clock;
 
-        /// <summary>Seconds a meal takes. The original's bunni was back at work about 9s after reaching a garden.</summary>
-        const float EatSeconds = 3f;
         Workplace _workplace;
         Harvestable _target;
-        float _harvestTimer;
-        float _harvestDuration;
         int _carrying;
-        int _tripsSinceMeal;
-        bool _asleep;
+        int _hunger = BunniRules.StartingHunger;
+        bool _hungry;
 
-        SpriteRenderer _renderer;
+        // FindWood
+        int _searchCounter;
+        Vector2 _napOffset;
+        bool _asleep;
+        bool _dreamStarted;
+
+        // HarvestWood
+        int _swingFrame;
+        int _swingFrames = 15;
+        int _hitFrame = 3;
+
+        Follower _follower;
 
         public bool IsAssigned => _workplace != null;
+        public bool IsAsleep => _asleep;
+        public bool IsHungry => _hungry;
+        public int Hunger => _hunger;
+        public Workplace Workplace => _workplace;
+        public Harvestable CurrentTarget => _target;
+        public string SpeciesName => speciesName;
 
-        /// <summary>What this worker is visibly doing right now.</summary>
+        /// <summary>0..1 through the current swing, for the tool animation to follow.</summary>
+        public float SwingPhase => _state == State.HarvestWood ? (float)_swingFrame / _swingFrames : 0f;
+
+        /// <summary>Fired on the hit frame of each swing, with the node struck.</summary>
+        public event Action<Harvestable> Struck;
+
         public WorkerActivity Activity
         {
             get
             {
-                if (_asleep) return WorkerActivity.Asleep;
-                if (_workplace == null) return WorkerActivity.Following;
-                return _state switch
+                switch (_state)
                 {
-                    State.ToNode => WorkerActivity.WalkingToNode,
-                    State.Harvesting => WorkerActivity.Harvesting,
-                    State.ToWorkplace => WorkerActivity.CarryingHome,
-                    State.ToFood => WorkerActivity.WalkingToFood,
-                    State.Eating => WorkerActivity.Eating,
-                    _ => WorkerActivity.Waiting,
-                };
+                    case State.Following: return WorkerActivity.Following;
+                    case State.FindWood: return _asleep ? WorkerActivity.Asleep : WorkerActivity.Waiting;
+                    case State.GetWood: return TargetIsFood ? WorkerActivity.WalkingToFood : WorkerActivity.WalkingToNode;
+                    case State.HarvestWood: return TargetIsFood ? WorkerActivity.Eating : WorkerActivity.Harvesting;
+                    case State.TakeWoodToMill: return WorkerActivity.CarryingHome;
+                    default: return WorkerActivity.Waiting;
+                }
             }
         }
 
-        /// <summary>0..1 through the current chop or mine, for a progress read.</summary>
-        public float HarvestProgress =>
-            _state == State.Harvesting && _harvestDuration > 0.01f
-                ? Mathf.Clamp01(_harvestTimer / _harvestDuration)
-                : 0f;
+        bool TargetIsFood => _target != null && _target.Family == NodeFamily.Flower;
 
-        /// <summary>The node being worked, so a tree can shake when it is struck.</summary>
-        public Harvestable CurrentTarget => _target;
-        public bool IsAsleep => _asleep;
-        public Workplace Workplace => _workplace;
+        void Awake() => _follower = GetComponent<Follower>();
 
-        Follower _follower;
-
-        void Awake()
+        /// <summary>The species' speed against a resource: its modifier if it has one, else its normal speed.</summary>
+        public int SpeedFor(NodeResource resource)
         {
-            _renderer = GetComponentInChildren<SpriteRenderer>();
-            _follower = GetComponent<Follower>();
+            foreach (var m in modifiers) if (m.resource == resource) return m.speed;
+            return normalSpeed;
         }
+
+        // ---------------------------------------------------------------- assignment
 
         public void AssignTo(Workplace workplace)
         {
+            ReleaseTarget();
             _workplace = workplace;
             if (_follower != null) _follower.PlaceInWorld();   // leaves the inventory trail
-            _state = State.Idle;
-            _target = null;
-            _carrying = 0;
+            EnterFindWood();
         }
 
         public void Unassign()
         {
+            ReleaseTarget();
             if (_workplace != null) _workplace.Release(this);
             _workplace = null;
+            _asleep = false;
             _state = State.Following;
-            _target = null;
-            _carrying = 0;
-            if (_follower != null) _follower.PickUpIntoInventory();   // back into the trail
+            if (_follower != null) _follower.PickUpIntoInventory();
         }
 
         /// <summary>
-        /// Dropped by the player. If it landed on a station that accepts it, it takes the job;
-        /// otherwise it rejoins the queue behind the king.
+        /// Dropped by the player. If it landed on a station with room it takes the job; otherwise it
+        /// snaps back to the king's feet — a worker is either following you or working.
         /// </summary>
         void OnDropped()
         {
@@ -137,6 +151,8 @@ namespace CapyIsland.Game
             foreach (var w in FindObjectsByType<Workplace>(FindObjectsSortMode.None))
             {
                 if (!w.HasRoom) continue;
+                var placeable = w.GetComponent<Placeable>();
+                if (placeable != null && !placeable.Placed) continue;   // a station still in the trail
                 float d = Vector2.Distance(w.transform.position, transform.position);
                 if (d > DropOnStationRadius || d >= bestDistance) continue;
                 best = w;
@@ -144,9 +160,6 @@ namespace CapyIsland.Game
             }
 
             if (best != null && best.TryAssign(this)) return;
-
-            // Not on a station: the drop is refused. A capy is either following you or working, so
-            // it snaps back to your feet rather than standing wherever it was let go.
             Unassign();
             ReturnToKing();
         }
@@ -154,115 +167,13 @@ namespace CapyIsland.Game
         /// <summary>Picked up by the player: drop whatever job it had.</summary>
         void OnPickedUp()
         {
+            ReleaseTarget();
             if (_workplace != null) _workplace.Release(this);
             _workplace = null;
-            _target = null;
-            _carrying = 0;
+            _asleep = false;
             _state = State.Following;
         }
 
-        /// <summary>Feeding wakes a sleeping worker and resets its hunger.</summary>
-        public void Feed()
-        {
-            _tripsSinceMeal = 0;
-            _food = null;
-            if (!_asleep) return;
-            _asleep = false;
-            _state = State.Idle;
-        }
-
-        void Update()
-        {
-            if (_asleep) { TickAsleep(); return; }
-            // While unassigned the Follower component walks it; the worker just waits.
-            if (_workplace == null) return;
-
-            switch (_state)
-            {
-                case State.Following: return;
-                case State.Idle: TickIdle(); break;
-                case State.ToNode: TickToNode(); break;
-                case State.Harvesting: TickHarvesting(); break;
-                case State.ToWorkplace: TickToWorkplace(); break;
-                case State.ToFood: TickToFood(); break;
-                case State.Eating: TickEating(); break;
-            }
-        }
-
-        void TickIdle()
-        {
-            if (tripsBeforeHungry > 0 && _tripsSinceMeal >= tripsBeforeHungry)
-            {
-                if (TryGoEat()) return;
-                // Nothing to eat in reach: fall asleep beside the mill. This is the beat the
-                // original's Tutorial 2 teaches you to fix by planting a garden.
-                _asleep = true;
-                _wakeTimer = 0f;
-                return;
-            }
-
-            _target = _workplace.FindNode();
-            if (_target == null) return;   // nothing in range; try again next frame
-            _state = State.ToNode;
-        }
-
-        void TickToNode()
-        {
-            if (_target == null || !_target.IsWorkable) { _state = State.Idle; return; }
-
-            // Walk to the tree actually being felled, not the middle of the forest.
-            if (!MoveToward(_target.WorkPoint)) return;
-
-            // Seconds per STRIKE now, not per trip: a whole node still takes about as long,
-            // but the payout and the shrink arrive steadily instead of all at the end.
-            _harvestDuration = SecondsPerStrikeAtSpeedOne / Mathf.Max(0.01f, speed);
-            _harvestTimer = 0f;
-            _state = State.Harvesting;
-        }
-
-        void TickHarvesting()
-        {
-            if (_target == null || !_target.IsWorkable) { _state = State.Idle; return; }
-
-            // Drifted out of the mill's reach (the node shrank, or the mill was replaced).
-            if (_workplace == null) { _state = State.Following; return; }
-
-            _harvestTimer += Time.deltaTime;
-            if (_harvestTimer < _harvestDuration) return;
-            _harvestTimer = 0f;
-
-            // Every strike pays out on the spot. Waiting for a round trip made work invisible for
-            // most of a minute, which read as the capybara doing nothing.
-            int gained = _target.Strike();
-            if (gained > 0)
-            {
-                _workplace.Deposit(gained);
-                _tripsSinceMeal++;
-            }
-
-            bool pauseToEat = tripsBeforeHungry > 0 && _tripsSinceMeal >= tripsBeforeHungry;
-            if (_target == null || !_target.IsWorkable || pauseToEat) { _state = State.Idle; return; }
-
-            // That strike felled the tree: walk over to the next one before carrying on.
-            if (Vector2.Distance(transform.position, _target.WorkPoint) > 0.5f) _state = State.ToNode;
-        }
-
-        /// <summary>Strikes between hunger checks, so a worker still stops to eat.</summary>
-        const int HungerCheckEvery = 6;
-
-        void TickToWorkplace()
-        {
-            if (_workplace == null) { _state = State.Idle; return; }
-            if (!MoveToward(_workplace.transform.position)) return;
-
-            // Credited on arrival, not on chop - matches the observed behaviour.
-            _workplace.Deposit(_carrying);
-            _carrying = 0;
-            _tripsSinceMeal++;
-            _state = State.Idle;
-        }
-
-        /// <summary>Snaps back to just behind the king, where a refused drop belongs.</summary>
         void ReturnToKing()
         {
             var king = FindFirstObjectByType<PlayerAvatar>();
@@ -271,65 +182,198 @@ namespace CapyIsland.Game
             transform.position = new Vector3(behind.x, behind.y, transform.position.z);
         }
 
-        /// <summary>Heads for the nearest open garden if there is one. False when there is none.</summary>
-        bool TryGoEat()
+        void ReleaseTarget()
         {
-            _food = FoodSource.FindNear(transform.position);
-            if (_food == null) return false;
-            _state = State.ToFood;
-            return true;
+            if (_target != null) _target.Reserved = false;
+            _target = null;
         }
 
-        void TickToFood()
+        // ---------------------------------------------------------------- the frame loop
+
+        void Update()
         {
-            if (_food == null || !_food.IsOpen) { _state = State.Idle; return; }
-            if (!MoveToward(_food.EatPoint)) return;
-            _eatTimer = 0f;
-            _state = State.Eating;
+            if (_state == State.Following || _workplace == null) return;
+
+            int frames = _clock.Consume(Time.deltaTime);
+            for (int i = 0; i < frames && _workplace != null; i++)
+            {
+                switch (_state)
+                {
+                    case State.FindWood: TickFindWood(); break;
+                    case State.GetWood: TickGetWood(); break;
+                    case State.HarvestWood: TickHarvestWood(); break;
+                    case State.TakeWoodToMill: TickTakeWoodToMill(); break;
+                }
+            }
         }
 
-        void TickEating()
-        {
-            if (_food == null) { _state = State.Idle; return; }
-            _eatTimer += Time.deltaTime;
-            if (_eatTimer < EatSeconds) return;
+        // ---------------------------------------------------------------- hunger
 
-            _food.Eat();
-            _food = null;
-            _tripsSinceMeal = 0;
-            _state = State.Idle;
+        /// <summary>One active frame of hunger. Crossing below 1000 drops everything to go and eat.</summary>
+        void GetHungry()
+        {
+            _hunger--;
+            if (_hunger >= BunniRules.HungryBelow || _hungry) return;
+            _hungry = true;
+            ReleaseTarget();
+            EnterFindWood();
         }
 
-        /// <summary>A sleeping worker wakes the moment a garden comes within reach.</summary>
-        void TickAsleep()
+        void ResolveHunger(int amount)
         {
-            _wakeTimer -= Time.deltaTime;
-            if (_wakeTimer > 0f) return;
-            _wakeTimer = wakeCheckSeconds;
+            _hunger += amount;   // no cap: a rose banks a worker far past full
+            if (_hunger >= BunniRules.HungryBelow) _hungry = false;
+        }
 
-            if (!TryGoEat()) return;
+        // ---------------------------------------------------------------- FindWood
+
+        void EnterFindWood()
+        {
+            _state = State.FindWood;
+            _searchCounter = 0;
+            _asleep = false;
+            _dreamStarted = false;
+
+            // The nap spot: 70 units from the workplace at a random angle through the front half.
+            float angle = UnityEngine.Random.value * Mathf.PI;
+            _napOffset = BunniSpace.ToUnity(new Vector2(Mathf.Cos(angle), -Mathf.Sin(angle)) * BunniRules.SleepSpotDistance);
+        }
+
+        void TickFindWood()
+        {
+            if (_searchCounter == 0)
+            {
+                var family = _hungry ? NodeFamily.Flower : _workplace.WorkFamily;
+                _target = _workplace.Find(family, transform.position, reserve: true);
+                if (_target != null) { EnterGetWood(); return; }
+            }
+
+            var napSpot = (Vector2)_workplace.transform.position + _napOffset;
+            if (BunniSpace.WorldDistance(transform.position, napSpot) < 3f)
+            {
+                // Asleep beside the mill: no hunger drain, dreaming of what it lacks.
+                _asleep = true;
+                if (!_dreamStarted)
+                {
+                    _dreamStarted = true;
+                    RaiseDreamHint();
+                }
+            }
+            else
+            {
+                _asleep = false;
+                _dreamStarted = false;
+                GetHungry();
+                if (_state != State.FindWood) return;   // hunger restarted the search
+                var pos = (Vector2)transform.position;
+                BunniSpace.Step(ref pos, napSpot, normalSpeed);
+                MoveTo(pos);
+            }
+
+            if (++_searchCounter > BunniRules.SearchIntervalFrames - 1) _searchCounter = 0;
+        }
+
+        void RaiseDreamHint()
+        {
+            string who = "A " + speciesName;
+            if (_hungry)
+                Hint?.Invoke(who + " ate the last flower in the garden. I guess you need to plant bigger flower gardens for your hungry workers.");
+            else if (_workplace.Accepts == ResourceKind.Wood)
+                Hint?.Invoke("Uh oh... I hear a " + speciesName + " chopped down the last tree in a forest. Too many workers leads to overharvesting.");
+            else
+                Hint?.Invoke("I hear a " + speciesName + " mined the last rock in a hill. Soon the mine will collapse.");
+        }
+
+        // ---------------------------------------------------------------- GetWood
+
+        void EnterGetWood()
+        {
+            _state = State.GetWood;
             _asleep = false;
         }
 
-        /// <summary>Steps toward a target. Returns true on arrival.</summary>
-        bool MoveToward(Vector3 destination)
-        {
-            destination.z = transform.position.z;
-            var delta = destination - transform.position;
-            float distance = delta.magnitude;
-            if (distance <= 0.15f) return true;
+        /// <summary>Where a worker stands to work a node: 5 world units behind its centre.</summary>
+        Vector2 WorkSpot(Transform node) => (Vector2)node.position + BunniSpace.ToUnity(new Vector2(0f, 5f));
 
-            transform.position += delta / distance * (moveSpeed * Time.deltaTime);
-            FaceMovement(delta.x);
-            return false;
+        void TickGetWood()
+        {
+            GetHungry();
+            if (_state != State.GetWood) return;
+            if (_target == null || !_target.InWorld) { ReleaseTarget(); EnterFindWood(); return; }
+
+            // The path is walked at the species' speed for this resource, not its normal speed.
+            var pos = (Vector2)transform.position;
+            bool arrived = BunniSpace.Step(ref pos, WorkSpot(_target.transform), SpeedFor(_target.Resource));
+            MoveTo(pos);
+            if (arrived) EnterHarvestWood();
         }
 
-        void FaceMovement(float dx)
+        // ---------------------------------------------------------------- HarvestWood
+
+        void EnterHarvestWood()
         {
-            if (_renderer == null || Mathf.Abs(dx) < 0.001f) return;
-            var scale = _renderer.transform.localScale;
-            scale.x = Mathf.Abs(scale.x) * (dx < 0f ? -1f : 1f);
-            _renderer.transform.localScale = scale;
+            _state = State.HarvestWood;
+            BunniRules.Swing(_target.Family, out _swingFrames, out _hitFrame);
+            _swingFrame = 0;
+        }
+
+        void TickHarvestWood()
+        {
+            GetHungry();
+            if (_state != State.HarvestWood) return;
+            if (_target == null || !_target.InWorld) { ReleaseTarget(); EnterFindWood(); return; }
+
+            _swingFrame++;
+            if (_swingFrame >= _swingFrames) _swingFrame = 0;
+            if (_swingFrame != _hitFrame) return;
+
+            var node = _target;
+            bool food = node.Family == NodeFamily.Flower;
+            int value = node.Value;
+            Struck?.Invoke(node);
+
+            if (!node.Hit(BunniRules.ScalePerHit(SpeedFor(node.Resource)))) return;
+
+            _target = null;
+            if (food)
+            {
+                // Eating restores the flower's price × this species' food rate.
+                ResolveHunger(Mathf.RoundToInt(BunniRules.Price(node.Resource) * foodRate));
+                EnterFindWood();
+                return;
+            }
+
+            _carrying = value;
+            _state = State.TakeWoodToMill;
+        }
+
+        // ---------------------------------------------------------------- TakeWoodToMill
+
+        /// <summary>Carrying home. Walks at normal speed and — as in the original — drains no hunger.</summary>
+        void TickTakeWoodToMill()
+        {
+            var pos = (Vector2)transform.position;
+            bool arrived = BunniSpace.Step(ref pos, WorkSpot(_workplace.transform), normalSpeed);
+            MoveTo(pos);
+            if (!arrived) return;
+
+            _workplace.Deposit(_carrying);
+            _carrying = 0;
+            EnterFindWood();
+        }
+
+        // ---------------------------------------------------------------- movement
+
+        void MoveTo(Vector2 pos)
+        {
+            var dx = pos.x - transform.position.x;
+            transform.position = new Vector3(pos.x, pos.y, transform.position.z);
+
+            var body = transform.Find("Sprite");
+            if (body == null || Mathf.Abs(dx) < 0.0001f) return;
+            var s = body.localScale;
+            s.x = Mathf.Abs(s.x) * (dx < 0f ? -1f : 1f);
+            body.localScale = s;
         }
     }
 }
