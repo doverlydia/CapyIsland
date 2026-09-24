@@ -24,9 +24,6 @@ namespace CapyIsland.Game
         [Tooltip("Tint while another item's footprint is in the way.")]
         [SerializeField] Color blockedTint = new Color(0.55f, 0.10f, 0.08f, 0.38f);
 
-        [Tooltip("The ellipse is squashed vertically to sit flat in the 3/4 view.")]
-        [Range(0.3f, 1f)]
-        [SerializeField] float verticalSquash = 0.55f;
 
         Placeable _tracking;
 
@@ -75,9 +72,14 @@ namespace CapyIsland.Game
             var at = placeable.transform.position;
             transform.position = new Vector3(at.x, at.y, at.z + 0.01f);
 
-            // The sprite is a unit circle at PPU 128, so diameter in world units = 2 * radius.
-            float diameter = placeable.OuterRadius * 2f;
-            transform.localScale = new Vector3(diameter, diameter * verticalSquash, 1f);
+            // The outer radius is a world circle; on screen it is the original's 2:1 ellipse.
+            // The ring sprite is one Unity unit across, so its scale is the ellipse size itself.
+            // Mills and houses have no outer radius; show their footprint instead, so a blocked
+            // spot still turns red.
+            float radius = placeable.OuterRadius > 0f ? placeable.OuterRadius : placeable.InnerRadius;
+            var size = BunniSpace.ToUnity(new Vector2(radius, radius) * 2f);
+            ring.enabled = true;
+            transform.localScale = new Vector3(size.x, size.y, 1f);
 
             bool clear = placeable.CanPlaceAt(at);
             ring.color = clear ? validTint : blockedTint;

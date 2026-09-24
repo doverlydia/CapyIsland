@@ -48,6 +48,9 @@ namespace CapyIsland.Game
         Step _step = Step.Greet;
         float _greetTimer;
 
+        void OnEnable() => Worker.Hint += Say;
+        void OnDisable() => Worker.Hint -= Say;
+
         void Start()
         {
             _greetTimer = greetSeconds;
@@ -119,7 +122,7 @@ namespace CapyIsland.Game
             {
                 var workplace = mill.GetComponent<Workplace>();
                 // Planted, but out of reach of any tree: say so rather than let it look broken.
-                if (workplace != null && workplace.FindNode() == null)
+                if (workplace != null && !workplace.HasWorkInReach())
                 {
                     Say("That Sawmill is too far from the trees. It needs a forest within its circle to work.");
                     var forest = FindPlaceable("Forest");
@@ -168,7 +171,7 @@ namespace CapyIsland.Game
         {
             Worker sleeper = null;
             foreach (var w in FindObjectsByType<Worker>(FindObjectsSortMode.None))
-                if (w.IsAsleep) { sleeper = w; break; }
+                if (w.IsAsleep && w.IsHungry) { sleeper = w; break; }
             if (sleeper == null) return;
 
             // The problem is on screen; now hand out the fix.
@@ -198,17 +201,17 @@ namespace CapyIsland.Game
             Say("Plant the garden near the sleeping capybara so it can reach the flowers.");
             Worker sleeper = null;
             foreach (var w in FindObjectsByType<Worker>(FindObjectsSortMode.None))
-                if (w.IsAsleep) { sleeper = w; break; }
+                if (w.IsAsleep && w.IsHungry) { sleeper = w; break; }
             if (pointer != null && sleeper != null)
                 pointer.PointAt((Vector2)sleeper.transform.position + new Vector2(2.2f, -1.2f));
         }
 
         void TickWaitForWake()
         {
-            bool anyAsleep = false;
+            bool anyStarving = false;
             foreach (var w in FindObjectsByType<Worker>(FindObjectsSortMode.None))
-                if (w.IsAsleep) { anyAsleep = true; break; }
-            if (anyAsleep) return;
+                if (w.IsAsleep && w.IsHungry) { anyStarving = true; break; }
+            if (anyStarving) return;
 
             Say("Fed and back to work. Gardens get eaten out, so plant more as your capybaras multiply.");
             Advance(Step.Done);

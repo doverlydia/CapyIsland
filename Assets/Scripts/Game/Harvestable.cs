@@ -221,6 +221,9 @@ namespace CapyIsland.Game
 
         void Fell()
         {
+            if (HarvestEffects.Instance != null)
+                HarvestEffects.Instance.Felled(transform.position, Family);
+
             if (isParent && _placeable != null)
             {
                 BubbleSpawner.ReturnToBubble(_placeable);

@@ -19,12 +19,12 @@ namespace CapyIsland.Game
         [Tooltip("The little production line shown on the found-item card, e.g. 'Trees + Sawmill + Capy = 3 wood'.")]
         [SerializeField] string recipeLine = "";
 
-        [Header("Radii (original's inner/outer, in world units)")]
+        [Header("Radii (store_items.xml inner/outer, original world units)")]
         [Tooltip("Footprint. Nothing else may overlap this.")]
-        [SerializeField] float innerRadius = 0.8f;
+        [SerializeField] float innerRadius = 22f;
 
-        [Tooltip("Area of effect. Drawn as a translucent ellipse while placing.")]
-        [SerializeField] float outerRadius = 4f;
+        [Tooltip("Area of effect — where a forest or garden spreads. Drawn as an ellipse while placing.")]
+        [SerializeField] float outerRadius = 100f;
 
         [Header("Carried look")]
         [Tooltip("While in the inventory trail an item shows as a small icon, not at full size. " +
@@ -53,17 +53,11 @@ namespace CapyIsland.Game
             transform.localScale = placed ? _placedScale : _placedScale * carriedScale;
         }
 
-        /// <summary>True when this spot is clear of every other placed item's footprint.</summary>
-        public bool CanPlaceAt(Vector2 worldPoint)
-        {
-            foreach (var other in FindObjectsByType<Placeable>(FindObjectsSortMode.None))
-            {
-                if (other == this || !other.placed) continue;
-                float gap = Vector2.Distance(other.transform.position, worldPoint);
-                if (gap < other.innerRadius + innerRadius) return false;
-            }
-            return true;
-        }
+        /// <summary>
+        /// The original's placement test (CircleOnMap): the footprint must be on land and clear of
+        /// every other item's footprint — buildings, planted groves and every tree and flower in them.
+        /// </summary>
+        public bool CanPlaceAt(Vector2 position) => BunniSpace.CircleOnMap(position, innerRadius, this);
 
         /// <summary>
         /// Dropped by the player. Plants it if the spot is clear; otherwise it goes back into the

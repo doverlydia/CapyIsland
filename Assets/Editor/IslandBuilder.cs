@@ -69,6 +69,7 @@ namespace CapyIsland.EditorTools
             systems.AddComponent<Game.ResourceStore>();
 
             BuildPlacementPreview(systems.transform);
+            BuildHarvestEffects(systems.transform);
             var pointer = BuildTutorialPointer(systems.transform);
 
             var ghost = BuildHud(root.transform);
@@ -88,28 +89,47 @@ namespace CapyIsland.EditorTools
 
         // ---------------------------------------------------------------- bubble contents
 
+        // Radii are store_items.xml's inner/outer, in original world units (see BunniSpace).
+
         static GameObject BuildForestItem(Transform parent, Sprite shadow)
         {
             var item = MakeItem(parent, "Medium Pine Forest", Load("Assets/Art/Terrain/Tree_Pine.png"),
                 shadow, 1.85f, 0.62f,
                 "Plant pine trees to grow lovely forests. Place a Sawmill and a Capybara nearby to harvest wood.",
-                "Trees + Sawmill + Capy = 3 wood", inner: 1.6f, outer: 6.5f);
+                "Trees + Sawmill + Capy = 3 wood", inner: 36f, outer: 200f);
 
-            var h = item.AddComponent<Game.Harvestable>();
-            var so = new SerializedObject(h);
-            so.FindProperty("kind").enumValueIndex = (int)Game.ResourceKind.Wood;
-            so.FindProperty("yieldPerTrip").intValue = 3;      // game.xml: price/pine
-            // 5 trees x 6 chops each. Chops-per-tree is not in the original data (there, 3 wood
-            // arrives per round trip) so this is a chosen number: 30 chops x 3 wood = 90 wood per
-            // forest, which buys 9 capybaras at 10 wood each.
-            so.FindProperty("capacity").intValue = 30;
-            so.FindProperty("renewable").boolValue = false;   // felled forests return as a bubble
-            so.FindProperty("regrowSeconds").floatValue = 30f;
-            so.ApplyModifiedPropertiesWithoutUndo();
-
-            // Carried as one small tree icon; planting grows it into a clump of five.
-            item.AddComponent<Game.ScatterOnPlace>();
+            // Planted, this becomes the grove's parent node: it scatters outer/10 child trees and
+            // keeps seeding more (docs/BUNNI_GROUND_TRUTH.md).
+            ConfigureNode(item, Game.NodeResource.Pine, inner: 36f, outer: 200f, artScale: 1.4f, planted: null);
             return item;
+        }
+
+        static GameObject BuildGardenItem(Transform parent, Sprite shadow)
+        {
+            var item = MakeItem(parent, "Medium Posie Garden", Load("Assets/Art/Terrain/Garden_Posie.png"),
+                shadow, 1.6f, 0.8f,
+                "A beautiful larder for wild creatures. Feeds hungry capybaras.",
+                "Posie = 500 food", inner: 22f, outer: 150f);
+
+            // The icon is a flower bed; planted, the parent is a single posie and its children are
+            // separate flowers around it — each one a meal for a hungry worker.
+            ConfigureNode(item, Game.NodeResource.Posie, inner: 22f, outer: 150f, artScale: 0.8f,
+                planted: Load("Assets/Art/Terrain/Flower_Posie.png"));
+            return item;
+        }
+
+        static void ConfigureNode(GameObject item, Game.NodeResource resource, float inner, float outer,
+            float artScale, Sprite planted)
+        {
+            var node = item.AddComponent<Game.Harvestable>();
+            var so = new SerializedObject(node);
+            so.FindProperty("resource").enumValueIndex = (int)resource;
+            so.FindProperty("isParent").boolValue = true;
+            so.FindProperty("innerSize").floatValue = inner;
+            so.FindProperty("outerRadius").floatValue = outer;
+            so.FindProperty("artScale").floatValue = artScale;
+            so.FindProperty("plantedSprite").objectReferenceValue = planted;
+            so.ApplyModifiedPropertiesWithoutUndo();
         }
 
         static GameObject BuildSawmillItem(Transform parent, Sprite shadow)
@@ -117,12 +137,11 @@ namespace CapyIsland.EditorTools
             var item = MakeItem(parent, "Sawmill", Load("Assets/Art/Buildings/Build_Sawmill.png"),
                 shadow, 1.7f, 0.85f,
                 "Place a Sawmill next to a Forest. Add a Capybara to harvest wood.",
-                "Trees + Sawmill + Capy = 3 wood", inner: 1.4f, outer: 9f);
+                "Trees + Sawmill + Capy = 3 wood", inner: 41f, outer: 0f);
 
             var mill = item.AddComponent<Game.Workplace>();
             var so = new SerializedObject(mill);
             so.FindProperty("accepts").enumValueIndex = (int)Game.ResourceKind.Wood;
-            so.FindProperty("workRadius").floatValue = 9f;
             so.ApplyModifiedPropertiesWithoutUndo();
             return item;
         }
@@ -132,7 +151,7 @@ namespace CapyIsland.EditorTools
             var item = MakeItem(parent, "Capy House", Load("Assets/Art/Buildings/Build_CapyHouse.png"),
                 shadow, 1.7f, 0.85f,
                 "Purchase Capybaras from a Capy House to help harvest wood and gold.",
-                "Capy House = buy Capybaras", inner: 1.4f, outer: 4f);
+                "Capy House = buy Capybaras", inner: 41f, outer: 0f);
 
             // The sample capybara on its pedestal beside the shop, which you tap to buy.
             var sample = new GameObject("Sample");
@@ -155,27 +174,6 @@ namespace CapyIsland.EditorTools
             so.FindProperty("goldCost").intValue = 10;
             so.FindProperty("gemCost").intValue = 0;
             so.FindProperty("sample").objectReferenceValue = sample.transform;
-            so.ApplyModifiedPropertiesWithoutUndo();
-            return item;
-        }
-
-        static GameObject BuildGardenItem(Transform parent, Sprite shadow)
-        {
-            var item = MakeItem(parent, "Medium Posie Garden", Load("Assets/Art/Terrain/Garden_Posie.png"),
-                shadow, 1.6f, 0.8f,
-                "A beautiful larder for wild creatures. Hungry capybaras eat here, so keep it planted.",
-                "Garden = fed Capybaras", inner: 1.2f, outer: 10f);
-            item.AddComponent<Game.FoodSource>();
-
-            // Planted, the bed icon grows into six separate flowers, eaten one by one.
-            var scatter = item.AddComponent<Game.ScatterOnPlace>();
-            var so = new SerializedObject(scatter);
-            so.FindProperty("count").intValue = 6;
-            so.FindProperty("spreadX").floatValue = 1.7f;
-            so.FindProperty("spreadY").floatValue = 1.0f;
-            so.FindProperty("clumpSprite").objectReferenceValue = Load("Assets/Art/Terrain/Flower_Posie.png");
-            so.FindProperty("clumpScale").floatValue = 0.55f;
-            so.FindProperty("growSeconds").floatValue = 3f;
             so.ApplyModifiedPropertiesWithoutUndo();
             return item;
         }
@@ -250,6 +248,22 @@ namespace CapyIsland.EditorTools
             var so = new SerializedObject(bubble);
             so.FindProperty("contents").objectReferenceValue = contents;
             so.FindProperty("arrow").objectReferenceValue = arrow.transform;
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        /// <summary>Particle bursts for hits, falls and fruit. Sprites are generated by Tools/fx.</summary>
+        static void BuildHarvestEffects(Transform parent)
+        {
+            var go = new GameObject("HarvestEffects");
+            go.transform.SetParent(parent, false);
+            var fx = go.AddComponent<Game.HarvestEffects>();
+            var so = new SerializedObject(fx);
+            so.FindProperty("leaf").objectReferenceValue = Load("Assets/Art/FX/FX_Leaf.png");
+            so.FindProperty("chip").objectReferenceValue = Load("Assets/Art/FX/FX_Chip.png");
+            so.FindProperty("petal").objectReferenceValue = Load("Assets/Art/FX/FX_Petal.png");
+            so.FindProperty("grit").objectReferenceValue = Load("Assets/Art/FX/FX_Grit.png");
+            so.FindProperty("sparkle").objectReferenceValue = Load("Assets/Art/FX/FX_Sparkle.png");
+            so.FindProperty("juice").objectReferenceValue = Load("Assets/Art/FX/FX_Juice.png");
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
