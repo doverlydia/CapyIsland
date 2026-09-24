@@ -56,7 +56,7 @@ namespace CapyIsland.CameraRig
         float _pressStartTime;
         bool _movedBeyondSlop;
         Game.DraggableActor _heldActor;
-        Game.ShopBuilding _pendingShop;
+        Game.ITappable _pendingTap;
 
         bool _pinching;
         float _pinchStartDistance;
@@ -80,7 +80,7 @@ namespace CapyIsland.CameraRig
                 _pinching = false;
                 _pressing = false;
                 _heldActor = null;
-                _pendingShop = null;
+                _pendingTap = null;
                 SteerTarget = null;
                 return;
             }
@@ -132,23 +132,23 @@ namespace CapyIsland.CameraRig
 
                 var world = ScreenToWorld(screen);
 
-                // A shop's sample sits right beside its building, inside the building's own grab
-                // circle. The sample wins, or pressing it would just pick the shop up and the
-                // purchase dialog could never open.
-                _pendingShop = Game.ShopBuilding.Pick(world);
-                if (_pendingShop != null) { SteerTarget = null; return; }
-
-                _heldActor = Game.DraggableActor.Pick(world);
-                if (_heldActor != null)
+                // Carried items first: the trail rides right behind the king and must stay grabbable.
+                var carried = Game.DraggableActor.Pick(world);
+                if (carried != null)
                 {
+                    _heldActor = carried;
                     _heldActor.BeginDrag();
                     SteerTarget = null;
+                    return;
                 }
-                else
-                {
-                    // Ground press: steer at once, so holding moves you without waiting for a drag.
-                    SteerTarget = world;
-                }
+
+                // Shop displays, fruit trees, quest givers: a tap target claims the press, so
+                // pressing a display never picks up the shop behind it.
+                _pendingTap = Game.TapTargets.Pick(world);
+                if (_pendingTap != null) { SteerTarget = null; return; }
+
+                // Ground press: steer at once, so holding moves you without waiting for a drag.
+                SteerTarget = world;
                 return;
             }
 
@@ -158,7 +158,7 @@ namespace CapyIsland.CameraRig
                 if (!_movedBeyondSlop && Vector2.Distance(screen, _pressStartScreen) > tapSlopPixels)
                     _movedBeyondSlop = true;
 
-                if (_pendingShop != null) return;   // holding a shop sample does nothing
+                if (_pendingTap != null) return;   // holding a tap target does nothing
 
                 var world = ScreenToWorld(screen);
                 if (_heldActor != null) _heldActor.DragTo(world);
@@ -172,11 +172,11 @@ namespace CapyIsland.CameraRig
                 _pressing = false;
                 SteerTarget = null;
 
-                if (_pendingShop != null)
+                if (_pendingTap != null)
                 {
-                    var shop = _pendingShop;
-                    _pendingShop = null;
-                    if (!_movedBeyondSlop) shop.Browse();
+                    var tapped = _pendingTap;
+                    _pendingTap = null;
+                    if (!_movedBeyondSlop) tapped.Tap();
                     return;
                 }
 
@@ -196,9 +196,6 @@ namespace CapyIsland.CameraRig
                 var bubble = Game.Bubble.Pick(world);
                 if (bubble != null) { bubble.Collect(); return; }
 
-                // Then fruit trees: a tap shakes the fruit down.
-                var tree = Game.FruitTree.Pick(world);
-                if (tree != null) { tree.PlayerShake(); return; }
 
                 Tapped?.Invoke(world);
             }

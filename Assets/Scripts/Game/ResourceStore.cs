@@ -63,6 +63,32 @@ namespace CapyIsland.Game
             Changed?.Invoke(ResourceKind.Gem, gems);
         }
 
+        // Best wood / gold delivered by workers in any one minute this session (HUD.updatePerMin):
+        // the input to the dynamically priced items. Not saved, as in the original.
+        int _woodThisMinute, _goldThisMinute;
+        float _minuteStarted;
+        public int BestWoodPerMinute { get; private set; }
+        public int BestGoldPerMinute { get; private set; }
+
+        /// <summary>A worker delivered a load to a mill or mine.</summary>
+        public void RecordDelivery(ResourceKind kind, int amount)
+        {
+            RollMinute();
+            if (kind == ResourceKind.Wood) _woodThisMinute += amount;
+            else if (kind == ResourceKind.Gold) _goldThisMinute += amount;
+        }
+
+        void RollMinute()
+        {
+            if (Time.time - _minuteStarted < 60f) return;
+            BestWoodPerMinute = Mathf.Max(BestWoodPerMinute, _woodThisMinute);
+            BestGoldPerMinute = Mathf.Max(BestGoldPerMinute, _goldThisMinute);
+            _woodThisMinute = _goldThisMinute = 0;
+            _minuteStarted = Time.time;
+        }
+
+        void LateUpdate() => RollMinute();
+
         public int Get(ResourceKind kind) => kind switch
         {
             ResourceKind.Wood => wood,

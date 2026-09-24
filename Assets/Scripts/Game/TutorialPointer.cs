@@ -38,6 +38,7 @@ namespace CapyIsland.Game
         /// <summary>Point at a moving object.</summary>
         public void PointAt(Transform target)
         {
+            _hideAt = -1f;
             _followTarget = target;
             _hasStatic = false;
             Show(target != null);
@@ -52,6 +53,15 @@ namespace CapyIsland.Game
             Show(true);
         }
 
+        float _hideAt = -1f;
+
+        /// <summary>Point at something for a while, then let go (the original's quest focus arrow).</summary>
+        public void PointAt(Transform target, float seconds)
+        {
+            PointAt(target);
+            _hideAt = Time.time + seconds;
+        }
+
         public void Hide() => Show(false);
 
         void Show(bool visible)
@@ -63,6 +73,7 @@ namespace CapyIsland.Game
         void LateUpdate()
         {
             if (hand == null || !hand.enabled) return;
+            if (_hideAt > 0f && Time.time > _hideAt) { _hideAt = -1f; Hide(); return; }
 
             Vector3 anchor;
             if (_followTarget != null) anchor = _followTarget.position;

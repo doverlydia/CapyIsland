@@ -39,6 +39,7 @@ namespace CapyIsland.Game
         Vector2 _velocity;
         float _hopPhase;
 
+        Vector2 _lastShake;
         ResponsiveCameraRig _rig;
         CameraInputController _input;
 
@@ -105,7 +106,7 @@ namespace CapyIsland.Game
             if (_velocity.sqrMagnitude < 0.0001f) { ResetHop(); return; }
 
             Vector2 here = transform.position;
-            Vector2 next = ClampToIsland(here + _velocity * Time.deltaTime);
+            Vector2 next = StepOnLand(here, _velocity * Time.deltaTime);
             transform.position = new Vector3(next.x, next.y, transform.position.z);
 
             Face(_velocity.x);
@@ -142,8 +143,34 @@ namespace CapyIsland.Game
             if (_rig == null) return;
 
             var camPos = _rig.transform.position;
-            var target = new Vector3(transform.position.x, transform.position.y, camPos.z);
-            _rig.MoveTo(Vector3.Lerp(camPos, target, Time.deltaTime * followLerp));
+            Vector2 look = transform.position;
+            if (CameraFocus.TryGet(out var focus)) look = focus;
+            var target = new Vector3(look.x, look.y, camPos.z);
+            var next = Vector3.Lerp(camPos - (Vector3)_lastShake, target, Time.deltaTime * followLerp);
+            _lastShake = CameraShake.Offset;
+            _rig.MoveTo(next + (Vector3)_lastShake);
+        }
+
+        /// <summary>
+        /// One step that never leaves land. Blocked straight ahead, it tries turning a little either
+        /// way, further each time, so the king slides along the coast instead of sticking to it —
+        /// the original's NextStep, which rotates the step in 5 degree increments.
+        /// </summary>
+        static Vector2 StepOnLand(Vector2 here, Vector2 step)
+        {
+            if (step.sqrMagnitude < 1e-8f) return here;
+            if (BunniSpace.PointOnLand(here + step)) return here + step;
+            // Already off land (e.g. spawned on water): let him walk back.
+            if (!BunniSpace.PointOnLand(here)) return here + step;
+
+            for (int turn = 5; turn <= 85; turn += 5)
+            {
+                var left = (Vector2)(Quaternion.Euler(0f, 0f, turn) * step);
+                if (BunniSpace.PointOnLand(here + left)) return here + left * Mathf.Cos(turn * Mathf.Deg2Rad);
+                var right = (Vector2)(Quaternion.Euler(0f, 0f, -turn) * step);
+                if (BunniSpace.PointOnLand(here + right)) return here + right * Mathf.Cos(turn * Mathf.Deg2Rad);
+            }
+            return here;
         }
 
         /// <summary>Keeps the king on land. Mirrors IslandBuilder's ellipse.</summary>

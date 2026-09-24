@@ -23,6 +23,10 @@ namespace CapyIsland.Game
         public Sprite chestClosed;
         public Sprite chestOpen;
 
+        [Header("Characters and love")]
+        public Sprite priest;
+        public Sprite heart;
+
         [Header("Resource icons")]
         public Sprite wood;
         public Sprite gold;

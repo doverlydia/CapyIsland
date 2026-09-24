@@ -74,8 +74,13 @@ namespace CapyIsland.Game
             return chosen;
         }
 
-        bool InBoundary(Vector2 point) =>
-            BunniSpace.WorldDistance(transform.position, point) <= BunniRules.WorkplaceBoundary;
+        /// <summary>Inside the 800-unit boundary, and on land connected to this building.</summary>
+        bool InBoundary(Vector2 point)
+        {
+            if (BunniSpace.WorldDistance(transform.position, point) > BunniRules.WorkplaceBoundary) return false;
+            var land = LandMap.Instance;
+            return land == null || land.Reachable(transform.position, point);
+        }
 
         /// <summary>
         /// The nearest grown, unreserved fruit tree inside the boundary. With
@@ -132,7 +137,9 @@ namespace CapyIsland.Game
         public void Deposit(int amount, bool legendaryBonus = true)
         {
             if (amount <= 0 || ResourceStore.Instance == null) return;
-            ResourceStore.Instance.Add(accepts, legendary && legendaryBonus ? amount * 2 : amount);
+            int paid = legendary && legendaryBonus ? amount * 2 : amount;
+            ResourceStore.Instance.RecordDelivery(accepts, paid);
+            ResourcePing.Fly(accepts, paid, (Vector2)transform.position + Vector2.up * 1.4f);
         }
 
         void OnDrawGizmosSelected()

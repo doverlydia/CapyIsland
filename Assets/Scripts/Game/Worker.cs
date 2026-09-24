@@ -151,6 +151,15 @@ namespace CapyIsland.Game
         /// </summary>
         void OnDropped()
         {
+            var pete = PiratePete.Near(transform.position);
+            if (pete != null)
+            {
+                Unassign();
+                ReturnToKing();
+                pete.OfferFor(gameObject, null);
+                return;
+            }
+
             Workplace best = null;
             float bestDistance = float.MaxValue;
             foreach (var w in FindObjectsByType<Workplace>(FindObjectsSortMode.None))

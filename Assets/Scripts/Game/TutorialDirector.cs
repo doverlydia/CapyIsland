@@ -28,7 +28,9 @@ namespace CapyIsland.Game
             WaitForHunger,
             CollectGarden,
             PlantGarden,
-            WaitForWake,
+            ClickMote,
+            CrossToHeart,
+            OpenTower,
             Done,
         }
 
@@ -46,6 +48,9 @@ namespace CapyIsland.Game
         [SerializeField] float greetSeconds = 3.5f;
 
         Step _step = Step.Greet;
+        float _stepTimer;
+
+        public bool Finished => _step == Step.Done;
         float _greetTimer;
 
         void OnEnable() => Hints.Shown += Say;
@@ -78,7 +83,9 @@ namespace CapyIsland.Game
                 case Step.WaitForHunger: TickWaitForHunger(); break;
                 case Step.CollectGarden: TickCollectGarden(); break;
                 case Step.PlantGarden: TickPlantGarden(); break;
-                case Step.WaitForWake: TickWaitForWake(); break;
+                case Step.ClickMote: TickClickMote(); break;
+                case Step.CrossToHeart: TickCrossToHeart(); break;
+                case Step.OpenTower: TickOpenTower(); break;
             }
         }
 
@@ -141,7 +148,9 @@ namespace CapyIsland.Game
 
         void TickBuy()
         {
-            var shop = FindFirstObjectByType<ShopBuilding>();
+            SaleDisplay shop = null;
+            foreach (var d in FindObjectsByType<SaleDisplay>(FindObjectsSortMode.None))
+                if (d.StoreName == "Capybara") { shop = d; break; }
             if (shop == null) return;
 
             if (FindFirstObjectByType<Worker>() != null) { Advance(Step.AssignCapy); return; }
@@ -196,7 +205,7 @@ namespace CapyIsland.Game
         void TickPlantGarden()
         {
             if (gardenItem == null) { Advance(Step.Done); return; }
-            if (gardenItem.Placed) { Advance(Step.WaitForWake); return; }
+            if (gardenItem.Placed) { AwakenSpirits(); return; }
 
             Say("Plant the garden near the sleeping capybara so it can reach the flowers.");
             Worker sleeper = null;
@@ -206,15 +215,95 @@ namespace CapyIsland.Game
                 pointer.PointAt((Vector2)sleeper.transform.position + new Vector2(2.2f, -1.2f));
         }
 
-        void TickWaitForWake()
+        /// <summary>
+        /// The garden is planted (Tasks.TaskClickMote): the first bit of love appears, and the Tower
+        /// of Love rises on the next island over.
+        /// </summary>
+        void AwakenSpirits()
         {
-            bool anyStarving = false;
-            foreach (var w in FindObjectsByType<Worker>(FindObjectsSortMode.None))
-                if (w.IsAsleep && w.IsHungry) { anyStarving = true; break; }
-            if (anyStarving) return;
+            Motes.Trigger("first_mote");
+            var land = LandMap.Instance;
+            var catalog = ItemCatalog.Instance;
+            if (land != null && catalog != null)
+                catalog.MakeItem("Tower Of Love", land.RandomSpotOnIsland(1, 83f));
+            Say("What? Is that a bit of love? All your building has begun to awaken the island spirits. Uh oh.");
+            _stepTimer = 6f;
+            Advance(Step.ClickMote);
+        }
 
-            Say("Fed and back to work. Gardens get eaten out, so plant more as your capybaras multiply.");
-            Advance(Step.Done);
+        void TickClickMote()
+        {
+            if (Motes.IsClicked("First Love") || FindObjectsByType<MoteHeart>(FindObjectsSortMode.None).Length == 0)
+            {
+                OpenFirstBridge();
+                return;
+            }
+            _stepTimer -= Time.deltaTime;
+            if (_stepTimer > 0f) return;
+            Say("The heart shaped thing following you is a Mote. Tap the Mote to collect it.");
+            var heart = FindFirstObjectByType<MoteHeart>();
+            if (pointer != null && heart != null) pointer.PointAt(heart.transform);
+        }
+
+        /// <summary>The first mote is home (Tasks.TaskFindTower): the way to the next island opens.</summary>
+        void OpenFirstBridge()
+        {
+            var land = LandMap.Instance;
+            var catalog = ItemCatalog.Instance;
+            if (land != null)
+            {
+                land.OpenBridge("first_bridge");
+                if (catalog != null)
+                {
+                    BridgeGhost.Spawn("Ginger Cove", land.RandomSpotOnIsland(1, 30f), catalog.ItemParent);
+                    catalog.MakeStore("Coriander", land.RandomSpotOnIsland(1, 30f));
+                }
+            }
+            Say("How exciting! A new island is open. Let's go exploring. Hold to walk your capybara over to the next island.");
+            _stepTimer = 10f;
+            Advance(Step.CrossToHeart);
+        }
+
+        void TickCrossToHeart()
+        {
+            var king = FindFirstObjectByType<PlayerAvatar>();
+            var land = LandMap.Instance;
+            if (king != null && land != null && land.IslandAt(king.transform.position) == 1)
+            {
+                Say("*Gulp* I've heard of this place. It is the secret heart of the Capy Islands.");
+                _stepTimer = 10f;
+                _towerOpened = false;
+                TowerOfLove.DiaryClosed -= OnDiaryClosed;
+                TowerOfLove.DiaryClosed += OnDiaryClosed;
+                Advance(Step.OpenTower);
+                return;
+            }
+            if (pointer != null && land != null)
+            {
+                var bridge = land.Bridge("first_bridge");
+                if (bridge != null && bridge.circles.Count > 0)
+                    pointer.PointAt(LandMap.WorldToUnity(new Vector2(bridge.circles[2].x, bridge.circles[2].y)));
+            }
+        }
+
+        bool _towerOpened;
+        void OnDiaryClosed() => _towerOpened = true;
+
+        void TickOpenTower()
+        {
+            if (_towerOpened)
+            {
+                TowerOfLove.DiaryClosed -= OnDiaryClosed;
+                Say("If you get stuck, visit the tower! Bring love back to the island!");
+                Advance(Step.Done);
+                return;
+            }
+            _stepTimer -= Time.deltaTime;
+            if (_stepTimer > 0f) return;
+            _stepTimer = 20f;
+            Say("Try to find a strange tower. Can you open it?");
+            var tower = TowerOfLove.Instance;
+            if (pointer != null && tower != null) pointer.PointAt(tower.transform);
         }
 
         // ---------------------------------------------------------------- helpers

@@ -88,8 +88,12 @@ namespace CapyIsland.Game
             return parent ? new Vector2(1.25f, 1.75f) : new Vector2(0.75f, 1.25f);
         }
 
-        /// <summary>A placed parent tries this many children at once: outerRadius / 10.</summary>
-        public static int InitialChildAttempts(float outerRadius) => Mathf.FloorToInt(outerRadius / 10f);
+        /// <summary>
+        /// A placed parent tries this many children at once: outerRadius / 10 for forests and gardens,
+        /// outerRadius / 5 for hills (HillItem.initStateMachine).
+        /// </summary>
+        public static int InitialChildAttempts(float outerRadius, NodeFamily family) =>
+            Mathf.FloorToInt(outerRadius / (family == NodeFamily.Rock ? 5f : 10f));
 
         // ---------------------------------------------------------------- harvesting
 
@@ -250,11 +254,14 @@ namespace CapyIsland.Game
 
         /// <summary>
         /// True when a world circle lies entirely on land — the first half of the original's
-        /// TestCollision.CircleOnMap. Our land is one ellipse rather than the original's union of
-        /// circles, so the circle's on-screen footprint is shrunk off the ellipse edge.
+        /// TestCollision.CircleOnMap. Land is the <see cref="LandMap"/>'s union of circles; the
+        /// ellipse below is only a fallback for scenes without one.
         /// </summary>
         public static bool CircleOnLand(Vector2 centreUnity, float worldRadius)
         {
+            var land = LandMap.Instance;
+            if (land != null) return land.CircleOnLand(centreUnity, worldRadius);
+
             var r = ToUnity(new Vector2(worldRadius, worldRadius));
             float rx = IslandRadiusX - r.x, ry = IslandRadiusY - r.y;
             if (rx <= 0f || ry <= 0f) return false;
@@ -267,6 +274,15 @@ namespace CapyIsland.Game
         /// Animals, the avatar and items still riding in the trail do not block, exactly as in the
         /// original.
         /// </summary>
+        /// <summary>True if a Unity position is on land.</summary>
+        public static bool PointOnLand(Vector2 unity)
+        {
+            var land = LandMap.Instance;
+            if (land != null) return land.IsOnLand(unity);
+            float nx = unity.x / IslandRadiusX, ny = unity.y / IslandRadiusY;
+            return nx * nx + ny * ny <= 1f;
+        }
+
         public static bool CircleOnMap(Vector2 centreUnity, float worldRadius, Object ignore = null)
         {
             if (!CircleOnLand(centreUnity, worldRadius)) return false;

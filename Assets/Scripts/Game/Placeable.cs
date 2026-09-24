@@ -66,6 +66,15 @@ namespace CapyIsland.Game
         /// </summary>
         void OnDropped()
         {
+            // Dropped on Pirate Pete: he makes an offer; until then it goes back in the trail.
+            var pete = PiratePete.Near(transform.position);
+            if (pete != null && pete.gameObject != gameObject)
+            {
+                MarkCarried();
+                pete.OfferFor(gameObject, null);
+                return;
+            }
+
             if (CanPlaceAt(transform.position)) { MarkPlaced(); return; }
 
             // Blocked: back into the trail at the king's feet, not left hovering over the obstacle.
@@ -81,7 +90,13 @@ namespace CapyIsland.Game
         /// <summary>Picked up again: back into the inventory trail.</summary>
         void OnPickedUp() => MarkCarried();
 
-        public void MarkPlaced()
+        public void MarkPlaced() => MarkPlaced(silent: false);
+
+        /// <summary>
+        /// Plants the item. A player placement fires its placement mote; <paramref name="silent"/>
+        /// is for things the game puts down itself (bridge arrivals, quest spawns).
+        /// </summary>
+        public void MarkPlaced(bool silent)
         {
             CaptureScale();
             placed = true;
@@ -92,6 +107,8 @@ namespace CapyIsland.Game
 
             // A forest item is a single tree icon while carried; planting it grows the real thing.
             SendMessage("OnPlacedInWorld", SendMessageOptions.DontRequireReceiver);
+
+            if (!silent) Motes.PlacementMote(displayName);
         }
 
         public void MarkCarried()

@@ -24,7 +24,7 @@ namespace CapyIsland.Game
     /// the splash — is presentation on top of those rules.
     /// </summary>
     [DefaultExecutionOrder(110)]
-    public class FruitTree : MonoBehaviour
+    public class FruitTree : MonoBehaviour, ITappable
     {
         enum Phase { Unplanted, Grow, GrowFruit, Shake, Chopped }
 
@@ -463,6 +463,20 @@ namespace CapyIsland.Game
         }
 
         // ---------------------------------------------------------------- input
+
+        void OnEnable() => TapTargets.Register(this);
+        void OnDisable() => TapTargets.Unregister(this);
+
+        public float TapDistance(Vector2 worldPoint)
+        {
+            if (!InWorld || _bodyRenderer == null) return -1f;
+            var b = _bodyRenderer.bounds;
+            if (!b.Contains(new Vector3(worldPoint.x, worldPoint.y, b.center.z))) return -1f;
+            // Trees are big; let smaller things in front of them win a tap.
+            return Vector2.Distance(b.center, worldPoint) + 1.5f;
+        }
+
+        public void Tap() => PlayerShake();
 
         /// <summary>The planted fruit tree under a world point, if any — for the player's tap.</summary>
         public static FruitTree Pick(Vector2 worldPoint)

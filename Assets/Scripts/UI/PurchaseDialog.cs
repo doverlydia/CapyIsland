@@ -28,39 +28,63 @@ namespace CapyIsland.UI
         [SerializeField] Color affordable = Color.white;
         [SerializeField] Color tooExpensive = new Color(1f, 0.45f, 0.4f);
 
-        ShopBuilding _shop;
+        IPurchasable _item;
 
         void Awake() => Close();
 
         void OnEnable()
         {
-            ShopBuilding.Browsed += Open;
+            SaleDisplay.Browsed += Open;
             if (cancelButton != null) cancelButton.onClick.AddListener(Close);
             if (purchaseButton != null) purchaseButton.onClick.AddListener(Buy);
         }
 
         void OnDisable()
         {
-            ShopBuilding.Browsed -= Open;
+            SaleDisplay.Browsed -= Open;
             if (cancelButton != null) cancelButton.onClick.RemoveListener(Close);
             if (purchaseButton != null) purchaseButton.onClick.RemoveListener(Buy);
         }
 
-        void Open(ShopBuilding shop)
+        void Open(IPurchasable item)
         {
-            if (shop == null) return;
-            _shop = shop;
+            if (item == null) return;
+            _item = item;
 
-            if (titleLabel != null) titleLabel.text = shop.ItemName;
-            if (blurbLabel != null) blurbLabel.text = shop.Blurb;
+            if (titleLabel != null) titleLabel.text = item.Title;
 
             var store = ResourceStore.Instance;
-            SetPrice(woodLabel, shop.WoodCost, store != null ? store.Get(ResourceKind.Wood) : 0);
-            SetPrice(goldLabel, shop.GoldCost, store != null ? store.Get(ResourceKind.Gold) : 0);
-            SetPrice(gemLabel, shop.GemCost, store != null ? store.Get(ResourceKind.Gem) : 0);
+            var price = item.Price;
+            SetPrice(woodLabel, price.x, store != null ? store.Get(ResourceKind.Wood) : 0);
+            SetPrice(goldLabel, price.y, store != null ? store.Get(ResourceKind.Gold) : 0);
+            SetPrice(gemLabel, price.z, store != null ? store.Get(ResourceKind.Gem) : 0);
 
-            if (purchaseButton != null) purchaseButton.interactable = shop.CanAfford;
+            bool soldOut = item.SoldOut;
+            bool affordable = store != null && store.CanAfford(price.x, price.y, price.z);
+            string feedback = soldOut ? "<b>Sold out.</b>" : affordable ? "" : "<color=#b0413e>" + Shortfall(price, store) + "</color>";
+            if (blurbLabel != null)
+                blurbLabel.text = item.Description + (feedback.Length > 0 ? "\n\n" + feedback : "");
+
+            if (purchaseButton != null)
+            {
+                purchaseButton.gameObject.SetActive(!soldOut);
+                purchaseButton.interactable = affordable;
+            }
             if (panel != null) panel.SetActive(true);
+        }
+
+        /// <summary>What you are short of — the original's purchase feedback.</summary>
+        static string Shortfall(Vector3Int price, ResourceStore store)
+        {
+            if (store == null) return "";
+            bool wood = store.Get(ResourceKind.Wood) < price.x;
+            bool gold = store.Get(ResourceKind.Gold) < price.y;
+            bool gems = store.Get(ResourceKind.Gem) < price.z;
+            if (wood && gold && gems) return "You need more wood, gold and gems.";
+            if (gems) return "You need more gems.";
+            if (gold && wood) return "You need more wood and gold.";
+            if (gold) return "You need more gold.";
+            return "You need more wood.";
         }
 
         /// <summary>Shows the cost, reddened when you cannot cover it.</summary>
@@ -73,14 +97,14 @@ namespace CapyIsland.UI
 
         void Buy()
         {
-            if (_shop == null) { Close(); return; }
-            _shop.TryPurchase();   // refuses on its own if the player cannot afford it
+            if (_item == null) { Close(); return; }
+            _item.Buy();   // refuses on its own if the player cannot afford it
             Close();
         }
 
         public void Close()
         {
-            _shop = null;
+            _item = null;
             if (panel != null) panel.SetActive(false);
         }
     }

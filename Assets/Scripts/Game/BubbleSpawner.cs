@@ -55,13 +55,18 @@ namespace CapyIsland.Game
         /// tutorial hands out once the first worker falls asleep. The item must already exist
         /// inactive in the scene, the way the builder stashes everything.
         /// </summary>
-        public static Bubble SpawnAt(Placeable item, Vector2 at, Transform parent)
+        public static Bubble SpawnAt(Placeable item, Vector2 at, Transform parent) =>
+            item == null ? null : SpawnAt(item.gameObject, at, parent);
+
+        /// <summary>A bubble around anything — an item, or an animal from a quest or a bomb.</summary>
+        public static Bubble SpawnAt(GameObject item, Vector2 at, Transform parent)
         {
             if (item == null) return null;
-            item.ResetForRebirth();
-            item.gameObject.SetActive(false);
+            var placeable = item.GetComponent<Placeable>();
+            if (placeable != null) placeable.ResetForRebirth();
+            item.SetActive(false);
 
-            var go = new GameObject("Bubble_" + item.DisplayName.Replace(" ", ""));
+            var go = new GameObject("Bubble_" + item.name.Replace(" ", ""));
             go.transform.SetParent(parent, false);
             go.transform.position = new Vector3(at.x, at.y, 0f);
 
@@ -83,7 +88,7 @@ namespace CapyIsland.Game
             ar.sortingOrder = order + 2;
 
             var bubble = go.AddComponent<Bubble>();
-            bubble.Fill(item.gameObject, arrow.transform);
+            bubble.Fill(item, arrow.transform);
             return bubble;
         }
 

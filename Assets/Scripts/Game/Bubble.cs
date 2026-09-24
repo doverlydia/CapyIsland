@@ -178,6 +178,7 @@ namespace CapyIsland.Game
             }
 
             Collected?.Invoke(item, this);
+            Purchasing.Collected(item);
             gameObject.SetActive(false);
             return item;
         }

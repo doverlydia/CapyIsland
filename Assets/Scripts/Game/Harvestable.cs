@@ -115,8 +115,8 @@ namespace CapyIsland.Game
             if (_body != null && plantedSprite != null) _body.sprite = plantedSprite;
             BeginGrowing();
 
-            // The first burst: outerRadius/10 attempts, each tested with the parent's own radius.
-            int attempts = BunniRules.InitialChildAttempts(outerRadius);
+            // The first burst: outerRadius/10 attempts (/5 for hills), each tested with the parent's own radius.
+            int attempts = BunniRules.InitialChildAttempts(outerRadius, Family);
             for (int i = 0; i < attempts; i++) TrySpawnChild(childInnerSize: innerSize);
         }
 
@@ -278,7 +278,13 @@ namespace CapyIsland.Game
         /// One hit: takes <paramref name="amount"/> off the node's scale. Returns true when that hit
         /// felled it — a child is removed, a parent turns back into a bubble.
         /// </summary>
-        public bool Hit(float amount)
+        public bool Hit(float amount) => Hit(amount, spoil: false);
+
+        /// <summary>
+        /// A hit. With <paramref name="spoil"/> — a deer eating or a wild monster wrecking — a
+        /// felled parent is simply gone instead of becoming a bubble.
+        /// </summary>
+        public bool Hit(float amount, bool spoil)
         {
             if (!CanHarvest) return false;
             _scale -= amount;
@@ -286,16 +292,16 @@ namespace CapyIsland.Game
 
             _scale = 0f;
             Reserved = false;
-            Fell();
+            Fell(spoil);
             return true;
         }
 
-        void Fell()
+        void Fell(bool spoil)
         {
             if (HarvestEffects.Instance != null)
                 HarvestEffects.Instance.Felled(transform.position, Family);
 
-            if (isParent && _placeable != null)
+            if (isParent && _placeable != null && !spoil)
             {
                 BubbleSpawner.ReturnToBubble(_placeable);
                 return;

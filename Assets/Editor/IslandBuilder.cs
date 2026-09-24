@@ -11,7 +11,7 @@ namespace CapyIsland.EditorTools
     ///
     /// Menu: CapyIsland > Build > Island
     /// </summary>
-    public static class IslandBuilder
+    public static partial class IslandBuilder
     {
         const string RootName = "Island";
 
@@ -56,13 +56,13 @@ namespace CapyIsland.EditorTools
             var bubbles = new GameObject("Bubbles");
             bubbles.transform.SetParent(root.transform, false);
 
-            MakeBubble(bubbles.transform, new Vector2(-5.5f, 1.5f), BuildForestItem(stash.transform, shadow));
-            MakeBubble(bubbles.transform, new Vector2(5.5f, 2.5f), BuildSawmillItem(stash.transform, shadow));
-            MakeBubble(bubbles.transform, new Vector2(0.5f, 6f), BuildCapyHouseItem(stash.transform, shadow));
+            MakeBubble(bubbles.transform, new Vector2(-5.5f, 1.5f), BuildCatalogItem("Medium Pine Forest", stash.transform, shadow));
+            MakeBubble(bubbles.transform, new Vector2(5.5f, 2.5f), BuildCatalogItem("Sawmill", stash.transform, shadow));
+            MakeBubble(bubbles.transform, new Vector2(0.5f, 6f), BuildCatalogItem("Capy House", stash.transform, shadow));
 
             // The garden has no bubble yet: the tutorial drops one the moment the first worker
             // falls asleep, so the player sees the problem before the fix.
-            var garden = BuildGardenItem(stash.transform, shadow);
+            var garden = BuildCatalogItem("Medium Posie Garden", stash.transform, shadow);
 
             var systems = new GameObject("Systems");
             systems.transform.SetParent(root.transform, false);
@@ -72,6 +72,8 @@ namespace CapyIsland.EditorTools
             BuildHarvestEffects(systems.transform);
             systems.AddComponent<Game.Wind>();
             BuildGameArt(systems.transform, shadow);
+            systems.AddComponent<Game.GameBootstrap>();
+            systems.AddComponent<Game.QuestSystem>();
             BuildCatalog(root.transform, systems.transform, shadow);
             var pointer = BuildTutorialPointer(systems.transform);
 
@@ -91,35 +93,6 @@ namespace CapyIsland.EditorTools
         }
 
         // ---------------------------------------------------------------- bubble contents
-
-        // Radii are store_items.xml's inner/outer, in original world units (see BunniSpace).
-
-        static GameObject BuildForestItem(Transform parent, Sprite shadow)
-        {
-            var item = MakeItem(parent, "Medium Pine Forest", Load("Assets/Art/Terrain/Tree_Pine.png"),
-                shadow, 1.85f, 0.62f,
-                "Plant pine trees to grow lovely forests. Place a Sawmill and a Capybara nearby to harvest wood.",
-                "Trees + Sawmill + Capy = 3 wood", inner: 36f, outer: 200f);
-
-            // Planted, this becomes the grove's parent node: it scatters outer/10 child trees and
-            // keeps seeding more (docs/BUNNI_GROUND_TRUTH.md).
-            ConfigureNode(item, Game.NodeResource.Pine, inner: 36f, outer: 200f, artScale: 1.4f, planted: null);
-            return item;
-        }
-
-        static GameObject BuildGardenItem(Transform parent, Sprite shadow)
-        {
-            var item = MakeItem(parent, "Medium Posie Garden", Load("Assets/Art/Terrain/Garden_Posie.png"),
-                shadow, 1.6f, 0.8f,
-                "A beautiful larder for wild creatures. Feeds hungry capybaras.",
-                "Posie = 500 food", inner: 22f, outer: 150f);
-
-            // The icon is a flower bed; planted, the parent is a single posie and its children are
-            // separate flowers around it — each one a meal for a hungry worker.
-            ConfigureNode(item, Game.NodeResource.Posie, inner: 22f, outer: 150f, artScale: 0.8f,
-                planted: Load("Assets/Art/Terrain/Flower_Posie.png"));
-            return item;
-        }
 
         static void ConfigureNode(GameObject item, Game.NodeResource resource, float inner, float outer,
             float artScale, Sprite planted)
@@ -173,47 +146,6 @@ namespace CapyIsland.EditorTools
             return item;
         }
 
-        // ---------------------------------------------------------------- runtime catalogue
-
-        /// <summary>
-        /// Inactive copies of every item that can be created at runtime — saplings shaken from fruit
-        /// trees, random bubbles, and shop stock — keyed by store name.
-        /// </summary>
-        static void BuildCatalog(Transform root, Transform systems, Sprite shadow)
-        {
-            var templates = new GameObject("Templates");
-            templates.transform.SetParent(root, false);
-            templates.SetActive(false);   // nothing in here ever runs
-
-            var items = new GameObject("Items");
-            items.transform.SetParent(root, false);
-
-            var list = new System.Collections.Generic.List<GameObject>
-            {
-                BuildForestItem(templates.transform, shadow),
-                BuildGardenItem(templates.transform, shadow),
-                BuildSawmillItem(templates.transform, shadow),
-                BuildFruitTreeItem(templates.transform, shadow, Game.FruitKind.Apple),
-                BuildFruitTreeItem(templates.transform, shadow, Game.FruitKind.Pear),
-                BuildFruitTreeItem(templates.transform, shadow, Game.FruitKind.Plum),
-            };
-
-            var catalog = systems.gameObject.AddComponent<Game.ItemCatalog>();
-            var so = new SerializedObject(catalog);
-            var t = so.FindProperty("templates");
-            t.arraySize = list.Count;
-            for (int i = 0; i < list.Count; i++)
-                t.GetArrayElementAtIndex(i).objectReferenceValue = list[i].GetComponent<Game.Placeable>();
-
-            var pool = so.FindProperty("randomPool");
-            string[] names = { "Medium Pine Forest", "Medium Posie Garden", "Apple Tree", "Pear Tree" };
-            pool.arraySize = names.Length;
-            for (int i = 0; i < names.Length; i++) pool.GetArrayElementAtIndex(i).stringValue = names[i];
-
-            so.FindProperty("itemParent").objectReferenceValue = items.transform;
-            so.ApplyModifiedPropertiesWithoutUndo();
-        }
-
         /// <summary>Sprites that runtime spawns need: fruit, chests, resource icons, a shadow.</summary>
         static void BuildGameArt(Transform systems, Sprite shadow)
         {
@@ -231,76 +163,12 @@ namespace CapyIsland.EditorTools
             art.plum = Load("Assets/Art/Props/Fruit_Plum.png");
             art.chestClosed = Load("Assets/Art/Props/Chest_Closed.png");
             art.chestOpen = Load("Assets/Art/Props/Chest_Open.png");
+            art.priest = Load("Assets/Art/Capybaras/Capy_Priest.png");
+            art.heart = Load("Assets/Art/Props/Prop_Mote.png");
             art.wood = Load("Assets/Art/UI/Icon_Wood.png");
             art.gold = Load("Assets/Art/UI/Icon_Gold.png");
             art.gem = Load("Assets/Art/UI/Icon_Gem.png");
             EditorUtility.SetDirty(art);
-        }
-
-        static GameObject BuildSawmillItem(Transform parent, Sprite shadow)
-        {
-            var item = MakeItem(parent, "Sawmill", Load("Assets/Art/Buildings/Build_Sawmill.png"),
-                shadow, 1.7f, 0.85f,
-                "Place a Sawmill next to a Forest. Add a Capybara to harvest wood.",
-                "Trees + Sawmill + Capy = 3 wood", inner: 41f, outer: 0f);
-
-            var mill = item.AddComponent<Game.Workplace>();
-            var so = new SerializedObject(mill);
-            so.FindProperty("accepts").enumValueIndex = (int)Game.ResourceKind.Wood;
-            so.ApplyModifiedPropertiesWithoutUndo();
-            return item;
-        }
-
-        static GameObject BuildCapyHouseItem(Transform parent, Sprite shadow)
-        {
-            var item = MakeItem(parent, "Capy House", Load("Assets/Art/Buildings/Build_CapyHouse.png"),
-                shadow, 1.7f, 0.85f,
-                "Purchase Capybaras from a Capy House to help harvest wood and gold.",
-                "Capy House = buy Capybaras", inner: 41f, outer: 0f);
-
-            // The sample capybara on its pedestal beside the shop, which you tap to buy.
-            var sample = new GameObject("Sample");
-            sample.transform.SetParent(item.transform, false);
-            sample.transform.localPosition = new Vector3(1.25f, 0f, 0f);
-            sample.transform.localScale = Vector3.one * 0.62f;
-            var sr = sample.AddComponent<SpriteRenderer>();
-            sr.sprite = Load("Assets/Art/Capybaras/Capy_Idle.png");
-            sr.sortingOrder = PropSortBase + 1;
-
-            var template = BuildWorkerTemplate(parent, shadow);
-
-            var shop = item.AddComponent<Game.ShopBuilding>();
-            var so = new SerializedObject(shop);
-            so.FindProperty("itemName").stringValue = "Capybara";
-            so.FindProperty("blurb").stringValue =
-                "A calm creature with a broad nose and endless patience. Capybaras earn you wood and gold.";
-            so.FindProperty("itemPrefab").objectReferenceValue = template;
-            so.FindProperty("woodCost").intValue = 10;   // the original's Bunni price
-            so.FindProperty("goldCost").intValue = 10;
-            so.FindProperty("gemCost").intValue = 0;
-            so.FindProperty("sample").objectReferenceValue = sample.transform;
-            so.ApplyModifiedPropertiesWithoutUndo();
-            return item;
-        }
-
-        /// <summary>An inactive worker the shop clones on purchase.</summary>
-        static GameObject BuildWorkerTemplate(Transform parent, Sprite shadow)
-        {
-            var go = Prop(parent, "CapybaraTemplate", Load("Assets/Art/Capybaras/Capy_Idle.png"),
-                shadow, Vector2.zero, 1.2f, 0.5f);
-            go.AddComponent<Game.Worker>();
-            var visuals = go.AddComponent<Game.WorkerVisuals>();
-            var vso = new SerializedObject(visuals);
-            vso.FindProperty("axe").objectReferenceValue = Load("Assets/Art/Common/Tool_Axe.png");
-            vso.FindProperty("pickaxe").objectReferenceValue = Load("Assets/Art/Common/Tool_Pickaxe.png");
-            vso.FindProperty("log").objectReferenceValue = Load("Assets/Art/Common/Prop_Log.png");
-            vso.FindProperty("sleeping").objectReferenceValue = Load("Assets/Art/Capybaras/Capy_Sleep.png");
-            vso.ApplyModifiedPropertiesWithoutUndo();
-            go.AddComponent<Game.Follower>();
-            go.AddComponent<Game.YSorter>();
-            go.AddComponent<Game.DraggableActor>();
-            go.SetActive(false);
-            return go;
         }
 
         /// <summary>A carried item: sprite, shadow, follower, draggable, placeable identity.</summary>
@@ -396,26 +264,47 @@ namespace CapyIsland.EditorTools
 
         // ---------------------------------------------------------------- ground and shared bits
 
+        /// <summary>Set before Build to regenerate the island textures instead of reusing them.</summary>
+        public static bool RepaintLand;
+
+        [MenuItem("CapyIsland/Build/Island (repaint land)")]
+        public static void BuildRepainting()
+        {
+            RepaintLand = true;
+            try { Build(); } finally { RepaintLand = false; }
+        }
+
+        /// <summary>
+        /// The sea and the archipelago: seven islands and six bridges, laid out on the original's
+        /// 4500-unit world with the start island at the origin. Bridges start closed and hidden.
+        /// </summary>
         static void BuildGround(Transform parent)
         {
             var ground = new GameObject("Ground");
             ground.transform.SetParent(parent, false);
 
-            // Larger than any orientation can show, so rotating never reveals an edge.
-            Quad(ground.transform, "Water", Vector3.zero, new Vector2(120f, 120f),
-                new Color(0.56f, 0.80f, 0.88f), -200);
+            var worldCentre = Game.LandMap.WorldToUnity(new Vector2(Game.LandMap.WorldSize * 0.5f, Game.LandMap.WorldSize * 0.5f));
+            Quad(ground.transform, "Water", worldCentre, new Vector2(300f, 200f), new Color(0.56f, 0.80f, 0.88f), -200);
 
-            var islandSprite = Load("Assets/Art/Terrain/Island_Main.png");
-            var island = new GameObject("Landmass");
-            island.transform.SetParent(ground.transform, false);
-            var sr = island.AddComponent<SpriteRenderer>();
-            sr.sprite = islandSprite;
-            sr.sortingOrder = -100;
-            if (islandSprite != null)
+            var pieces = IslandPainter.Layout();
+            for (int i = 0; i < pieces.Count; i++)
             {
-                float spriteWidth = islandSprite.bounds.size.x;
-                if (spriteWidth > 0.01f)
-                    island.transform.localScale = Vector3.one * (IslandExtent * 2f / spriteWidth);
+                pieces[i].layers = IslandPainter.Paint(pieces[i], i, ground.transform, RepaintLand);
+                if (pieces[i].isBridge)
+                    foreach (var layer in pieces[i].layers) layer.enabled = false;
+            }
+
+            var land = ground.AddComponent<Game.LandMap>();
+            land.SetPieces(pieces);
+            EditorUtility.SetDirty(land);
+            ScatterDressing(ground.transform, land);
+
+            // The camera may roam the whole world, with a little sea beyond it.
+            var rig = Object.FindFirstObjectByType<CameraRig.ResponsiveCameraRig>();
+            if (rig != null)
+            {
+                rig.WorldBounds = new Bounds(new Vector3(worldCentre.x, worldCentre.y, 0f), new Vector3(200f, 104f, 0f));
+                EditorUtility.SetDirty(rig);
             }
         }
 
@@ -490,6 +379,8 @@ namespace CapyIsland.EditorTools
 
             BuildResourceBar(safe.transform);
             BuildPurchaseDialog(safe.transform);
+            BuildSpeechDialog(safe.transform);
+            BuildCardPopup(safe.transform);
             return BuildGhostDialogue(safe.transform);
         }
 

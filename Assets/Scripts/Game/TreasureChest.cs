@@ -62,6 +62,15 @@ namespace CapyIsland.Game
             return chest;
         }
 
+        /// <summary>A chest with set contents (TreasureChest.SetValue): quest rewards, bank trades, Pete's payouts.</summary>
+        public static TreasureChest SpawnValue(Vector2 at, ResourceKind type, int value, Transform parent)
+        {
+            var chest = Spawn(at, 1, parent);
+            chest._type = type;
+            chest._value = value;
+            return chest;
+        }
+
         void Awake()
         {
             var body = transform.Find("Sprite");
