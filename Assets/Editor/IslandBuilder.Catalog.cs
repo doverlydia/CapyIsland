@@ -248,6 +248,7 @@ namespace CapyIsland.EditorTools
         {
             var go = Prop(parent, def.Name, sprite, shadow, Vector2.zero, look.scale, look.shadow);
             go.AddComponent<YSorter>();
+            go.AddComponent<WalkBob>();
 
             if (def.Name == "Deer")
             {

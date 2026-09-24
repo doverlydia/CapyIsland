@@ -60,7 +60,12 @@ namespace CapyIsland.Game
             if (Instance == this) Instance = null;
         }
 
-        public void SetPieces(List<Piece> list) => pieces = list;
+        public void SetPieces(List<Piece> list)
+        {
+            pieces = list;
+            _grid = null;
+            _component = null;
+        }
 
         // ---------------------------------------------------------------- coordinates
 
@@ -80,16 +85,57 @@ namespace CapyIsland.Game
         public bool IsOnLand(Vector2 unity)
         {
             var w = UnityToWorld(unity);
-            foreach (var p in pieces)
+            var cell = Cell(w);
+            if (cell == null) return false;
+            foreach (var e in cell)
             {
-                if (p.isBridge && !p.open) continue;
-                foreach (var c in p.circles)
-                {
-                    float dx = w.x - c.x, dy = w.y - c.y;
-                    if (dx * dx + dy * dy <= c.z * c.z) return true;
-                }
+                var piece = pieces[e.piece];
+                if (piece.isBridge && !piece.open) continue;
+                float dx = w.x - e.circle.x, dy = w.y - e.circle.y;
+                if (dx * dx + dy * dy <= e.circle.z * e.circle.z) return true;
             }
             return false;
+        }
+
+        // ---- a coarse grid over the world, so a land test only looks at nearby circles
+
+        struct Entry { public int piece; public int island; public Vector3 circle; }
+
+        const float CellSize = 300f;
+        const int Cells = (int)(WorldSize / CellSize) + 2;
+        List<Entry>[] _grid;
+
+        List<Entry> Cell(Vector2 world)
+        {
+            if (_grid == null) BuildGrid();
+            int cx = Mathf.FloorToInt(world.x / CellSize), cy = Mathf.FloorToInt(world.y / CellSize);
+            if (cx < 0 || cy < 0 || cx >= Cells || cy >= Cells) return null;
+            return _grid[cy * Cells + cx];
+        }
+
+        void BuildGrid()
+        {
+            _grid = new List<Entry>[Cells * Cells];
+            int island = 0;
+            for (int i = 0; i < pieces.Count; i++)
+            {
+                var piece = pieces[i];
+                foreach (var c in piece.circles)
+                {
+                    int x0 = Mathf.Max(0, Mathf.FloorToInt((c.x - c.z) / CellSize));
+                    int x1 = Mathf.Min(Cells - 1, Mathf.FloorToInt((c.x + c.z) / CellSize));
+                    int y0 = Mathf.Max(0, Mathf.FloorToInt((c.y - c.z) / CellSize));
+                    int y1 = Mathf.Min(Cells - 1, Mathf.FloorToInt((c.y + c.z) / CellSize));
+                    for (int y = y0; y <= y1; y++)
+                    for (int x = x0; x <= x1; x++)
+                    {
+                        int k = y * Cells + x;
+                        if (_grid[k] == null) _grid[k] = new List<Entry>();
+                        _grid[k].Add(new Entry { piece = i, island = piece.isBridge ? -1 : island, circle = c });
+                    }
+                }
+                if (!piece.isBridge) island++;
+            }
         }
 
         /// <summary>
@@ -112,16 +158,13 @@ namespace CapyIsland.Game
         public int IslandAt(Vector2 unity)
         {
             var w = UnityToWorld(unity);
-            int island = 0;
-            foreach (var p in pieces)
+            var cell = Cell(w);
+            if (cell == null) return -1;
+            foreach (var e in cell)
             {
-                if (p.isBridge) continue;
-                foreach (var c in p.circles)
-                {
-                    float dx = w.x - c.x, dy = w.y - c.y;
-                    if (dx * dx + dy * dy <= c.z * c.z) return island;
-                }
-                island++;
+                if (e.island < 0) continue;
+                float dx = w.x - e.circle.x, dy = w.y - e.circle.y;
+                if (dx * dx + dy * dy <= e.circle.z * e.circle.z) return e.island;
             }
             return -1;
         }
@@ -201,6 +244,20 @@ namespace CapyIsland.Game
             }
 
             BridgeOpened?.Invoke(name);
+        }
+
+        /// <summary>
+        /// True if the straight walk between two Unity positions stays on land — how the original
+        /// decides a target is reachable (its paths are land-checked step by step, and a target
+        /// whose way is blocked by water is marked inaccessible).
+        /// </summary>
+        public bool SegmentOnLand(Vector2 a, Vector2 b)
+        {
+            float worldLength = BunniSpace.WorldDistance(a, b);
+            int steps = Mathf.Max(1, Mathf.CeilToInt(worldLength / 30f));
+            for (int i = 1; i < steps; i++)
+                if (!IsOnLand(Vector2.Lerp(a, b, (float)i / steps))) return false;
+            return true;
         }
 
         int[] _component;

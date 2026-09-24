@@ -33,6 +33,15 @@ namespace CapyIsland.UI
 
         public bool IsSpeaking => panel != null && panel.activeSelf;
 
+        /// <summary>
+        /// During the tutorial a line stays up until the next one. Afterwards, like the original's
+        /// hint text, a line fades after ten seconds.
+        /// </summary>
+        public bool HoldLastLine { get; set; } = true;
+
+        const float LingerSeconds = 10f;
+        float _linger;
+
         void Awake()
         {
             if (panel != null) panel.SetActive(false);
@@ -69,23 +78,24 @@ namespace CapyIsland.UI
             _current = _queue.Dequeue();
             _revealed = 0f;
             _holdTimer = holdSeconds;
+            _linger = LingerSeconds;
             if (panel != null) panel.SetActive(true);
-            if (label != null) label.text = "";
+            if (label != null)
+            {
+                // The whole line is set once and revealed by count, so rich-text tags never show.
+                label.text = _current;
+                label.maxVisibleCharacters = typeSpeed <= 0f ? int.MaxValue : 0;
+            }
         }
 
         void Update()
         {
             if (!IsSpeaking || label == null) return;
 
-            if (typeSpeed <= 0f)
-            {
-                label.text = _current;
-            }
-            else if (_revealed < _current.Length)
+            if (typeSpeed > 0f && _revealed < _current.Length)
             {
                 _revealed += Time.deltaTime * typeSpeed;
-                int count = Mathf.Clamp(Mathf.FloorToInt(_revealed), 0, _current.Length);
-                label.text = _current.Substring(0, count);
+                label.maxVisibleCharacters = Mathf.Clamp(Mathf.FloorToInt(_revealed), 0, int.MaxValue);
             }
 
             bool finished = typeSpeed <= 0f || _revealed >= _current.Length;
@@ -93,7 +103,13 @@ namespace CapyIsland.UI
 
             // Only auto-advance when something else is waiting; a lone line stays up as the
             // current instruction until the tutorial replaces it.
-            if (_queue.Count == 0) return;
+            if (_queue.Count == 0)
+            {
+                if (HoldLastLine) return;
+                _linger -= Time.deltaTime;
+                if (_linger <= 0f) Advance();
+                return;
+            }
 
             _holdTimer -= Time.deltaTime;
             if (_holdTimer <= 0f) Advance();

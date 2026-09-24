@@ -72,6 +72,8 @@ namespace CapyIsland.Game
 
         void Update()
         {
+            if (dialogue != null) dialogue.HoldLastLine = _step != Step.Done;
+
             switch (_step)
             {
                 case Step.Greet: TickGreet(); break;

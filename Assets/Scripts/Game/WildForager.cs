@@ -184,7 +184,7 @@ namespace CapyIsland.Game
             foreach (var node in FindObjectsByType<Harvestable>(FindObjectsSortMode.None))
             {
                 if (!node.InWorld || !node.CanHarvest || node.Reserved || !wanted(node)) continue;
-                if (land != null && !land.Reachable(from, node.transform.position)) continue;
+                if (land != null && !land.SegmentOnLand(from, node.transform.position)) continue;
                 float d = BunniSpace.WorldDistance(from, node.transform.position);
                 if (node.IsParent) { if (d < dp) { dp = d; bestParent = node; } }
                 else if (d < dc) { dc = d; bestChild = node; }
@@ -203,7 +203,7 @@ namespace CapyIsland.Game
             foreach (var tree in FindObjectsByType<FruitTree>(FindObjectsSortMode.None))
             {
                 if (!tree.InWorld || tree.Reserved || tree.FruitCount == 0 || !tree.CanShake) continue;
-                if (land != null && !land.Reachable(from, tree.transform.position)) continue;
+                if (land != null && !land.SegmentOnLand(from, tree.transform.position)) continue;
                 float d = BunniSpace.WorldDistance(from, tree.transform.position);
                 if (d < distance) { distance = d; best = tree; }
             }

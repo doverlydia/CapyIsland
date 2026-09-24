@@ -79,7 +79,7 @@ namespace CapyIsland.Game
         {
             if (BunniSpace.WorldDistance(transform.position, point) > BunniRules.WorkplaceBoundary) return false;
             var land = LandMap.Instance;
-            return land == null || land.Reachable(transform.position, point);
+            return land == null || land.SegmentOnLand(transform.position, point);
         }
 
         /// <summary>
