@@ -39,6 +39,10 @@ which in turn cite the decompiled source and the shipped XML.
   tame). **Bombs** bubble everything nearby; **Deer Bombs** only clear deer and wild monsters.
 - **Pirate Pete** buys spare items and workers; the **Priest** marries you once Coriander says yes.
 - **Mines and hills** (gray, black, gold) for gold; Legendary mills and mines pay double.
+- **Sound**: small synthesised effects (chops, clinks, nibbles, rustles, fruit plops, chest
+  chimes, coin ticks, pops, hearts, bridges, bombs) made by `Tools/fx/sfx.mjs`, quieter the
+  further they are from the view. No recorded or original audio is used.
+- **Saving**: automatic every 30 s and on pause once the tutorial is done.
 
 ## Different from the original, on purpose
 
