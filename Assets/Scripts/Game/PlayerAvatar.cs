@@ -24,11 +24,6 @@ namespace CapyIsland.Game
         [Tooltip("Hops per second at full speed.")]
         [SerializeField] float hopRate = 3.4f;
 
-        [Header("Island bounds")]
-        [Tooltip("Must match IslandBuilder: the ellipse the landmass occupies.")]
-        [SerializeField] float islandRadiusX = 14.4f;
-        [SerializeField] float islandRadiusY = 10.4f;
-
         [Header("Camera")]
         [SerializeField] bool cameraFollows = true;
         [Tooltip("Higher is snappier. The camera trails rather than locks, so motion reads.")]
@@ -171,31 +166,6 @@ namespace CapyIsland.Game
                 if (BunniSpace.PointOnLand(here + right)) return here + right * Mathf.Cos(turn * Mathf.Deg2Rad);
             }
             return here;
-        }
-
-        /// <summary>Keeps the king on land. Mirrors IslandBuilder's ellipse.</summary>
-        Vector2 ClampToIsland(Vector2 p)
-        {
-            if (islandRadiusX <= 0f || islandRadiusY <= 0f) return p;
-            float nx = p.x / islandRadiusX, ny = p.y / islandRadiusY;
-            float d = nx * nx + ny * ny;
-            if (d <= 1f) return p;
-            float scale = 1f / Mathf.Sqrt(d);
-            return new Vector2(p.x * scale, p.y * scale);
-        }
-
-        void OnDrawGizmosSelected()
-        {
-            Gizmos.color = new Color(0.3f, 0.9f, 0.4f, 0.6f);
-            const int steps = 48;
-            Vector3 prev = Vector3.zero;
-            for (int i = 0; i <= steps; i++)
-            {
-                float a = i / (float)steps * Mathf.PI * 2f;
-                var pt = new Vector3(Mathf.Cos(a) * islandRadiusX, Mathf.Sin(a) * islandRadiusY, 0f);
-                if (i > 0) Gizmos.DrawLine(prev, pt);
-                prev = pt;
-            }
         }
     }
 }

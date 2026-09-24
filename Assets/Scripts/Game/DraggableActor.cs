@@ -22,11 +22,6 @@ namespace CapyIsland.Game
         [Tooltip("Lift the sprite while held, so it reads as picked up.")]
         [SerializeField] float carryLift = 0.35f;
 
-        [Tooltip("Keep this inside the island ellipse when dropped.")]
-        [SerializeField] bool clampToIsland = true;
-        [SerializeField] float islandRadiusX = 14.4f;
-        [SerializeField] float islandRadiusY = 10.4f;
-
         Transform _body;
         Vector3 _bodyRest;
         bool _held;
@@ -95,22 +90,10 @@ namespace CapyIsland.Game
             _held = false;
             if (_body != null) _body.localPosition = _bodyRest;
 
-            if (clampToIsland)
-            {
-                Vector2 p = transform.position;
-                transform.position = new Vector3(Clamp(p).x, Clamp(p).y, transform.position.z);
-            }
+            // No clamping here: whether a drop is allowed is the dropped thing's call (an item
+            // checks it is on land and clear; a worker looks for a station), and the islands are
+            // not one shape to clamp to.
             SendMessage("OnDropped", SendMessageOptions.DontRequireReceiver);
-        }
-
-        Vector2 Clamp(Vector2 p)
-        {
-            if (islandRadiusX <= 0f || islandRadiusY <= 0f) return p;
-            float nx = p.x / islandRadiusX, ny = p.y / islandRadiusY;
-            float d = nx * nx + ny * ny;
-            if (d <= 1f) return p;
-            float s = 1f / Mathf.Sqrt(d);
-            return new Vector2(p.x * s, p.y * s);
         }
 
         void OnDrawGizmosSelected()
