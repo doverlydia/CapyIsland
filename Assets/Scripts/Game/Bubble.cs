@@ -4,17 +4,17 @@ using UnityEngine;
 namespace CapyIsland.Game
 {
     /// <summary>
-    /// A glowing bubble on the ground holding an item. Tap it and the item joins your inventory
-    /// trail. These are how the island is seeded: you start with nothing, and every early item —
-    /// forest, sawmill, capy house — arrives in one.
+    /// A glowing bubble on the ground holding an item, drawn inside the glass so you can see what
+    /// you are about to get. Tap it and the item joins your inventory trail. These are how the
+    /// island is seeded — you start with nothing — and how a felled forest or eaten garden comes
+    /// back to be replanted.
     ///
-    /// In the original these are survivors Grandpa Angel sealed away before the disaster, which is
-    /// why they are scattered around rather than bought.
+    /// In the original these are survivors Grandpa Angel sealed away before the disaster.
     /// </summary>
     public class Bubble : MonoBehaviour
     {
         [Header("Contents")]
-        [Tooltip("Prefab-like source object, inactive in the scene, handed over when collected.")]
+        [Tooltip("Item held inside, inactive in the scene until collected.")]
         [SerializeField] GameObject contents;
 
         [Header("Look")]
@@ -25,8 +25,11 @@ namespace CapyIsland.Game
         [SerializeField] float arrowBobHeight = 0.3f;
         [SerializeField] float arrowBobRate = 2.2f;
 
+        [Tooltip("Largest size of the item picture inside the glass, in world units.")]
+        [SerializeField] float iconSize = 1.6f;
+
         [Header("Interaction")]
-        [SerializeField] float tapRadius = 1.2f;
+        [SerializeField] float tapRadius = 1.7f;
 
         /// <summary>Raised when collected, with the item that came out.</summary>
         public static event Action<GameObject, Bubble> Collected;
@@ -35,6 +38,7 @@ namespace CapyIsland.Game
         Vector3 _bodyRest;
         Vector3 _arrowRest;
         bool _taken;
+        SpriteRenderer _icon;
 
         public bool Taken => _taken;
         public float TapRadius => tapRadius;
@@ -46,6 +50,44 @@ namespace CapyIsland.Game
             _body = sprite != null ? sprite : transform;
             _bodyRest = _body.localPosition;
             if (arrow != null) _arrowRest = arrow.localPosition;
+            RefreshIcon();
+        }
+
+        /// <summary>
+        /// Shows the item inside the glass. Sits just behind the bubble sprite, so the glass rim and
+        /// highlight draw over it, and rides the body so it bobs with the bubble.
+        /// </summary>
+        void RefreshIcon()
+        {
+            if (_body == null || contents == null) return;
+
+            var source = contents.transform.Find("Sprite");
+            var sourceRenderer = source != null ? source.GetComponent<SpriteRenderer>() : null;
+            if (sourceRenderer == null || sourceRenderer.sprite == null) return;
+
+            if (_icon == null)
+            {
+                var existing = _body.Find("Icon");
+                var go = existing != null ? existing.gameObject : new GameObject("Icon");
+                go.transform.SetParent(_body, false);
+                _icon = go.GetComponent<SpriteRenderer>();
+                if (_icon == null) _icon = go.AddComponent<SpriteRenderer>();
+            }
+
+            _icon.sprite = sourceRenderer.sprite;
+
+            // Over the glass: under it, the bubble's tinted fill washed the item out to a ghost.
+            var glass = _body.GetComponent<SpriteRenderer>();
+            if (glass != null) _icon.sortingOrder = glass.sortingOrder + 1;
+
+            // Fit the picture inside the glass whatever its native size, centred on the bubble
+            // (sprites pivot at their feet, so pull it down by half its height).
+            var size = sourceRenderer.sprite.bounds.size;
+            float largest = Mathf.Max(0.01f, Mathf.Max(size.x, size.y));
+            float bodyScale = Mathf.Max(0.01f, Mathf.Abs(_body.lossyScale.x));
+            float s = iconSize / largest / bodyScale;
+            _icon.transform.localScale = Vector3.one * s;
+            _icon.transform.localPosition = new Vector3(0f, -sourceRenderer.sprite.bounds.center.y * s, 0f);
         }
 
         void Update()
@@ -67,7 +109,7 @@ namespace CapyIsland.Game
             contents = item;
             arrow = arrowTransform;
             _taken = false;
-            Awake();   // re-cache the body and arrow rest positions
+            Awake();   // re-cache the body, arrow rest positions and the icon
         }
 
         /// <summary>Nearest uncollected bubble under a world point, or null.</summary>

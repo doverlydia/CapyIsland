@@ -33,14 +33,14 @@ namespace CapyIsland.Game
 
             var body = new GameObject("Sprite");
             body.transform.SetParent(go.transform, false);
-            body.transform.localScale = Vector3.one * 1.15f;
+            body.transform.localScale = Vector3.one * 1.6f;
             var sr = body.AddComponent<SpriteRenderer>();
             sr.sprite = BubbleSprite;
             sr.sortingOrder = order;
 
             var arrow = new GameObject("Arrow");
             arrow.transform.SetParent(go.transform, false);
-            arrow.transform.localPosition = new Vector3(0f, 1.5f, 0f);
+            arrow.transform.localPosition = new Vector3(0f, 2.0f, 0f);
             arrow.transform.localScale = Vector3.one * 0.7f;
             var ar = arrow.AddComponent<SpriteRenderer>();
             ar.sprite = ArrowSprite;
@@ -69,14 +69,14 @@ namespace CapyIsland.Game
 
             var body = new GameObject("Sprite");
             body.transform.SetParent(go.transform, false);
-            body.transform.localScale = Vector3.one * 1.15f;
+            body.transform.localScale = Vector3.one * 1.6f;
             var sr = body.AddComponent<SpriteRenderer>();
             sr.sprite = BubbleSprite;
             sr.sortingOrder = order;
 
             var arrow = new GameObject("Arrow");
             arrow.transform.SetParent(go.transform, false);
-            arrow.transform.localPosition = new Vector3(0f, 1.5f, 0f);
+            arrow.transform.localPosition = new Vector3(0f, 2.0f, 0f);
             arrow.transform.localScale = Vector3.one * 0.7f;
             var ar = arrow.AddComponent<SpriteRenderer>();
             ar.sprite = ArrowSprite;

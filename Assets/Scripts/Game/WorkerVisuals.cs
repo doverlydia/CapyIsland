@@ -19,6 +19,12 @@ namespace CapyIsland.Game
         [SerializeField] Sprite pickaxe;
         [SerializeField] Sprite log;
 
+        [Tooltip("Shown while the worker is asleep from hunger, so a stalled worker is obvious.")]
+        [SerializeField] Sprite sleeping;
+
+        Sprite _awake;
+        SpriteRenderer _bodyRenderer;
+
         [Header("Held prop")]
         [SerializeField] Vector2 holdOffset = new Vector2(0.42f, 0.30f);
         [SerializeField] float propScale = 0.5f;
@@ -56,6 +62,8 @@ namespace CapyIsland.Game
 
             var sprite = transform.Find("Sprite");
             _body = sprite != null ? sprite : transform;
+            _bodyRenderer = _body.GetComponent<SpriteRenderer>();
+            if (_bodyRenderer != null) _awake = _bodyRenderer.sprite;
 
             // Pivot at the shoulder so the tool swings in an arc rather than sliding.
             var pivotGo = new GameObject("PropPivot");
@@ -81,6 +89,8 @@ namespace CapyIsland.Game
             var bodyRenderer = _body != null ? _body.GetComponent<SpriteRenderer>() : null;
             if (bodyRenderer != null && _prop != null) _prop.sortingOrder = bodyRenderer.sortingOrder + 1;
 
+            ShowSleepPose(_worker.Activity == WorkerActivity.Asleep);
+
             switch (_worker.Activity)
             {
                 case WorkerActivity.Harvesting: ShowHarvesting(); break;
@@ -90,6 +100,13 @@ namespace CapyIsland.Game
             }
 
             TickTargetShake();
+        }
+
+        void ShowSleepPose(bool asleep)
+        {
+            if (_bodyRenderer == null || sleeping == null) return;
+            var want = asleep ? sleeping : _awake;
+            if (_bodyRenderer.sprite != want) _bodyRenderer.sprite = want;
         }
 
         Sprite ToolFor()
@@ -161,9 +178,10 @@ namespace CapyIsland.Game
         {
             if (target == null) return;
             _shaking = target;
-            // Shake the sprite child, not the node itself, so its world position stays put.
-            var sprite = target.transform.Find("Sprite");
-            _shakingSprite = sprite != null ? sprite : target.transform;
+            // Shake the tree being felled — the node's own icon sprite is hidden once planted.
+            var tree = target.CurrentVisual;
+            var sprite = tree != null ? tree.Find("Sprite") : null;
+            _shakingSprite = sprite != null ? sprite : tree;
             _shakeTimer = targetShakeSeconds;
         }
 

@@ -3,12 +3,13 @@ using UnityEngine;
 namespace CapyIsland.Game
 {
     /// <summary>
-    /// Turns one carried icon into the real thing when planted. A "Medium Pine Forest" rides in the
-    /// inventory as a single small tree; dropping it scatters five saplings around the spot, which
-    /// grow to full size over a few seconds — the original grows them in about 4s.
+    /// Turns one carried icon into the real thing when planted. A forest rides in the inventory as
+    /// a single small tree and a garden as a single bed; dropping either scatters separate clumps
+    /// around the spot — trees, or individual flowers — which grow in over a few seconds. The
+    /// original grows them in about 4s.
     ///
-    /// The scattered copies are plain sprites: the parent keeps the Harvestable, so the whole clump
-    /// is one resource node rather than five independent ones.
+    /// The clumps are plain sprites: the parent keeps the Harvestable or FoodSource, which wears
+    /// them down one at a time as they are chopped or eaten.
     /// </summary>
     public class ScatterOnPlace : MonoBehaviour
     {
@@ -16,6 +17,13 @@ namespace CapyIsland.Game
         [SerializeField] int count = 5;
         [SerializeField] float spreadX = 2.6f;
         [SerializeField] float spreadY = 1.6f;
+
+        [Tooltip("Sprite for each clump. Empty uses the icon's own sprite (right for trees; a " +
+                 "garden's icon is a whole bed, so it grows individual flowers instead).")]
+        [SerializeField] Sprite clumpSprite;
+
+        [Tooltip("Clump size relative to the icon sprite.")]
+        [SerializeField] float clumpScale = 1f;
 
         [Header("Growth")]
         [Tooltip("Seconds for a sapling to reach full size. The original takes about 4.")]
@@ -33,7 +41,7 @@ namespace CapyIsland.Game
 
         /// <summary>
         /// Called when the item is bubbled again. Clears the old clumps and restores the icon, so
-        /// replanting grows a fresh forest rather than re-showing a stump field.
+        /// replanting grows a fresh set rather than re-showing a stump field.
         /// </summary>
         void OnReturnedToBubble()
         {
@@ -66,9 +74,10 @@ namespace CapyIsland.Game
             var sourceRenderer = source.GetComponent<SpriteRenderer>();
             if (sourceRenderer == null) return;
 
+            var sprite = clumpSprite != null ? clumpSprite : sourceRenderer.sprite;
             var shadow = transform.Find("Shadow");
 
-            // Deterministic per position, so rebuilding the same island looks the same.
+            // Deterministic per position, so the same spot always grows the same shape.
             var rng = new System.Random(Mathf.RoundToInt(transform.position.x * 73 + transform.position.y * 131));
 
             for (int i = 0; i < count; i++)
@@ -86,12 +95,14 @@ namespace CapyIsland.Game
                     var sh = Instantiate(shadow.gameObject, clump.transform);
                     sh.name = "Shadow";
                     sh.transform.localPosition = new Vector3(0f, 0.04f, 0f);
+                    sh.SetActive(true);
                 }
 
                 var body = new GameObject("Sprite");
                 body.transform.SetParent(clump.transform, false);
+                body.transform.localScale = Vector3.one * clumpScale;
                 var sr = body.AddComponent<SpriteRenderer>();
-                sr.sprite = sourceRenderer.sprite;
+                sr.sprite = sprite;
                 // Lower on screen draws in front, within this clump.
                 sr.sortingOrder = sourceRenderer.sortingOrder + Mathf.RoundToInt(-offset.y * 10f);
 
@@ -100,7 +111,7 @@ namespace CapyIsland.Game
                 grow.Begin(jitter, startScale, growSeconds);
             }
 
-            // The original icon becomes the first tree; hide it so the clump reads as the forest.
+            // The icon has become the clumps; hide it so the set reads as the real thing.
             sourceRenderer.enabled = false;
             if (shadow != null) shadow.gameObject.SetActive(false);
         }
@@ -114,12 +125,16 @@ namespace CapyIsland.Game
         float _duration = 4f;
         float _elapsed;
 
+        /// <summary>The size this is growing toward — its real full size, even mid-growth.</summary>
+        public float TargetScale => _target;
+
         public void Begin(float targetScale, float startScale, float seconds)
         {
             _target = targetScale;
             _from = startScale * targetScale;
             _duration = Mathf.Max(0.01f, seconds);
             _elapsed = 0f;
+            enabled = true;
             transform.localScale = Vector3.one * _from;
         }
 

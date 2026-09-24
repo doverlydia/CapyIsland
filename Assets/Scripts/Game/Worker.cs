@@ -208,9 +208,10 @@ namespace CapyIsland.Game
 
         void TickToNode()
         {
-            if (_target == null || !_target.HasStock) { _state = State.Idle; return; }
+            if (_target == null || !_target.IsWorkable) { _state = State.Idle; return; }
 
-            if (!MoveToward(_target.transform.position)) return;
+            // Walk to the tree actually being felled, not the middle of the forest.
+            if (!MoveToward(_target.WorkPoint)) return;
 
             // Seconds per STRIKE now, not per trip: a whole node still takes about as long,
             // but the payout and the shrink arrive steadily instead of all at the end.
@@ -221,7 +222,7 @@ namespace CapyIsland.Game
 
         void TickHarvesting()
         {
-            if (_target == null || !_target.HasStock) { _state = State.Idle; return; }
+            if (_target == null || !_target.IsWorkable) { _state = State.Idle; return; }
 
             // Drifted out of the mill's reach (the node shrank, or the mill was replaced).
             if (_workplace == null) { _state = State.Following; return; }
@@ -239,9 +240,11 @@ namespace CapyIsland.Game
                 _tripsSinceMeal++;
             }
 
-            bool pauseToEat = tripsBeforeHungry > 0 && _tripsSinceMeal >= HungerCheckEvery;
-            if (_target == null || !_target.HasStock || pauseToEat)
-                _state = State.Idle;
+            bool pauseToEat = tripsBeforeHungry > 0 && _tripsSinceMeal >= tripsBeforeHungry;
+            if (_target == null || !_target.IsWorkable || pauseToEat) { _state = State.Idle; return; }
+
+            // That strike felled the tree: walk over to the next one before carrying on.
+            if (Vector2.Distance(transform.position, _target.WorkPoint) > 0.5f) _state = State.ToNode;
         }
 
         /// <summary>Strikes between hunger checks, so a worker still stops to eat.</summary>
@@ -280,7 +283,7 @@ namespace CapyIsland.Game
         void TickToFood()
         {
             if (_food == null || !_food.IsOpen) { _state = State.Idle; return; }
-            if (!MoveToward(_food.transform.position)) return;
+            if (!MoveToward(_food.EatPoint)) return;
             _eatTimer = 0f;
             _state = State.Eating;
         }

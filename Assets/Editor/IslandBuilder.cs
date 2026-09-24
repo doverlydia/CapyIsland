@@ -166,6 +166,17 @@ namespace CapyIsland.EditorTools
                 "A beautiful larder for wild creatures. Hungry capybaras eat here, so keep it planted.",
                 "Garden = fed Capybaras", inner: 1.2f, outer: 10f);
             item.AddComponent<Game.FoodSource>();
+
+            // Planted, the bed icon grows into six separate flowers, eaten one by one.
+            var scatter = item.AddComponent<Game.ScatterOnPlace>();
+            var so = new SerializedObject(scatter);
+            so.FindProperty("count").intValue = 6;
+            so.FindProperty("spreadX").floatValue = 1.7f;
+            so.FindProperty("spreadY").floatValue = 1.0f;
+            so.FindProperty("clumpSprite").objectReferenceValue = Load("Assets/Art/Terrain/Flower_Posie.png");
+            so.FindProperty("clumpScale").floatValue = 0.55f;
+            so.FindProperty("growSeconds").floatValue = 3f;
+            so.ApplyModifiedPropertiesWithoutUndo();
             return item;
         }
 
@@ -180,6 +191,7 @@ namespace CapyIsland.EditorTools
             vso.FindProperty("axe").objectReferenceValue = Load("Assets/Art/Common/Tool_Axe.png");
             vso.FindProperty("pickaxe").objectReferenceValue = Load("Assets/Art/Common/Tool_Pickaxe.png");
             vso.FindProperty("log").objectReferenceValue = Load("Assets/Art/Common/Prop_Log.png");
+            vso.FindProperty("sleeping").objectReferenceValue = Load("Assets/Art/Capybaras/Capy_Sleep.png");
             vso.ApplyModifiedPropertiesWithoutUndo();
             go.AddComponent<Game.Follower>();
             go.AddComponent<Game.YSorter>();
@@ -221,14 +233,14 @@ namespace CapyIsland.EditorTools
 
             var body = new GameObject("Sprite");
             body.transform.SetParent(go.transform, false);
-            body.transform.localScale = Vector3.one * 1.15f;
+            body.transform.localScale = Vector3.one * 1.6f;
             var sr = body.AddComponent<SpriteRenderer>();
             sr.sprite = Load("Assets/Art/Common/Bubble.png");
             sr.sortingOrder = order;
 
             var arrow = new GameObject("Arrow");
             arrow.transform.SetParent(go.transform, false);
-            arrow.transform.localPosition = new Vector3(0f, 1.5f, 0f);
+            arrow.transform.localPosition = new Vector3(0f, 2.0f, 0f);
             arrow.transform.localScale = Vector3.one * 0.7f;
             var ar = arrow.AddComponent<SpriteRenderer>();
             ar.sprite = Load("Assets/Art/Common/Arrow_Down.png");

@@ -60,8 +60,9 @@ namespace CapyIsland.Game
 
             foreach (var node in HarvestableRegistry.All)
             {
-                if (node == null || !node.isActiveAndEnabled) continue;
-                if (node.Kind != accepts || !node.HasStock) continue;
+                if (node == null || node.Kind != accepts) continue;
+                // A forest still in the inventory trail is an icon, not a forest.
+                if (!node.IsWorkable) continue;
 
                 float d = Vector2.Distance(node.transform.position, transform.position);
                 if (d > workRadius || d >= bestDistance) continue;
