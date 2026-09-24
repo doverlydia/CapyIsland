@@ -44,9 +44,14 @@ namespace CapyIsland.Game
         [SerializeField] float ripenSeconds = 4f;
 
         static float _saplingReadyAt;
+        static bool _anyShaken, _shakeHinted;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void ResetSaplingTimer() => _saplingReadyAt = BunniRules.SaplingIntervalSeconds;
+        static void ResetSaplingTimer()
+        {
+            _saplingReadyAt = BunniRules.SaplingIntervalSeconds;
+            _anyShaken = _shakeHinted = false;
+        }
 
         class Fruit
         {
@@ -152,7 +157,15 @@ namespace CapyIsland.Game
 
                 case Phase.GrowFruit:
                     if (_fruit.Count < BunniRules.MaxFruitOnTree && Random.value < BunniRules.FruitChancePerFrame(kind))
+                    {
                         AddFruit();
+                        // The fruit-tree card's line, for players who never picked one up.
+                        if (_fruit.Count == BunniRules.MaxFruitOnTree && !_anyShaken && !_shakeHinted)
+                        {
+                            _shakeHinted = true;
+                            Hints.Show("Tap to shake fruit trees.  All sorts of goodies (including gems) are hidden in the branches.");
+                        }
+                    }
                     break;
 
                 case Phase.Shake:
@@ -187,6 +200,7 @@ namespace CapyIsland.Game
         /// <summary>The player tapped the tree (FruitTree.Click): shake down every fruit.</summary>
         public void PlayerShake()
         {
+            _anyShaken = true;
             Hints.Show("You shook a <b>" + StoreName + "</b>");
             if (!_canShake) { if (_sway != null) _sway.Kick(3f, 0.3f, 40f); return; }
             EnterShake();
