@@ -54,14 +54,17 @@ namespace CapyIsland.Game
         [SerializeField] float foodRate = BunniRules.CapybaraFoodRate;
         [SerializeField] List<SpeedModifier> modifiers = new();
 
-        /// <summary>Raised with the original's hint lines when a worker runs out of work or food.</summary>
-        public static event Action<string> Hint;
 
         State _state = State.Following;
         FrameClock _clock;
 
         Workplace _workplace;
         Harvestable _target;
+        // A fruit tree target: chopped for wood when a mill runs out of forest, or shaken for one
+        // fruit by a hungry worker (mShake).
+        FruitTree _tree;
+        bool _shake;
+        bool _carryingNoBonus;
         int _carrying;
         int _hunger = BunniRules.StartingHunger;
         bool _hungry;
@@ -85,13 +88,15 @@ namespace CapyIsland.Game
         public int Hunger => _hunger;
         public Workplace Workplace => _workplace;
         public Harvestable CurrentTarget => _target;
+        public FruitTree CurrentTree => _tree;
+        public bool IsShaking => _tree != null && _shake;
         public string SpeciesName => speciesName;
 
         /// <summary>0..1 through the current swing, for the tool animation to follow.</summary>
         public float SwingPhase => _state == State.HarvestWood ? (float)_swingFrame / _swingFrames : 0f;
 
-        /// <summary>Fired on the hit frame of each swing, with the node struck.</summary>
-        public event Action<Harvestable> Struck;
+        /// <summary>Fired on the hit frame of each swing, with the node or fruit tree struck.</summary>
+        public event Action<Component> Struck;
 
         public WorkerActivity Activity
         {
@@ -101,7 +106,7 @@ namespace CapyIsland.Game
                 {
                     case State.Following: return WorkerActivity.Following;
                     case State.FindWood: return _asleep ? WorkerActivity.Asleep : WorkerActivity.Waiting;
-                    case State.GetWood: return TargetIsFood ? WorkerActivity.WalkingToFood : WorkerActivity.WalkingToNode;
+                    case State.GetWood: return TargetIsFood || IsShaking ? WorkerActivity.WalkingToFood : WorkerActivity.WalkingToNode;
                     case State.HarvestWood: return TargetIsFood ? WorkerActivity.Eating : WorkerActivity.Harvesting;
                     case State.TakeWoodToMill: return WorkerActivity.CarryingHome;
                     default: return WorkerActivity.Waiting;
@@ -186,7 +191,17 @@ namespace CapyIsland.Game
         {
             if (_target != null) _target.Reserved = false;
             _target = null;
+            if (_tree != null) _tree.Reserved = false;
+            _tree = null;
+            _shake = false;
         }
+
+        bool HasTarget => _target != null || _tree != null;
+
+        /// <summary>The target is gone or no longer in the world.</summary>
+        bool TargetLost => _tree != null ? !_tree.InWorld : (_target == null || !_target.InWorld);
+
+        Transform TargetTransform => _tree != null ? _tree.transform : _target.transform;
 
         // ---------------------------------------------------------------- the frame loop
 
@@ -243,9 +258,8 @@ namespace CapyIsland.Game
         {
             if (_searchCounter == 0)
             {
-                var family = _hungry ? NodeFamily.Flower : _workplace.WorkFamily;
-                _target = _workplace.Find(family, transform.position, reserve: true);
-                if (_target != null) { EnterGetWood(); return; }
+                Search();
+                if (HasTarget) { EnterGetWood(); return; }
             }
 
             var napSpot = (Vector2)_workplace.transform.position + _napOffset;
@@ -273,15 +287,36 @@ namespace CapyIsland.Game
             if (++_searchCounter > BunniRules.SearchIntervalFrames - 1) _searchCounter = 0;
         }
 
+        /// <summary>
+        /// The original's FindWood search. Hungry: the nearest food — a child flower or fallen fruit,
+        /// or a fruit tree with fruit to shake — else a parent flower. Otherwise the workplace's own
+        /// resource, children before parents, and for a sawmill with no forest left, a fruit tree.
+        /// </summary>
+        void Search()
+        {
+            ReleaseTarget();
+            Vector2 from = transform.position;
+            if (_hungry)
+            {
+                _workplace.FindFood(from, reserve: true, out _target, out _tree);
+                _shake = _tree != null;
+                return;
+            }
+
+            _target = _workplace.Find(_workplace.WorkFamily, from, reserve: true);
+            if (_target == null && _workplace.Accepts == ResourceKind.Wood)
+                _tree = _workplace.FindFruitTree(from, needFruit: false, reserve: true);
+        }
+
         void RaiseDreamHint()
         {
             string who = "A " + speciesName;
             if (_hungry)
-                Hint?.Invoke(who + " ate the last flower in the garden. I guess you need to plant bigger flower gardens for your hungry workers.");
+                Hints.Show(who + " ate the last flower in the garden. I guess you need to plant bigger flower gardens for your hungry workers.");
             else if (_workplace.Accepts == ResourceKind.Wood)
-                Hint?.Invoke("Uh oh... I hear a " + speciesName + " chopped down the last tree in a forest. Too many workers leads to overharvesting.");
+                Hints.Show("Uh oh... I hear a " + speciesName + " chopped down the last tree in a forest. Too many workers leads to overharvesting.");
             else
-                Hint?.Invoke("I hear a " + speciesName + " mined the last rock in a hill. Soon the mine will collapse.");
+                Hints.Show("I hear a " + speciesName + " mined the last rock in a hill. Soon the mine will collapse.");
         }
 
         // ---------------------------------------------------------------- GetWood
@@ -299,11 +334,13 @@ namespace CapyIsland.Game
         {
             GetHungry();
             if (_state != State.GetWood) return;
-            if (_target == null || !_target.InWorld) { ReleaseTarget(); EnterFindWood(); return; }
+            if (TargetLost) { ReleaseTarget(); EnterFindWood(); return; }
 
             // The path is walked at the species' speed for this resource, not its normal speed.
+            // Fruit trees have no modifier: normal speed.
+            int speed = _tree != null ? normalSpeed : SpeedFor(_target.Resource);
             var pos = (Vector2)transform.position;
-            bool arrived = BunniSpace.Step(ref pos, WorkSpot(_target.transform), SpeedFor(_target.Resource));
+            bool arrived = BunniSpace.Step(ref pos, WorkSpot(TargetTransform), speed);
             MoveTo(pos);
             if (arrived) EnterHarvestWood();
         }
@@ -313,19 +350,24 @@ namespace CapyIsland.Game
         void EnterHarvestWood()
         {
             _state = State.HarvestWood;
-            BunniRules.Swing(_target.Family, out _swingFrames, out _hitFrame);
+            BunniRules.Swing(_tree != null ? NodeFamily.Tree : _target.Family, out _swingFrames, out _hitFrame);
             _swingFrame = 0;
+
+            // Starting to chop a fruit tree (not shake it) drops its fruit and stops it fruiting.
+            if (_tree != null && !_shake) _tree.BeginChop();
         }
 
         void TickHarvestWood()
         {
             GetHungry();
             if (_state != State.HarvestWood) return;
-            if (_target == null || !_target.InWorld) { ReleaseTarget(); EnterFindWood(); return; }
+            if (TargetLost) { ReleaseTarget(); EnterFindWood(); return; }
 
             _swingFrame++;
             if (_swingFrame >= _swingFrames) _swingFrame = 0;
             if (_swingFrame != _hitFrame) return;
+
+            if (_tree != null) { StrikeTree(); return; }
 
             var node = _target;
             bool food = node.Family == NodeFamily.Flower;
@@ -344,6 +386,32 @@ namespace CapyIsland.Game
             }
 
             _carrying = value;
+            _carryingNoBonus = false;
+            _state = State.TakeWoodToMill;
+        }
+
+        /// <summary>
+        /// A hit on a fruit tree. Shaking knocks down one fruit and goes looking for food again;
+        /// chopping takes 0.1 × 0.5 off per blow, and a felled tree is 500 wood.
+        /// </summary>
+        void StrikeTree()
+        {
+            var tree = _tree;
+            Struck?.Invoke(tree);
+
+            if (_shake)
+            {
+                tree.RemoveOne();
+                ReleaseTarget();
+                EnterFindWood();
+                return;
+            }
+
+            if (!tree.Hit(0.1f * BunniRules.FruitTreeHarvestSpeed)) return;
+
+            _tree = null;
+            _carrying = BunniRules.FruitTreeWoodValue;
+            _carryingNoBonus = true;   // the original sets 500 flat, no Legendary doubling
             _state = State.TakeWoodToMill;
         }
 
@@ -357,8 +425,9 @@ namespace CapyIsland.Game
             MoveTo(pos);
             if (!arrived) return;
 
-            _workplace.Deposit(_carrying);
+            _workplace.Deposit(_carrying, legendaryBonus: !_carryingNoBonus);
             _carrying = 0;
+            _carryingNoBonus = false;
             EnterFindWood();
         }
 

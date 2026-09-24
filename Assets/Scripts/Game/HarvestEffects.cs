@@ -29,7 +29,7 @@ namespace CapyIsland.Game
         [SerializeField] Color petalColour = new Color(1.00f, 0.72f, 0.78f);
         [SerializeField] Color gritColour = new Color(0.62f, 0.62f, 0.60f);
 
-        ParticleSystem _leaves, _chips, _petals, _grit, _sparkles, _juice;
+        ParticleSystem _leaves, _blown, _chips, _petals, _grit, _sparkles, _juice;
 
         const int SortingOrder = 30000;   // above every prop
 
@@ -37,6 +37,10 @@ namespace CapyIsland.Game
         {
             Instance = this;
             _leaves = MakeSystem("Leaves", leaf, gravity: 0.25f, drag: 1.4f, life: 1.6f, spin: 260f);
+            AddFlutter(_leaves, 0.6f);
+            // Leaves carried off by the wind: barely any gravity, long-lived, fluttering as they go.
+            _blown = MakeSystem("BlownLeaves", leaf, gravity: 0.05f, drag: 0.15f, life: 3.2f, spin: 220f);
+            AddFlutter(_blown, 1.1f);
             _chips = MakeSystem("Chips", chip, gravity: 2.2f, drag: 0.4f, life: 0.8f, spin: 540f);
             _petals = MakeSystem("Petals", petal, gravity: 0.2f, drag: 1.6f, life: 1.4f, spin: 200f);
             _grit = MakeSystem("Grit", grit, gravity: 2.6f, drag: 0.5f, life: 0.6f, spin: 360f);
@@ -67,6 +71,23 @@ namespace CapyIsland.Game
                     Burst(_grit, at + Vector2.down * 0.3f, 5, gritColour, 0.1f, 1.8f, 3.2f);
                     break;
             }
+        }
+
+        /// <summary>An axe blow on a fruit tree: chips from the trunk, leaves from the canopy.</summary>
+        public void HitTree(FruitTree tree)
+        {
+            if (tree == null) return;
+            var sprite = tree.transform.Find("Sprite");
+            var sr = sprite != null ? sprite.GetComponent<SpriteRenderer>() : null;
+            Vector2 at = tree.transform.position;
+            if (sr != null)
+            {
+                var b = sr.bounds;
+                Burst(_chips, new Vector2(b.center.x, b.min.y + b.size.y * 0.2f), 4, chipColour, 0.12f, 1.8f, 3.6f);
+                Burst(_leaves, new Vector2(b.center.x, b.min.y + b.size.y * 0.7f), 4, leafColour, 0.16f, 0.8f, 1.8f);
+                return;
+            }
+            Burst(_chips, at, 4, chipColour, 0.12f, 1.8f, 3.6f);
         }
 
         /// <summary>A node falling: a bigger shower, and a little sparkle for the payout.</summary>
@@ -104,6 +125,25 @@ namespace CapyIsland.Game
                 var p = canopy + new Vector2(Random.Range(-width, width) * 0.5f, Random.Range(-0.4f, 0.6f));
                 Emit(_leaves, p, new Vector2(Random.Range(0.6f, 2.2f), Random.Range(0.2f, 1.2f)), leafColour, Random.Range(0.12f, 0.2f));
             }
+        }
+
+        /// <summary>One leaf torn off a canopy by a gust, drifting away downwind.</summary>
+        public void BlowLeaf(Vector2 at, int windDirection, Color colour)
+        {
+            var v = new Vector2(windDirection * Random.Range(1.4f, 2.8f), Random.Range(-0.2f, 0.7f));
+            Emit(_blown, at, v, colour * Random.Range(0.85f, 1.1f), Random.Range(0.13f, 0.2f));
+        }
+
+        /// <summary>A small puff for fruit or a bubble that has gone off: leaves, no sparkle.</summary>
+        public void Poof(Vector2 at, Color colour)
+        {
+            Burst(_petals, at, 5, colour, 0.1f, 0.4f, 1.0f);
+        }
+
+        /// <summary>Sparkles for a reward: a chest opening, a sapling found in the branches.</summary>
+        public void Twinkle(Vector2 at, int count = 8)
+        {
+            Burst(_sparkles, at, count, Color.white, 0.16f, 0.8f, 2.0f);
         }
 
         /// <summary>The on-screen top of a node, where debris should come from.</summary>
@@ -203,6 +243,18 @@ namespace CapyIsland.Game
 
             ps.Play();
             return ps;
+        }
+
+        /// <summary>Wobble on top of the motion, so leaves flutter instead of flying in straight arcs.</summary>
+        static void AddFlutter(ParticleSystem ps, float strength)
+        {
+            var noise = ps.noise;
+            noise.enabled = true;
+            noise.strength = strength;
+            noise.frequency = 0.6f;
+            noise.scrollSpeed = 0.4f;
+            noise.damping = true;
+            noise.quality = ParticleSystemNoiseQuality.Low;   // WebGL
         }
 
         static Material _material;

@@ -150,9 +150,30 @@ namespace CapyIsland.Game
             if (_body != null) _body.localRotation = Quaternion.identity;
         }
 
-        void OnStruck(Harvestable node)
+        void OnStruck(Component struck)
         {
-            if (node == null) return;
+            if (struck == null) return;
+
+            // Fruit trees rock themselves and throw their own leaves.
+            if (struck is FruitTree tree)
+            {
+                var fxTree = HarvestEffects.Instance;
+                if (fxTree != null) fxTree.HitTree(tree);
+                return;
+            }
+
+            var node = (Harvestable)struck;
+
+            // Anything that sways owns its rotation: kick it rather than rotating it directly.
+            var sway = node.GetComponent<Sway>();
+            if (sway != null)
+            {
+                sway.Kick(targetShake, targetShakeSeconds);
+                var fxSway = HarvestEffects.Instance;
+                if (fxSway != null) fxSway.Hit(node);
+                return;
+            }
+
             var sprite = node.transform.Find("Sprite");
             if (_shaking != null && _shaking != sprite) _shaking.localRotation = Quaternion.identity;
             _shaking = sprite != null ? sprite : node.transform;

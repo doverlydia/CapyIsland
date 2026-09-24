@@ -48,8 +48,8 @@ namespace CapyIsland.Game
         Step _step = Step.Greet;
         float _greetTimer;
 
-        void OnEnable() => Worker.Hint += Say;
-        void OnDisable() => Worker.Hint -= Say;
+        void OnEnable() => Hints.Shown += Say;
+        void OnDisable() => Hints.Shown -= Say;
 
         void Start()
         {

@@ -70,6 +70,9 @@ namespace CapyIsland.EditorTools
 
             BuildPlacementPreview(systems.transform);
             BuildHarvestEffects(systems.transform);
+            systems.AddComponent<Game.Wind>();
+            BuildGameArt(systems.transform, shadow);
+            BuildCatalog(root.transform, systems.transform, shadow);
             var pointer = BuildTutorialPointer(systems.transform);
 
             var ghost = BuildHud(root.transform);
@@ -130,6 +133,108 @@ namespace CapyIsland.EditorTools
             so.FindProperty("artScale").floatValue = artScale;
             so.FindProperty("plantedSprite").objectReferenceValue = planted;
             so.ApplyModifiedPropertiesWithoutUndo();
+
+            // Trees and flowers bend in the wind; trees shed leaves in the gusts.
+            var sway = item.AddComponent<Game.Sway>();
+            if (Game.BunniRules.FamilyOf(resource) == Game.NodeFamily.Flower)
+                sway.Configure(1.6f, 0f, Color.white);
+            else
+                sway.Configure(1f, 0.7f, new Color(0.33f, 0.52f, 0.30f));
+        }
+
+        // ---------------------------------------------------------------- fruit trees
+
+        static readonly (Game.FruitKind kind, string name, string art, string blurb)[] FruitTrees =
+        {
+            (Game.FruitKind.Apple, "Apple Tree", "Tree_Apple",
+                "A magical tree that produces food and gold.  A tree spirit lives inside."),
+            (Game.FruitKind.Pear, "Pear Tree", "Tree_Pear",
+                "A magical tree that produces food and gold.  A tree spirit lives inside."),
+            (Game.FruitKind.Plum, "Legendary Plum Tree", "Tree_Plum",
+                "Juicy plums grow heavily from the sweeping branches.  Plum trees produce valuable items when shaken."),
+        };
+
+        static GameObject BuildFruitTreeItem(Transform parent, Sprite shadow, Game.FruitKind kind)
+        {
+            var def = System.Array.Find(FruitTrees, f => f.kind == kind);
+            var item = MakeItem(parent, def.name, Load("Assets/Art/Terrain/" + def.art + ".png"),
+                shadow, 1.55f, 0.75f, def.blurb, "Tap to shake down fruit", inner: 50f, outer: 0f);
+
+            var tree = item.AddComponent<Game.FruitTree>();
+            var so = new SerializedObject(tree);
+            so.FindProperty("kind").enumValueIndex = (int)kind;
+            so.FindProperty("artScale").floatValue = 1.55f;
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            var sway = item.AddComponent<Game.Sway>();
+            sway.Configure(0.9f, 1.1f, kind == Game.FruitKind.Plum
+                ? new Color(0.40f, 0.52f, 0.46f)
+                : new Color(0.45f, 0.68f, 0.32f));
+            return item;
+        }
+
+        // ---------------------------------------------------------------- runtime catalogue
+
+        /// <summary>
+        /// Inactive copies of every item that can be created at runtime — saplings shaken from fruit
+        /// trees, random bubbles, and shop stock — keyed by store name.
+        /// </summary>
+        static void BuildCatalog(Transform root, Transform systems, Sprite shadow)
+        {
+            var templates = new GameObject("Templates");
+            templates.transform.SetParent(root, false);
+            templates.SetActive(false);   // nothing in here ever runs
+
+            var items = new GameObject("Items");
+            items.transform.SetParent(root, false);
+
+            var list = new System.Collections.Generic.List<GameObject>
+            {
+                BuildForestItem(templates.transform, shadow),
+                BuildGardenItem(templates.transform, shadow),
+                BuildSawmillItem(templates.transform, shadow),
+                BuildFruitTreeItem(templates.transform, shadow, Game.FruitKind.Apple),
+                BuildFruitTreeItem(templates.transform, shadow, Game.FruitKind.Pear),
+                BuildFruitTreeItem(templates.transform, shadow, Game.FruitKind.Plum),
+            };
+
+            var catalog = systems.gameObject.AddComponent<Game.ItemCatalog>();
+            var so = new SerializedObject(catalog);
+            var t = so.FindProperty("templates");
+            t.arraySize = list.Count;
+            for (int i = 0; i < list.Count; i++)
+                t.GetArrayElementAtIndex(i).objectReferenceValue = list[i].GetComponent<Game.Placeable>();
+
+            var pool = so.FindProperty("randomPool");
+            string[] names = { "Medium Pine Forest", "Medium Posie Garden", "Apple Tree", "Pear Tree" };
+            pool.arraySize = names.Length;
+            for (int i = 0; i < names.Length; i++) pool.GetArrayElementAtIndex(i).stringValue = names[i];
+
+            so.FindProperty("itemParent").objectReferenceValue = items.transform;
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        /// <summary>Sprites that runtime spawns need: fruit, chests, resource icons, a shadow.</summary>
+        static void BuildGameArt(Transform systems, Sprite shadow)
+        {
+            var shadowTemplate = new GameObject("ShadowTemplate");
+            shadowTemplate.transform.SetParent(systems, false);
+            shadowTemplate.transform.localScale = new Vector3(0.9f, 0.9f, 1f);
+            var sr = shadowTemplate.AddComponent<SpriteRenderer>();
+            sr.sprite = shadow;
+            shadowTemplate.SetActive(false);
+
+            var art = systems.gameObject.AddComponent<Game.GameArt>();
+            art.shadowTemplate = shadowTemplate;
+            art.apple = Load("Assets/Art/Props/Fruit_Apple.png");
+            art.pear = Load("Assets/Art/Props/Fruit_Pear.png");
+            art.plum = Load("Assets/Art/Props/Fruit_Plum.png");
+            art.chestClosed = Load("Assets/Art/Props/Chest_Closed.png");
+            art.chestOpen = Load("Assets/Art/Props/Chest_Open.png");
+            art.wood = Load("Assets/Art/UI/Icon_Wood.png");
+            art.gold = Load("Assets/Art/UI/Icon_Gold.png");
+            art.gem = Load("Assets/Art/UI/Icon_Gem.png");
+            EditorUtility.SetDirty(art);
         }
 
         static GameObject BuildSawmillItem(Transform parent, Sprite shadow)

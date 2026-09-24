@@ -11,6 +11,8 @@ namespace CapyIsland.Game
     }
 
     /// <summary>The three families of node, which decide the swing animation and who may harvest.</summary>
+    public enum FruitKind { Apple, Pear, Plum }
+
     public enum NodeFamily
     {
         Tree,
@@ -124,6 +126,69 @@ namespace CapyIsland.Game
         public const int HungryBelow = 1000;
 
         /// <summary>game.xml &lt;animals&gt;&lt;bunni&gt;: the capybara stands in for the bunni.</summary>
+        // ---- fruit trees (MapItems/FruitTrees) ----
+
+        /// <summary>A fruit tree's footprint: a fixed circle, not scaled by growth.</summary>
+        public const float FruitTreeInnerRadius = 50f;
+        /// <summary>A fruit tree grows from 0.2 to exactly 1 at this rate per frame.</summary>
+        public const float FruitTreeGrowthPerFrame = 0.005f;
+        public const int MaxFruitOnTree = 5;
+        /// <summary>Frames the shake animation plays (art frames 2..12).</summary>
+        public const int ShakeFrames = 11;
+        /// <summary>Scale a full-grown tree drops to the moment a worker starts chopping it.</summary>
+        public const float ChoppedStartScale = 0.9f;
+        /// <summary>Chopped trees regrow at a fifth of the growth rate.</summary>
+        public const float ChoppedRegrowPerFrame = FruitTreeGrowthPerFrame / 5f;
+        /// <summary>Workers chop fruit trees at a flat 0.5 harvest speed (not the species' speed / 3).</summary>
+        public const float FruitTreeHarvestSpeed = 0.5f;
+        /// <summary>Wood carried home for felling a fruit tree. Not doubled by a Legendary mill.</summary>
+        public const int FruitTreeWoodValue = 500;
+        /// <summary>A dropped fruit is a food node with this inner size.</summary>
+        public const float FruitInnerSize = 22f;
+        /// <summary>Seconds between saplings: the first fruit shaken off after this has passed is a free tree.</summary>
+        public const float SaplingIntervalSeconds = 60f;
+        /// <summary>Chance a shaken fruit is instead a bubble holding a random store item.</summary>
+        public const float RandomStoreChance = 0.01f;
+
+        /// <summary>Per-frame chance of a new fruit while below the maximum: 0.005 divided per tree.</summary>
+        public static float FruitChancePerFrame(FruitKind kind) => kind switch
+        {
+            FruitKind.Apple => 0.005f / 2f,
+            FruitKind.Pear => 0.005f / 2.5f,
+            FruitKind.Plum => 0.005f / 3f,
+            _ => 0.005f,
+        };
+
+        /// <summary>The food a fallen fruit counts as: apples are posies, pears tulips, plums roses.</summary>
+        public static NodeResource FruitFood(FruitKind kind) => kind switch
+        {
+            FruitKind.Apple => NodeResource.Posie,
+            FruitKind.Pear => NodeResource.Tulip,
+            _ => NodeResource.Rose,
+        };
+
+        /// <summary>Chance a shaken fruit is a treasure chest instead, and the chest's tier.</summary>
+        public static float ChestChance(FruitKind kind, out int tier)
+        {
+            switch (kind)
+            {
+                case FruitKind.Apple: tier = 1; return 0.2f;
+                case FruitKind.Pear: tier = 2; return 0.3f;
+                default: tier = 3; return 0.2f;
+            }
+        }
+
+        /// <summary>Store name of each tree, for the free sapling bubble.</summary>
+        public static string FruitTreeStoreName(FruitKind kind) => kind switch
+        {
+            FruitKind.Apple => "Apple Tree",
+            FruitKind.Pear => "Pear Tree",
+            _ => "Legendary Plum Tree",
+        };
+
+        /// <summary>Frames a timed bubble or fallen fruit lasts: (rand x 10 + 1) x 200.</summary>
+        public static int RandomLifetimeFrames() => Mathf.FloorToInt((Random.value * 10f + 1f) * 200f);
+
         public const int CapybaraSpeed = 3;
         public const float CapybaraFoodRate = 1f;
     }

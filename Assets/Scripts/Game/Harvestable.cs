@@ -40,6 +40,12 @@ namespace CapyIsland.Game
                  "but the planted parent is a single flower). Children always use it.")]
         [SerializeField] Sprite plantedSprite;
 
+        // Fruit shaken off a fruit tree is a flower-type food node that rots if nobody eats it
+        // (GardenItem.mIsFruit / mLifeOver).
+        bool _isFruit;
+        int _lifeTimer;
+        int _lifeOver;
+
         Phase _phase = Phase.Unplanted;
         FrameClock _clock;
         float _scale;
@@ -72,6 +78,9 @@ namespace CapyIsland.Game
 
         /// <summary>Whether this node occupies ground that new items and seeds must avoid.</summary>
         public bool BlocksPlacement => InWorld;
+
+        /// <summary>A fruit lying on the ground rather than a planted flower.</summary>
+        public bool IsFruit => _isFruit;
 
         void Awake()
         {
@@ -136,10 +145,64 @@ namespace CapyIsland.Game
 
         void Update()
         {
-            if (_phase == Phase.Unplanted || _phase == Phase.Grown) return;
+            if (_phase == Phase.Unplanted) return;
+            if (_phase == Phase.Grown && !_isFruit) return;
 
             int frames = _clock.Consume(Time.deltaTime);
-            for (int i = 0; i < frames; i++) TickFrame();
+            for (int i = 0; i < frames; i++)
+            {
+                if (_phase != Phase.Grown) TickFrame();
+                if (_isFruit && TickRot()) return;
+            }
+        }
+
+        /// <summary>One frame of a fallen fruit's life. True once it has rotted away.</summary>
+        bool TickRot()
+        {
+            _lifeTimer++;
+            if (_body != null && _lifeOver - _lifeTimer < 60)
+                _body.enabled = (_lifeTimer / 4) % 2 == 0;   // blinks for its last two seconds
+            if (_lifeTimer <= _lifeOver) return false;
+
+            var fx = HarvestEffects.Instance;
+            if (fx != null) fx.Poof(transform.position, new Color(0.62f, 0.5f, 0.3f));
+            Reserved = false;
+            Destroy(gameObject);
+            return true;
+        }
+
+        /// <summary>
+        /// A fruit dropped by a fruit tree: food of the given flower kind, child-sized, at
+        /// <paramref name="at"/>. It lives (rand x 10 + 1) x 200 frames unless eaten first.
+        /// </summary>
+        public static Harvestable SpawnFruit(NodeResource food, Sprite sprite, float artScale, Vector2 at,
+            Transform parent, GameObject shadowTemplate)
+        {
+            var go = new GameObject(food + "Fruit");
+            go.transform.SetParent(parent, false);
+            go.transform.position = new Vector3(at.x, at.y, 0f);
+
+            if (shadowTemplate != null)
+            {
+                var shadow = Instantiate(shadowTemplate, go.transform);
+                shadow.name = "Shadow";
+                shadow.transform.localPosition = Vector3.zero;
+                shadow.transform.localScale = shadowTemplate.transform.localScale * 0.35f;
+                shadow.SetActive(true);
+            }
+
+            var body = new GameObject("Sprite");
+            body.transform.SetParent(go.transform, false);
+            var sr = body.AddComponent<SpriteRenderer>();
+            sr.sprite = sprite;
+
+            var node = go.AddComponent<Harvestable>();
+            node._isFruit = true;
+            node._lifeTimer = 0;
+            node._lifeOver = BunniRules.RandomLifetimeFrames();
+            node.InitChild(food, BunniRules.FruitInnerSize, artScale, sprite);
+            go.AddComponent<YSorter>();
+            return node;
         }
 
         void TickFrame()
@@ -199,6 +262,14 @@ namespace CapyIsland.Game
             var node = child.AddComponent<Harvestable>();
             node.InitChild(resource, childInnerSize, artScale, sr.sprite);
             child.AddComponent<YSorter>();
+
+            // Children bend in the wind like their parent.
+            var parentSway = GetComponent<Sway>();
+            if (parentSway != null)
+            {
+                var sway = child.AddComponent<Sway>();
+                sway.CopyFrom(parentSway);
+            }
         }
 
         // ---------------------------------------------------------------- harvesting

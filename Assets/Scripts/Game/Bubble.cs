@@ -36,9 +36,15 @@ namespace CapyIsland.Game
 
         Transform _body;
         Vector3 _bodyRest;
+        float _bodyScale = 1f;
         Vector3 _arrowRest;
         bool _taken;
         SpriteRenderer _icon;
+
+        // A timed bubble (a sapling or random item shaken from a fruit tree) pops if left alone.
+        FrameClock _clock;
+        int _lifeFrames = -1;
+        int _age;
 
         public bool Taken => _taken;
         public float TapRadius => tapRadius;
@@ -49,6 +55,7 @@ namespace CapyIsland.Game
             var sprite = transform.Find("Sprite");
             _body = sprite != null ? sprite : transform;
             _bodyRest = _body.localPosition;
+            _bodyScale = _body.localScale.x;
             if (arrow != null) _arrowRest = arrow.localPosition;
             RefreshIcon();
         }
@@ -90,9 +97,29 @@ namespace CapyIsland.Game
             _icon.transform.localPosition = new Vector3(0f, -sourceRenderer.sprite.bounds.center.y * s, 0f);
         }
 
+        /// <summary>
+        /// Pops this bubble, contents and all, if not collected within <paramref name="frames"/>
+        /// 30 Hz frames — the original's timed store bubbles.
+        /// </summary>
+        public void ExpireAfterFrames(int frames)
+        {
+            _lifeFrames = frames;
+            _age = 0;
+        }
+
         void Update()
         {
             if (_taken) return;
+
+            if (_lifeFrames >= 0)
+            {
+                _age += _clock.Consume(Time.deltaTime);
+                if (_age > _lifeFrames) { Pop(); return; }
+
+                // The last two seconds, it wobbles to warn it is about to go.
+                if (_lifeFrames - _age < 60 && _body != null)
+                    _body.localScale = Vector3.one * _bodyScale * (1f + Mathf.Sin(Time.time * 30f) * 0.05f);
+            }
 
             float t = Time.time;
             if (_body != null)
@@ -153,6 +180,17 @@ namespace CapyIsland.Game
             Collected?.Invoke(item, this);
             gameObject.SetActive(false);
             return item;
+        }
+
+        /// <summary>Gone unclaimed: the bubble bursts and takes its contents with it.</summary>
+        public void Pop()
+        {
+            if (_taken) return;
+            _taken = true;
+            var fx = HarvestEffects.Instance;
+            if (fx != null) fx.Twinkle(transform.position + Vector3.up * 0.6f, 6);
+            if (contents != null) Destroy(contents);
+            Destroy(gameObject);
         }
 
         void OnDrawGizmosSelected()

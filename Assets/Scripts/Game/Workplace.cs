@@ -51,7 +51,7 @@ namespace CapyIsland.Game
         /// inside this building's boundary, the nearest **child**; only if there is no child at all,
         /// the nearest **parent**. The winner is reserved when <paramref name="reserve"/> is set.
         /// </summary>
-        public Harvestable Find(NodeFamily family, Vector2 from, bool reserve)
+        public Harvestable Find(NodeFamily family, Vector2 from, bool reserve, bool childrenOnly = false)
         {
             Harvestable bestChild = null, bestParent = null;
             float childDistance = float.MaxValue, parentDistance = float.MaxValue;
@@ -59,7 +59,7 @@ namespace CapyIsland.Game
             foreach (var node in FindObjectsByType<Harvestable>(FindObjectsSortMode.None))
             {
                 if (node.Family != family || !node.InWorld || !node.CanHarvest || node.Reserved) continue;
-                if (BunniSpace.WorldDistance(transform.position, node.transform.position) > BunniRules.WorkplaceBoundary) continue;
+                if (!InBoundary(node.transform.position)) continue;
 
                 float d = BunniSpace.WorldDistance(from, node.transform.position);
                 if (node.IsParent)
@@ -69,16 +69,70 @@ namespace CapyIsland.Game
                 else if (d < childDistance) { childDistance = d; bestChild = node; }
             }
 
-            var chosen = bestChild != null ? bestChild : bestParent;
+            var chosen = bestChild != null ? bestChild : (childrenOnly ? null : bestParent);
             if (chosen != null && reserve) chosen.Reserved = true;
             return chosen;
         }
 
-        /// <summary>Credits a delivered load, doubled at a Legendary building.</summary>
-        public void Deposit(int amount)
+        bool InBoundary(Vector2 point) =>
+            BunniSpace.WorldDistance(transform.position, point) <= BunniRules.WorkplaceBoundary;
+
+        /// <summary>
+        /// The nearest grown, unreserved fruit tree inside the boundary. With
+        /// <paramref name="needFruit"/>, only trees with fruit on them (a hungry worker's search).
+        /// </summary>
+        public FruitTree FindFruitTree(Vector2 from, bool needFruit, bool reserve)
+        {
+            FruitTree best = null;
+            float bestDistance = float.MaxValue;
+            foreach (var tree in FindObjectsByType<FruitTree>(FindObjectsSortMode.None))
+            {
+                if (!tree.InWorld || !tree.CanHarvest || tree.Reserved) continue;
+                if (needFruit && tree.FruitCount == 0) continue;
+                if (!InBoundary(tree.transform.position)) continue;
+                float d = BunniSpace.WorldDistance(from, tree.transform.position);
+                if (d < bestDistance) { bestDistance = d; best = tree; }
+            }
+            if (best != null && reserve) best.Reserved = true;
+            return best;
+        }
+
+        /// <summary>
+        /// A hungry worker's search — one pass over flowers, fallen fruit and fruit trees with fruit:
+        /// the nearest of the child flowers and fruit trees, else the nearest parent flower. Exactly
+        /// one of the outputs is set, or neither.
+        /// </summary>
+        public void FindFood(Vector2 from, bool reserve, out Harvestable flower, out FruitTree tree)
+        {
+            var flowerChild = Find(NodeFamily.Flower, from, reserve: false, childrenOnly: true);
+            var fruitTree = FindFruitTree(from, needFruit: true, reserve: false);
+
+            flower = null;
+            tree = null;
+            if (flowerChild != null && fruitTree != null)
+            {
+                if (BunniSpace.WorldDistance(from, fruitTree.transform.position) < BunniSpace.WorldDistance(from, flowerChild.transform.position))
+                    tree = fruitTree;
+                else
+                    flower = flowerChild;
+            }
+            else if (flowerChild != null) flower = flowerChild;
+            else if (fruitTree != null) tree = fruitTree;
+            else flower = Find(NodeFamily.Flower, from, reserve: false);
+
+            if (!reserve) return;
+            if (flower != null) flower.Reserved = true;
+            if (tree != null) tree.Reserved = true;
+        }
+
+        /// <summary>
+        /// Credits a delivered load, doubled at a Legendary building — except a felled fruit tree,
+        /// which the original pays at a flat 500.
+        /// </summary>
+        public void Deposit(int amount, bool legendaryBonus = true)
         {
             if (amount <= 0 || ResourceStore.Instance == null) return;
-            ResourceStore.Instance.Add(accepts, legendary ? amount * 2 : amount);
+            ResourceStore.Instance.Add(accepts, legendary && legendaryBonus ? amount * 2 : amount);
         }
 
         void OnDrawGizmosSelected()

@@ -196,6 +196,10 @@ namespace CapyIsland.CameraRig
                 var bubble = Game.Bubble.Pick(world);
                 if (bubble != null) { bubble.Collect(); return; }
 
+                // Then fruit trees: a tap shakes the fruit down.
+                var tree = Game.FruitTree.Pick(world);
+                if (tree != null) { tree.PlayerShake(); return; }
+
                 Tapped?.Invoke(world);
             }
         }

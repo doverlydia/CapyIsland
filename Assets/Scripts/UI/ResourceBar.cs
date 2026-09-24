@@ -26,10 +26,56 @@ namespace CapyIsland.UI
         [Tooltip("How long a counter takes to count up to a new value, in seconds.")]
         [SerializeField] float countUpSeconds = 0.35f;
 
+        static ResourceBar _instance;
+        Transform _bumping;
+        float _bumpTimer;
+
         ResourceStore _store;
         int _shownWood, _shownGold, _shownGem;
         int _targetWood, _targetGold, _targetGem;
         float _countTimer;
+
+        void Awake() => _instance = this;
+
+        /// <summary>
+        /// Where a counter sits, as a world point at depth <paramref name="z"/> — the target of a
+        /// resource flying up from the island. Falls back to the top of the screen.
+        /// </summary>
+        public static Vector3 CounterWorldPosition(ResourceKind kind, float z)
+        {
+            var cam = Camera.main;
+            if (cam == null) return Vector3.zero;
+
+            Vector2 screen = new Vector2(Screen.width * 0.5f, Screen.height);
+            var label = _instance != null ? _instance.LabelFor(kind) : null;
+            if (label != null)
+            {
+                var canvas = label.canvas;
+                var uiCam = canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay ? canvas.worldCamera : null;
+                screen = RectTransformUtility.WorldToScreenPoint(uiCam, label.rectTransform.position);
+            }
+
+            var w = cam.ScreenToWorldPoint(new Vector3(screen.x, screen.y, z - cam.transform.position.z));
+            return new Vector3(w.x, w.y, z);
+        }
+
+        /// <summary>A little hop on a counter as something lands in it.</summary>
+        public static void Bump(ResourceKind kind)
+        {
+            if (_instance == null) return;
+            var label = _instance.LabelFor(kind);
+            if (label == null) return;
+            if (_instance._bumping != null) _instance._bumping.localScale = Vector3.one;
+            _instance._bumping = label.transform;
+            _instance._bumpTimer = 0.25f;
+        }
+
+        TMP_Text LabelFor(ResourceKind kind) => kind switch
+        {
+            ResourceKind.Wood => woodLabel,
+            ResourceKind.Gold => goldLabel,
+            _ => gemLabel,
+        };
 
         void OnEnable()
         {
@@ -60,6 +106,14 @@ namespace CapyIsland.UI
 
         void Update()
         {
+            if (_bumping != null)
+            {
+                _bumpTimer -= Time.unscaledDeltaTime;
+                float k = Mathf.Clamp01(_bumpTimer / 0.25f);
+                _bumping.localScale = Vector3.one * (1f + Mathf.Sin(k * Mathf.PI) * 0.25f);
+                if (_bumpTimer <= 0f) { _bumping.localScale = Vector3.one; _bumping = null; }
+            }
+
             // Ticking the number up is a small thing that makes earning feel like earning.
             bool changed = false;
             _countTimer += Time.deltaTime;
