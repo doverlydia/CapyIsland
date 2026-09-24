@@ -104,6 +104,7 @@ namespace CapyIsland.Game
             if (_credited) return;
             _credited = true;
             if (ResourceStore.Instance != null) ResourceStore.Instance.Add(_kind, _amount);
+            Sfx.Play(SfxKind.Coin, 0.35f, 0.15f);
             UI.ResourceBar.Bump(_kind);
         }
 

@@ -236,6 +236,7 @@ namespace CapyIsland.Game
 
             if (animate)
             {
+                Sfx.Play(SfxKind.Bridge, 0.9f, 0f);
                 var fx = HarvestEffects.Instance;
                 if (fx != null)
                     foreach (var c in b.circles)

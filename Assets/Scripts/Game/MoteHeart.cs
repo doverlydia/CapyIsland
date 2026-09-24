@@ -57,6 +57,7 @@ namespace CapyIsland.Game
             go.transform.DOScale(1f, 32f / 30f).SetEase(Ease.OutBack);
             var fx = HarvestEffects.Instance;
             if (fx != null) fx.Twinkle(at + Vector2.up * 0.6f, 10);
+            Sfx.Play(SfxKind.Heart, 0.8f, 0f);
         }
 
         void OnEnable() => TapTargets.Register(this);

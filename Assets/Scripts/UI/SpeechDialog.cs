@@ -129,6 +129,7 @@ namespace CapyIsland.UI
 
         void NextPage()
         {
+            Game.Sfx.Play(Game.SfxKind.Tap, 0.5f);
             if (_page < _pages.Length - 1) { _page++; ShowPage(); return; }
             if (_choices.Count == 0) Close(runCallback: true);
         }

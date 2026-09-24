@@ -283,6 +283,7 @@ namespace CapyIsland.Game
         void Fell()
         {
             Vector2 at = transform.position;
+            Sfx.PlayAt(SfxKind.Fell, at);
             var fx = HarvestEffects.Instance;
             if (fx != null)
             {
@@ -380,6 +381,7 @@ namespace CapyIsland.Game
 
         void PlayShake()
         {
+            Sfx.PlayAt(SfxKind.Rustle, transform.position);
             if (_sway != null) _sway.Kick(9f, 0.5f, 34f);
             if (_body != null)
             {
@@ -428,6 +430,7 @@ namespace CapyIsland.Game
                 if (nodeBody != null) nodeBody.DOPunchScale(new Vector3(0.35f, -0.3f, 0f), 0.3f, 5, 0.8f);
                 var fx = HarvestEffects.Instance;
                 if (fx != null) fx.FruitPop(spot + Vector2.up * 0.1f, juice);
+                Sfx.PlayAt(SfxKind.Plop, spot, 0.9f, 0.18f);
             });
         }
 

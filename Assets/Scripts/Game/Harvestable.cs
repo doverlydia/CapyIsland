@@ -345,6 +345,7 @@ namespace CapyIsland.Game
         {
             if (HarvestEffects.Instance != null)
                 HarvestEffects.Instance.Felled(transform.position, Family);
+            if (Family == NodeFamily.Tree) Sfx.PlayAt(SfxKind.Fell, transform.position, 0.8f);
 
             if (isParent && _placeable != null && !spoil)
             {

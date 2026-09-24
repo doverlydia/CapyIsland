@@ -157,12 +157,15 @@ namespace CapyIsland.Game
             // Fruit trees rock themselves and throw their own leaves.
             if (struck is FruitTree tree)
             {
+                Sfx.PlayAt(_worker.IsShaking ? SfxKind.Rustle : SfxKind.Chop, tree.transform.position, 0.8f);
                 var fxTree = HarvestEffects.Instance;
                 if (fxTree != null) fxTree.HitTree(tree);
                 return;
             }
 
             var node = (Harvestable)struck;
+            Sfx.PlayAt(node.Family == NodeFamily.Tree ? SfxKind.Chop : node.Family == NodeFamily.Rock ? SfxKind.Mine : SfxKind.Nibble,
+                node.transform.position, 0.7f);
 
             // Anything that sways owns its rotation: kick it rather than rotating it directly.
             var sway = node.GetComponent<Sway>();

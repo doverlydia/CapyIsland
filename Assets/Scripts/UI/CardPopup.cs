@@ -100,6 +100,7 @@ namespace CapyIsland.UI
 
         void Dismiss()
         {
+            Sfx.Play(SfxKind.Tap, 0.5f);
             var closed = _current;
             _current = null;
             ShowNext();

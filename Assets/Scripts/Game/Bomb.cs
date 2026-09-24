@@ -37,7 +37,11 @@ namespace CapyIsland.Game
             _bodyRenderer = _body != null ? _body.GetComponent<SpriteRenderer>() : null;
         }
 
-        void OnPlacedInWorld() => _counter = 0;
+        void OnPlacedInWorld()
+        {
+            _counter = 0;
+            Sfx.PlayAt(SfxKind.Fuse, transform.position);
+        }
 
         void OnReturnedToBubble() => _counter = -1;
 
@@ -79,6 +83,7 @@ namespace CapyIsland.Game
         {
             var fx = HarvestEffects.Instance;
             Vector2 at = transform.position;
+            Sfx.PlayAt(SfxKind.Boom, at, 1f, 0.05f);
             if (fx != null)
             {
                 fx.Felled(at, NodeFamily.Rock);

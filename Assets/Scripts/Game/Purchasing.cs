@@ -39,6 +39,7 @@ namespace CapyIsland.Game
             var store = ResourceStore.Instance;
             var price = StoreData.Price(name);
             if (store == null || !store.TrySpend(price.x, price.y, price.z)) return false;
+            Sfx.Play(SfxKind.Buy, 0.8f);
             Deliver(name, shopSpot);
             return true;
         }

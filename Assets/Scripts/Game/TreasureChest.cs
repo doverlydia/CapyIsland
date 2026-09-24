@@ -152,6 +152,7 @@ namespace CapyIsland.Game
 
         void Open()
         {
+            Sfx.PlayAt(SfxKind.Chest, transform.position);
             var art = GameArt.Instance;
             if (_body != null && art != null && art.chestOpen != null) _body.sprite = art.chestOpen;
             if (_body != null)

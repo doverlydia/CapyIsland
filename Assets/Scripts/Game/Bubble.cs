@@ -193,6 +193,7 @@ namespace CapyIsland.Game
                 }
             }
 
+            Sfx.PlayAt(SfxKind.Pop, transform.position);
             Collected?.Invoke(item, this);
             Purchasing.Collected(item);
             gameObject.SetActive(false);
@@ -204,6 +205,7 @@ namespace CapyIsland.Game
         {
             if (_taken) return;
             _taken = true;
+            Sfx.PlayAt(SfxKind.Pop, transform.position, 0.6f, 0.2f);
             var fx = HarvestEffects.Instance;
             if (fx != null) fx.Twinkle(transform.position + Vector3.up * 0.6f, 6);
             if (contents != null) Destroy(contents);

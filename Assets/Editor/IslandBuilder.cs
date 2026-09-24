@@ -75,6 +75,13 @@ namespace CapyIsland.EditorTools
             systems.AddComponent<Game.GameBootstrap>();
             systems.AddComponent<Game.QuestSystem>();
             systems.AddComponent<Game.SaveGame>();
+            var sfx = systems.AddComponent<Game.Sfx>();
+            var names = System.Enum.GetNames(typeof(Game.SfxKind));
+            var clips = new AudioClip[names.Length];
+            for (int i = 0; i < names.Length; i++)
+                clips[i] = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Sfx_" + names[i] + ".wav");
+            sfx.SetClips(clips);
+            EditorUtility.SetDirty(sfx);
             BuildCatalog(root.transform, systems.transform, shadow);
             var pointer = BuildTutorialPointer(systems.transform);
 

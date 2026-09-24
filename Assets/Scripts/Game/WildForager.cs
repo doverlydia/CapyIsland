@@ -124,6 +124,7 @@ namespace CapyIsland.Game
                 // Fruit trees are shaken, one fruit at a time, never chopped.
                 var sway = TargetTree.GetComponent<Sway>();
                 if (sway != null) sway.Kick(5f, 0.3f);
+                Sfx.PlayAt(SfxKind.Rustle, TargetTree.transform.position, 0.6f);
                 TargetTree.RemoveOne();
                 Release();
                 _state = State.Find;
@@ -132,6 +133,8 @@ namespace CapyIsland.Game
             }
 
             var node = TargetNode;
+            Sfx.PlayAt(node.Family == NodeFamily.Tree ? SfxKind.Chop : node.Family == NodeFamily.Rock ? SfxKind.Mine : SfxKind.Nibble,
+                node.transform.position, 0.6f);
             var nodeSway = node.GetComponent<Sway>();
             if (nodeSway != null) nodeSway.Kick(6f, 0.3f);
             if (HarvestEffects.Instance != null) HarvestEffects.Instance.Hit(node);
