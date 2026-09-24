@@ -31,6 +31,30 @@ namespace CapyIsland.Game
 
         bool _scattered;
 
+        /// <summary>
+        /// Called when the item is bubbled again. Clears the old clumps and restores the icon, so
+        /// replanting grows a fresh forest rather than re-showing a stump field.
+        /// </summary>
+        void OnReturnedToBubble()
+        {
+            for (int i = transform.childCount - 1; i >= 0; i--)
+            {
+                var child = transform.GetChild(i);
+                if (child.name.StartsWith("Clump")) DestroyImmediate(child.gameObject);
+            }
+
+            var source = transform.Find("Sprite");
+            if (source != null)
+            {
+                var sr = source.GetComponent<SpriteRenderer>();
+                if (sr != null) sr.enabled = true;
+            }
+            var shadow = transform.Find("Shadow");
+            if (shadow != null) shadow.gameObject.SetActive(true);
+
+            _scattered = false;
+        }
+
         /// <summary>Called by <see cref="Placeable.MarkPlaced"/>.</summary>
         void OnPlacedInWorld()
         {

@@ -18,6 +18,8 @@ namespace CapyIsland.Game
         WalkingToNode,
         Harvesting,
         CarryingHome,
+        WalkingToFood,
+        Eating,
         Asleep,
         Waiting,
     }
@@ -27,10 +29,13 @@ namespace CapyIsland.Game
         /// <summary>Chop/mine seconds for a worker of speed 1. Speed 3 gives ~33s, plus walking ~= 45s.</summary>
         public const float HarvestSecondsAtSpeedOne = 100f;
 
+        /// <summary>Seconds per strike for a worker of speed 1. Speed 3 gives a strike every ~2.7s.</summary>
+        public const float SecondsPerStrikeAtSpeedOne = 8f;
+
         /// <summary>How near a station a dropped worker must land to take the job.</summary>
         public const float DropOnStationRadius = 2.2f;
 
-        enum State { Following, Idle, ToNode, Harvesting, ToWorkplace }
+        enum State { Following, Idle, ToNode, Harvesting, ToWorkplace, ToFood, Eating }
 
         [Header("Species")]
         [Tooltip("The original's relative rate: bunni 3, pirate 4, panda 2, fox 6, monster 6.")]
@@ -39,10 +44,19 @@ namespace CapyIsland.Game
         [SerializeField] float moveSpeed = 2.2f;
 
         [Header("Hunger")]
-        [Tooltip("Trips this worker can make before it needs to eat. 0 disables hunger.")]
-        [SerializeField] int tripsBeforeHungry = 4;
+        [Tooltip("Strikes this worker makes before it needs to eat. 0 disables hunger.")]
+                [SerializeField] int tripsBeforeHungry = 12;
+
+        [Tooltip("While asleep, how often to check whether a garden has appeared nearby.")]
+        [SerializeField] float wakeCheckSeconds = 0.5f;
 
         State _state = State.Following;
+        FoodSource _food;
+        float _eatTimer;
+        float _wakeTimer;
+
+        /// <summary>Seconds a meal takes. The original's bunni was back at work about 9s after reaching a garden.</summary>
+        const float EatSeconds = 3f;
         Workplace _workplace;
         Harvestable _target;
         float _harvestTimer;
@@ -67,6 +81,8 @@ namespace CapyIsland.Game
                     State.ToNode => WorkerActivity.WalkingToNode,
                     State.Harvesting => WorkerActivity.Harvesting,
                     State.ToWorkplace => WorkerActivity.CarryingHome,
+                    State.ToFood => WorkerActivity.WalkingToFood,
+                    State.Eating => WorkerActivity.Eating,
                     _ => WorkerActivity.Waiting,
                 };
             }
@@ -149,6 +165,7 @@ namespace CapyIsland.Game
         public void Feed()
         {
             _tripsSinceMeal = 0;
+            _food = null;
             if (!_asleep) return;
             _asleep = false;
             _state = State.Idle;
@@ -156,7 +173,7 @@ namespace CapyIsland.Game
 
         void Update()
         {
-            if (_asleep) return;
+            if (_asleep) { TickAsleep(); return; }
             // While unassigned the Follower component walks it; the worker just waits.
             if (_workplace == null) return;
 
@@ -167,6 +184,8 @@ namespace CapyIsland.Game
                 case State.ToNode: TickToNode(); break;
                 case State.Harvesting: TickHarvesting(); break;
                 case State.ToWorkplace: TickToWorkplace(); break;
+                case State.ToFood: TickToFood(); break;
+                case State.Eating: TickEating(); break;
             }
         }
 
@@ -174,9 +193,11 @@ namespace CapyIsland.Game
         {
             if (tripsBeforeHungry > 0 && _tripsSinceMeal >= tripsBeforeHungry)
             {
-                // No food handling yet, so an unfed worker simply stops - the original's
-                // "falls asleep beside the mill" behaviour that Tutorial 2 teaches you to fix.
+                if (TryGoEat()) return;
+                // Nothing to eat in reach: fall asleep beside the mill. This is the beat the
+                // original's Tutorial 2 teaches you to fix by planting a garden.
                 _asleep = true;
+                _wakeTimer = 0f;
                 return;
             }
 
@@ -191,22 +212,40 @@ namespace CapyIsland.Game
 
             if (!MoveToward(_target.transform.position)) return;
 
-            _harvestDuration = HarvestSecondsAtSpeedOne / Mathf.Max(0.01f, speed);
+            // Seconds per STRIKE now, not per trip: a whole node still takes about as long,
+            // but the payout and the shrink arrive steadily instead of all at the end.
+            _harvestDuration = SecondsPerStrikeAtSpeedOne / Mathf.Max(0.01f, speed);
             _harvestTimer = 0f;
             _state = State.Harvesting;
         }
 
         void TickHarvesting()
         {
-            if (_target == null) { _state = State.Idle; return; }
+            if (_target == null || !_target.HasStock) { _state = State.Idle; return; }
+
+            // Drifted out of the mill's reach (the node shrank, or the mill was replaced).
+            if (_workplace == null) { _state = State.Following; return; }
 
             _harvestTimer += Time.deltaTime;
             if (_harvestTimer < _harvestDuration) return;
+            _harvestTimer = 0f;
 
-            _carrying = _target.Take();
-            if (_carrying <= 0) { _state = State.Idle; return; }
-            _state = State.ToWorkplace;
+            // Every strike pays out on the spot. Waiting for a round trip made work invisible for
+            // most of a minute, which read as the capybara doing nothing.
+            int gained = _target.Strike();
+            if (gained > 0)
+            {
+                _workplace.Deposit(gained);
+                _tripsSinceMeal++;
+            }
+
+            bool pauseToEat = tripsBeforeHungry > 0 && _tripsSinceMeal >= HungerCheckEvery;
+            if (_target == null || !_target.HasStock || pauseToEat)
+                _state = State.Idle;
         }
+
+        /// <summary>Strikes between hunger checks, so a worker still stops to eat.</summary>
+        const int HungerCheckEvery = 6;
 
         void TickToWorkplace()
         {
@@ -227,6 +266,46 @@ namespace CapyIsland.Game
             if (king == null) return;
             var behind = (Vector2)king.transform.position + new Vector2(-0.9f, -0.5f);
             transform.position = new Vector3(behind.x, behind.y, transform.position.z);
+        }
+
+        /// <summary>Heads for the nearest open garden if there is one. False when there is none.</summary>
+        bool TryGoEat()
+        {
+            _food = FoodSource.FindNear(transform.position);
+            if (_food == null) return false;
+            _state = State.ToFood;
+            return true;
+        }
+
+        void TickToFood()
+        {
+            if (_food == null || !_food.IsOpen) { _state = State.Idle; return; }
+            if (!MoveToward(_food.transform.position)) return;
+            _eatTimer = 0f;
+            _state = State.Eating;
+        }
+
+        void TickEating()
+        {
+            if (_food == null) { _state = State.Idle; return; }
+            _eatTimer += Time.deltaTime;
+            if (_eatTimer < EatSeconds) return;
+
+            _food.Eat();
+            _food = null;
+            _tripsSinceMeal = 0;
+            _state = State.Idle;
+        }
+
+        /// <summary>A sleeping worker wakes the moment a garden comes within reach.</summary>
+        void TickAsleep()
+        {
+            _wakeTimer -= Time.deltaTime;
+            if (_wakeTimer > 0f) return;
+            _wakeTimer = wakeCheckSeconds;
+
+            if (!TryGoEat()) return;
+            _asleep = false;
         }
 
         /// <summary>Steps toward a target. Returns true on arrival.</summary>

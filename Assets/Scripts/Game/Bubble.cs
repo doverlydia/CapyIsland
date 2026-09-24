@@ -61,6 +61,15 @@ namespace CapyIsland.Game
                 arrow.localPosition = _arrowRest + new Vector3(0f, Mathf.Abs(Mathf.Sin(t * arrowBobRate * Mathf.PI)) * arrowBobHeight, 0f);
         }
 
+        /// <summary>Fills a bubble created at runtime, for an item returning to the world.</summary>
+        public void Fill(GameObject item, Transform arrowTransform)
+        {
+            contents = item;
+            arrow = arrowTransform;
+            _taken = false;
+            Awake();   // re-cache the body and arrow rest positions
+        }
+
         /// <summary>Nearest uncollected bubble under a world point, or null.</summary>
         public static Bubble Pick(Vector2 worldPoint)
         {

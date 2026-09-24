@@ -112,6 +112,19 @@ namespace CapyIsland.Game
         }
 
         /// <summary>
+        /// Puts a used-up item back to its just-bought state so it can be bubbled, collected and
+        /// replanted. Anything that regenerates on placement resets here too.
+        /// </summary>
+        public void ResetForRebirth()
+        {
+            CaptureScale();
+            placed = false;
+            transform.localScale = _placedScale * carriedScale;
+            transform.localRotation = Quaternion.identity;
+            SendMessage("OnReturnedToBubble", SendMessageOptions.DontRequireReceiver);
+        }
+
+        /// <summary>
         /// Remembers the authored scale once, so repeated pick-up/place cycles cannot compound the
         /// carried shrink into nothing.
         /// </summary>

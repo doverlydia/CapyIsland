@@ -60,13 +60,26 @@ namespace CapyIsland.EditorTools
             MakeBubble(bubbles.transform, new Vector2(5.5f, 2.5f), BuildSawmillItem(stash.transform, shadow));
             MakeBubble(bubbles.transform, new Vector2(0.5f, 6f), BuildCapyHouseItem(stash.transform, shadow));
 
+            // The garden has no bubble yet: the tutorial drops one the moment the first worker
+            // falls asleep, so the player sees the problem before the fix.
+            var garden = BuildGardenItem(stash.transform, shadow);
+
             var systems = new GameObject("Systems");
             systems.transform.SetParent(root.transform, false);
             systems.AddComponent<Game.ResourceStore>();
 
             BuildPlacementPreview(systems.transform);
+            var pointer = BuildTutorialPointer(systems.transform);
 
-            BuildHud(root.transform);
+            var ghost = BuildHud(root.transform);
+
+            var tutorial = systems.AddComponent<Game.TutorialDirector>();
+            var tso = new SerializedObject(tutorial);
+            tso.FindProperty("dialogue").objectReferenceValue = ghost;
+            tso.FindProperty("pointer").objectReferenceValue = pointer;
+            tso.FindProperty("gardenItem").objectReferenceValue = garden.GetComponent<Game.Placeable>();
+            tso.FindProperty("bubbleParent").objectReferenceValue = bubbles.transform;
+            tso.ApplyModifiedPropertiesWithoutUndo();
 
             EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
             Selection.activeGameObject = root;
@@ -86,8 +99,11 @@ namespace CapyIsland.EditorTools
             var so = new SerializedObject(h);
             so.FindProperty("kind").enumValueIndex = (int)Game.ResourceKind.Wood;
             so.FindProperty("yieldPerTrip").intValue = 3;      // game.xml: price/pine
-            so.FindProperty("capacity").intValue = 24;
-            so.FindProperty("renewable").boolValue = true;
+            // 5 trees x 6 chops each. Chops-per-tree is not in the original data (there, 3 wood
+            // arrives per round trip) so this is a chosen number: 30 chops x 3 wood = 90 wood per
+            // forest, which buys 9 capybaras at 10 wood each.
+            so.FindProperty("capacity").intValue = 30;
+            so.FindProperty("renewable").boolValue = false;   // felled forests return as a bubble
             so.FindProperty("regrowSeconds").floatValue = 30f;
             so.ApplyModifiedPropertiesWithoutUndo();
 
@@ -143,12 +159,28 @@ namespace CapyIsland.EditorTools
             return item;
         }
 
+        static GameObject BuildGardenItem(Transform parent, Sprite shadow)
+        {
+            var item = MakeItem(parent, "Medium Posie Garden", Load("Assets/Art/Terrain/Garden_Posie.png"),
+                shadow, 1.6f, 0.8f,
+                "A beautiful larder for wild creatures. Hungry capybaras eat here, so keep it planted.",
+                "Garden = fed Capybaras", inner: 1.2f, outer: 10f);
+            item.AddComponent<Game.FoodSource>();
+            return item;
+        }
+
         /// <summary>An inactive worker the shop clones on purchase.</summary>
         static GameObject BuildWorkerTemplate(Transform parent, Sprite shadow)
         {
             var go = Prop(parent, "CapybaraTemplate", Load("Assets/Art/Capybaras/Capy_Idle.png"),
                 shadow, Vector2.zero, 1.2f, 0.5f);
             go.AddComponent<Game.Worker>();
+            var visuals = go.AddComponent<Game.WorkerVisuals>();
+            var vso = new SerializedObject(visuals);
+            vso.FindProperty("axe").objectReferenceValue = Load("Assets/Art/Common/Tool_Axe.png");
+            vso.FindProperty("pickaxe").objectReferenceValue = Load("Assets/Art/Common/Tool_Pickaxe.png");
+            vso.FindProperty("log").objectReferenceValue = Load("Assets/Art/Common/Prop_Log.png");
+            vso.ApplyModifiedPropertiesWithoutUndo();
             go.AddComponent<Game.Follower>();
             go.AddComponent<Game.YSorter>();
             go.AddComponent<Game.DraggableActor>();
@@ -301,7 +333,7 @@ namespace CapyIsland.EditorTools
 
         // ---------------------------------------------------------------- HUD
 
-        static void BuildHud(Transform parent)
+        static UI.GhostDialogue BuildHud(Transform parent)
         {
             var canvasGo = new GameObject("HUD",
                 typeof(Canvas), typeof(UnityEngine.UI.CanvasScaler), typeof(UnityEngine.UI.GraphicRaycaster));
@@ -327,6 +359,104 @@ namespace CapyIsland.EditorTools
 
             BuildResourceBar(safe.transform);
             BuildPurchaseDialog(safe.transform);
+            return BuildGhostDialogue(safe.transform);
+        }
+
+        /// <summary>
+        /// The pointing hand, in world space so it can sit over a moving target without any
+        /// screen-space conversion.
+        /// </summary>
+        static Game.TutorialPointer BuildTutorialPointer(Transform parent)
+        {
+            var go = new GameObject("TutorialPointer");
+            go.transform.SetParent(parent, false);
+
+            var handGo = new GameObject("Hand");
+            handGo.transform.SetParent(go.transform, false);
+            handGo.transform.localScale = Vector3.one * 1.15f;
+            var sr = handGo.AddComponent<SpriteRenderer>();
+            sr.sprite = Load("Assets/Art/Common/UI_PointerHand.png");
+            sr.sortingOrder = PropSortBase + 9000;   // always over the world
+            sr.enabled = false;
+
+            var pointer = go.AddComponent<Game.TutorialPointer>();
+            var so = new SerializedObject(pointer);
+            so.FindProperty("hand").objectReferenceValue = sr;
+            so.ApplyModifiedPropertiesWithoutUndo();
+            return pointer;
+        }
+
+        /// <summary>The ghost who talks you through the opening, bottom-left like the original.</summary>
+        static UI.GhostDialogue BuildGhostDialogue(Transform safeArea)
+        {
+            var root = new GameObject("GhostDialogueRoot", typeof(RectTransform));
+            root.transform.SetParent(safeArea, false);
+            var rootRect = root.GetComponent<RectTransform>();
+            rootRect.anchorMin = Vector2.zero;
+            rootRect.anchorMax = Vector2.one;
+            rootRect.offsetMin = Vector2.zero;
+            rootRect.offsetMax = Vector2.zero;
+
+            var panel = new GameObject("Panel", typeof(RectTransform));
+            panel.transform.SetParent(root.transform, false);
+            var rect = panel.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0f, 0f);
+            rect.anchorMax = new Vector2(0f, 0f);
+            rect.pivot = new Vector2(0f, 0f);
+            rect.anchoredPosition = new Vector2(24f, 24f);
+            rect.sizeDelta = new Vector2(880f, 210f);
+
+            // Ghost portrait on the left.
+            var portraitGo = new GameObject("Portrait", typeof(RectTransform), typeof(UnityEngine.UI.Image));
+            portraitGo.transform.SetParent(panel.transform, false);
+            var pr = portraitGo.GetComponent<RectTransform>();
+            pr.anchorMin = new Vector2(0f, 0.5f);
+            pr.anchorMax = new Vector2(0f, 0.5f);
+            pr.pivot = new Vector2(0f, 0.5f);
+            pr.sizeDelta = new Vector2(180f, 180f);
+            var portrait = portraitGo.GetComponent<UnityEngine.UI.Image>();
+            portrait.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Capybaras/Capy_Ghost.png");
+            portrait.preserveAspect = true;
+            portrait.raycastTarget = false;
+
+            // Speech bubble to its right.
+            var bubbleGo = new GameObject("Bubble", typeof(RectTransform), typeof(UnityEngine.UI.Image));
+            bubbleGo.transform.SetParent(panel.transform, false);
+            var br = bubbleGo.GetComponent<RectTransform>();
+            br.anchorMin = new Vector2(0f, 0.5f);
+            br.anchorMax = new Vector2(0f, 0.5f);
+            br.pivot = new Vector2(0f, 0.5f);
+            br.anchoredPosition = new Vector2(196f, 0f);
+            br.sizeDelta = new Vector2(660f, 180f);
+            var bubble = bubbleGo.GetComponent<UnityEngine.UI.Image>();
+            bubble.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Common/White.png");
+            bubble.color = new Color(0.16f, 0.13f, 0.10f, 0.82f);
+            bubble.raycastTarget = false;
+
+            var labelGo = new GameObject("Line", typeof(RectTransform), typeof(TMPro.TextMeshProUGUI));
+            labelGo.transform.SetParent(bubbleGo.transform, false);
+            var lr = labelGo.GetComponent<RectTransform>();
+            lr.anchorMin = Vector2.zero;
+            lr.anchorMax = Vector2.one;
+            lr.offsetMin = new Vector2(26f, 20f);
+            lr.offsetMax = new Vector2(-26f, -20f);
+
+            var label = labelGo.GetComponent<TMPro.TextMeshProUGUI>();
+            label.fontSize = 32f;
+            label.alignment = TMPro.TextAlignmentOptions.TopLeft;
+            label.color = new Color(0.98f, 0.96f, 0.92f);
+            label.raycastTarget = false;
+            label.text = "";
+
+            var dialogue = root.AddComponent<UI.GhostDialogue>();
+            var so = new SerializedObject(dialogue);
+            so.FindProperty("panel").objectReferenceValue = panel;
+            so.FindProperty("label").objectReferenceValue = label;
+            so.FindProperty("portrait").objectReferenceValue = portrait;
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            panel.SetActive(false);
+            return dialogue;
         }
 
         static void BuildResourceBar(Transform safeArea)
