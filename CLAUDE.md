@@ -33,7 +33,8 @@ invented mechanics repeatedly, and that is what these files exist to prevent.
 - Harvesting is **hit-frames removing scale**, not a timer. `speed` = scale removed per swing.
 - `<seedrates>` is a **frame countdown — lower is faster**. Ironwood and gold reseed fastest.
 - Roses **do** regrow, and faster than posies. "Non-renewable" is designer intent, not code.
-- Harvesting a **parent** node regenerates its entire cluster.
+- Harvesting a **parent** node turns it into a **free bubble** of the same item (it does not regrow in place), and workers take children before parents.
+- Harvest per hit is `0.1 × speed / 3` — the /3 is easy to miss.
 - The SWF runs at **30 fps**; every rate in the config is per frame.
 
 ## Licensing boundary
