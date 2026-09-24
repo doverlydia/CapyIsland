@@ -43,14 +43,14 @@ namespace CapyIsland.EditorTools
             root.transform.SetParent(safeArea, false);
             Stretch(root);
 
-            var panelImg = Panel(root.transform, "Panel", Parchment);
+            var panelImg = Panel(root.transform, "Panel", new Color(Parchment.r, Parchment.g, Parchment.b, 1f));
             var panel = panelImg.gameObject;
             var rect = panel.GetComponent<RectTransform>();
             rect.anchorMin = new Vector2(0.5f, 0f);
             rect.anchorMax = new Vector2(0.5f, 0f);
             rect.pivot = new Vector2(0.5f, 0f);
             rect.anchoredPosition = new Vector2(0f, 250f);
-            rect.sizeDelta = new Vector2(1000f, 420f);
+            rect.sizeDelta = new Vector2(1000f, 380f);
 
             // The whole panel is the "next page" button.
             var pageButton = panel.AddComponent<Button>();
@@ -61,8 +61,8 @@ namespace CapyIsland.EditorTools
             var pr = portraitGo.GetComponent<RectTransform>();
             pr.anchorMin = pr.anchorMax = new Vector2(0f, 1f);
             pr.pivot = new Vector2(0f, 1f);
-            pr.anchoredPosition = new Vector2(24f, 90f);
-            pr.sizeDelta = new Vector2(220f, 220f);
+            pr.anchoredPosition = new Vector2(20f, -20f);
+            pr.sizeDelta = new Vector2(200f, 200f);
             var portrait = portraitGo.GetComponent<Image>();
             portrait.preserveAspect = true;
             portrait.raycastTarget = false;
@@ -72,7 +72,7 @@ namespace CapyIsland.EditorTools
             var nr = name.rectTransform;
             nr.anchorMin = nr.anchorMax = new Vector2(0f, 1f);
             nr.pivot = new Vector2(0f, 1f);
-            nr.anchoredPosition = new Vector2(260f, -18f);
+            nr.anchoredPosition = new Vector2(240f, -22f);
             name.fontStyle = FontStyles.Bold;
 
             var body = Label(panel.transform, "Body", 32f, TextAlignmentOptions.TopLeft,
@@ -80,8 +80,8 @@ namespace CapyIsland.EditorTools
             var br = body.rectTransform;
             br.anchorMin = new Vector2(0f, 0f);
             br.anchorMax = new Vector2(1f, 1f);
-            br.offsetMin = new Vector2(40f, 110f);
-            br.offsetMax = new Vector2(-40f, -84f);
+            br.offsetMin = new Vector2(240f, 110f);
+            br.offsetMax = new Vector2(-32f, -84f);
             body.textWrappingMode = TextWrappingModes.Normal;
             body.overflowMode = TextOverflowModes.Ellipsis;
 

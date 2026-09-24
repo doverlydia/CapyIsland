@@ -381,11 +381,13 @@ namespace CapyIsland.EditorTools
             safeRect.offsetMin = Vector2.zero;
             safeRect.offsetMax = Vector2.zero;
 
+            // Later siblings draw on top: the ghost's hints under any dialog, the card over all.
             BuildResourceBar(safe.transform);
-            BuildPurchaseDialog(safe.transform);
+            var ghost = BuildGhostDialogue(safe.transform);
             BuildSpeechDialog(safe.transform);
+            BuildPurchaseDialog(safe.transform);
             BuildCardPopup(safe.transform);
-            return BuildGhostDialogue(safe.transform);
+            return ghost;
         }
 
         /// <summary>
@@ -538,21 +540,25 @@ namespace CapyIsland.EditorTools
             rect.anchorMin = new Vector2(0.5f, 0.5f);
             rect.anchorMax = new Vector2(0.5f, 0.5f);
             rect.pivot = new Vector2(0.5f, 0.5f);
-            rect.sizeDelta = new Vector2(760f, 460f);
+            rect.sizeDelta = new Vector2(820f, 520f);
 
             var bg = panel.GetComponent<UnityEngine.UI.Image>();
             bg.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Common/White.png");
             bg.color = new Color(0.98f, 0.96f, 0.91f, 0.98f);
 
             var title = Label(panel.transform, "Title", 52f, TMPro.TextAlignmentOptions.Center,
-                new Vector2(0f, 160f), new Vector2(700f, 70f), new Color(0.22f, 0.16f, 0.11f));
-            var blurb = Label(panel.transform, "Blurb", 32f, TMPro.TextAlignmentOptions.TopLeft,
-                new Vector2(0f, 40f), new Vector2(660f, 170f), new Color(0.30f, 0.24f, 0.18f));
+                new Vector2(0f, 195f), new Vector2(760f, 70f), new Color(0.22f, 0.16f, 0.11f));
+            var blurb = Label(panel.transform, "Blurb", 30f, TMPro.TextAlignmentOptions.TopLeft,
+                new Vector2(-105f, 35f), new Vector2(560f, 230f), new Color(0.30f, 0.24f, 0.18f));
+            blurb.textWrappingMode = TMPro.TextWrappingModes.Normal;
+            blurb.enableAutoSizing = true;
+            blurb.fontSizeMin = 18f;
+            blurb.fontSizeMax = 30f;
 
             // Prices stack down the right, each with its icon.
-            var wood = PriceRow(panel.transform, "WoodCost", "Assets/Art/UI/Icon_Wood.png", 150f);
-            var gold = PriceRow(panel.transform, "GoldCost", "Assets/Art/UI/Icon_Gold.png", 80f);
-            var gem = PriceRow(panel.transform, "GemCost", "Assets/Art/UI/Icon_Gem.png", 10f);
+            var wood = PriceRow(panel.transform, "WoodCost", "Assets/Art/UI/Icon_Wood.png", 120f);
+            var gold = PriceRow(panel.transform, "GoldCost", "Assets/Art/UI/Icon_Gold.png", 50f);
+            var gem = PriceRow(panel.transform, "GemCost", "Assets/Art/UI/Icon_Gem.png", -20f);
 
             var cancel = DialogButton(panel.transform, "Cancel", "Cancel", -160f,
                 new Color(0.86f, 0.83f, 0.77f), new Color(0.28f, 0.22f, 0.16f));
@@ -596,7 +602,7 @@ namespace CapyIsland.EditorTools
             var icon = new GameObject(name + "Icon", typeof(RectTransform), typeof(UnityEngine.UI.Image));
             icon.transform.SetParent(parent, false);
             var ir = icon.GetComponent<RectTransform>();
-            ir.anchoredPosition = new Vector2(300f, y);
+            ir.anchoredPosition = new Vector2(350f, y);
             ir.sizeDelta = new Vector2(52f, 52f);
             var img = icon.GetComponent<UnityEngine.UI.Image>();
             img.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(iconPath);
@@ -604,7 +610,7 @@ namespace CapyIsland.EditorTools
             img.raycastTarget = false;
 
             return Label(parent, name, 38f, TMPro.TextAlignmentOptions.Right,
-                new Vector2(215f, y), new Vector2(140f, 52f), new Color(0.22f, 0.16f, 0.11f));
+                new Vector2(265f, y), new Vector2(130f, 52f), new Color(0.22f, 0.16f, 0.11f));
         }
 
         static UnityEngine.UI.Button DialogButton(Transform parent, string name, string caption,

@@ -18,6 +18,11 @@ const tag = (block, name) => {
 
 // The capybara stands in for the bunni everywhere the player can see it.
 const rename = (s) => s
+  // Touch screens: the original's "click" is a tap here.
+  .replace(/\bClicking\b/g, "Tapping")
+  .replace(/\bclicking\b/g, "tapping")
+  .replace(/\bClick\b/g, "Tap")
+  .replace(/\bclick\b/g, "tap")
   .replace(/Bunni House/g, "Capy House")
   .replace(/\bBunni\b/g, "Capybara")
   .replace(/\bbunnies\b/g, "capybaras")

@@ -77,9 +77,9 @@ namespace CapyIsland.Game
             new CardDef("Pirate House", 38, "Bribe Pirates with sparkly gems to help find hidden treasure", new[] { "Pirate House" }),
             new CardDef("Capy House", 39, "Purchase Capybaras from a Capybara house to help harvest wood and gold.", new[] { "Capy House" }),
             new CardDef("Panda House", 40, "Hire slow Pandas from a Panda house to help harvest wood and gold.", new[] { "Panda House" }),
-            new CardDef("Apple Tree", 41, "Click to shake fruit trees. All sorts of goodies (including gems) are hidden in the branches.", new[] { "Apple Tree" }),
-            new CardDef("Pear Tree", 42, "Click to shake fruit trees. All sorts of goodies (including gems) are hidden in the branches.", new[] { "Pear Tree" }),
-            new CardDef("Plum Tree", 43, "Click to shake fruit trees. All sorts of goodies (including gems) are hidden in the branches.", new[] { "Legendary Plum Tree" }),
+            new CardDef("Apple Tree", 41, "Tap to shake fruit trees. All sorts of goodies (including gems) are hidden in the branches.", new[] { "Apple Tree" }),
+            new CardDef("Pear Tree", 42, "Tap to shake fruit trees. All sorts of goodies (including gems) are hidden in the branches.", new[] { "Pear Tree" }),
+            new CardDef("Plum Tree", 43, "Tap to shake fruit trees. All sorts of goodies (including gems) are hidden in the branches.", new[] { "Legendary Plum Tree" }),
         };
 
         public static readonly QuestDef[] Ghosts =

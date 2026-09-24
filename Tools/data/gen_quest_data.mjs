@@ -15,6 +15,11 @@ const tag = (block, name) => {
 const all = (block, name) => [...block.matchAll(new RegExp(`<${name}>([\\s\\S]*?)</${name}>`, "g"))].map((m) => m[1].trim());
 
 const rename = (s) => s
+  // Touch screens: the original's "click" is a tap here.
+  .replace(/\bClicking\b/g, "Tapping")
+  .replace(/\bclicking\b/g, "tapping")
+  .replace(/\bClick\b/g, "Tap")
+  .replace(/\bclick\b/g, "tap")
   .replace(/Bunni House/g, "Capy House")
   .replace(/Bunni Island/g, "Capy Island")
   .replace(/Bunni Islands/g, "Capy Islands")

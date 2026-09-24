@@ -25,7 +25,7 @@ namespace CapyIsland.UI
         [SerializeField] Button purchaseButton;
 
         [Header("Colours")]
-        [SerializeField] Color affordable = Color.white;
+        [SerializeField] Color affordable = new Color(0.22f, 0.16f, 0.11f);
         [SerializeField] Color tooExpensive = new Color(1f, 0.45f, 0.4f);
 
         IPurchasable _item;
