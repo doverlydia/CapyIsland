@@ -396,3 +396,311 @@ deposit to the next:
 - **New-game opening:** 1000 wood, 1500 gold, 0 gems, 0 bunnies, on island 1 with an empty map.
   The tutorial then hands out free items in this order: Medium Pine Forest → Sawmill →
   Bunni House → Medium Posie Garden. A bunni costs 10 wood + 10 gold.
+
+## Island unlocking (ghosts)
+
+Confirmed against `save_data.xml`. New islands are not bought from a shop: each is gated by a
+**ghost** who sets an objective and/or asks to be paid.
+
+Every `<ghost>` entry has the same fields, and they spell the system out:
+
+| Field | Meaning |
+|---|---|
+| `trigger_mote` | the progress flag that makes this ghost appear |
+| `intro` / `during` / `complete` | dialogue for not-started / in-progress / done |
+| `set_up` | **what completing it unlocks** - ghost 1 has `second_island` |
+| `complete_mote` | the progress flag granted on completion |
+| `reward_item` | a free item handed over as well |
+| `wood` / `gold` / `gems` | **the price the ghost asks** (all 0 on the three shipped ghosts) |
+
+So the loop is: a mote flag makes a ghost appear -> the ghost asks for payment and/or an objective
+-> completing it fires `set_up` (unlocking the island), grants `complete_mote`, and hands over
+`reward_item`.
+
+### The three shipped ghosts
+
+1. **Fredrickson** (id 1) - "Friend of foxes, fatally fond of vodka." Triggered by the
+   `Bronze Store` mote. Objective: get a fox onto the island. **`set_up: second_island`** - this
+   is the island unlock. Reward: Large Posie Garden.
+2. **Fredrickson again** (id 3) - triggered by `Fox Importer`. Objective: round up **5 foxes**
+   total. Reward: Medium Ironwood Forest. No island.
+3. **Chappy, the church ghost** (id 8) - triggered by `Legendary Store`. Objective: build a
+   **Holy Statue** ("for each one they build, they erase a single sin"). Mentions a **score** that
+   rises when you build statues. No island, no item reward.
+
+Only ghost 1 carries a `set_up`, so of the 7 islands only the second is ghost-gated in this data.
+The other bridges are opened some other way - likely by the other NPC quest-givers, which use the
+same field layout: `<coriander>` (10 entries), `<peach>` (15), `<piratepeach>` (6).
+
+### Motes are collectibles AND progress flags
+
+Correcting an earlier assumption in this doc: motes are not a quest chain of their own. There are
+**27** of them (ids are non-contiguous, 1-35), each just `id` / `description` / `func` /
+`collected`. The first one says: *"Every heart mote you collect gets you closer to healing the
+island. Collect them all!"* They are named flags - "Bronze Store", "Fox Importer", "Holy Statue" -
+that ghosts and NPCs reference to gate their own dialogue.
+
+**For CapyIsland:** the ghost is a **ghost capybara** (`ArtSource/Capy_Ghost.png`), pale blue-white
+and translucent with wisps instead of feet, same silhouette as the hero so it reads as one of your
+own.
+
+## Quests and NPCs (from the Bunni Fandom wiki)
+
+Transcribed from wiki screenshots. The wiki blocks automated fetching (HTTP 402), so this came from
+images. It names the ghosts, which `save_data.xml` does not.
+
+### Tutorial chain — five ghosts, in order
+
+| # | Ghost | Asks you to |
+|---|---|---|
+| 1 | **Susanna** | Drag the sleeping bunnies onto the **mill** and **mine** nearby. They start collecting wood and gold. |
+| 2 | **Mr. Summers**, the Flower Ghost | Working bunnies get hungry; with no flowers nearby they fall asleep. Buy a flower from a shop and drag it to valid ground near the bunnies. |
+| 3 | **Sir Edmunds**, the Spelunking Ghost | Find his bones beneath the rocks on the first island. Assign every bunni to the mine to speed it up; the quest ends when **no rock is left**. |
+| 4 | **Bruce**, the Tower Ghost (second island) | Build a mill. **A mill costs 50 coins.** |
+| 5 | **Mr. Greenspun**, the Storekeeper Ghost (second island) | Buy one of every item in the nearby store: mill, mine, medium pine forest, small posie garden, small tulip garden. |
+
+Tutorial 2 confirms the three flower types are the food chain: **posies, tulips, roses**.
+
+### Mini quests
+
+| # | Giver | Objective |
+|---|---|---|
+| 1 | **Fredrickson** (main isle) | Buy a **fox house** from the bronze store, build it, buy a fox from it. |
+| 2 | **Fredrickson** again | The fox is lonely — buy **four more foxes** (five total). |
+| 3 | **Arty**, the Messenger Ghost | After opening Pirate Cove and buying a gem store: buy **three plum trees** from the gem store and plant them. |
+| 4 | **Chappy**, the church ghost | After Pirate Cove + gem store: build a **Holy Statue**. No direct reward — it raises your **score** over time. |
+
+### Pirate Peach quests (on Pirate Cove)
+
+| # | Objective |
+|---|---|
+| 1 | **Panda and Maple** — Pirate Peach gives you a **panda**; use it to chop a nearby tree. |
+| 2 | **Maple and Ironwood** — chop down **every maple tree on Pirate Cove** so ironwoods can be planted. |
+| 3 | **Pear Trees** — buy and plant **five plum trees**. |
+
+### Characters
+
+- **King Bunni** — the player character. Goal: restore the island to its former glory, and marry Coriander.
+- **Coriander** — the girl Bunni who becomes your wife. Named **Maria** in the original draft. You free
+  her from a bubble near the start of the game.
+- **Pirate Peach** — a spunky pirate Bunni with a crush on King Bunni; jealous at the wedding.
+- **Grandpa Angel** — the angel who created the island. Appears in the "please save the island" art,
+  which becomes "you saved the island" on completion. Chappy's line — *"so many pandas and no statues,
+  what would Grandpa Angel do?"* — matches the ghost dialogue in `save_data.xml` exactly.
+- **Deer** — destroy your harvest. Kill them with a **deer bomb** from the bronze store.
+
+### Conflict to resolve
+
+The wiki states rocks are **not replenishable** ("rocks are not replenish-able like trees so you need
+to be careful when spending golds"), and Tutorial 3 ends when no rock remains. But `game.xml` lists
+seed rates for bronze/silver/gold (100/50/25) alongside the tree ones, which this doc read as regrowth.
+Either ore seed rates mean something else (initial spawn density?), or ore regrows far too slowly to
+notice. **Treat ore as finite in CapyIsland** unless play-testing shows otherwise — it is the more
+interesting design and matches the tutorial.
+
+### For CapyIsland
+
+Ghosts become **ghost capybaras**. The names can carry over or be re-themed, but the structure should
+not change: five tutorial ghosts teach the loop in this exact order — assign workers, feed them, mine,
+build, shop — and that sequence is a genuinely good onboarding design worth copying beat for beat.
+
+## The core loop, as Lydia describes it
+
+Told by Lydia from memory of playing the original. The follower behaviour is not in the data files
+or the wiki pages we have, so this is the record of it.
+
+1. **Buy a worker from a shop.** The Bunni House sells them: 10 wood + 10 gold each.
+2. **Bought workers follow you.** An unassigned worker trails the player's avatar in a little train
+   rather than standing where it spawned. This is how you carry them to where you need them.
+3. **Assign by dragging.** You drag a worker *out of the train behind you* and drop it on a station.
+   Valid stations glow with a yellow ring while dragging. Dropping on a Sawmill gives "You set a
+   Bunni to work on a Sawmill".
+4. **Working stations produce.** A worker on a Sawmill earns wood, on a Mine earns gold. The HUD
+   counter rises, which is what lets you afford the next thing from the shop.
+5. **Workers get hungry and fall asleep.** They eat from flower gardens in range. Gardens hold a
+   limited number of feedings (Small Posie "feeds up to 1 hungry bunni", Medium "up to 2"), so a
+   garden can be eaten out, and then the workers stop.
+
+That is the whole economic engine: shop -> follower -> station -> resources -> shop. Everything
+else in the game hangs off it.
+
+## Visual reference notes (from screenshots of the original)
+
+Observed directly from gameplay screenshots. These correct several guesses made earlier in this doc
+and in the art direction.
+
+### The world is a curved hilltop, not a flat top-down map
+
+The island is drawn as a **convex, curving-away surface with sky above it**: pale blue sky and soft
+white clouds fill the top of the screen, the land curves over a horizon, and the sea sits at the
+lower edges. It reads like standing on a very small planet. This is the single biggest visual
+difference from a flat orthographic top-down island, and it is what gives the game its look.
+
+### Everything sits on a pedestal
+
+Every placed object — flower, apple, tree, bush, statue — rests on a small **grey elliptical
+pedestal / disc**. It is not a shadow; it is a visible base. Carried items in the trail have one
+too. This reads as the object being "planted" and makes the free-position placement legible.
+
+### Scale
+
+Characters are **small relative to the island** — a bunni is a fraction of the screen, and dozens of
+items fit comfortably on one island. Our current props are proportionally far too large.
+
+### Palette
+
+Softer and more pastel than our current art: grass is a **light yellow-green**, not a saturated mid
+green. Trees are small, round and low-contrast rather than big dark conifers. The overall impression
+is bright and airy.
+
+### The trail confirmed
+
+One screenshot shows a line of **~15 foxes** trailing the king in a long queue, with the prompt
+"Place your Fox on Mine" at the bottom of the screen. The trail-as-inventory model is exactly right.
+Another shows "Click and hold to pick up Panda", confirming press-and-hold as the pick-up gesture.
+
+### Food is apples as well as flowers
+
+Red apples lie scattered on the ground alongside white daisy-like flowers. The HUD counts apples as
+a separate resource with a red icon, next to wood and gold.
+
+### HUD layout
+
+A single **bar across the very top** of the screen: wood (green tree icon), gold (orange coin),
+apples (red icon), then a bunny count with a rabbit icon, then the buttons **Map**, **Forums**,
+**Save**. Nothing else is on screen — no side panels, no bottom bar.
+
+### Stores are buildings on the map
+
+Stores are literal green-roofed buildings labelled "STORE" that you walk up to, not a menu button.
+Pirate Peach stands behind a wooden "Sell Stuff" sign.
+
+## The opening, step by step (from walkthrough screenshots)
+
+The exact sequence a new game runs. This corrects the earlier assumption that you begin with
+workers already on the island — **you begin with nothing at all.**
+
+### 0. A desolate island
+
+The island is empty: no trees, no buildings, no workers. Just the king. The first ghost says:
+
+> "Hi! Welcome to my desolate island. Unless you start building a home, you will soon be dead,
+> just like me."
+
+### 1. Bubbles are the source of everything
+
+A **glowing translucent bubble** sits on the ground with a white **down-arrow** bobbing above it to
+draw the eye. The status line reads "Click to pick up **Medium Pine Forest**". These are story-
+justified: Grandpa Angel *"saved a few survivors in magical bubbles. You may come across a few here
+and there."*
+
+Clicking one opens a modal card — **"You found a new item!"** — showing the item art, a one-line
+description, and a little **recipe strip**: `Trees + Sawmill + Bunni = 3 wood`. That recipe is how
+the game teaches the production chain without a tutorial screen.
+
+### 2. Picked-up items go into the inventory trail
+
+After the card, the item is yours: it sits at the king's feet / follows him. The status line
+switches to "Click and hold to pick up **X**".
+
+### 3. Placement shows the radius
+
+While dragging a placeable, the game draws a **large translucent ellipse** on the ground — that is
+the item's `outer` radius, the area it serves. The status line reads "You can place your
+**Medium Pine Forest** here". On release: "You created a **Medium Pine Forest**!" and 5 saplings
+scatter and grow.
+
+### 4. The opening order
+
+Confirmed by the walkthrough, and by Lydia:
+
+| # | Bubble | What it gives |
+|---|---|---|
+| 1 | **Medium Pine Forest** | "Plant pine trees to grow lovely forests. Place a Sawmill and a Bunni nearby to harvest wood." |
+| 2 | **Sawmill** | "Place a Sawmill next to a Forest. Add a Bunni to harvest wood." |
+| 3 | **Bunni House** | "Purchase Bunnies from a Bunni house to help harvest wood and gold." |
+
+So: **forest -> sawmill -> bunni house -> buy a worker -> drag worker onto sawmill.** You never
+start owning a worker; the Bunni House is what lets you buy one.
+
+### 5. Buying a worker
+
+A bunni stands on a pedestal beside the placed Bunni House. Clicking it opens a purchase dialog:
+
+> **Bunni** — "A cuddly creature with floppy soft ears and a quivering nose. Bunnies earn you gold
+> and wood."  Cost: **10 wood, 10 gold, 0 red**.  [Cancel] [Purchase]
+
+Buying takes the resources (1000 -> 990 wood, 1500 -> 1490 gold, seen in the HUD) and shows another
+"You found a new item!" card: *"Bunnies are hard workers! Add a Bunni to a Sawmill to harvest wood.
+Add a Bunni to a Mine to harvest gold."*
+
+### 6. Assigning
+
+The bought bunni follows the king. Dragging it over the Sawmill makes the sawmill **glow yellow**;
+dropping assigns it, and the bunni then stands beside the mill **holding an axe**.
+
+### Implications for CapyIsland
+
+- The island must start **empty**, not pre-populated.
+- A **Bubble** is a first-class object: collectible, with an arrow marker, that grants an item.
+- An **item card** modal is part of the core loop, not decoration — it is where the recipes are taught.
+- Placement needs a **radius preview**, not just a ghost sprite.
+- A **shop building** (Bunni House) with a purchase dialog is required before any worker exists.
+
+## Findings from the 1h33m playthrough recording
+
+Sampled every 5 minutes from `bunniPlaytrough.mp4` (480x360, 30fps, 1:32:54).
+
+### The third currency is RED, and it is the gem
+
+The HUD reads **wood (green tree) / gold (orange coin) / red (red gem)**, then a capy count. Purchase
+dialogs list all three: a Bunni is `10 wood, 10 gold, 0 red`, which matches `costwood 10 / costrock 10
+/ costgem 0` exactly. So the XML's `costgem` is the **red** counter, not a blue or teal gem.
+Our Icon_Gem was teal — wrong colour, needs to be red.
+
+Red is scarce all game: 0 early, ~15 by 15 minutes, 94 by 55 minutes, 5764 by 90 minutes.
+
+### Trees are shaken for fruit
+
+Status lines seen: **"You shook a Apple Tree"**, **"You shook a Legendary Plum Tree"**. Fruit trees
+drop collectible fruit when shaken, which then lies on the ground as pickups with a floating count
+(e.g. "5" beside a red icon, "7" beside a gold coin). This is a second harvesting route alongside
+worker-and-mill production, and it is how red is earned.
+
+### Placement preview confirmed
+
+"You can place your **Medium Ironwood Forest** here" is shown with a **large dark translucent ellipse**
+under the cursor — the item's `outer` radius. Exactly what `Placeable.OuterRadius` should draw.
+
+### Ore really does run out
+
+> "I hear a Fox mined the last rock in a hill. Soon the mine will collapse."
+
+Confirms ore is finite and that a mine becomes useless once its hills are exhausted. Trees regrow;
+rock does not.
+
+### Gardens get eaten
+
+> "A Bunni ate the last flower in the garden. I guess you need to plant bigger flower gardens for
+> your hungry workers."
+
+Food is consumed. Small gardens support few workers; scaling the workforce means scaling food.
+
+### Prices seen
+
+| Item | Wood | Gold | Red |
+|---|---|---|---|
+| Bunni | 10 | 10 | 0 |
+| Fox ("Fast, hard working and rather fond of small red potatoes") | 30 | 15 | 0 |
+| Wedding Dress | 1448 | 1411 | 0 |
+
+### Other confirmations
+
+- Workers **cluster visibly around the station** they are assigned to — a mill with many foxes has
+  them all standing about it.
+- A sleeping worker shows a **"z"** above it.
+- **Deer** wander in as pests; **bombs** are sold to remove them.
+- Later islands hold **monster dens**, purple plum trees, fountains, big **bunny statues with a red
+  gem in the chest**, and a tall red **mote monument**.
+- A ghost quest: *"If you happen to see about five wild monsters, could you tame them?"*
+- Stores are buildings labelled **STORE**; Pirate Peach stands by a **"Sell Stuff"** sign.
