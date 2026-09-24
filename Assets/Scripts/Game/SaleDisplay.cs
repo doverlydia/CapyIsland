@@ -31,6 +31,7 @@ namespace CapyIsland.Game
 
         SpriteRenderer _icon;
         SpriteRenderer _shadow;
+        SpriteRenderer _plinth;
         float _phase;
         float _alpha = -1f;
 
@@ -55,6 +56,15 @@ namespace CapyIsland.Game
                 shadow.transform.localPosition = Vector3.zero;
                 shadow.transform.localScale = art.shadowTemplate.transform.localScale * 0.9f;
                 shadow.SetActive(true);
+
+                // A soft pale base under the ware, so shop stock reads as "for sale" rather than planted.
+                var plinth = Instantiate(art.shadowTemplate, go.transform);
+                plinth.name = "Plinth";
+                plinth.transform.localPosition = new Vector3(0f, 0.02f, 0f);
+                plinth.transform.localScale = art.shadowTemplate.transform.localScale * 1.35f;
+                var pr = plinth.GetComponent<SpriteRenderer>();
+                if (pr != null) pr.color = new Color(1f, 0.97f, 0.84f, 0.55f);
+                plinth.SetActive(true);
             }
 
             var body = new GameObject("Sprite");
@@ -75,6 +85,8 @@ namespace CapyIsland.Game
             _icon = body != null ? body.GetComponent<SpriteRenderer>() : null;
             var shadow = transform.Find("Shadow");
             _shadow = shadow != null ? shadow.GetComponent<SpriteRenderer>() : null;
+            var plinth = transform.Find("Plinth");
+            _plinth = plinth != null ? plinth.GetComponent<SpriteRenderer>() : null;
 
             var catalog = ItemCatalog.Instance;
             var sprite = catalog != null ? catalog.Icon(storeName) : null;
@@ -105,6 +117,7 @@ namespace CapyIsland.Game
                 _icon.transform.localPosition = new Vector3(0f, 0.08f + Mathf.Sin(Time.time * 2f + _phase) * 0.06f, 0f);
             }
             if (_shadow != null) { var c = _shadow.color; c.a = _alpha * 0.8f; _shadow.color = c; }
+            if (_plinth != null) { var c = _plinth.color; c.a = _alpha * (0.45f + 0.1f * Mathf.Sin(Time.time * 2f + _phase)); _plinth.color = c; }
         }
 
         public bool Buy() => Purchasing.TryBuy(storeName, transform.position);

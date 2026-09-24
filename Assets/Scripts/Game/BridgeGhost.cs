@@ -34,9 +34,12 @@ namespace CapyIsland.Game
             GameObject go;
             if (template != null)
             {
+                // The copy is still inactive (so is its template): strip the quest-giver parts
+                // before anything in them wakes up.
                 go = Instantiate(template, parent);
-                Destroy(go.GetComponent<QuestGiver>());
-                Destroy(go.GetComponent<CatalogItem>());
+                go.SetActive(false);
+                DestroyImmediate(go.GetComponent<QuestGiver>());
+                DestroyImmediate(go.GetComponent<CatalogItem>());
             }
             else go = new GameObject();
             go.name = "BridgeGhost_" + name.Replace(" ", "");

@@ -119,6 +119,13 @@ namespace CapyIsland.Game
         void Awake() => _follower = GetComponent<Follower>();
 
         /// <summary>The species' speed against a resource: its modifier if it has one, else its normal speed.</summary>
+        /// <summary>Restores a saved worker's hunger.</summary>
+        public void RestoreHunger(int hunger)
+        {
+            _hunger = hunger;
+            _hungry = _hunger < BunniRules.HungryBelow;
+        }
+
         public int SpeedFor(NodeResource resource)
         {
             foreach (var m in modifiers) if (m.resource == resource) return m.speed;

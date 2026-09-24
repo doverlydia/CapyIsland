@@ -96,6 +96,13 @@ namespace CapyIsland.Game
                 ("Cancel", null));
         }
 
+        /// <summary>A saved monster that was already tamed.</summary>
+        public void RestoreTame()
+        {
+            tame = true;
+            ApplyTameness();
+        }
+
         public void TameNow()
         {
             var store = ResourceStore.Instance;

@@ -74,6 +74,7 @@ namespace CapyIsland.EditorTools
             BuildGameArt(systems.transform, shadow);
             systems.AddComponent<Game.GameBootstrap>();
             systems.AddComponent<Game.QuestSystem>();
+            systems.AddComponent<Game.SaveGame>();
             BuildCatalog(root.transform, systems.transform, shadow);
             var pointer = BuildTutorialPointer(systems.transform);
 
@@ -266,6 +267,9 @@ namespace CapyIsland.EditorTools
 
         /// <summary>Set before Build to regenerate the island textures instead of reusing them.</summary>
         public static bool RepaintLand;
+
+        [MenuItem("CapyIsland/Delete Save")]
+        public static void DeleteSave() => Game.SaveGame.Delete();
 
         [MenuItem("CapyIsland/Build/Island (repaint land)")]
         public static void BuildRepainting()

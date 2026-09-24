@@ -22,6 +22,7 @@ namespace CapyIsland.Game
         [SerializeField] SpriteRenderer shadowRenderer;
 
         float _lastY = float.NaN;
+        SpriteRenderer _plinth;
 
         void Awake()
         {
@@ -32,6 +33,7 @@ namespace CapyIsland.Game
                 foreach (var r in found)
                 {
                     if (r.transform.name == "Shadow") { shadowRenderer = r; continue; }
+                    if (r.transform.name == "Plinth") { _plinth = r; continue; }
                     list.Add(r);
                 }
                 renderers = list.ToArray();
@@ -49,6 +51,7 @@ namespace CapyIsland.Game
             foreach (var r in renderers)
                 if (r != null) r.sortingOrder = order;
             if (shadowRenderer != null) shadowRenderer.sortingOrder = order - 1;
+            if (_plinth != null) _plinth.sortingOrder = order - 2;
         }
     }
 }

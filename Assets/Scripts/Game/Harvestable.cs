@@ -82,6 +82,34 @@ namespace CapyIsland.Game
         /// <summary>A fruit lying on the ground rather than a planted flower.</summary>
         public bool IsFruit => _isFruit;
 
+        /// <summary>For a child: the store item its grove came from, so a saved child can be rebuilt.</summary>
+        public string OriginName { get; private set; }
+
+        public float FinalScale => _finalScale;
+        public float InnerSize => innerSize;
+
+        /// <summary>Puts a saved node back exactly as it was: its size, its full size, grown or not.</summary>
+        public void RestoreState(float scale, float finalScale)
+        {
+            _finalScale = finalScale;
+            _innerRadius = innerSize * _finalScale;
+            _scale = Mathf.Min(scale, finalScale);
+            _phase = _scale >= _finalScale - 0.0001f ? (isParent ? Phase.Seeding : Phase.Grown) : Phase.Growing;
+            ApplyScale();
+        }
+
+        /// <summary>
+        /// Rebuilds a saved child of a grove, borrowing the look of <paramref name="source"/> — the
+        /// grove's template — for its sprite, shadow and sway.
+        /// </summary>
+        public static Harvestable RestoreChild(Harvestable source, Vector2 at, float inner, float scale, float finalScale, Transform parent)
+        {
+            if (source == null) return null;
+            var child = source.BuildChild(at, inner, parent);
+            child.RestoreState(scale, finalScale);
+            return child;
+        }
+
         void Awake()
         {
             var sprite = transform.Find("Sprite");
@@ -114,6 +142,9 @@ namespace CapyIsland.Game
             if (!isParent) return;
             if (_body != null && plantedSprite != null) _body.sprite = plantedSprite;
             BeginGrowing();
+
+            // A saved grove brings its own children back.
+            if (SaveGame.Restoring) return;
 
             // The first burst: outerRadius/10 attempts (/5 for hills), each tested with the parent's own radius.
             int attempts = BunniRules.InitialChildAttempts(outerRadius, Family);
@@ -241,9 +272,15 @@ namespace CapyIsland.Game
             float testRadius = innerSize * _finalScale;
             if (!BunniSpace.CircleOnMap(at, testRadius)) return;
 
+            BuildChild(at, childInnerSize, transform.parent);
+        }
+
+        /// <summary>Makes one child node of this grove at a spot, growing from 0.2.</summary>
+        Harvestable BuildChild(Vector2 at, float childInnerSize, Transform parent)
+        {
             var child = new GameObject(resource + "Child");
-            child.transform.SetParent(transform.parent, false);   // a sibling: it outlives the parent
-            child.transform.position = new Vector3(at.x, at.y, transform.position.z);
+            child.transform.SetParent(parent, false);   // a sibling: it outlives the parent
+            child.transform.position = new Vector3(at.x, at.y, 0f);
 
             var shadowSource = transform.Find("Shadow");
             if (shadowSource != null)
@@ -257,10 +294,17 @@ namespace CapyIsland.Game
             var body = new GameObject("Sprite");
             body.transform.SetParent(child.transform, false);
             var sr = body.AddComponent<SpriteRenderer>();
+            if (_iconSprite == null)
+            {
+                var ownBody = transform.Find("Sprite");
+                if (ownBody != null) _iconSprite = ownBody.GetComponent<SpriteRenderer>().sprite;
+            }
             sr.sprite = plantedSprite != null ? plantedSprite : _iconSprite;
 
             var node = child.AddComponent<Harvestable>();
             node.InitChild(resource, childInnerSize, artScale, sr.sprite);
+            var tag = GetComponent<CatalogItem>();
+            node.OriginName = tag != null ? tag.StoreName : OriginName;
             child.AddComponent<YSorter>();
 
             // Children bend in the wind like their parent.
@@ -270,6 +314,7 @@ namespace CapyIsland.Game
                 var sway = child.AddComponent<Sway>();
                 sway.CopyFrom(parentSway);
             }
+            return node;
         }
 
         // ---------------------------------------------------------------- harvesting

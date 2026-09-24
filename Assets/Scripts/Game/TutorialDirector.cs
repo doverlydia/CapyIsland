@@ -51,6 +51,13 @@ namespace CapyIsland.Game
         float _stepTimer;
 
         public bool Finished => _step == Step.Done;
+
+        /// <summary>A returning player: no tutorial (Tasks.GameStarted).</summary>
+        public void SkipForReturningPlayer()
+        {
+            _step = Step.Done;
+            if (pointer != null) pointer.Hide();
+        }
         float _greetTimer;
 
         void OnEnable() => Hints.Shown += Say;
@@ -58,6 +65,7 @@ namespace CapyIsland.Game
 
         void Start()
         {
+            if (_step == Step.Done) return;
             _greetTimer = greetSeconds;
             Say("Hi! Welcome to my desolate island. Unless you start building a home, you will soon be dead, just like me.");
         }

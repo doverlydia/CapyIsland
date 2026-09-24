@@ -104,6 +104,18 @@ namespace CapyIsland.Game
             ApplyScale();
         }
 
+        /// <summary>A saved tree: grown (or regrowing after a chop) with its fruit back on the branches.</summary>
+        public void RestoreGrown(float scale, int fruit)
+        {
+            _scale = Mathf.Clamp(scale, BunniRules.SpawnScale, 1f);
+            _canHarvest = _scale >= 1f;
+            _canShake = _scale >= 1f;
+            _phase = _scale >= 1f ? Phase.GrowFruit : Phase.Grow;
+            ApplyScale();
+            ClearFruitVisuals();
+            for (int i = 0; i < fruit && i < BunniRules.MaxFruitOnTree; i++) AddFruit();
+        }
+
         void OnReturnedToBubble()
         {
             _phase = Phase.Unplanted;

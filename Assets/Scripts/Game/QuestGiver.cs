@@ -28,6 +28,7 @@ namespace CapyIsland.Game
         SpriteRenderer _accessory;
 
         public Kind GiverKind => kind;
+        public int GhostId => ghostId;
 
         public void Configure(Kind k) => kind = k;
 
