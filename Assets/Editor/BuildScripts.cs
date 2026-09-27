@@ -6,9 +6,9 @@ using UnityEngine;
 namespace CapyIsland.EditorTools
 {
     /// <summary>
-    /// One-click builds for the two targets: WebGL (into Builds/WebGL, playable from any static
-    /// host) and an Android APK (Builds/Android/CapyIsland.apk). Both allow every orientation, so the
-    /// game can be turned mid-play. Results are written to Builds/last-build.txt.
+    /// One-click builds: WebGL (into Builds/WebGL, playable from any static host), an Android APK
+    /// (Builds/Android/CapyIsland.apk) and an iOS Xcode project (Builds/iOS). All allow every
+    /// orientation, so the game can be turned mid-play. Results are written to Builds/last-build.txt.
     /// </summary>
     public static class BuildScripts
     {
@@ -54,6 +54,34 @@ namespace CapyIsland.EditorTools
             Run(BuildTarget.Android, "Builds/Android/CapyIsland.apk");
         }
 
+        /// <summary>
+        /// Exports an Xcode project to Builds/iOS. Unity can do this on Windows, but compiling,
+        /// signing and installing it on a phone has to happen in Xcode on a Mac (or a cloud Mac).
+        /// </summary>
+        [MenuItem("CapyIsland/Build/iOS Xcode Project")]
+        public static void BuildIOS()
+        {
+            CommonSettings();
+            PlayerSettings.SetApplicationIdentifier(UnityEditor.Build.NamedBuildTarget.iOS, "com.capyisland.game");
+            PlayerSettings.SetScriptingBackend(UnityEditor.Build.NamedBuildTarget.iOS, ScriptingImplementation.IL2CPP);
+            PlayerSettings.iOS.sdkVersion = iOSSdkVersion.DeviceSDK;
+            PlayerSettings.iOS.targetOSVersionString = "15.0";
+            PlayerSettings.iOS.targetDevice = iOSTargetDevice.iPhoneAndiPad;
+            // Signing is left to Xcode: tick "Automatically manage signing" and pick your team there.
+            PlayerSettings.iOS.appleEnableAutomaticSigning = true;
+
+            // The GitHub workflow (.github/workflows/ios.yml) passes its own output folder.
+            Run(BuildTarget.iOS, CommandLineArg("-customBuildPath") ?? "Builds/iOS");
+        }
+
+        static string CommandLineArg(string name)
+        {
+            var args = System.Environment.GetCommandLineArgs();
+            for (int i = 0; i < args.Length - 1; i++)
+                if (args[i] == name) return args[i + 1];
+            return null;
+        }
+
         static void Run(BuildTarget target, string path)
         {
             // Settings changed in memory can be lost across the build's domain reload: write them now.
@@ -74,10 +102,14 @@ namespace CapyIsland.EditorTools
             File.AppendAllText("Builds/last-build.txt", line + "\n");
             Debug.Log("[BuildScripts] " + line);
             if (summary.result != BuildResult.Succeeded)
+            {
                 foreach (var step in report.steps)
                     foreach (var m in step.messages)
                         if (m.type == LogType.Error || m.type == LogType.Exception)
                             File.AppendAllText("Builds/last-build.txt", "  " + m.content + "\n");
+                // Command-line builds (CI) otherwise exit 0 and the failure goes unnoticed.
+                if (Application.isBatchMode) EditorApplication.Exit(1);
+            }
         }
     }
 }
