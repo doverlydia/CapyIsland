@@ -127,8 +127,8 @@ namespace CapyIsland.UI
 
             if (capyLabel != null)
             {
-                int owned = FindObjectsByType<Worker>(FindObjectsSortMode.None).Length;
-                string text = owned.ToString();
+                // On a friend's island the workers here are theirs, not yours.
+                string text = Visit.Active ? "–" : FindObjectsByType<Worker>(FindObjectsSortMode.None).Length.ToString();
                 if (capyLabel.text != text) { capyLabel.text = text; }
             }
 

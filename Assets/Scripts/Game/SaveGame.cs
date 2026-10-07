@@ -4,67 +4,101 @@ using UnityEngine;
 
 namespace CapyIsland.Game
 {
+    [Serializable] public class ItemSave { public string name; public Vector2 pos; public float scale = -1f, finalScale = -1f; public int fruit; }
+    [Serializable] public class NodeSave { public string origin; public Vector2 pos; public float inner, scale, finalScale; }
+    [Serializable] public class BubbleSave { public string name; public Vector2 pos; }
+    [Serializable] public class AnimalSave { public string name; public Vector2 pos; public int workplace = -1; public bool carried, tame; public int hunger; }
+    [Serializable] public class QuestSave { public int giver, id, stage; public bool complete; }
+    [Serializable] public class PriceSave { public string name; public int wood, gold, gems; }
+    [Serializable] public class GhostSave { public string name; public int id; public Vector2 pos; }
+
     /// <summary>
-    /// Saves the island and brings it back next time (Save/Save.as). As in the original, saving only
-    /// starts once the tutorial is over; a returning player skips the tutorial and gets a
-    /// "Welcome Back". The game saves itself every 30 seconds and whenever the app is paused or
-    /// closed — there is no save button to forget.
+    /// A whole island on disk. Two halves share it: the player's <b>progress</b> (resources,
+    /// achievements, cards, quests) and the island's <b>world</b> (bridges, everything planted, the
+    /// trail, bubbles, animals, spirits). A friend's island uses only the world half.
+    /// </summary>
+    [Serializable]
+    public class SaveData
+    {
+        public int version = 1;
+        public int wood, gold, gems, score;
+        public List<string> motes = new(), motesClicked = new(), bridges = new(), carried = new();
+        public List<int> cards = new(), ghostsSpawned = new();
+        public int corianderIndex, peachIndex;
+        public List<QuestSave> quests = new();
+        public List<PriceSave> prices = new();
+        public Vector2 king;
+        public List<ItemSave> placed = new();
+        public List<NodeSave> children = new();
+        public List<BubbleSave> bubbles = new();
+        public List<AnimalSave> animals = new();
+        public List<GhostSave> questGhosts = new(), bridgeGhosts = new();
+    }
+
+    /// <summary>
+    /// Saves the island and brings it back next time. Saving starts once the tutorial is over; the
+    /// game saves every 30 seconds and whenever the app is paused or closed — there is no save
+    /// button to forget.
     ///
     /// Stored as JSON in PlayerPrefs, which is IndexedDB on WebGL and app storage on Android.
     ///
-    /// What is kept: resources, motes, cards, quests, bridges, the king's position, everything
-    /// planted (with each grove's children and each fruit tree's fruit), everything in the trail,
-    /// uncollected bubbles, every animal, and the ghosts still waiting. What is not: a heart not yet
-    /// tapped, fruit lying on the ground, a lit bomb, an unopened chest — all of it seconds from
-    /// gone anyway.
+    /// What is kept: resources, achievements, cards, quests, bridges, the king's position,
+    /// everything planted (with each grove's children and each fruit tree's fruit), everything in
+    /// the trail, uncollected bubbles, every animal, and the spirits still waiting. What is not: a
+    /// heart not yet tapped, fruit lying on the ground, a lit bomb, an unopened chest.
+    ///
+    /// While visiting a friend, your own island stays safely on disk: this saves the friend's world
+    /// to their profile instead (or nothing, for a stranger), and never touches your save.
     /// </summary>
     [DefaultExecutionOrder(1000)]
     public class SaveGame : MonoBehaviour
     {
-        const string Key = "CapyIsland.Save.v1";
+        public const string Key = "CapyIsland.Save.v1";
         const float AutosaveSeconds = 30f;
+
+        public static SaveGame Instance { get; private set; }
 
         /// <summary>True while a save is being rebuilt, so placing things does not re-seed groves.</summary>
         public static bool Restoring { get; private set; }
 
         public static bool HasSave => PlayerPrefs.HasKey(Key);
 
+        /// <summary>Set while a fresh start or a flight is swapping islands, so nothing saves over them.</summary>
+        public static bool Suspended { get; set; }
+
+        /// <summary>
+        /// Puts every static the game keeps back to a new session, as a fresh launch would: each
+        /// class with session state already resets it in a SubsystemRegistration method, so run them all.
+        /// </summary>
+        public static void ResetStatics()
+        {
+            foreach (var type in typeof(SaveGame).Assembly.GetTypes())
+            foreach (var m in type.GetMethods(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic))
+            {
+                if (m.GetParameters().Length != 0) continue;
+                foreach (RuntimeInitializeOnLoadMethodAttribute a in m.GetCustomAttributes(typeof(RuntimeInitializeOnLoadMethodAttribute), false))
+                    if (a.loadType == RuntimeInitializeLoadType.SubsystemRegistration) { m.Invoke(null, null); break; }
+            }
+            QuestSystem.AnyoneTalkedTo = false;
+        }
+
         float _nextSave;
         bool _loaded;
 
-        // ---------------------------------------------------------------- data
-
-        [Serializable] class ItemSave { public string name; public Vector2 pos; public float scale = -1f, finalScale = -1f; public int fruit; }
-        [Serializable] class NodeSave { public string origin; public Vector2 pos; public float inner, scale, finalScale; }
-        [Serializable] class BubbleSave { public string name; public Vector2 pos; }
-        [Serializable] class AnimalSave { public string name; public Vector2 pos; public int workplace = -1; public bool carried, tame; public int hunger; }
-        [Serializable] class QuestSave { public int giver, id, stage; public bool complete; }
-        [Serializable] class PriceSave { public string name; public int wood, gold, gems; }
-        [Serializable] class GhostSave { public string name; public int id; public Vector2 pos; }
-
-        [Serializable]
-        class SaveData
-        {
-            public int version = 1;
-            public int wood, gold, gems, score;
-            public List<string> motes = new(), motesClicked = new(), bridges = new(), carried = new();
-            public List<int> cards = new(), ghostsSpawned = new();
-            public int corianderIndex, peachIndex;
-            public List<QuestSave> quests = new();
-            public List<PriceSave> prices = new();
-            public Vector2 king;
-            public List<ItemSave> placed = new();
-            public List<NodeSave> children = new();
-            public List<BubbleSave> bubbles = new();
-            public List<AnimalSave> animals = new();
-            public List<GhostSave> questGhosts = new(), bridgeGhosts = new();
-        }
-
         // ---------------------------------------------------------------- lifecycle
+
+        void Awake() => Instance = this;
+
+        void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
+        }
 
         void Start()
         {
-            if (HasSave) Load();
+            Suspended = false;
+            if (Visit.Active) LoadVisit();
+            else if (HasSave) Load();
             _loaded = true;
             _nextSave = Time.unscaledTime + AutosaveSeconds;
         }
@@ -74,7 +108,7 @@ namespace CapyIsland.Game
             get
             {
                 var tutorial = FindFirstObjectByType<TutorialDirector>();
-                return _loaded && (tutorial == null || tutorial.Finished);
+                return _loaded && !Suspended && (tutorial == null || tutorial.Finished);
             }
         }
 
@@ -103,9 +137,47 @@ namespace CapyIsland.Game
 
         // ---------------------------------------------------------------- save
 
+        /// <summary>Saves whichever island you are on: yours to your save, a friend's to their profile.</summary>
         public void Save()
         {
-            var d = new SaveData();
+            if (Visit.Active)
+            {
+                Visit.StoreHostWorld(CaptureWorld());
+                return;
+            }
+            var d = CaptureWorld();
+            CaptureProgress(d);
+            WriteHome(d);
+        }
+
+        /// <summary>Saves your island now, whatever the autosave timer says (before a flight).</summary>
+        public bool SaveHomeNow()
+        {
+            if (Visit.Active || !_loaded) return false;
+            Save();
+            return true;
+        }
+
+        public static SaveData ReadHome()
+        {
+            if (!HasSave) return null;
+            try { return JsonUtility.FromJson<SaveData>(PlayerPrefs.GetString(Key)); }
+            catch (Exception e)
+            {
+                Debug.LogWarning("[SaveGame] Save unreadable: " + e.Message);
+                return null;
+            }
+        }
+
+        public static void WriteHome(SaveData d)
+        {
+            PlayerPrefs.SetString(Key, JsonUtility.ToJson(d));
+            PlayerPrefs.Save();
+        }
+
+        /// <summary>The player's own progress: wallet, achievements, cards, prices, quests.</summary>
+        public static void CaptureProgress(SaveData d)
+        {
             var store = ResourceStore.Instance;
             if (store != null)
             {
@@ -114,16 +186,12 @@ namespace CapyIsland.Game
                 d.gems = store.Get(ResourceKind.Gem);
             }
             d.score = TowerOfLove.Score;
-            d.motes.AddRange(Motes.Collected);
-            d.motesClicked.AddRange(Motes.Clicked);
-            d.cards.AddRange(Cards.Collected);
+            d.motes.Clear(); d.motes.AddRange(Motes.Collected);
+            d.motesClicked.Clear(); d.motesClicked.AddRange(Motes.Clicked);
+            d.cards.Clear(); d.cards.AddRange(Cards.Collected);
+            d.prices.Clear();
             foreach (var kv in StoreData.PinnedPrices)
                 d.prices.Add(new PriceSave { name = kv.Key, wood = kv.Value.x, gold = kv.Value.y, gems = kv.Value.z });
-
-            var land = LandMap.Instance;
-            if (land != null)
-                foreach (var p in land.Pieces)
-                    if (p.isBridge && p.open) d.bridges.Add(p.name);
 
             var qs = QuestSystem.Instance;
             if (qs != null)
@@ -131,10 +199,22 @@ namespace CapyIsland.Game
                 var snap = qs.Snapshot();
                 d.corianderIndex = snap.coriander;
                 d.peachIndex = snap.peach;
+                d.quests.Clear();
                 foreach (var (giver, id, stage, complete) in snap.quests)
                     d.quests.Add(new QuestSave { giver = giver, id = id, stage = stage, complete = complete });
+                d.ghostsSpawned.Clear();
                 d.ghostsSpawned.AddRange(snap.ghosts);
             }
+        }
+
+        /// <summary>Everything on the island as it stands now.</summary>
+        public static SaveData CaptureWorld()
+        {
+            var d = new SaveData();
+            var land = LandMap.Instance;
+            if (land != null)
+                foreach (var p in land.Pieces)
+                    if (p.isBridge && p.open) d.bridges.Add(p.name);
 
             var king = FindFirstObjectByType<PlayerAvatar>();
             if (king != null) d.king = king.transform.position;
@@ -178,7 +258,7 @@ namespace CapyIsland.Game
             foreach (var w in FindObjectsByType<Worker>(FindObjectsSortMode.None))
             {
                 var tag = w.GetComponent<CatalogItem>();
-                if (tag == null) continue;
+                if (tag == null || w.GetComponent<VisitorBot>() != null) continue;
                 var monster = w.GetComponent<MonsterAnimal>();
                 bool wild = monster != null && !monster.Tame;
                 var a = new AnimalSave { name = tag.StoreName, pos = w.transform.position, tame = !wild, hunger = w.Hunger };
@@ -196,45 +276,55 @@ namespace CapyIsland.Game
                 if (g.GiverKind == QuestGiver.Kind.Ghost && g.GhostId > 0)
                     d.questGhosts.Add(new GhostSave { id = g.GhostId, pos = g.transform.position });
             foreach (var g in FindObjectsByType<BridgeGhost>(FindObjectsSortMode.None))
-                if (!g.SoldOut) d.bridgeGhosts.Add(new GhostSave { name = g.Title, pos = g.transform.position });
-
-            PlayerPrefs.SetString(Key, JsonUtility.ToJson(d));
-            PlayerPrefs.Save();
+                if (!g.SoldOut) d.bridgeGhosts.Add(new GhostSave { name = g.BridgeName, pos = g.transform.position });
+            return d;
         }
 
         // ---------------------------------------------------------------- load
 
         void Load()
         {
-            SaveData d;
-            try { d = JsonUtility.FromJson<SaveData>(PlayerPrefs.GetString(Key)); }
-            catch (Exception e)
-            {
-                Debug.LogWarning("[SaveGame] Save unreadable, starting fresh: " + e.Message);
-                return;
-            }
+            var d = ReadHome();
             if (d == null) return;
 
             Restoring = true;
-            try { Apply(d); }
+            try
+            {
+                SkipTutorial();
+                ApplyProgress(d);
+                ApplyWorld(d, d);
+            }
             finally { Restoring = false; }
 
-            Motes.Trigger("welcome_back");
-            Hints.Show("Welcome back... I have restored your island.");
+            bool backFromTrip = Visit.ReturnedHome;
+            Visit.ReturnedHome = false;
+            Hints.Show(backFromTrip ? "Welcome home! Your island missed you." : "Welcome back! Your island kept warm while you were away.");
         }
 
-        void Apply(SaveData d)
+        /// <summary>On a friend's island: your progress and your trail, their world.</summary>
+        void LoadVisit()
+        {
+            var home = ReadHome() ?? new SaveData();
+            var world = Visit.HostWorld ?? new SaveData();
+            Restoring = true;
+            try
+            {
+                SkipTutorial();
+                ApplyProgress(home);
+                ApplyWorld(world, home);
+            }
+            finally { Restoring = false; }
+            Visit.OnArrived();
+        }
+
+        static void SkipTutorial()
         {
             var tutorial = FindFirstObjectByType<TutorialDirector>();
             if (tutorial != null) tutorial.SkipForReturningPlayer();
+        }
 
-            // The opening bubbles belong to a new game.
-            foreach (var b in FindObjectsByType<Bubble>(FindObjectsSortMode.None))
-            {
-                if (b.Contents != null) Destroy(b.Contents);
-                Destroy(b.gameObject);
-            }
-
+        static void ApplyProgress(SaveData d)
+        {
             var store = ResourceStore.Instance;
             if (store != null)
             {
@@ -253,6 +343,23 @@ namespace CapyIsland.Game
                 var quests = new List<(int, int, int, bool)>();
                 foreach (var q in d.quests) quests.Add((q.giver, q.id, q.stage, q.complete));
                 qs.Restore(d.corianderIndex, d.peachIndex, quests, d.ghostsSpawned);
+            }
+        }
+
+        /// <summary>
+        /// Builds the island from <paramref name="d"/>. The trail — what is carried, and the animals
+        /// following the king — comes from <paramref name="trail"/>, which is the same save at
+        /// home and the player's own save when visiting, so your trail always travels with you.
+        /// </summary>
+        static void ApplyWorld(SaveData d, SaveData trail)
+        {
+            bool visiting = Visit.Active;
+
+            // The opening bubbles belong to a new game.
+            foreach (var b in FindObjectsByType<Bubble>(FindObjectsSortMode.None))
+            {
+                if (b.Contents != null) Destroy(b.Contents);
+                Destroy(b.gameObject);
             }
 
             var land = LandMap.Instance;
@@ -287,7 +394,7 @@ namespace CapyIsland.Game
             }
 
             Vector2 behindKing = king != null ? (Vector2)king.transform.position + new Vector2(-0.8f, -0.4f) : Vector2.zero;
-            foreach (var name in d.carried)
+            foreach (var name in trail.carried)
             {
                 var go = catalog.Create(name);
                 if (go == null) continue;
@@ -295,36 +402,49 @@ namespace CapyIsland.Game
                 go.SetActive(true);
                 var placeable = go.GetComponent<Placeable>();
                 if (placeable != null) placeable.MarkCarried();
+                if (visiting) VisitTag.Mark(go, VisitTag.Origin.Home);
             }
 
             foreach (var b in d.bubbles) catalog.MakeStore(b.name, b.pos);
 
             foreach (var a in d.animals)
             {
-                if (!a.tame || a.name == "Deer") { catalog.MakeItem(a.name, a.pos); continue; }
-                var go = catalog.Create(a.name);
-                if (go == null) continue;
-                go.transform.position = new Vector3(a.pos.x, a.pos.y, 0f);
-                go.SetActive(true);
-                if (go.TryGetComponent<MonsterAnimal>(out var monster)) monster.RestoreTame();
-                var worker = go.GetComponent<Worker>();
-                if (worker != null) worker.RestoreHunger(a.hunger);
-                Workplace wp = a.workplace >= 0 && a.workplace < placed.Count && placed[a.workplace] != null
-                    ? placed[a.workplace].GetComponent<Workplace>() : null;
-                if (wp != null && worker != null && wp.TryAssign(worker)) continue;
-                var follower = go.GetComponent<Follower>();
-                if (follower != null) follower.PickUpIntoInventory();
+                if (a.carried && trail != d) continue;   // the host's trail is not yours
+                SpawnAnimal(a, placed, catalog, null);
             }
+            if (trail != d)
+                foreach (var a in trail.animals)
+                    if (a.carried && a.tame) SpawnAnimal(a, placed, catalog, behindKing);
 
             foreach (var g in d.questGhosts)
             {
                 var go = catalog.Create("Ghost");
                 if (go == null) continue;
                 go.transform.position = new Vector3(g.pos.x, g.pos.y, 0f);
-                go.GetComponent<QuestGiver>()?.AssignGhost(g.id);
+                var giver = go.GetComponent<QuestGiver>();
+                if (giver != null) giver.AssignGhost(g.id);
                 go.SetActive(true);
             }
             foreach (var g in d.bridgeGhosts) BridgeGhost.Spawn(g.name, g.pos, catalog.ItemParent);
+        }
+
+        static void SpawnAnimal(AnimalSave a, List<GameObject> placed, ItemCatalog catalog, Vector2? at)
+        {
+            if (!a.tame || a.name == "Deer") { catalog.MakeItem(a.name, a.pos); return; }
+            var go = catalog.Create(a.name);
+            if (go == null) return;
+            var pos = at ?? a.pos;
+            go.transform.position = new Vector3(pos.x, pos.y, 0f);
+            go.SetActive(true);
+            if (go.TryGetComponent<MonsterAnimal>(out var monster)) monster.RestoreTame();
+            var worker = go.GetComponent<Worker>();
+            if (worker != null) worker.RestoreHunger(a.hunger);
+            if (at.HasValue && Visit.Active) VisitTag.Mark(go, VisitTag.Origin.Home);
+            Workplace wp = !at.HasValue && a.workplace >= 0 && a.workplace < placed.Count && placed[a.workplace] != null
+                ? placed[a.workplace].GetComponent<Workplace>() : null;
+            if (wp != null && worker != null && wp.TryAssign(worker)) return;
+            var follower = go.GetComponent<Follower>();
+            if (follower != null) follower.PickUpIntoInventory();
         }
     }
 }

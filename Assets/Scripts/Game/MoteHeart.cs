@@ -14,6 +14,7 @@ namespace CapyIsland.Game
 
         string _mote;
         string _description;
+        string _title;
         SpriteRenderer _renderer;
         Follower _follower;
         bool _flying;
@@ -47,6 +48,7 @@ namespace CapyIsland.Game
             var heart = go.AddComponent<MoteHeart>();
             heart._mote = def.Name;
             heart._description = def.Description;
+            heart._title = def.Title;
             heart._renderer = sr;
             heart._follower = go.AddComponent<Follower>();
             heart._follower.PickUpIntoInventory();
@@ -82,7 +84,7 @@ namespace CapyIsland.Game
         {
             if (_flying) return;
             _flying = true;
-            UI.CardPopup.Show(_mote, _description, _renderer != null ? _renderer.sprite : null, FlyHome);
+            UI.CardPopup.Show(_title ?? _mote, _description, _renderer != null ? _renderer.sprite : null, FlyHome);
         }
 
         void FlyHome()

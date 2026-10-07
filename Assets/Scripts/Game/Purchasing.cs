@@ -23,6 +23,9 @@ namespace CapyIsland.Game
         /// <summary>Raised when a gift for Coriander is bought.</summary>
         public static event Action<string> GiftGiven;
 
+        /// <summary>Raised when something is paid for, with what arrived (null for gifts).</summary>
+        public static event Action<string, GameObject> Bought;
+
         /// <summary>Where the Church always stands, in world units (StoreItemsList.MakeItem).</summary>
         public static readonly Vector2 ChurchWorldSpot = new Vector2(3937f, 1027f);
 
@@ -31,6 +34,7 @@ namespace CapyIsland.Game
         {
             Acquired = null;
             GiftGiven = null;
+            Bought = null;
         }
 
         /// <summary>Spends the price and delivers the item. False if it cannot be afforded.</summary>
@@ -40,7 +44,8 @@ namespace CapyIsland.Game
             var price = StoreData.Price(name);
             if (store == null || !store.TrySpend(price.x, price.y, price.z)) return false;
             Sfx.Play(SfxKind.Buy, 0.8f);
-            Deliver(name, shopSpot);
+            var item = Deliver(name, shopSpot);
+            Bought?.Invoke(name, item);
             return true;
         }
 

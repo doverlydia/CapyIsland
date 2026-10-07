@@ -137,6 +137,8 @@ namespace CapyIsland.Game
         public void Deposit(int amount, bool legendaryBonus = true)
         {
             if (amount <= 0 || ResourceStore.Instance == null) return;
+            // A friend's workers fill their own stores, not your wallet.
+            if (Visit.Active) return;
             int paid = legendary && legendaryBonus ? amount * 2 : amount;
             ResourceStore.Instance.RecordDelivery(accepts, paid);
             ResourcePing.Fly(accepts, paid, (Vector2)transform.position + Vector2.up * 1.4f);

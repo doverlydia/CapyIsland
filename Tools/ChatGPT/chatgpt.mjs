@@ -50,7 +50,24 @@ async function post(endpoint, body) {
   return res.json();
 }
 
+// Image requests can run for minutes and connections occasionally drop: retry those, and say why.
+async function withRetry(what, attempt) {
+  for (let i = 1; ; i++) {
+    try { return await attempt(); }
+    catch (e) {
+      const transient = e instanceof TypeError || /fetch failed|ECONNRESET|socket/i.test(String(e.message));
+      if (!transient || i >= 3) throw e;
+      console.error(`${what}: ${e.message}${e.cause ? " (" + (e.cause.code || e.cause.message) + ")" : ""} - retrying (${i}/2)`);
+      await new Promise((r) => setTimeout(r, 4000 * i));
+    }
+  }
+}
+
 async function postForm(endpoint, form) {
+  return withRetry(endpoint, () => postFormOnce(endpoint, form));
+}
+
+async function postFormOnce(endpoint, form) {
   const res = await fetch(`${API}${endpoint}`, {
     method: "POST",
     headers: { "Authorization": `Bearer ${key}` },
@@ -121,6 +138,6 @@ try {
     process.exit(1);
   }
 } catch (e) {
-  console.error(e.message);
+  console.error(e.message + (e.cause ? " (cause: " + (e.cause.code || e.cause.message) + ")" : ""));
   process.exit(1);
 }

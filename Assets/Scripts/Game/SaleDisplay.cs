@@ -36,7 +36,7 @@ namespace CapyIsland.Game
         float _alpha = -1f;
 
         public string StoreName => storeName;
-        public string Title => storeName;
+        public string Title => StoryText.Name(storeName);
         public string Description => StoreData.Get(storeName).Description;
         public Vector3Int Price => StoreData.Price(storeName);
         public bool SoldOut => StoreData.IsSoldOut(storeName);

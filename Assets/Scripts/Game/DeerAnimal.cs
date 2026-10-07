@@ -17,7 +17,7 @@ namespace CapyIsland.Game
         protected override int WalkSpeed => Speed;
 
         protected override string ArrivalHint =>
-            "A deer is eating all your flowers! Find it and put a bomb under its booty to make it go boom.";
+            "A guinea pig is nibbling all your flowers! Find it and plant a bomb right next to it.";
 
         public void GoWild() => BeginLife();
 

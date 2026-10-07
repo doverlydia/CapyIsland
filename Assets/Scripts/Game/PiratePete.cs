@@ -40,9 +40,9 @@ namespace CapyIsland.Game
         public void Tap()
         {
             string line = Motes.Has("Priate Tales")
-                ? "Aar...if you want to sell me some spare loot, just drag it onto me booty."
-                : "*Pirate Pete leans in and tells you a very dirty story about a mermaid and a barrel of rum.*";
-            UI.SpeechDialog.Show(Face, "Pirate Pete", new[] { line }, OnClosed);
+                ? "Arr, back again? If you've spare goods, drag 'em onto me and I'll make you an offer."
+                : "*Salty Kombu leans in and tells you about the time he arm-wrestled a sea serpent for a barrel of pickles. It goes on for quite a while.*";
+            UI.SpeechDialog.Show(Face, StoryText.Sailor, new[] { line }, OnClosed);
         }
 
         void OnClosed() => Motes.Trigger("girl_quest_3");
@@ -72,7 +72,7 @@ namespace CapyIsland.Game
                 var def = tag.Def;
                 if (!def.IsValid || def.Max != 0)
                 {
-                    UI.SpeechDialog.Show(Face, "Pirate Pete", new[] { "Sorry I can't buy this item." }, noDeal);
+                    UI.SpeechDialog.Show(Face, StoryText.Sailor, new[] { "Can't take that one off your paws, I'm afraid." }, noDeal);
                     return true;
                 }
                 var price = StoreData.Price(tag.StoreName);
@@ -85,7 +85,7 @@ namespace CapyIsland.Game
             if (pay.z > 0) parts.Add(pay.z + " gems");
             string offer = parts.Count > 0 ? string.Join(" and ", parts) : "a pat on the back";
 
-            UI.SpeechDialog.Show(Face, "Pirate Pete", new[] { $"I will buy your {tag.StoreName} for {offer}." }, null,
+            UI.SpeechDialog.Show(Face, StoryText.Sailor, new[] { $"I'll give you {offer} for your {StoryText.Name(tag.StoreName)}." }, null,
                 ("Deal", () => Deal(item, pay)),
                 ("No Deal", noDeal));
             return true;

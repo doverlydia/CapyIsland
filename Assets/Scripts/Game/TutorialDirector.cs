@@ -52,6 +52,39 @@ namespace CapyIsland.Game
 
         public bool Finished => _step == Step.Done;
 
+        public static TutorialDirector Instance { get; private set; }
+
+        void Awake() => Instance = this;
+
+        void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
+        }
+
+        /// <summary>The current step as a short to-do, for the objective tracker.</summary>
+        public string CurrentGoal => _step switch
+        {
+            Step.Greet => "Look around your new island",
+            Step.CollectForest => "Pop the bubble to get a forest",
+            Step.PlantForest => "Drag the forest onto the grass",
+            Step.CollectSawmill => "Pop the bubble to get a sawmill",
+            Step.PlantSawmillNearTrees => "Plant the sawmill beside the trees",
+            Step.CollectHouse => "Pop the bubble to get a house",
+            Step.PlantHouse => "Plant the capy house",
+            Step.BuyCapy => "Buy your first capybara",
+            Step.AssignCapy => "Drag the capybara onto the sawmill",
+            Step.WaitForHunger => "Watch your capybara work",
+            Step.CollectGarden => "Pop the garden bubble",
+            Step.PlantGarden => "Plant flowers by the sleepy capybara",
+            Step.ClickMote => "Tap the warm heart following you",
+            Step.CrossToHeart => "Walk across the new bridge",
+            Step.OpenTower => "Find the Steam Tower and tap it",
+            _ => null,
+        };
+
+        /// <summary>Where the current step wants you to look, if anywhere.</summary>
+        public Vector2? GoalPoint => pointer != null ? pointer.Target : null;
+
         /// <summary>A returning player: no tutorial (Tasks.GameStarted).</summary>
         public void SkipForReturningPlayer()
         {
@@ -65,9 +98,11 @@ namespace CapyIsland.Game
 
         void Start()
         {
+            // A returning player (or a visitor on someone else's island) never sees the opening.
+            if (Visit.Active || SaveGame.HasSave) SkipForReturningPlayer();
             if (_step == Step.Done) return;
             _greetTimer = greetSeconds;
-            Say("Hi! Welcome to my desolate island. Unless you start building a home, you will soon be dead, just like me.");
+            Say("Hello, little one! I'm Old Yuzu, or what's left of me. Welcome to my chilly island. Without a home, nothing here will ever warm up again.");
         }
 
         void Update()
@@ -141,7 +176,7 @@ namespace CapyIsland.Game
                 // Planted, but out of reach of any tree: say so rather than let it look broken.
                 if (workplace != null && !workplace.HasWorkInReach())
                 {
-                    Say("That Sawmill is too far from the trees. It needs a forest within its circle to work.");
+                    Say("That sawmill is too far from the trees. It only works on the forest inside its circle.");
                     var forest = FindPlaceable("Forest");
                     if (pointer != null && forest != null) pointer.PointAt(forest.transform);
                     return;
@@ -150,7 +185,7 @@ namespace CapyIsland.Game
                 return;
             }
 
-            Say("Drop the Sawmill right next to your trees — it only reaches the forest inside its circle.");
+            Say("Drop the sawmill right beside your trees. It can only reach the forest inside its circle.");
             var trees = FindPlaceable("Forest");
             if (pointer != null && trees != null)
                 pointer.PointAt((Vector2)trees.transform.position + new Vector2(2.6f, -1.4f));
@@ -165,7 +200,7 @@ namespace CapyIsland.Game
 
             if (FindFirstObjectByType<Worker>() != null) { Advance(Step.AssignCapy); return; }
 
-            Say("Tap the capybara standing beside the house to buy one. It costs 10 wood and 10 gold.");
+            Say("Tap the capybara by the house to welcome one in. It costs 10 wood and 10 gold.");
             if (pointer != null) pointer.PointAt(shop.transform);
         }
 
@@ -176,12 +211,12 @@ namespace CapyIsland.Game
 
             if (worker.IsAssigned)
             {
-                Say("That's the loop: forest, sawmill, capybara. Watch the wood climb with every chop.");
+                Say("That's the rhythm: forest, sawmill, capybara. Watch the wood pile up with every chop.");
                 Advance(Step.WaitForHunger);
                 return;
             }
 
-            Say("Now drag the capybara onto the Sawmill to put it to work.");
+            Say("Now drag the capybara onto the sawmill to put it to work.");
             var mill = FindFirstObjectByType<Workplace>();
             if (pointer != null && mill != null) pointer.PointAt(mill.transform);
         }
@@ -201,14 +236,14 @@ namespace CapyIsland.Game
                 _gardenBubble = BubbleSpawner.SpawnAt(gardenItem, at, bubbleParent);
             }
 
-            Say("Your capybara fell asleep - it's hungry. Capybaras eat flowers. There's a garden in that bubble.");
+            Say("Your capybara has dozed off. It's hungry! Capybaras eat flowers, and there's a garden in that bubble.");
             Advance(Step.CollectGarden);
         }
 
         void TickCollectGarden()
         {
             if (_gardenBubble == null || _gardenBubble.Taken) { Advance(Step.PlantGarden); return; }
-            Say("Tap the bubble to collect the posie garden.");
+            Say("Tap the bubble to collect the daisy garden.");
             if (pointer != null) pointer.PointAt(_gardenBubble.transform);
         }
 
@@ -217,7 +252,7 @@ namespace CapyIsland.Game
             if (gardenItem == null) { Advance(Step.Done); return; }
             if (gardenItem.Placed) { AwakenSpirits(); return; }
 
-            Say("Plant the garden near the sleeping capybara so it can reach the flowers.");
+            Say("Plant the garden close to the sleepy capybara so it can reach the flowers.");
             Worker sleeper = null;
             foreach (var w in FindObjectsByType<Worker>(FindObjectsSortMode.None))
                 if (w.IsAsleep && w.IsHungry) { sleeper = w; break; }
@@ -236,7 +271,7 @@ namespace CapyIsland.Game
             var catalog = ItemCatalog.Instance;
             if (land != null && catalog != null)
                 catalog.MakeItem("Tower Of Love", land.RandomSpotOnIsland(1, 83f));
-            Say("What? Is that a bit of love? All your building has begun to awaken the island spirits. Uh oh.");
+            Say("Oh! A warm heart! All your building is waking the island up. The spirits can feel it.");
             _stepTimer = 6f;
             Advance(Step.ClickMote);
         }
@@ -250,7 +285,7 @@ namespace CapyIsland.Game
             }
             _stepTimer -= Time.deltaTime;
             if (_stepTimer > 0f) return;
-            Say("The heart shaped thing following you is a Mote. Tap the Mote to collect it.");
+            Say("That glowing heart following you is a warm heart. Tap it to send it home.");
             var heart = FindFirstObjectByType<MoteHeart>();
             if (pointer != null && heart != null) pointer.PointAt(heart.transform);
         }
@@ -269,7 +304,7 @@ namespace CapyIsland.Game
                     catalog.MakeStore("Coriander", land.RandomSpotOnIsland(1, 30f));
                 }
             }
-            Say("How exciting! A new island is open. Let's go exploring. Hold to walk your capybara over to the next island.");
+            Say("Wonderful! A bridge has risen to the next island. Hold your finger down to walk your capybara across.");
             _stepTimer = 10f;
             Advance(Step.CrossToHeart);
         }
@@ -280,7 +315,7 @@ namespace CapyIsland.Game
             var land = LandMap.Instance;
             if (king != null && land != null && land.IslandAt(king.transform.position) == 1)
             {
-                Say("*Gulp* I've heard of this place. It is the secret heart of the Capy Islands.");
+                Say("Ah... this is the heart of the Capy Isles. The old hot spring is here somewhere.");
                 _stepTimer = 10f;
                 _towerOpened = false;
                 TowerOfLove.DiaryClosed -= OnDiaryClosed;
@@ -304,14 +339,14 @@ namespace CapyIsland.Game
             if (_towerOpened)
             {
                 TowerOfLove.DiaryClosed -= OnDiaryClosed;
-                Say("If you get stuck, visit the tower! Bring love back to the island!");
+                Say("Whenever you're stuck, visit the Steam Tower. Bring the warmth back to the islands!");
                 Advance(Step.Done);
                 return;
             }
             _stepTimer -= Time.deltaTime;
             if (_stepTimer > 0f) return;
             _stepTimer = 20f;
-            Say("Try to find a strange tower. Can you open it?");
+            Say("Find the tall Steam Tower and tap it. Let's see what's inside.");
             var tower = TowerOfLove.Instance;
             if (pointer != null && tower != null) pointer.PointAt(tower.transform);
         }

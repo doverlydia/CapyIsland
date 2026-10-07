@@ -39,7 +39,7 @@ namespace CapyIsland.Game
         bool _capturedScale;
 
         public string DisplayName => displayName;
-        public string Description => description;
+        public string Description => StoryText.Blurb(displayName) is { Length: > 0 } blurb ? blurb : description;
         public string RecipeLine => recipeLine;
         public float InnerRadius => innerRadius;
         public float OuterRadius => outerRadius;
@@ -51,6 +51,15 @@ namespace CapyIsland.Game
             // already-shrunken scale be mistaken for full size, so items shrank again on every load.
             CaptureScale();
             transform.localScale = placed ? _placedScale : _placedScale * carriedScale;
+        }
+
+        /// <summary>Sets up an item built in code (hobby objects, the airstrip) rather than by the island builder.</summary>
+        public void Configure(string name, float inner, float outer, float carried = 0.6f)
+        {
+            displayName = name;
+            innerRadius = inner;
+            outerRadius = outer;
+            carriedScale = carried;
         }
 
         /// <summary>

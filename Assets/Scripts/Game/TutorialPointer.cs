@@ -9,7 +9,7 @@ namespace CapyIsland.Game
     /// Lives in world space rather than on the canvas so it can sit over a moving target without
     /// any screen-space conversion, and so it is hidden by the same camera bounds as everything else.
     /// </summary>
-    public class TutorialPointer : MonoBehaviour
+    public class TutorialPointer : MonoBehaviour, IMapMarker
     {
         [SerializeField] SpriteRenderer hand;
 
@@ -63,6 +63,27 @@ namespace CapyIsland.Game
         }
 
         public void Hide() => Show(false);
+
+        /// <summary>Where the hand is pointing, while it is showing.</summary>
+        public Vector2? Target
+        {
+            get
+            {
+                if (hand == null || !hand.enabled) return null;
+                if (_followTarget != null) return _followTarget.position;
+                if (_hasStatic) return _staticTarget;
+                return null;
+            }
+        }
+
+        // Off screen, the hand gets an arrow at the screen edge like anything else worth finding.
+        void OnEnable() => MapMarkers.Register(this);
+        void OnDestroy() => MapMarkers.Unregister(this);
+
+        public MarkerKind MarkerKind => MarkerKind.Guide;
+        public bool MarkerActive => Target.HasValue;
+        public Vector2 MarkerPosition => Target ?? (Vector2)transform.position;
+        public Sprite MarkerIcon => hand != null ? hand.sprite : null;
 
         void Show(bool visible)
         {

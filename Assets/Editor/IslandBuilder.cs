@@ -39,7 +39,8 @@ namespace CapyIsland.EditorTools
             var root = new GameObject(RootName);
             BuildGround(root.transform);
 
-            var shadow = Load("Assets/Art/Common/Shadow_Ellipse.png");
+            // No ground shadows: an ellipse under everything made props look like they float.
+            Sprite shadow = null;
 
             var actors = new GameObject("Actors");
             actors.transform.SetParent(root.transform, false);
@@ -125,21 +126,18 @@ namespace CapyIsland.EditorTools
 
         // ---------------------------------------------------------------- fruit trees
 
-        static readonly (Game.FruitKind kind, string name, string art, string blurb)[] FruitTrees =
+        static readonly (Game.FruitKind kind, string name, string art)[] FruitTrees =
         {
-            (Game.FruitKind.Apple, "Apple Tree", "Tree_Apple",
-                "A magical tree that produces food and gold.  A tree spirit lives inside."),
-            (Game.FruitKind.Pear, "Pear Tree", "Tree_Pear",
-                "A magical tree that produces food and gold.  A tree spirit lives inside."),
-            (Game.FruitKind.Plum, "Legendary Plum Tree", "Tree_Plum",
-                "Juicy plums grow heavily from the sweeping branches.  Plum trees produce valuable items when shaken."),
+            (Game.FruitKind.Apple, "Apple Tree", "Tree_Apple"),
+            (Game.FruitKind.Pear, "Pear Tree", "Tree_Pear"),
+            (Game.FruitKind.Plum, "Legendary Plum Tree", "Tree_Plum"),
         };
 
         static GameObject BuildFruitTreeItem(Transform parent, Sprite shadow, Game.FruitKind kind)
         {
             var def = System.Array.Find(FruitTrees, f => f.kind == kind);
             var item = MakeItem(parent, def.name, Load("Assets/Art/Terrain/" + def.art + ".png"),
-                shadow, 1.55f, 0.75f, def.blurb, "Tap to shake down fruit", inner: 50f, outer: 0f);
+                shadow, 1.55f, 0.75f, Game.StoryText.Blurb(def.name), "Tap to shake down fruit", inner: 50f, outer: 0f);
 
             var tree = item.AddComponent<Game.FruitTree>();
             var so = new SerializedObject(tree);
@@ -157,12 +155,16 @@ namespace CapyIsland.EditorTools
         /// <summary>Sprites that runtime spawns need: fruit, chests, resource icons, a shadow.</summary>
         static void BuildGameArt(Transform systems, Sprite shadow)
         {
-            var shadowTemplate = new GameObject("ShadowTemplate");
-            shadowTemplate.transform.SetParent(systems, false);
-            shadowTemplate.transform.localScale = new Vector3(0.9f, 0.9f, 1f);
-            var sr = shadowTemplate.AddComponent<SpriteRenderer>();
-            sr.sprite = shadow;
-            shadowTemplate.SetActive(false);
+            GameObject shadowTemplate = null;
+            if (shadow != null)
+            {
+                shadowTemplate = new GameObject("ShadowTemplate");
+                shadowTemplate.transform.SetParent(systems, false);
+                shadowTemplate.transform.localScale = new Vector3(0.9f, 0.9f, 1f);
+                var sr = shadowTemplate.AddComponent<SpriteRenderer>();
+                sr.sprite = shadow;
+                shadowTemplate.SetActive(false);
+            }
 
             var art = systems.gameObject.AddComponent<Game.GameArt>();
             art.shadowTemplate = shadowTemplate;

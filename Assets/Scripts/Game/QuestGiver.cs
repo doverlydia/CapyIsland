@@ -12,7 +12,7 @@ namespace CapyIsland.Game
     /// Coriander and Peach are placed like any item; a ghost simply appears, and floats away once
     /// its quest is done.
     /// </summary>
-    public class QuestGiver : MonoBehaviour, ITappable
+    public class QuestGiver : MonoBehaviour, ITappable, IMapMarker
     {
         public enum Kind { Coriander, Peach, Ghost }
 
@@ -38,11 +38,11 @@ namespace CapyIsland.Game
             ghostId = id;
         }
 
-        string Speaker => kind switch
+        public string Speaker => kind switch
         {
-            Kind.Coriander => "Coriander",
-            Kind.Peach => "Pirate Peach",
-            _ => "Ghost",
+            Kind.Coriander => StoryText.Sweetheart,
+            Kind.Peach => StoryText.Captain,
+            _ => StoryText.Spirit,
         };
 
         void Awake()
@@ -55,6 +55,7 @@ namespace CapyIsland.Game
             markerGo.transform.SetParent(transform, false);
             _marker = markerGo.AddComponent<TextMeshPro>();
             _marker.text = "!";
+            if (UI.UiKit.HeadingFont != null) _marker.font = UI.UiKit.HeadingFont;
             _marker.fontSize = 9f;
             _marker.fontStyle = FontStyles.Bold;
             _marker.alignment = TextAlignmentOptions.Center;
@@ -68,6 +69,7 @@ namespace CapyIsland.Game
         void OnEnable()
         {
             TapTargets.Register(this);
+            MapMarkers.Register(this);
             if (kind == Kind.Coriander) Purchasing.GiftGiven += OnGift;
 
             // The original's nudges: Coriander at once, Peach and ghosts after a minute — only
@@ -84,6 +86,7 @@ namespace CapyIsland.Game
         void OnDisable()
         {
             TapTargets.Unregister(this);
+            MapMarkers.Unregister(this);
             if (kind == Kind.Coriander) Purchasing.GiftGiven -= OnGift;
         }
 
@@ -99,11 +102,39 @@ namespace CapyIsland.Game
             }
         }
 
+        /// <summary>A new quest to hear, or a finished one to be thanked for.</summary>
+        public bool HasNews
+        {
+            get
+            {
+                var q = Progress;
+                return InWorld && q != null && q.Stage != QuestSystem.Stage.GiftReceived
+                       && (q.Stage == QuestSystem.Stage.NotStarted || q.Complete);
+            }
+        }
+
+        /// <summary>The finished quest is waiting to be handed in.</summary>
+        public bool RewardWaiting
+        {
+            get
+            {
+                var q = Progress;
+                return InWorld && q != null && q.Complete && q.Stage != QuestSystem.Stage.GiftReceived;
+            }
+        }
+
+        public bool IsInWorld => InWorld;
+        public QuestSystem.Progress CurrentQuest => Progress;
+        public Sprite Portrait => _bodyRenderer != null ? _bodyRenderer.sprite : null;
+
+        public MarkerKind MarkerKind => MarkerKind.Quest;
+        public bool MarkerActive => HasNews;
+        public Vector2 MarkerPosition => transform.position;
+        public Sprite MarkerIcon => Portrait;
+
         void Update()
         {
-            var q = Progress;
-            bool news = InWorld && q != null && q.Stage != QuestSystem.Stage.GiftReceived
-                        && (q.Stage == QuestSystem.Stage.NotStarted || q.Complete);
+            bool news = HasNews;
             if (_marker != null)
             {
                 _marker.enabled = news;
@@ -121,12 +152,7 @@ namespace CapyIsland.Game
             }
         }
 
-        string NudgeLine => kind switch
-        {
-            Kind.Coriander => "Goodness, my dear daughter is still alive! Tap on her to see if she needs any help.",
-            Kind.Peach => "Have you chatted with Pirate Peach? She's a saucy lass who knows the secret of how to unlock Pirate Bay.",
-            _ => "A new ghost has appeared and has a quest for you... tap him to find out more.",
-        };
+        string NudgeLine => StoryText.NudgeFor(kind);
 
         // ---------------------------------------------------------------- talking
 
@@ -148,7 +174,7 @@ namespace CapyIsland.Game
             QuestSystem.AnyoneTalkedTo = true;
 
             // Peach's last wish: the dance, for 500 gems.
-            if (kind == Kind.Peach && q != null && q.Def.Id == 4 && !q.Complete && WantsToDance(q, pages))
+            if (kind == Kind.Peach && q != null && q.Def.Id == 4 && !q.Complete)
             {
                 var store = ResourceStore.Instance;
                 bool rich = store != null && store.Get(ResourceKind.Gem) >= 500;
@@ -163,11 +189,6 @@ namespace CapyIsland.Game
             UI.SpeechDialog.Show(face, Speaker, pages, () => qs.Advance(q, this));
         }
 
-        static bool WantsToDance(QuestSystem.Progress q, string[] pages)
-        {
-            string text = string.Join(" ", pages);
-            return text.Contains("little show for you") || text.Contains("The offer still stands");
-        }
 
         void Dance()
         {

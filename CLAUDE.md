@@ -43,10 +43,21 @@ The decompiled ActionScript is the original developers' copyrighted code. Mechan
 balance numbers are fine to learn from and reimplement. **Never copy AS3 source, art, or audio into
 `Assets/`.** Write original C#.
 
+## Words the player reads
+
+Capy Island has its own story ("The Big Chill") and cast: Old Yuzu, Miso, Captain Wasabi, Salty Kombu,
+Elder Matcha. **Every visible name and line lives in `Assets/Scripts/Game/StoryText.cs`.** Item and
+achievement *names* in code ("Coriander", "The Girl's New Dress", "Deer"…) are save-file ids only and
+must never be shown directly — show `StoryText.Name(id)` / `MoteDef.Title`. The `*.g.cs` data tables
+and their generators carry ids and numbers only; never re-introduce prose from `docs/reference/*.xml`.
+
 ## Layout
 
 - `Assets/Scripts/Game/` — gameplay (`Worker`, `Workplace`, `Harvestable`, `Placeable`,
-  `ResourceStore`, `Bubble`, `TutorialDirector`)
+  `ResourceStore`, `Bubble`, `TutorialDirector`), `Wardrobe`, `DailyGifts`, `Objectives`
+- `Assets/Scripts/Game/Visits/` — fake multiplayer: bot friends, generated islands, flights (`Visit`)
+- `Assets/Scripts/Game/Hobbies/` — fishing, birdwatching, books, sewing (`HobbyLog`)
+- `Assets/Scripts/UI/` — runtime-built HUD (`MobileHud` bootstraps it), `UiKit`/`IconPainter`, screens
 - `Assets/Scripts/CameraRig/`, `Assets/Scripts/UI/`, `Assets/Scripts/Core/`
 - `Assets/Editor/IslandBuilder.cs`
 - `docs/` — design and reference material

@@ -126,7 +126,7 @@ namespace CapyIsland.Game
 
             bool wild = victim.GetComponent<DeerAnimal>() != null
                         || (victim.TryGetComponent<MonsterAnimal>(out var monster) && !monster.Tame);
-            if (wild) { BlowAway(victim); return; }
+            if (wild) { Hazards.NotePestCleared(victim.transform.position); BlowAway(victim); return; }
             if (deerOnly) return;
 
             // Spared by a normal bomb.

@@ -209,7 +209,7 @@ namespace CapyIsland.CameraRig
             }
         }
 
-        static bool ModalOpen => UI.SpeechDialog.IsOpen || UI.CardPopup.IsShowing || UI.PurchaseDialog.IsOpen;
+        static bool ModalOpen => UI.SpeechDialog.IsOpen || UI.CardPopup.IsShowing || UI.PurchaseDialog.IsOpen || UI.UiScreen.AnyOpen;
 
         static bool PointerOverUI()
         {

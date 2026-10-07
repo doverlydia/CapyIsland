@@ -15,7 +15,10 @@ namespace CapyIsland.EditorTools
     {
         void OnPreprocessTexture()
         {
-            if (!assetPath.StartsWith("Assets/Art/")) return;
+            // Wardrobe art loads at runtime from Resources, so it lives outside Assets/Art.
+            bool wardrobe = assetPath.StartsWith("Assets/Resources/Wardrobe/");
+            bool hobbies = assetPath.StartsWith("Assets/Resources/Hobbies/");
+            if (!assetPath.StartsWith("Assets/Art/") && !wardrobe && !hobbies) return;
             if (!assetImporter.importSettingsMissing) return;
 
             var importer = (TextureImporter)assetImporter;
@@ -27,7 +30,9 @@ namespace CapyIsland.EditorTools
             importer.alphaIsTransparency = true;
             importer.textureCompression = TextureImporterCompression.CompressedHQ;
 
-            bool centred = assetPath.StartsWith("Assets/Art/FX/") || assetPath.StartsWith("Assets/Art/UI/");
+            // Outfit pieces sit centred on their anchor; the bare capybara stands on its feet like the king.
+            bool centred = assetPath.StartsWith("Assets/Art/FX/") || assetPath.StartsWith("Assets/Art/UI/")
+                           || hobbies || (wardrobe && !assetPath.EndsWith("/Capy_Player.png"));
             var settings = new TextureImporterSettings();
             importer.ReadTextureSettings(settings);
             settings.spriteAlignment = (int)(centred ? SpriteAlignment.Center : SpriteAlignment.BottomCenter);

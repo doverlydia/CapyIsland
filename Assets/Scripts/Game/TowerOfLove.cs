@@ -1,5 +1,4 @@
 using System;
-using System.Text;
 using DG.Tweening;
 using UnityEngine;
 
@@ -11,7 +10,7 @@ namespace CapyIsland.Game
     /// flies here and adds 50 to your score. Once every heart is home, the island is saved and the
     /// Tower drops a little chest of wood or gold every second.
     /// </summary>
-    public class TowerOfLove : MonoBehaviour, ITappable
+    public class TowerOfLove : MonoBehaviour, ITappable, IMapMarker
     {
         public static TowerOfLove Instance { get; private set; }
 
@@ -35,12 +34,14 @@ namespace CapyIsland.Game
         {
             Instance = this;
             TapTargets.Register(this);
+            MapMarkers.Register(this);
         }
 
         void OnDisable()
         {
             if (Instance == this) Instance = null;
             TapTargets.Unregister(this);
+            MapMarkers.Unregister(this);
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -49,6 +50,11 @@ namespace CapyIsland.Game
             DiaryClosed = null;
             Score = 0;
         }
+
+        public MarkerKind MarkerKind => MarkerKind.Tower;
+        public bool MarkerActive => true;
+        public Vector2 MarkerPosition => transform.position;
+        public Sprite MarkerIcon => _bodyRenderer != null ? _bodyRenderer.sprite : null;
 
         public bool IslandSaved => Motes.ClickedCount >= Motes.Total;
 
@@ -98,27 +104,22 @@ namespace CapyIsland.Game
             return Vector2.Distance(b.center, worldPoint);
         }
 
+        /// <summary>Opens the goals list on its achievements, with how the island is feeling on top.</summary>
         public void Tap()
         {
             int total = Motes.Total, clicked = Motes.ClickedCount;
             int percent = total > 0 ? Mathf.RoundToInt(100f * clicked / total) : 0;
-            string mood = percent < 20 ? $"{percent}% away from certain death"
-                        : percent < 40 ? $"{percent}% hopeful that life has meaning"
-                        : percent < 60 ? $"{percent}% determined to rebuild what was lost"
-                        : percent < 80 ? $"{percent}% delighted to be bustling and moving forward"
-                        : $"{percent}% convinced that Love is eternal";
-
-            var found = new StringBuilder();
-            foreach (var m in QuestData.Motes)
-                if (Motes.IsClicked(m.Name)) found.Append("♥ ").Append(m.Name).Append("   ");
-
-            var pages = new[]
-            {
-                $"<b>Dear Diary</b>\nToday I am {mood}.\n\nBits of love left to collect ({total - clicked}).",
-                clicked > 0 ? "Bits of love found so far:\n" + found : "No bits of love have come home yet. Tap the hearts that follow you to send them here.",
-            };
-            var face = _bodyRenderer != null ? _bodyRenderer.sprite : null;
-            UI.SpeechDialog.Show(face, "Tower of Love", pages, () => DiaryClosed?.Invoke());
+            string mood = percent < 20 ? "The island is still cold and quiet"
+                        : percent < 40 ? "Little sparks of life are popping up"
+                        : percent < 60 ? "The island is waking up"
+                        : percent < 80 ? "The island is busy, bright and humming"
+                        : "The whole island is glowing";
+            string left = total - clicked == 0 ? "Every heart is home."
+                        : total - clicked == 1 ? "One heart still to bring home."
+                        : $"{total - clicked} hearts still to bring home.";
+            UI.ObjectivesScreen.Show(UI.ObjectivesScreen.Tab.Achievements,
+                $"<b>{mood}.</b> {percent}% of its warmth has returned. {left}",
+                () => DiaryClosed?.Invoke());
         }
     }
 }

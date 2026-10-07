@@ -2,59 +2,68 @@ namespace CapyIsland.Game
 {
     public enum QuestSource { Ghost, Coriander, Peach }
 
-    /// <summary>A mote: a named, one-shot achievement that is also a heart on the map.</summary>
+    /// <summary>
+    /// An achievement: one-shot, triggered by its func, known to quests and saves by its name. The
+    /// name is an id; what the player reads is <see cref="Title"/> and <see cref="Description"/>.
+    /// </summary>
     public readonly struct MoteDef
     {
         public readonly string Name;
         public readonly int Id;
         /// <summary>What triggers call it by.</summary>
         public readonly string Func;
-        public readonly string Description;
 
-        public MoteDef(string name, int id, string func, string description)
+        public MoteDef(string name, int id, string func)
         {
-            Name = name; Id = id; Func = func; Description = description;
+            Name = name; Id = id; Func = func;
         }
+
+        public string Title => StoryText.AchievementTitle(Func, Name);
+        public string Description => StoryText.AchievementBlurb(Func);
     }
 
     /// <summary>A first-discovery card, shown the first time you get any of its items.</summary>
     public readonly struct CardDef
     {
-        public readonly string Name;
         public readonly int Id;
-        public readonly string Description;
         public readonly string[] Items;
 
-        public CardDef(string name, int id, string description, string[] items)
+        public CardDef(int id, string[] items)
         {
-            Name = name; Id = id; Description = description; Items = items;
+            Id = id; Items = items;
         }
+
+        public string Name => StoryText.CardTitle(Id);
+        public string Description => StoryText.CardBlurb(Id);
     }
 
-    /// <summary>One quest from a ghost, Coriander or Pirate Peach.</summary>
+    /// <summary>One quest from a spirit, Miso or Captain Wasabi. Its words live in <see cref="StoryText"/>.</summary>
     public readonly struct QuestDef
     {
         public readonly QuestSource Giver;
         public readonly int Id;
-        public readonly string Intro, During, Complete;
-        /// <summary>Ghosts only: the mote whose firing makes the ghost appear.</summary>
+        /// <summary>Spirits only: the achievement whose firing makes the spirit appear.</summary>
         public readonly string Trigger;
         /// <summary>Action run when the intro has been read.</summary>
         public readonly string SetUp;
-        /// <summary>The mote name that completes the quest.</summary>
+        /// <summary>The achievement name that completes the quest.</summary>
         public readonly string CompleteMote;
         public readonly string RewardItem;
         public readonly int Wood, Gold, Gems;
 
-        public QuestDef(QuestSource giver, int id, string intro, string during, string complete,
+        public QuestDef(QuestSource giver, int id,
             string trigger, string setUp, string completeMote, string rewardItem, int wood, int gold, int gems)
         {
-            Giver = giver; Id = id; Intro = intro; During = during; Complete = complete;
+            Giver = giver; Id = id;
             Trigger = trigger; SetUp = setUp; CompleteMote = completeMote; RewardItem = rewardItem;
             Wood = wood; Gold = gold; Gems = gems;
         }
 
-        /// <summary>A text split into the pages the original shows one at a time.</summary>
+        public string Intro => StoryText.Quest(Giver, Id).Intro;
+        public string During => StoryText.Quest(Giver, Id).During;
+        public string Complete => StoryText.Quest(Giver, Id).Complete;
+
+        /// <summary>A text split into the pages shown one at a time.</summary>
         public static string[] Pages(string text) =>
             text.Split(new[] { "[br]" }, System.StringSplitOptions.RemoveEmptyEntries);
     }

@@ -11,7 +11,7 @@ namespace CapyIsland.Game
     /// A newborn one grows from 0.2 to full size at 0.01 a frame, 70 units from where it appeared
     /// (Animals/States/Born).
     /// </summary>
-    public abstract class WildForager : MonoBehaviour
+    public abstract class WildForager : MonoBehaviour, IMapMarker
     {
         enum State { Born, Find, Walk, Swing }
 
@@ -48,6 +48,14 @@ namespace CapyIsland.Game
         {
             _fullScale = transform.localScale;
         }
+
+        protected virtual void OnEnable() => MapMarkers.Register(this);
+        protected virtual void OnDisable() => MapMarkers.Unregister(this);
+
+        public MarkerKind MarkerKind => MarkerKind.Pest;
+        public virtual bool MarkerActive => isActiveAndEnabled && Running;
+        public Vector2 MarkerPosition => transform.position;
+        public Sprite MarkerIcon => MapMarkers.SpriteOf(gameObject);
 
         /// <summary>Starts life: grows in, then wanders off to feed.</summary>
         public void BeginLife()

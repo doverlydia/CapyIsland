@@ -69,9 +69,9 @@ namespace CapyIsland.Game
             var face = _body != null ? _body.sprite : null;
             if (!Motes.Has("Madly in Love"))
             {
-                UI.SpeechDialog.Show(face, "Priest", new[]
+                UI.SpeechDialog.Show(face, StoryText.Elder, new[]
                 {
-                    "Hi I'm the local Priest.  I'd be happy to perform a marriage for you, but first you have to find a girl who is willing! Keep looking!  Love is just around the corner.",
+                    "Welcome to the Blossom Chapel. I'm Elder Matcha. I'd be delighted to hold a wedding here, once two hearts have found each other. Keep at it, young one.",
                 });
                 return;
             }
@@ -80,14 +80,14 @@ namespace CapyIsland.Game
             var store = ResourceStore.Instance;
             bool afford = store != null && store.CanAfford(WeddingWood, WeddingGold, 0);
             string line = married
-                ? "You are already married. Would you like me to renew your vows?"
-                : "Marry the girl of your dreams. A Wedding Ceremony is 50 wood and 50 gold.";
+                ? "You two are already married! Shall we renew your vows under the blossom?"
+                : "Shall we hold the wedding? The ceremony costs 50 wood and 50 gold, for the lanterns and the cake.";
             var choices = new System.Collections.Generic.List<UI.SpeechDialog.Choice>
             {
                 new(married ? "Renew Vows" : "Wedding Ceremony", Wed, afford),
                 new("Cancel", null),
             };
-            UI.SpeechDialog.ShowChoices(face, "Priest", new[] { line }, null, choices);
+            UI.SpeechDialog.ShowChoices(face, StoryText.Elder, new[] { line }, null, choices);
         }
 
         void Wed()

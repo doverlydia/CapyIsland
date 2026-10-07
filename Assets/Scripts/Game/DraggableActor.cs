@@ -40,6 +40,13 @@ namespace CapyIsland.Game
             _bodyRest = _body.localPosition;
         }
 
+        /// <summary>Sets the grab circle for an item built in code, in its own (unscaled) units.</summary>
+        public void Configure(float radius, float offsetY)
+        {
+            grabRadius = radius;
+            grabOffsetY = offsetY;
+        }
+
         void OnDisable() => _held = false;
 
         /// <summary>

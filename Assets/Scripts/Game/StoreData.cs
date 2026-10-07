@@ -3,14 +3,14 @@ using UnityEngine;
 
 namespace CapyIsland.Game
 {
-    /// <summary>What buying (or collecting) a store item does — decided by its original item class.</summary>
+    /// <summary>What buying (or collecting) a store item does.</summary>
     public enum StoreItemKind
     {
         Garden, Forest, Hill, Workplace, Store, House, FruitTree, Decoration, Bomb, DeerBomb,
         Animal, Gift, Church, Tower, BridgeGhost, Character, BankTrade,
     }
 
-    /// <summary>One row of store_items.xml.</summary>
+    /// <summary>One store item. <see cref="Name"/> is its id; the player sees <see cref="Title"/>.</summary>
     public readonly struct StoreItemDef
     {
         public readonly string Name;
@@ -20,15 +20,16 @@ namespace CapyIsland.Game
         /// <summary>Ownership cap: 0 = unlimited; otherwise sold out once more than this many exist.</summary>
         public readonly int Max;
         public readonly StoreItemKind Kind;
-        public readonly string OriginalClass;
-        public readonly string Description;
 
         public StoreItemDef(string name, int id, int wood, int gold, int gems, float inner, float outer, int max,
-            StoreItemKind kind, string originalClass, string description)
+            StoreItemKind kind)
         {
             Name = name; Id = id; Wood = wood; Gold = gold; Gems = gems; Inner = inner; Outer = outer;
-            Max = max; Kind = kind; OriginalClass = originalClass; Description = description;
+            Max = max; Kind = kind;
         }
+
+        public string Title => StoryText.Name(Name);
+        public string Description => StoryText.Blurb(Name);
 
         public bool IsValid => !string.IsNullOrEmpty(Name);
     }

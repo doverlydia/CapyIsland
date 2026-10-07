@@ -4,8 +4,8 @@ using UnityEngine;
 namespace CapyIsland.Game
 {
     /// <summary>
-    /// The quest engine shared by Coriander, Pirate Peach and the ghosts (Quests/Quest, Ghost,
-    /// Mission, MissionSetUps). Data: <see cref="QuestData"/>, from save_data.xml.
+    /// The quest engine shared by Miso, Captain Wasabi and the spirits. Data: <see cref="QuestData"/>;
+    /// words: <see cref="StoryText"/>.
     ///
     ///   * Coriander and Peach give their missions strictly in order, one at a time; after a reward
     ///     they wait 15 seconds, then the next is ready.
@@ -116,6 +116,7 @@ namespace CapyIsland.Game
 
         void Update()
         {
+            if (Visit.Active) return;   // a friend's island never moves your quests on
             if (Time.time < _nextCheck) return;
             _nextCheck = Time.time + 5f;
 
@@ -150,7 +151,7 @@ namespace CapyIsland.Game
         {
             if (q == null)
             {
-                var comments = kind == QuestGiver.Kind.Peach ? QuestData.PeachComments : QuestData.CorianderComments;
+                var comments = kind == QuestGiver.Kind.Peach ? StoryText.WasabiChat : StoryText.MisoChat;
                 if (comments.Length == 0) return new[] { "..." };
                 return new[] { comments[Random.Range(0, comments.Length)] };
             }

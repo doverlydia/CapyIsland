@@ -55,19 +55,17 @@ namespace CapyIsland.CameraRig
             set { worldBounds = value; Apply(); }
         }
 
+        // Listens from Awake to OnDestroy, not OnEnable/OnDisable: the scene has this component
+        // saved disabled, and it must still re-frame when the phone rotates.
         void Awake()
         {
             _camera = GetComponent<Camera>();
             _camera.orthographic = true;
-        }
-
-        void OnEnable()
-        {
             ScreenMetrics.Changed += Apply;
             Apply();
         }
 
-        void OnDisable()
+        void OnDestroy()
         {
             ScreenMetrics.Changed -= Apply;
         }

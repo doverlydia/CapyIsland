@@ -28,7 +28,7 @@ namespace CapyIsland.Game
         protected override bool Running => !tame;
 
         protected override string ArrivalHint =>
-            "Angry monsters are stealing your rocks! Pay it some gems to get it to switch sides.";
+            "A zombie capybara is stumbling about, wrecking trees and rocks! Give it some gems for a warm bath and it'll switch sides.";
 
         protected override void Awake()
         {
@@ -39,13 +39,18 @@ namespace CapyIsland.Game
             _visuals = GetComponent<WorkerVisuals>();
         }
 
-        void OnEnable()
+        protected override void OnEnable()
         {
+            base.OnEnable();
             TapTargets.Register(this);
             ApplyTameness();
         }
 
-        void OnDisable() => TapTargets.Unregister(this);
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+            TapTargets.Unregister(this);
+        }
 
         /// <summary>Bought from a Monster House, dropped from a felled fruit tree, or out of a bubble.</summary>
         public void GoWild()
@@ -86,11 +91,11 @@ namespace CapyIsland.Game
             var portrait = transform.Find("Sprite")?.GetComponent<SpriteRenderer>()?.sprite;
             if (store == null || store.Get(ResourceKind.Gem) < TameCost)
             {
-                UI.SpeechDialog.Show(portrait, "Monster", new[] { "I only work for people with gems." });
+                UI.SpeechDialog.Show(portrait, StoryText.Name("Monster"), new[] { "Grrrnnh... so cold... (It needs a warm bath. Come back with 20 gems.)" });
                 return;
             }
-            UI.SpeechDialog.Show(portrait, "Monster",
-                new[] { "I'll work for life for 20 Gems and wait for you to login next time." },
+            UI.SpeechDialog.Show(portrait, StoryText.Name("Monster"),
+                new[] { "Grrrnnh... so cold... (A warm bath costs 20 gems. Afterwards it'll happily work for you.)" },
                 null,
                 ("Pay 20 Gems", () => TameNow()),
                 ("Cancel", null));
@@ -107,6 +112,7 @@ namespace CapyIsland.Game
         {
             var store = ResourceStore.Instance;
             if (store == null || !store.TrySpend(0, 0, TameCost)) return;
+            Hazards.NotePestCleared(transform.position);
             Release();
             tame = true;
             ApplyTameness();

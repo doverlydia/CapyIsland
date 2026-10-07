@@ -21,7 +21,8 @@ namespace CapyIsland.Game
         SpriteRenderer _bodyRenderer;
         bool _gone;
 
-        public string Title => bridgeName;
+        public string BridgeName => bridgeName;
+        public string Title => "Bridge to " + StoryText.Name(bridgeName);
         public string Description => StoreData.Get(bridgeName).Description;
         public Vector3Int Price => StoreData.Price(bridgeName);
         public bool SoldOut => _gone;

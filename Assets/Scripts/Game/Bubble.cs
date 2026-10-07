@@ -11,7 +11,7 @@ namespace CapyIsland.Game
     ///
     /// In the original these are survivors Grandpa Angel sealed away before the disaster.
     /// </summary>
-    public class Bubble : MonoBehaviour
+    public class Bubble : MonoBehaviour, IMapMarker
     {
         [Header("Contents")]
         [Tooltip("Item held inside, inactive in the scene until collected.")]
@@ -49,6 +49,14 @@ namespace CapyIsland.Game
         public bool Taken => _taken;
         public float TapRadius => tapRadius;
         public GameObject Contents => contents;
+
+        void OnEnable() => MapMarkers.Register(this);
+        void OnDisable() => MapMarkers.Unregister(this);
+
+        public MarkerKind MarkerKind => MarkerKind.Bubble;
+        public bool MarkerActive => !_taken && isActiveAndEnabled;
+        public Vector2 MarkerPosition => transform.position;
+        public Sprite MarkerIcon => _icon != null ? _icon.sprite : MapMarkers.SpriteOf(contents);
 
         void Awake()
         {
@@ -123,7 +131,7 @@ namespace CapyIsland.Game
                 {
                     _nudged = true;
                     var tag = contents.GetComponent<CatalogItem>();
-                    Hints.Show("You've discovered a free <b>" + (tag != null ? tag.StoreName : contents.name) + "</b>! Tap to pick it up.");
+                    Hints.Show("You found a free <b>" + (tag != null ? StoryText.Name(tag.StoreName) : contents.name) + "</b>! Tap the bubble to pick it up.");
                 }
             }
 

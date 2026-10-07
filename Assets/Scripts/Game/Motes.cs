@@ -29,9 +29,53 @@ namespace CapyIsland.Game
             Triggered = null;
         }
 
-        public static int CollectedCount => _collected.Count;
-        public static int ClickedCount => _clicked.Count;
-        public static int Total => QuestData.Motes.Length;
+        /// <summary>
+        /// Achievements that are no longer in the game: visiting the original's web forum (nothing
+        /// here can trigger it, so the island could never be saved), and logging in a second day,
+        /// which the daily sign-in reward replaces. They never fire and do not count.
+        /// </summary>
+        static readonly HashSet<string> Retired = new() { "visit_forums", "welcome_back" };
+
+        /// <summary>Achievements this game adds of its own.</summary>
+        static readonly MoteDef[] Added =
+        {
+            new MoteDef("Dressed Up", 40, "dress_up"),
+        };
+
+        /// <summary>The visiting achievements, always available.</summary>
+        static readonly MoteDef[] Visiting =
+        {
+            new MoteDef("Good Neighbour", 41, "visit_three"),
+            new MoteDef("Lunch Delivery", 42, "visit_feed"),
+            new MoteDef("Pest Control", 43, "visit_pests"),
+            new MoteDef("First Catch", 44, "hobby_fish"),
+            new MoteDef("Bird Spotter", 45, "hobby_bird"),
+            new MoteDef("Published Author", 46, "hobby_book"),
+            new MoteDef("Fashion Designer", 47, "hobby_sew"),
+            new MoteDef("Green Thumb", 48, "hobby_garden"),
+            new MoteDef("Home Cooking", 49, "hobby_cook"),
+            new MoteDef("Bug Catcher", 50, "hobby_bug"),
+            new MoteDef("Cat Person", 51, "hobby_cat"),
+            new MoteDef("Ready for Take-off", 52, "built_airport"),
+        };
+
+        /// <summary>Every achievement still in the game, in order.</summary>
+        public static IEnumerable<MoteDef> All
+        {
+            get
+            {
+                foreach (var m in QuestData.Motes)
+                    if (!Retired.Contains(m.Func)) yield return m;
+                // Only once the wardrobe has art: an achievement nobody can earn is worse than none.
+                if (Wardrobe.Ready)
+                    foreach (var m in Added) yield return m;
+                foreach (var m in Visiting) yield return m;
+            }
+        }
+
+        public static int CollectedCount { get { int n = 0; foreach (var m in All) if (_collected.Contains(m.Name)) n++; return n; } }
+        public static int ClickedCount { get { int n = 0; foreach (var m in All) if (_clicked.Contains(m.Name)) n++; return n; } }
+        public static int Total { get { int n = 0; foreach (var _ in All) n++; return n; } }
         public static IEnumerable<string> Collected => _collected;
         public static IEnumerable<string> Clicked => _clicked;
 
@@ -42,7 +86,7 @@ namespace CapyIsland.Game
 
         public static bool TryGetByFunc(string func, out MoteDef def)
         {
-            foreach (var m in QuestData.Motes)
+            foreach (var m in All)
                 if (m.Func == func) { def = m; return true; }
             def = default;
             return false;
@@ -59,6 +103,9 @@ namespace CapyIsland.Game
         /// <summary>Fires a mote by its func (TriggerMote). Does nothing if it has already fired.</summary>
         public static void Trigger(string func)
         {
+            // On a friend's island only the visiting achievements can be earned: their island
+            // is not where your own story moves on.
+            if (Visit.Active && !func.StartsWith("visit_") && !func.StartsWith("hobby_")) return;
             if (!TryGetByFunc(func, out var def) || _collected.Contains(def.Name)) return;
             _collected.Add(def.Name);
             Triggered?.Invoke(def);

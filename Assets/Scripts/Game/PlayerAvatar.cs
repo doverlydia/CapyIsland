@@ -46,6 +46,9 @@ namespace CapyIsland.Game
             var sprite = transform.Find("Sprite");
             _body = sprite != null ? sprite : transform;
             _bodyRestLocal = _body.localPosition;
+            // The wardrobe dresses the player; added here so the island builder needn't know.
+            if (GetComponent<CapyOutfit>() == null) gameObject.AddComponent<CapyOutfit>();
+            if (GetComponent<DesignWear>() == null) gameObject.AddComponent<DesignWear>();
         }
 
         void OnEnable()

@@ -252,8 +252,23 @@ namespace CapyIsland.Game
 
         void ResolveHunger(int amount)
         {
+            bool wasHungry = _hungry;
             _hunger += amount;   // no cap: a rose banks a worker far past full
             if (_hunger >= BunniRules.HungryBelow) _hungry = false;
+            if (wasHungry && !_hungry) Fed?.Invoke(this);
+        }
+
+        /// <summary>Raised when a hungry worker has eaten its fill.</summary>
+        public static event Action<Worker> Fed;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetFedSession() => Fed = null;
+
+        /// <summary>A visiting friend hands this worker a snack: as good as a garden's worth of flowers.</summary>
+        public void FeedFromFriend()
+        {
+            if (!_hungry) return;
+            ResolveHunger(BunniRules.StartingHunger);
         }
 
         // ---------------------------------------------------------------- FindWood
@@ -326,13 +341,13 @@ namespace CapyIsland.Game
 
         void RaiseDreamHint()
         {
-            string who = "A " + speciesName;
+            string who = "A " + StoryText.Name(speciesName);
             if (_hungry)
-                Hints.Show(who + " ate the last flower in the garden. I guess you need to plant bigger flower gardens for your hungry workers.");
+                Hints.Show(who + " ate the last flower in the garden. Plant bigger gardens for your hungry workers.");
             else if (_workplace.Accepts == ResourceKind.Wood)
-                Hints.Show("Uh oh... I hear a " + speciesName + " chopped down the last tree in a forest. Too many workers leads to overharvesting.");
+                Hints.Show(who + " chopped down the last tree in a forest. Too many workers on one forest will strip it bare.");
             else
-                Hints.Show("I hear a " + speciesName + " mined the last rock in a hill. Soon the mine will collapse.");
+                Hints.Show(who + " dug out the last rock in a hill. With no rocks in reach, the mine will close.");
         }
 
         // ---------------------------------------------------------------- GetWood
