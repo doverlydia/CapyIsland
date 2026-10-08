@@ -119,6 +119,7 @@ namespace CapyIsland.UI
             MarkerKind.Guide => 4,
             MarkerKind.Quest => 3,
             MarkerKind.Pest => 2,
+            MarkerKind.Friend => 2,
             _ => 1,
         };
 
@@ -127,6 +128,7 @@ namespace CapyIsland.UI
             MarkerKind.Guide => UiKit.Primary,
             MarkerKind.Quest => UiKit.Sun,
             MarkerKind.Pest => UiKit.Danger,
+            MarkerKind.Friend => UiKit.Hex("5B9BD5"),
             _ => UiKit.Spring,
         };
 

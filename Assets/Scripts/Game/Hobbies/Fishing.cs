@@ -6,25 +6,42 @@ using UnityEngine;
 namespace CapyIsland.Game
 {
     /// <summary>
-    /// Fishing. Fish shadows swim in the shallows around whichever shore you are near — the bigger
-    /// the shadow, the bigger the fish. Stand at the water's edge and cast: the nearest fish comes
-    /// to look, nibbles once or twice (wait!), then bites — reel in right then to catch it. Too
-    /// early and it darts away; too late and it is gone.
+    /// Fishing, played the way Heartopia plays it. Fish shadows swim in the shallows around whichever
+    /// shore you are near — the bigger the shadow, the bigger the fish.
     ///
-    /// Catches go in the fish journal and raise your fishing level, which brings rarer fish.
+    /// 1. <b>Cast.</b> Hold the button: a ring slides out over the water. Let go to cast there —
+    ///    just in front of a shadow is best. (A quick tap casts at the nearest fish for you.)
+    /// 2. <b>Wait.</b> The fish comes over, nibbles, then bites with a big splash. It is hooked.
+    /// 3. <b>Reel.</b> Hold to reel the fish in; let go to give it slack. The line shows the strain:
+    ///    green is perfect, yellow is getting tight, red means let go now or it snaps. Every so
+    ///    often the fish fights back hard, so reeling is a rhythm — hold, ease off, hold again.
+    ///    Give it slack too long and it swims off.
+    ///
+    /// Catches go in the fish journal and raise your fishing level, which brings rarer fish and a
+    /// slightly kinder line.
     /// </summary>
     public class Fishing : MonoBehaviour
     {
-        public enum State { Idle, Waiting, Nibbling, Bite }
+        public enum State { Idle, Aiming, Waiting, Nibbling, Fight }
 
         public static Fishing Instance { get; private set; }
 
         /// <summary>Something worth showing the player: a catch, an escape, a hint.</summary>
         public static event Action<string> Said;
 
+        /// <summary>Raised the moment a fish bites and the fight begins.</summary>
+        public static event Action Bitten;
+
         const int ShadowCount = 5;
         const float ShadowRange = 10f, DespawnRange = 18f;
         const int ShadowOrder = -125;   // over the shallows, under the sand
+
+        // The tension zones, shared with the button so the two always agree.
+        public const float YellowAt = 0.5f, RedAt = 0.8f;
+        public static readonly Color Green = new(0.36f, 0.82f, 0.36f), Yellow = new(1f, 0.82f, 0.2f), Red = new(0.93f, 0.27f, 0.22f);
+
+        /// <summary>The colour of the line at a given strain.</summary>
+        public static Color TensionColour(float t) => t >= RedAt ? Red : t >= YellowAt ? Yellow : Green;
 
         class Shadow
         {
@@ -40,16 +57,46 @@ namespace CapyIsland.Game
         float _nextSpawn;
 
         public State Now { get; private set; }
+
+        /// <summary>The line's strain during a fight, 0 slack … 1 snapping.</summary>
+        public float Tension { get; private set; }
+
+        /// <summary>How far the fish has been reeled in, 0 just hooked … 1 landed.</summary>
+        public float Progress => _needed <= 0f ? 0f : Mathf.Clamp01(1f - _remaining / _needed);
+
+        /// <summary>True while the fish is fighting back hard.</summary>
+        public bool Surging { get; private set; }
+
+        /// <summary>The button is held down.</summary>
+        public bool Holding { get; private set; }
+
+        /// <summary>Fishing mode: the whole screen is the rod (see FishingButton). Off, you walk about as usual.</summary>
+        public bool Mode { get; set; }
+
+        /// <summary>How close a maxed-out line is to snapping, 0 … 1 (it holds for a moment first).</summary>
+        public float Overload => Mathf.Clamp01(_overload / SnapAfter);
+
+        const float SnapAfter = 1.5f;   // seconds a line can stay at full strain before it snaps
+        float _overload;
+
         Shadow _hooked;
-        GameObject _bobber;
+        GameObject _bobber, _aimRing;
         Transform _bobberBody;
         LineRenderer _line;
-        Vector2 _castFrom, _bobberAt;
-        float _stateUntil, _giveUpAt;
+        Vector2 _castFrom, _bobberAt, _aimDir;
+        float _stateUntil, _giveUpAt, _pressedAt, _aimDistance;
         int _nibblesLeft;
+        bool _warnedEarly;
+
+        // The fight.
+        const float LandAt = 0.7f;
+        float _needed, _remaining, _startDistance, _strength, _phaseUntil, _nextSplash, _slackFor;   // line still to reel in, in reel-seconds
 
         PlayerAvatar _king;
         static Material _lineMaterial;
+
+        // The rod in the capybara's paws while fishing (part of its body, so it turns with it).
+        SpriteRenderer _rod, _kingBody;
 
         void Awake() => Instance = this;
 
@@ -60,7 +107,11 @@ namespace CapyIsland.Game
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void ResetSession() => Said = null;
+        static void ResetSession()
+        {
+            Said = null;
+            Bitten = null;
+        }
 
         // ---------------------------------------------------------------- can I fish here?
 
@@ -156,6 +207,7 @@ namespace CapyIsland.Game
         void Swim(Shadow s)
         {
             if (s.Go == null) return;
+            if (s == _hooked && Now == State.Fight) return;   // the fight moves it
             Vector2 at = s.Go.transform.position;
             if (s != _hooked && !s.Fleeing && Time.time >= s.NextTurn)
             {
@@ -183,93 +235,226 @@ namespace CapyIsland.Game
             if (_hooked == s) _hooked = null;
         }
 
-        // ---------------------------------------------------------------- the line
+        // ---------------------------------------------------------------- the button
 
-        /// <summary>Casts towards the nearest fish in reach, or just out into the water.</summary>
-        public bool Cast()
+        /// <summary>Finger down on the fishing button.</summary>
+        public void Press()
         {
-            if (Now != State.Idle || _king == null) return false;
+            if (_king == null) return;
+            Holding = true;
+            _pressedAt = Time.time;
+            switch (Now)
+            {
+                case State.Idle: BeginAim(); break;
+                case State.Waiting:
+                case State.Nibbling:
+                    if (!_warnedEarly) { _warnedEarly = true; Say("Wait for the big splash — then hold to reel."); }
+                    break;
+            }
+        }
+
+        /// <summary>Puts the rod away: whatever was on the line gets away, and no harm done.</summary>
+        public void StopFishing()
+        {
+            Holding = false;
+            if (Now == State.Aiming) { CancelAim(); return; }
+            if (Now == State.Fight) Flee(_hooked);
+            if (Now != State.Idle) EndLine();
+        }
+
+        /// <summary>Finger up.</summary>
+        public void Release()
+        {
+            Holding = false;
+            if (Now == State.Aiming) Cast(quick: Time.time - _pressedAt < 0.2f);
+        }
+
+        // ---------------------------------------------------------------- casting
+
+        // ---------------------------------------------------------------- the rod
+
+        /// <summary>Turns to face the water and takes out the rod.</summary>
+        void HoldRod(Vector2 towards)
+        {
+            var body = _king.transform.Find("Sprite");
+            if (body == null) return;
+            _kingBody = body.GetComponent<SpriteRenderer>();
+            // The capybara's head is on the left of its picture: face the water by flipping to suit.
+            var scale = body.localScale;
+            scale.x = Mathf.Abs(scale.x) * (towards.x > 0f ? -1f : 1f);
+            body.localScale = scale;
+
+            if (_rod == null)
+            {
+                var art = HobbyData.Art("Rod");
+                if (art == null) return;
+                var go = new GameObject("FishingRod");
+                go.transform.SetParent(body, false);
+                _rod = go.AddComponent<SpriteRenderer>();
+                _rod.sprite = art;
+                _rod.flipX = true;   // tip towards the head, out over the water
+                go.transform.localScale = Vector3.one * (1.5f / Mathf.Max(0.01f, art.bounds.size.x));
+                go.transform.localPosition = new Vector3(-0.55f, 0.85f, 0f);
+            }
+            _rod.gameObject.SetActive(true);
+            _rod.transform.localRotation = Quaternion.identity;
+            _rod.transform.DOKill();
+        }
+
+        void PutRodAway()
+        {
+            if (_rod != null) _rod.gameObject.SetActive(false);
+        }
+
+        /// <summary>Where the line leaves the rod.</summary>
+        Vector2 RodTip()
+        {
+            if (_rod == null || !_rod.gameObject.activeInHierarchy) return (Vector2)_king.transform.position + new Vector2(0.55f, 1.25f);
+            var e = _rod.sprite.bounds.extents;
+            return _rod.transform.TransformPoint(new Vector3(-e.x * 0.95f, e.y * 0.95f, 0f));
+        }
+
+        void LateUpdate()
+        {
+            if (_rod == null || !_rod.gameObject.activeInHierarchy) return;
+            if (_kingBody != null) _rod.sortingOrder = _kingBody.sortingOrder + 6;
+            // It bends towards the fish as the line pulls tight.
+            float bend = Now == State.Fight ? Tension * 22f + (Surging ? Mathf.Sin(Time.time * 30f) * 4f : 0f) : 0f;
+            _rod.transform.localRotation = Quaternion.Euler(0f, 0f, bend);
+        }
+
+        /// <summary>Holding to cast: the ring slides out over the water and back.</summary>
+        void BeginAim()
+        {
             Vector2 you = _king.transform.position;
             var water = NearestWater(you, 2.6f);
-            if (!water.HasValue) { Say("Walk right up to the water's edge to fish."); return false; }
+            if (!water.HasValue) { Holding = false; Say("Walk right up to the water's edge to fish."); return; }
 
-            // Aim a little in front of the closest fish, or a few steps out to sea.
-            Shadow target = null;
-            float best = 6.5f;
+            // Aim towards the nearest fish if there is one in reach, otherwise straight out to sea.
+            var target = NearestShadow(you, 7f);
+            _aimDir = ((target != null ? (Vector2)target.Go.transform.position : water.Value) - you).normalized;
+            HoldRod(_aimDir);
+            Now = State.Aiming;
+            _castFrom = you;
+            _aimRing = new GameObject("CastAim");
+            var sr = _aimRing.AddComponent<SpriteRenderer>();
+            sr.sprite = UI.IconPainter.Ring;
+            sr.color = new Color(1f, 1f, 1f, 0.9f);
+            sr.sortingOrder = ShadowOrder + 420;
+            _aimRing.transform.localScale = new Vector3(0.7f, 0.42f, 1f);
+            Aim();
+        }
+
+        void Aim()
+        {
+            // Slides out and back while held, so letting go at the right moment picks the distance.
+            float t = Mathf.PingPong((Time.time - _pressedAt) * 0.55f, 1f);
+            _aimDistance = Mathf.Lerp(1.4f, 6.5f, t);
+            var p = CastPoint(_aimDistance);
+            _aimRing.transform.position = p;
+            var sr = _aimRing.GetComponent<SpriteRenderer>();
+            bool fishNear = NearestShadow(p, 1.6f) != null;
+            sr.color = fishNear ? new Color(1f, 0.92f, 0.4f, 0.95f) : new Color(1f, 1f, 1f, 0.85f);
+            float pulse = 1f + Mathf.Sin(Time.time * 10f) * 0.06f;
+            _aimRing.transform.localScale = new Vector3(0.7f, 0.42f, 1f) * pulse;
+        }
+
+        /// <summary>The landing point a distance out along the aim, pulled back onto water if it would land on sand.</summary>
+        Vector2 CastPoint(float distance)
+        {
+            Vector2 you = _king.transform.position;
+            var p = you + _aimDir * distance;
+            if (!BunniSpace.PointOnLand(p)) return p;
+            // Over land: walk further out until it is water (casting across a spit), else the nearest water.
+            for (float d = distance; d < 8f; d += 0.25f)
+                if (!BunniSpace.PointOnLand(you + _aimDir * d)) return you + _aimDir * d;
+            return NearestWater(you, 2.6f) ?? p;
+        }
+
+        Shadow NearestShadow(Vector2 from, float within)
+        {
+            Shadow best = null;
             foreach (var s in _shadows)
             {
                 if (s.Go == null || s.Fleeing) continue;
-                float d = Vector2.Distance(you, s.Go.transform.position);
-                if (d < best) { best = d; target = s; }
+                float d = Vector2.Distance(from, s.Go.transform.position);
+                if (d < within) { within = d; best = s; }
             }
+            return best;
+        }
+
+        void Cast(bool quick)
+        {
+            if (_aimRing != null) Destroy(_aimRing);
+            _aimRing = null;
+            Vector2 you = _king.transform.position;
+
             Vector2 spot;
-            if (target != null)
+            var fish = quick ? NearestShadow(you, 6.5f) : null;
+            if (fish != null)
             {
-                Vector2 fish = target.Go.transform.position;
-                spot = fish + (you - fish).normalized * 0.9f;
-                if (BunniSpace.PointOnLand(spot)) spot = fish;
+                // A quick tap: just in front of the nearest fish, as a helping hand.
+                Vector2 at = fish.Go.transform.position;
+                spot = at + (you - at).normalized * 0.9f;
+                if (BunniSpace.PointOnLand(spot)) spot = at;
             }
-            else
-            {
-                var dir = (water.Value - you).normalized;
-                spot = you + dir * 3.2f;
-                if (BunniSpace.PointOnLand(spot)) spot = water.Value;
-            }
+            else spot = CastPoint(quick ? 3.2f : _aimDistance);
 
             _castFrom = you;
             _bobberAt = spot;
+            HoldRod(spot - you);
             MakeBobber(spot);
             Sfx.Play(SfxKind.Plop, 0.7f);
             Now = State.Waiting;
+            _warnedEarly = false;
             _giveUpAt = Time.time + 14f;
+            _stateUntil = Time.time + 2f;
 
             // The fish nearest the bobber comes over for a look.
-            _hooked = null;
-            float near = 3.5f;
-            foreach (var s in _shadows)
-            {
-                if (s.Go == null || s.Fleeing) continue;
-                float d = Vector2.Distance(spot, s.Go.transform.position);
-                if (d < near) { near = d; _hooked = s; }
-            }
+            _hooked = NearestShadow(spot, 3.5f);
             if (_hooked != null) _hooked.Target = spot + (Vector2)(_hooked.Go.transform.position - (Vector3)spot).normalized * 0.35f;
-            return true;
         }
 
-        /// <summary>The reel button: right on a bite, a catch; any earlier, the fish takes fright.</summary>
-        public void Reel()
-        {
-            if (Now == State.Idle) return;
-            if (Now == State.Bite && _hooked != null) { Catch(_hooked); return; }
-            if (_hooked != null && Now == State.Nibbling) { Flee(_hooked); Say("Too soon! It got away. Wait for the big tug."); }
-            else Say("Nothing on the line yet.");
-            EndLine();
-        }
+        // ---------------------------------------------------------------- waiting for a bite
 
         void Tick(Vector2 you)
         {
             if (Now == State.Idle) return;
-            if (_line != null)
+            if (Now == State.Aiming)
             {
-                Vector2 tip = (Vector2)_king.transform.position + new Vector2(0.55f, 1.25f);
-                Vector2 bob = _bobber != null ? (Vector2)_bobberBody.position : _bobberAt;
-                for (int i = 0; i < _line.positionCount; i++)
-                {
-                    float t = i / (float)(_line.positionCount - 1);
-                    var p = Vector2.Lerp(tip, bob, t) + Vector2.down * Mathf.Sin(t * Mathf.PI) * 0.35f;
-                    _line.SetPosition(i, new Vector3(p.x, p.y, 0f));
-                }
+                if (_aimRing == null || Vector2.Distance(you, _castFrom) > 0.8f) { CancelAim(); return; }
+                Aim();
+                return;
             }
 
+            DrawLine();
+
             // Walking off reels the line in.
-            if (Vector2.Distance(you, _castFrom) > 0.8f) { EndLine(); return; }
+            if (Vector2.Distance(you, _castFrom) > 0.8f)
+            {
+                if (Now == State.Fight) { Escape("You walked off and the fish got away."); return; }
+                EndLine();
+                return;
+            }
 
             switch (Now)
             {
                 case State.Waiting:
                     if (_hooked == null || _hooked.Go == null)
                     {
-                        if (Time.time > _giveUpAt) { Say("Nothing's biting here. Try near a fish shadow."); EndLine(); }
+                        // Now and then a fish a little further off notices the bobber and swims over.
+                        if (Time.time >= _stateUntil)
+                        {
+                            _stateUntil = Time.time + 2f;
+                            var curious = UnityEngine.Random.value < 0.5f ? NearestShadow(_bobberAt, 6f) : null;
+                            if (curious != null)
+                            {
+                                _hooked = curious;
+                                _hooked.Target = _bobberAt + (Vector2)(_hooked.Go.transform.position - (Vector3)_bobberAt).normalized * 0.35f;
+                                break;
+                            }
+                        }
+                        if (Time.time > _giveUpAt) { Say("Nothing's biting here. Try casting just in front of a fish shadow."); EndLine(); }
                         break;
                     }
                     if (Vector2.Distance(_hooked.Go.transform.position, _bobberAt) < 0.5f)
@@ -284,51 +469,139 @@ namespace CapyIsland.Game
                     if (Time.time < _stateUntil) break;
                     if (_nibblesLeft-- > 0)
                     {
-                        Nibble(false);
+                        Nibble();
                         _stateUntil = Time.time + UnityEngine.Random.Range(0.8f, 1.6f);
                     }
-                    else
-                    {
-                        Now = State.Bite;
-                        Nibble(true);
-                        // Rarer fish give you less time.
-                        _stateUntil = Time.time + Mathf.Max(0.42f, 0.85f - _hooked.Kind.Stars * 0.08f);
-                    }
+                    else Hook();
                     break;
 
-                case State.Bite:
-                    if (Time.time >= _stateUntil)
-                    {
-                        Flee(_hooked);
-                        Say("Too slow! It slipped off the hook.");
-                        EndLine();
-                    }
+                case State.Fight:
+                    Fight(you);
                     break;
             }
         }
 
-        void Nibble(bool bite)
+        void CancelAim()
+        {
+            if (_aimRing != null) Destroy(_aimRing);
+            _aimRing = null;
+            Now = State.Idle;
+            Holding = false;
+            PutRodAway();
+        }
+
+        void Nibble()
         {
             if (_bobberBody == null) return;
             _bobberBody.DOKill();
             _bobberBody.localPosition = Vector3.zero;
-            if (bite)
+            _bobberBody.DOLocalMoveY(-0.1f, 0.1f).SetLoops(2, LoopType.Yoyo);
+            Sfx.Play(SfxKind.Plop, 0.35f);
+            Ripple(_bobberAt, 0.9f);
+        }
+
+        // ---------------------------------------------------------------- the fight
+
+        /// <summary>The big splash: the fish is on, and the reeling starts.</summary>
+        void Hook()
+        {
+            Now = State.Fight;
+            var kind = _hooked.Kind;
+            // Bigger and rarer fish pull harder; a higher fishing level makes the line a little kinder.
+            float rod = 1f - Mathf.Min(0.25f, HobbyLog.Level(Hobby.Fishing) * 0.03f);
+            _strength = (0.8f + kind.Stars * 0.12f + kind.Shadow * 0.06f) * rod;
+            _startDistance = Mathf.Max(LandAt + 1.2f, Vector2.Distance(_castFrom, _bobberAt));
+            // How much reeling it takes depends on the fish, not on how far out it bit: a common fish
+            // is a few holds, a big rare one a proper tussle.
+            _needed = _remaining = 4.5f + kind.Shadow * 0.7f + kind.Stars * 0.6f;
+            Tension = 0.15f;
+            Surging = false;
+            _slackFor = 0f;
+            _overload = 0f;
+            _phaseUntil = Time.time + UnityEngine.Random.Range(1.2f, 1.8f);   // an early pull, to teach the rhythm
+
+            if (_bobberBody != null)
             {
-                _bobberBody.DOLocalMoveY(-0.32f, 0.12f);
-                _bobberBody.DOScaleY(0.55f, 0.12f);
-                Sfx.Play(SfxKind.Pop, 0.9f);
-                Bitten?.Invoke();
+                _bobberBody.DOKill();
+                _bobberBody.localPosition = new Vector3(0f, -0.25f, 0f);
+                _bobberBody.localScale = new Vector3(0.26f, 0.16f, 1f);
+            }
+            Sfx.Play(SfxKind.Pop, 0.9f);
+            Ripple(_bobberAt, 1.8f);
+            Ripple(_bobberAt, 1.1f);
+#if UNITY_ANDROID || UNITY_IOS
+            Handheld.Vibrate();
+#endif
+            Bitten?.Invoke();
+            if (HobbyLog.Fish.Count == 0)
+                Say("It's hooked! Hold to reel. If the line turns red, let go until it calms down.");
+        }
+
+        float CalmFor() => UnityEngine.Random.Range(1.3f, 2.8f) / (1f + _hooked.Kind.Stars * 0.08f);
+        float SurgeFor() => UnityEngine.Random.Range(0.7f, 1.4f) * (1f + _hooked.Kind.Stars * 0.08f);
+
+        void Fight(Vector2 you)
+        {
+            float dt = Time.deltaTime;
+
+            // The fish alternates between swimming steadily and fighting back hard.
+            if (Time.time >= _phaseUntil)
+            {
+                Surging = !Surging;
+                _phaseUntil = Time.time + (Surging ? SurgeFor() : CalmFor());
+                if (Surging) Sfx.PlayAt(SfxKind.Plop, _bobberAt, 0.6f, 0.15f);
+            }
+
+            if (Holding)
+            {
+                Tension += dt * (Surging ? 0.85f : 0.22f) * _strength;
+                _remaining -= dt * (Surging ? 0.3f : 0.85f);
+                _slackFor = 0f;
             }
             else
             {
-                _bobberBody.DOLocalMoveY(-0.1f, 0.1f).SetLoops(2, LoopType.Yoyo);
-                Sfx.Play(SfxKind.Plop, 0.35f);
+                Tension -= dt * 1.1f;
+                _remaining += dt * (Surging ? 0.5f * _strength : 0.12f);
+                _slackFor += dt;
             }
-            Ripple(_bobberAt, bite ? 1.6f : 0.9f);
+            Tension = Mathf.Clamp01(Tension);
+
+            // At full strain the line holds for a moment (time to let go) before it snaps.
+            if (Tension >= 1f && Holding) _overload += dt;
+            else _overload = Mathf.Max(0f, _overload - dt * 2f);
+            if (_overload >= SnapAfter) { Escape("Snap! The line broke. Let go when it turns red."); return; }
+            if (_remaining > _needed + 2f || _slackFor > 6f) { Escape("It swam off. Keep reeling between its pulls."); return; }
+            if (_remaining <= 0f) { Catch(_hooked); return; }
+            float distance = LandAt + (_startDistance - LandAt) * Mathf.Clamp(_remaining / _needed, 0f, 1.3f);
+
+            // Move the bobber and fish along the line, thrashing side to side while it fights.
+            var dir = (_bobberAt - you).normalized;
+            var side = new Vector2(-dir.y, dir.x);
+            float thrash = Surging ? Mathf.Sin(Time.time * 14f) * 0.35f : Mathf.Sin(Time.time * 3f) * 0.08f;
+            var p = you + dir * distance + side * thrash;
+            if (BunniSpace.PointOnLand(p)) p = BunniSpace.PointOnLand(you + dir * distance) ? _bobberAt : you + dir * distance;   // never up on the sand
+            _bobberAt = p;
+            if (_bobber != null) _bobber.transform.position = p;
+            if (_hooked != null && _hooked.Go != null)
+            {
+                _hooked.Go.transform.position = p + dir * 0.35f;
+                _hooked.Sr.flipX = dir.x < 0f;   // its nose points away from you, pulling
+                _hooked.Go.transform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Sin(Time.time * (Surging ? 22f : 8f)) * (Surging ? 18f : 6f));
+            }
+            if (Surging && Time.time >= _nextSplash)
+            {
+                _nextSplash = Time.time + 0.28f;
+                Ripple(p, 0.8f);
+            }
         }
 
-        /// <summary>Raised the moment a fish truly bites, for the reel button to flash.</summary>
-        public static event Action Bitten;
+        void Escape(string why)
+        {
+            Say(why);
+            Sfx.Play(SfxKind.Pop, 0.4f);
+            Flee(_hooked);
+            EndLine();
+        }
 
         void Catch(Shadow s)
         {
@@ -358,7 +631,11 @@ namespace CapyIsland.Game
 
         void EndLine()
         {
+            PutRodAway();
             Now = State.Idle;
+            Holding = false;
+            Tension = 0f;
+            Surging = false;
             if (_bobber != null) Destroy(_bobber);
             if (_line != null) Destroy(_line.gameObject);
             _bobber = null;
@@ -370,6 +647,34 @@ namespace CapyIsland.Game
         static void Say(string line) => Said?.Invoke(line);
 
         // ---------------------------------------------------------------- props
+
+        /// <summary>The line from the rod tip to the bobber: it pulls taut and changes colour with the strain.</summary>
+        void DrawLine()
+        {
+            if (_line == null) return;
+            Vector2 tip = RodTip();
+            Vector2 bob = _bobber != null ? (Vector2)_bobberBody.position : _bobberAt;
+            bool fighting = Now == State.Fight;
+            float sag = fighting ? Mathf.Lerp(0.3f, 0.02f, Tension) : 0.35f;
+            for (int i = 0; i < _line.positionCount; i++)
+            {
+                float t = i / (float)(_line.positionCount - 1);
+                var p = Vector2.Lerp(tip, bob, t) + Vector2.down * Mathf.Sin(t * Mathf.PI) * sag;
+                _line.SetPosition(i, new Vector3(p.x, p.y, 0f));
+            }
+
+            Color c = new(1f, 1f, 1f, 0.85f);
+            float width = 0.025f;
+            if (fighting)
+            {
+                c = TensionColour(Tension);
+                width = 0.045f;
+                // Red flashes, so it reads as a warning even out of the corner of your eye.
+                if (Tension >= RedAt && Mathf.Repeat(Time.time * 8f, 1f) < 0.5f) c = Color.Lerp(c, Color.white, 0.45f);
+            }
+            _line.startColor = _line.endColor = c;
+            _line.startWidth = _line.endWidth = width;
+        }
 
         void MakeBobber(Vector2 at)
         {
@@ -401,8 +706,10 @@ namespace CapyIsland.Game
             _line.useWorldSpace = true;
             if (_lineMaterial == null)
             {
-                var shader = Shader.Find("Universal Render Pipeline/2D/Sprite-Unlit-Default") ?? Shader.Find("Sprites/Default");
-                _lineMaterial = new Material(shader);
+                // A shader looked up by name can be stripped from a phone build; the bobber's own
+                // sprite material is always there.
+                var shader = Shader.Find("Universal Render Pipeline/2D/Sprite-Unlit-Default");
+                _lineMaterial = shader != null ? new Material(shader) : white.sharedMaterial;
             }
             _line.material = _lineMaterial;
             _line.startColor = _line.endColor = new Color(1f, 1f, 1f, 0.85f);

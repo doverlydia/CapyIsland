@@ -67,6 +67,20 @@ namespace CapyIsland.Game
             if (_visuals != null) _visuals.enabled = tame;
             if (_drag != null) _drag.enabled = tame;
             if (_follower != null) _follower.enabled = tame;
+
+            // Cured ones look it: warm, smiling, towel on head. The grumpy grey ones are the pests.
+            if (tame)
+            {
+                var happy = HobbyData.Art("Monster_Happy");
+                if (happy != null)
+                {
+                    // Set on the renderer too, in case the visuals have not woken yet (they read it then).
+                    var body = transform.Find("Sprite");
+                    var sr = body != null ? body.GetComponent<SpriteRenderer>() : null;
+                    if (sr != null) sr.sprite = happy;
+                    if (_visuals != null) _visuals.SetAwakeSprite(happy);
+                }
+            }
         }
 
         protected override void Search()
@@ -119,6 +133,7 @@ namespace CapyIsland.Game
             transform.localScale = transform.localScale;   // keep grown size
             if (_follower != null) _follower.PickUpIntoInventory();
             if (HarvestEffects.Instance != null) HarvestEffects.Instance.Twinkle((Vector2)transform.position + Vector2.up * 0.6f, 12);
+            UI.BathCutscene.Show();   // a warm bath is what cures them
         }
     }
 }

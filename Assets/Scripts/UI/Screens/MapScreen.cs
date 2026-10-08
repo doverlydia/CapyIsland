@@ -1,3 +1,4 @@
+using DG.Tweening;
 using System.Collections.Generic;
 using CapyIsland.Game;
 using TMPro;
@@ -30,8 +31,6 @@ namespace CapyIsland.UI
         RectTransform _viewport;
         RawImage _picture;
         RectTransform _markerLayer;
-        float _nextRender;
-        int _renderFrames;
 
         readonly List<(IMapMarker marker, RectTransform widget)> _widgets = new();
         RectTransform _king;
@@ -88,7 +87,7 @@ namespace CapyIsland.UI
             LegendItem(legend, UiKit.Spring, "Bubble");
             LegendItem(legend, UiKit.Danger, "Pest");
             LegendItem(legend, UiKit.Sun, "News");
-            var hint = UiKit.Text(legend, "Hint", "Tap to look there", 24f, UiKit.InkSoft);
+            var hint = UiKit.Text(legend, "Hint", "Tap to look · drag yourself to travel", 24f, UiKit.InkSoft);
             hint.textWrappingMode = TextWrappingModes.NoWrap;
             hint.overflowMode = TextOverflowModes.Overflow;
         }
@@ -112,7 +111,6 @@ namespace CapyIsland.UI
         protected override void OnOpen()
         {
             EnsureCamera();
-            _renderFrames = 2;
             if (_camera != null) _camera.enabled = true;
             Layout();
             RebuildLocks();
@@ -152,10 +150,7 @@ namespace CapyIsland.UI
             _world = b;
 
             float aspect = b.size.x / Mathf.Max(0.01f, b.size.y);
-            int w = 2048, h = Mathf.Clamp(Mathf.RoundToInt(w / aspect), 256, 2048);
-            _texture = new RenderTexture(w, h, 16, RenderTextureFormat.ARGB32) { name = "IslandMap", antiAliasing = 2 };
-            _texture.Create();
-            _picture.texture = _texture;
+            MakeTexture(aspect);
 
             var main = Camera.main;
             var go = new GameObject("[MapCamera]");
@@ -172,23 +167,40 @@ namespace CapyIsland.UI
             _camera.enabled = false;
         }
 
+        /// <summary>
+        /// The picture the map camera draws into. Plain, with no multisampling: phone GPUs can leave
+        /// a multisampled target unresolved, which showed as a screen of random coloured squares.
+        /// </summary>
+        void MakeTexture(float aspect)
+        {
+            int longest = 1536;
+            int w = aspect >= 1f ? longest : Mathf.Clamp(Mathf.RoundToInt(longest * aspect), 256, longest);
+            int h = aspect >= 1f ? Mathf.Clamp(Mathf.RoundToInt(longest / aspect), 256, longest) : longest;
+            _texture = new RenderTexture(w, h, 16, RenderTextureFormat.ARGB32) { name = "IslandMap", antiAliasing = 1 };
+            _texture.Create();
+            _picture.texture = _texture;
+            if (_camera != null) _camera.targetTexture = _texture;
+        }
+
         protected override void Update()
         {
             base.Update();
             if (!IsOpen) return;
 
-            // The land changes slowly: render a frame or two, then once a second.
+            // Drawn every frame while the map is open. Drawing once and keeping the picture failed on
+            // phones: the GPU is free to throw a render target's contents away (switching apps, or
+            // simply tile memory), and then the map shows garbage until the next draw.
             if (_camera != null)
             {
-                if (_renderFrames > 0) { _renderFrames--; if (_renderFrames == 0) _camera.enabled = false; }
-                else if (Time.unscaledTime >= _nextRender)
+                if (_texture == null || !_texture.IsCreated())
                 {
-                    _nextRender = Time.unscaledTime + 1f;
-                    _camera.enabled = true;
-                    _renderFrames = 1;
+                    if (_texture != null) _texture.Release();
+                    MakeTexture(_world.size.x / Mathf.Max(0.01f, _world.size.y));
                 }
+                if (!_camera.enabled) _camera.enabled = true;
             }
             UpdateMarkers();
+            EdgeScroll();
         }
 
         /// <summary>Sizes the map to cover the frame, so there is never empty space; drag reveals the rest.</summary>
@@ -251,8 +263,14 @@ namespace CapyIsland.UI
             var king = FindFirstObjectByType<PlayerAvatar>();
             if (king != null)
             {
-                if (_king == null) _king = Pin(MapMarkers.SpriteOf(king.gameObject), UiKit.Primary, 88f, "You");
-                _king.anchoredPosition = ToMap(king.transform.position);
+                if (_king == null)
+                {
+                    _king = Pin(MapMarkers.SpriteOf(king.gameObject), UiKit.Primary, 88f, "You");
+                    // Drag yourself somewhere on the map to go there.
+                    _king.GetComponent<Image>().raycastTarget = true;
+                    _king.gameObject.AddComponent<KingDrag>().Owner = this;
+                }
+                if (!_draggingKing) _king.anchoredPosition = ToMap(king.transform.position);
                 _king.SetAsLastSibling();
             }
         }
@@ -277,6 +295,7 @@ namespace CapyIsland.UI
                 MarkerKind.Quest => (UiKit.Sun, 70f),
                 MarkerKind.Tower => (UiKit.Hex("E58FB0"), 76f),
                 MarkerKind.Guide => (UiKit.Primary, 60f),
+                MarkerKind.Friend => (UiKit.Hex("5B9BD5"), 64f),
                 _ => (UiKit.Spring, 52f),
             };
             return Pin(m.MarkerIcon, colour, size, null);
@@ -336,6 +355,127 @@ namespace CapyIsland.UI
                 badge.transform.SetAsFirstSibling();
                 _locks.Add(badge.rectTransform);
             }
+        }
+
+        // ---------------------------------------------------------------- travelling
+
+        bool _draggingKing;
+        TextMeshProUGUI _toast;
+        Vector2 _dragScreen;   // where the finger is while dragging yourself
+        Camera _dragCamera;
+
+        const float EdgeBand = 140f;     // how near an edge (canvas units) the map starts to scroll
+        const float EdgeSpeed = 1400f;   // canvas units a second, right at the edge
+
+        Vector2 ToWorld(Vector2 local)
+        {
+            var size = _scroll.content.rect.size;
+            var n = new Vector2(local.x / size.x + 0.5f, local.y / size.y + 0.5f);
+            return new Vector2(Mathf.Lerp(_world.min.x, _world.max.x, n.x), Mathf.Lerp(_world.min.y, _world.max.y, n.y));
+        }
+
+        bool LocalPoint(PointerEventData e, out Vector2 local) =>
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(_scroll.content, e.position, e.pressEventCamera, out local);
+
+        void BeginTravelDrag(PointerEventData e)
+        {
+            _draggingKing = true;
+            _dragScreen = e.position;
+            _dragCamera = e.pressEventCamera;
+            _king.DOKill();
+            _king.DOScale(1.2f, 0.15f).SetUpdate(true);
+        }
+
+        void TravelDrag(PointerEventData e)
+        {
+            _dragScreen = e.position;
+            _dragCamera = e.pressEventCamera;
+            if (LocalPoint(e, out var local)) _king.anchoredPosition = local;
+        }
+
+        /// <summary>
+        /// Holding yourself near an edge of the map scrolls it that way (faster the nearer the
+        /// edge), so you can carry yourself further than the part of the map on screen.
+        /// </summary>
+        void EdgeScroll()
+        {
+            if (!_draggingKing || _viewport == null || _king == null) return;
+            if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(_viewport, _dragScreen, _dragCamera, out var p)) return;
+            var view = _viewport.rect;
+            float Push(float at, float min, float max) =>
+                at < min + EdgeBand ? -Mathf.Clamp01(1f - (at - min) / EdgeBand)
+                : at > max - EdgeBand ? Mathf.Clamp01(1f - (max - at) / EdgeBand) : 0f;
+            var push = new Vector2(Push(p.x, view.xMin, view.xMax), Push(p.y, view.yMin, view.yMax));
+            if (push == Vector2.zero) return;
+
+            var spare = _scroll.content.rect.size - view.size;   // how far the map can move each way
+            float step = EdgeSpeed * Time.unscaledDeltaTime;
+            _scroll.velocity = Vector2.zero;
+            if (spare.x > 1f) _scroll.horizontalNormalizedPosition = Mathf.Clamp01(_scroll.horizontalNormalizedPosition + push.x * step / spare.x);
+            if (spare.y > 1f) _scroll.verticalNormalizedPosition = Mathf.Clamp01(_scroll.verticalNormalizedPosition + push.y * step / spare.y);
+
+            // The map slid under the finger: keep yourself under it.
+            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(_scroll.content, _dragScreen, _dragCamera, out var local))
+                _king.anchoredPosition = local;
+        }
+
+        void EndTravelDrag(PointerEventData e)
+        {
+            _king.DOKill();
+            _king.DOScale(1f, 0.15f).SetUpdate(true);
+            var king = FindFirstObjectByType<PlayerAvatar>();
+            if (king == null || !LocalPoint(e, out var local)) { _draggingKing = false; return; }
+            var world = ToWorld(local);
+            string why = null;
+            var land = LandMap.Instance;
+            if (!BunniSpace.PointOnLand(world)) why = "You can't stand in the sea! Drop yourself on land.";
+            else if (land != null && !land.Reachable(king.transform.position, world)) why = "That island is still closed. Open its bridge first!";
+            if (why != null)
+            {
+                _draggingKing = false;   // springs back to where you really are
+                Toast(why);
+                Sfx.Play(SfxKind.Tap, 0.4f);
+                return;
+            }
+            _draggingKing = false;
+            Close();
+            king.TravelTo(world);
+        }
+
+        void Toast(string line)
+        {
+            if (_toast == null)
+            {
+                var pill = UiKit.Image(_viewport, "Toast", UiKit.Rounded(24), new Color(0.15f, 0.12f, 0.1f, 0.85f));
+                pill.raycastTarget = false;
+                var r = pill.rectTransform;
+                r.anchorMin = r.anchorMax = r.pivot = new Vector2(0.5f, 1f);
+                r.anchoredPosition = new Vector2(0f, -20f);
+                r.sizeDelta = new Vector2(640f, 70f);
+                _toast = UiKit.Text(pill.transform, "Text", "", 26f, Color.white, true, TextAlignmentOptions.Center);
+                UiKit.Stretch(_toast.rectTransform, 16f, 0f, 16f, 0f);
+                _toast.enableAutoSizing = true;
+                _toast.fontSizeMin = 16f;
+                _toast.fontSizeMax = 26f;
+            }
+            var g = _toast.transform.parent.GetComponent<Image>();
+            _toast.text = line;
+            g.gameObject.SetActive(true);
+            g.DOKill();
+            _toast.DOKill();
+            g.color = new Color(0.15f, 0.12f, 0.1f, 0.85f);
+            _toast.alpha = 1f;
+            g.DOFade(0f, 0.5f).SetDelay(2.2f).SetUpdate(true);
+            _toast.DOFade(0f, 0.5f).SetDelay(2.2f).SetUpdate(true);
+        }
+
+        /// <summary>Your marker on the map: drag it somewhere to travel there (held near an edge, the map scrolls that way).</summary>
+        class KingDrag : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+        {
+            public MapScreen Owner;
+            public void OnBeginDrag(PointerEventData e) => Owner?.BeginTravelDrag(e);
+            public void OnDrag(PointerEventData e) => Owner?.TravelDrag(e);
+            public void OnEndDrag(PointerEventData e) => Owner?.EndTravelDrag(e);
         }
 
         // ---------------------------------------------------------------- tapping

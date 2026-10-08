@@ -57,6 +57,7 @@ namespace CapyIsland.Game
             new MoteDef("Bug Catcher", 50, "hobby_bug"),
             new MoteDef("Cat Person", 51, "hobby_cat"),
             new MoteDef("Ready for Take-off", 52, "built_airport"),
+            new MoteDef("It's the Thought That Counts", 53, "hobby_catgift"),
         };
 
         /// <summary>Every achievement still in the game, in order.</summary>

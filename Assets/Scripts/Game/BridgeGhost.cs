@@ -13,8 +13,20 @@ namespace CapyIsland.Game
     ///   Pirate Cove   100 gems
     ///   Wedding Isle  5 × your best minute + a quarter of what you hold
     /// </summary>
-    public class BridgeGhost : MonoBehaviour, ITappable, IPurchasable
+    public class BridgeGhost : MonoBehaviour, ITappable, IPurchasable, IMapMarker
     {
+        static readonly System.Collections.Generic.List<BridgeGhost> _live = new();
+
+        /// <summary>The ghost the current goal needs you to pay first, so the arrows point at it.</summary>
+        public static BridgeGhost Pointed { get; set; }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetSession()
+        {
+            _live.Clear();
+            Pointed = null;
+        }
+
         [SerializeField] string bridgeName;   // the store item name: "Ginger Cove", …
 
         Transform _body;
@@ -65,8 +77,57 @@ namespace CapyIsland.Game
             }
         }
 
-        void OnEnable() => TapTargets.Register(this);
-        void OnDisable() => TapTargets.Unregister(this);
+        void OnEnable()
+        {
+            TapTargets.Register(this);
+            MapMarkers.Register(this);
+            _live.Add(this);
+        }
+
+        void OnDisable()
+        {
+            TapTargets.Unregister(this);
+            MapMarkers.Unregister(this);
+            _live.Remove(this);
+            if (Pointed == this) Pointed = null;
+        }
+
+        public MarkerKind MarkerKind => MarkerKind.Quest;
+        public bool MarkerActive => !_gone && Pointed == this;
+        public Vector2 MarkerPosition => transform.position;
+        public Sprite MarkerIcon => _bodyRenderer != null ? _bodyRenderer.sprite : null;
+
+        /// <summary>The land bridge each ghost raises.</summary>
+        static string Piece(string storeName) => storeName switch
+        {
+            "Ginger Cove" => "second_bridge",
+            "Verdant Bay" => "pete_isle",
+            "Pirate Cove" => "pirate_cove",
+            "Wedding Isle" => "wedding_isle",
+            _ => null,
+        };
+
+        /// <summary>
+        /// The ghost to pay next on the way to <paramref name="target"/>, from where you stand: one
+        /// you can walk to, whose bridge lands on the target's island if there is one, otherwise
+        /// the one nearest the target (a step closer).
+        /// </summary>
+        public static BridgeGhost Toward(Vector2 target, Vector2 from)
+        {
+            var land = LandMap.Instance;
+            if (land == null) return null;
+            BridgeGhost best = null;
+            float bestDistance = float.MaxValue;
+            foreach (var g in _live)
+            {
+                if (g == null || g._gone || !land.Reachable(from, g.transform.position)) continue;
+                var piece = Piece(g.bridgeName);
+                if (piece != null && land.BridgeReaches(piece, target)) return g;
+                float d = Vector2.Distance(g.transform.position, target);
+                if (d < bestDistance) { best = g; bestDistance = d; }
+            }
+            return best;
+        }
 
         void Update()
         {
@@ -93,6 +154,8 @@ namespace CapyIsland.Game
             _gone = true;
             Cross(bridgeName);
             Depart();
+            // The movie plays over the paused game; the bridge finishes rising in the world after it.
+            UI.BridgeCutscene.Show(StoryText.Name(bridgeName));
             return true;
         }
 

@@ -25,7 +25,15 @@ namespace CapyIsland.Game
         Placeable _placeable;
         float _hintTimer = -1f;
         bool _departing;
-        SpriteRenderer _accessory;
+
+        // Miso and the Captain stroll about their spot rather than standing like statues.
+        Vector2 _home;
+        bool _hasHome;
+        Vector2 _strollTo;
+        bool _strolling;
+        float _nextStroll, _hop;
+        Vector3 _bodyRest;
+        int _dressedUp;   // 0 as she is; 1 in the dress, 2 with the pearls too, 3 and the tiara
 
         public Kind GiverKind => kind;
         public int GhostId => ghostId;
@@ -50,6 +58,7 @@ namespace CapyIsland.Game
             _body = transform.Find("Sprite");
             _bodyRenderer = _body != null ? _body.GetComponent<SpriteRenderer>() : null;
             _placeable = GetComponent<Placeable>();
+            if (_body != null) _bodyRest = _body.localPosition;
 
             var markerGo = new GameObject("QuestMarker");
             markerGo.transform.SetParent(transform, false);
@@ -144,12 +153,61 @@ namespace CapyIsland.Game
 
             if (kind == Kind.Ghost && _body != null && !_departing)
                 _body.localPosition = new Vector3(0f, 0.25f + Mathf.Sin(Time.time * 1.6f) * 0.12f, 0f);
+            else Stroll();
 
             if (_hintTimer > 0f && InWorld)
             {
                 _hintTimer -= Time.deltaTime;
                 if (_hintTimer <= 0f && !QuestSystem.AnyoneTalkedTo) Hints.Show(NudgeLine);
             }
+        }
+
+        /// <summary>
+        /// A gentle wander around where they live: a few steps, a pause, a few more. They stop to
+        /// talk (and while any conversation is on screen), and never leave dry land.
+        /// </summary>
+        void Stroll()
+        {
+            if (_body == null || !InWorld || _departing) return;
+            if (!_hasHome) { _home = transform.position; _hasHome = true; _nextStroll = Time.time + Random.Range(2f, 5f); }
+            if (UI.SpeechDialog.IsOpen || Time.timeScale <= 0f) { _strolling = false; Rest(); return; }
+
+            if (!_strolling)
+            {
+                Rest();
+                if (Time.time < _nextStroll) return;
+                for (int i = 0; i < 8; i++)
+                {
+                    var t = _home + Random.insideUnitCircle * 2.4f;
+                    if (!BunniSpace.PointOnLand(t)) continue;
+                    _strollTo = t;
+                    _strolling = true;
+                    break;
+                }
+                _nextStroll = Time.time + Random.Range(4f, 9f);
+                return;
+            }
+
+            Vector2 here = transform.position;
+            var next = Vector2.MoveTowards(here, _strollTo, 0.75f * Time.deltaTime);
+            if (!BunniSpace.PointOnLand(next)) { _strolling = false; return; }
+            transform.position = new Vector3(next.x, next.y, transform.position.z);
+            // Pictures face left: turn to face the way they walk.
+            float dx = _strollTo.x - here.x;
+            if (Mathf.Abs(dx) > 0.01f)
+            {
+                var sc = _body.localScale;
+                sc.x = Mathf.Abs(sc.x) * (dx > 0f ? -1f : 1f);
+                _body.localScale = sc;
+            }
+            _hop += Time.deltaTime * 9f;
+            _body.localPosition = _bodyRest + new Vector3(0f, Mathf.Abs(Mathf.Sin(_hop)) * 0.06f, 0f);
+            if ((next - _strollTo).sqrMagnitude < 0.01f) _strolling = false;
+        }
+
+        void Rest()
+        {
+            if (_body != null) _body.localPosition = Vector3.Lerp(_body.localPosition, _bodyRest, Time.deltaTime * 10f);
         }
 
         string NudgeLine => StoryText.NudgeFor(kind);
@@ -194,21 +252,24 @@ namespace CapyIsland.Game
         {
             var store = ResourceStore.Instance;
             if (store == null || !store.TrySpend(0, 0, 500)) return;
-            Motes.Trigger("peach_dance");
-            if (_body != null)
+            // The little movie (the original played one), then a happy jig back on the island.
+            UI.DanceCutscene.Show(() =>
             {
-                _body.DOKill();
-                var seq = DOTween.Sequence();
-                for (int i = 0; i < 6; i++)
+                Motes.Trigger("peach_dance");
+                if (_body != null)
                 {
-                    seq.Append(_body.DOLocalJump(Vector3.zero, 0.5f, 1, 0.35f));
-                    seq.Join(_body.DOLocalRotate(new Vector3(0f, 0f, i % 2 == 0 ? 12f : -12f), 0.35f));
+                    _body.DOKill();
+                    var seq = DOTween.Sequence();
+                    for (int i = 0; i < 4; i++)
+                    {
+                        seq.Append(_body.DOLocalJump(Vector3.zero, 0.5f, 1, 0.35f));
+                        seq.Join(_body.DOLocalRotate(new Vector3(0f, 0f, i % 2 == 0 ? 12f : -12f), 0.35f));
+                    }
+                    seq.Append(_body.DOLocalRotate(Vector3.zero, 0.2f));
                 }
-                seq.Append(_body.DOLocalRotate(Vector3.zero, 0.2f));
-            }
-            var fx = HarvestEffects.Instance;
-            if (fx != null) fx.Twinkle((Vector2)transform.position + Vector2.up, 30);
-            CameraRig.CameraFocus.Show(transform.position, 3f);
+                var fx = HarvestEffects.Instance;
+                if (fx != null) fx.Twinkle((Vector2)transform.position + Vector2.up, 30);
+            });
         }
 
         /// <summary>A ghost whose quest is done drifts up and fades away.</summary>
@@ -229,29 +290,40 @@ namespace CapyIsland.Game
             CameraRig.CameraFocus.Show(transform.position, 3.5f);
             var fx = HarvestEffects.Instance;
             if (fx != null) fx.Twinkle((Vector2)transform.position + Vector2.up * 0.8f, 24);
-
-            var catalog = ItemCatalog.Instance;
-            var sprite = catalog != null ? catalog.Icon(gift) : null;
-            if (sprite == null || _body == null) return;
-            if (_accessory == null)
-            {
-                var go = new GameObject("Accessory");
-                go.transform.SetParent(_body, false);
-                _accessory = go.AddComponent<SpriteRenderer>();
-            }
-            _accessory.sprite = sprite;
-            float size = gift == "Tiara" ? 0.45f : gift == "String of Pearls" ? 0.4f : 0.6f;
-            _accessory.transform.localScale = Vector3.one * size / Mathf.Max(0.01f, sprite.bounds.size.x);
-            _accessory.transform.localPosition = gift == "Tiara" ? new Vector3(0.05f, 1.05f, 0f)
-                                              : gift == "String of Pearls" ? new Vector3(0.05f, 0.45f, 0f)
-                                              : new Vector3(0.4f, 0.1f, 0f);
-            if (_bodyRenderer != null) _accessory.sortingOrder = _bodyRenderer.sortingOrder + 1;
-            _body.DOPunchScale(Vector3.one * 0.15f, 0.5f, 6, 0.6f);
+            if (Wear(gift) && _body != null) _body.DOPunchScale(Vector3.one * 0.15f, 0.5f, 6, 0.6f);
         }
 
-        void LateUpdate()
+        /// <summary>After a load, she is still wearing everything you have given her.</summary>
+        System.Collections.IEnumerator Start()
         {
-            if (_accessory != null && _bodyRenderer != null) _accessory.sortingOrder = _bodyRenderer.sortingOrder + 1;
+            if (kind != Kind.Coriander) yield break;
+            yield return null;
+            if (Motes.Has("The Girl's New Dress")) Wear("Wedding Dress");
+            if (Motes.Has("The Girl's New Necklace")) Wear("String of Pearls");
+            if (Motes.Has("The Girl's Tiara")) Wear("Tiara");
+        }
+
+        /// <summary>
+        /// Each gift is a whole new picture of her wearing it: pieces pinned on top never looked
+        /// worn. They always come in this order (the dress opens the shop with the pearls, the
+        /// pearls the one with the tiara), so three pictures cover every stage.
+        /// </summary>
+        bool Wear(string gift)
+        {
+            if (_bodyRenderer == null) return false;
+            int stage = gift switch { "Wedding Dress" => 1, "String of Pearls" => 2, "Tiara" => 3, _ => 0 };
+            if (stage <= _dressedUp) return false;
+            _dressedUp = stage;
+            // The newest picture there is, in case one is missing.
+            string[] art = { "Miso_Dress", "Miso_DressPearls", "Miso_DressTiara" };
+            for (int i = stage - 1; i >= 0; i--)
+            {
+                var sprite = HobbyData.Art(art[i]);
+                if (sprite == null) continue;
+                _bodyRenderer.sprite = sprite;
+                return true;
+            }
+            return false;
         }
     }
 }

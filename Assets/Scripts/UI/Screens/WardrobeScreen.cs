@@ -96,7 +96,7 @@ namespace CapyIsland.UI
             DressPreview();
             BuildGrid();
             int owned = 0, total = 0;
-            foreach (var i in Wardrobe.Items)
+            foreach (var i in Wardrobe.AllItems)
             {
                 if (Wardrobe.Art(i) == null) continue;
                 total++;
@@ -155,13 +155,13 @@ namespace CapyIsland.UI
         void BuildGrid()
         {
             ClearChildren(_grid);
-            foreach (var item in Wardrobe.Items)
+            foreach (var item in Wardrobe.AllItems)
             {
                 if (item.Slot != _slot) continue;
                 var art = Wardrobe.Art(item);
                 if (art == null) continue;   // still being drawn
                 bool owned = Wardrobe.Owns(item);
-                bool worn = Wardrobe.Worn(item.Slot) == item;
+                bool worn = Wardrobe.Worn(item.Slot)?.Id == item.Id;
 
                 var tile = UiKit.Image(_grid, item.Id, UiKit.Rounded(28), worn ? UiKit.Hex("FDE8F0") : owned ? Color.white : UiKit.SurfaceSunk, true);
                 var pic = UiKit.Image(tile.transform, "Art", art, owned ? Color.white : new Color(0.25f, 0.2f, 0.18f, 0.35f));

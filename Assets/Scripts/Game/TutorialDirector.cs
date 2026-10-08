@@ -159,10 +159,10 @@ namespace CapyIsland.Game
             if (item.Placed) { Advance(next); return; }
 
             Say(line);
-            // Point at open ground ahead of the king, so there is somewhere obvious to drop it.
+            // Show the drag: from the thing in your trail to open ground ahead of the king.
             var king = FindFirstObjectByType<PlayerAvatar>();
             if (pointer != null && king != null)
-                pointer.PointAt((Vector2)king.transform.position + new Vector2(3.2f, 2.2f));
+                pointer.DragFrom(item.transform, (Vector2)king.transform.position + new Vector2(3.2f, 2.2f));
         }
 
         void TickPlantSawmill()
@@ -188,7 +188,7 @@ namespace CapyIsland.Game
             Say("Drop the sawmill right beside your trees. It can only reach the forest inside its circle.");
             var trees = FindPlaceable("Forest");
             if (pointer != null && trees != null)
-                pointer.PointAt((Vector2)trees.transform.position + new Vector2(2.6f, -1.4f));
+                pointer.DragFrom(mill.transform, (Vector2)trees.transform.position + new Vector2(2.6f, -1.4f));
         }
 
         void TickBuy()
@@ -218,7 +218,7 @@ namespace CapyIsland.Game
 
             Say("Now drag the capybara onto the sawmill to put it to work.");
             var mill = FindFirstObjectByType<Workplace>();
-            if (pointer != null && mill != null) pointer.PointAt(mill.transform);
+            if (pointer != null && mill != null) pointer.DragFrom(worker.transform, mill.transform);
         }
 
         void TickWaitForHunger()
@@ -236,6 +236,7 @@ namespace CapyIsland.Game
                 _gardenBubble = BubbleSpawner.SpawnAt(gardenItem, at, bubbleParent);
             }
 
+            UI.NapCutscene.Show();
             Say("Your capybara has dozed off. It's hungry! Capybaras eat flowers, and there's a garden in that bubble.");
             Advance(Step.CollectGarden);
         }
@@ -257,7 +258,7 @@ namespace CapyIsland.Game
             foreach (var w in FindObjectsByType<Worker>(FindObjectsSortMode.None))
                 if (w.IsAsleep && w.IsHungry) { sleeper = w; break; }
             if (pointer != null && sleeper != null)
-                pointer.PointAt((Vector2)sleeper.transform.position + new Vector2(2.2f, -1.2f));
+                pointer.DragFrom(gardenItem.transform, (Vector2)sleeper.transform.position + new Vector2(2.2f, -1.2f));
         }
 
         /// <summary>

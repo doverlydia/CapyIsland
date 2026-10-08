@@ -127,10 +127,14 @@ namespace CapyIsland.UI
             gameObject.AddComponent<BugCatching>();
             gameObject.AddComponent<Gardening>();
             gameObject.AddComponent<CatCare>();
+            gameObject.AddComponent<DishOrders>();
+            gameObject.AddComponent<SeaLibrary>();
             Airport.Restore(this);
 
             var tracker = ObjectiveTracker.Create(_safe);
             tracker.transform.SetSiblingIndex(afterBar + 1);
+            ProfileBadge.Create(_safe).transform.SetSiblingIndex(afterBar + 1);
+            VisitorsColumn.Create(_safe).transform.SetSiblingIndex(afterBar + 1);
 
             var side = UiKit.Rect("SideButtons", _safe);
             side.anchorMin = side.anchorMax = side.pivot = new Vector2(1f, 1f);
@@ -156,13 +160,16 @@ namespace CapyIsland.UI
             var settings = MakeScreen<SettingsScreen>(screens, "SettingsScreen");
             var gifts = MakeScreen<DailyGiftScreen>(screens, "DailyGiftScreen");
             var wardrobe = MakeScreen<WardrobeScreen>(screens, "WardrobeScreen");
+            var profile = MakeScreen<ProfileScreen>(screens, "ProfileScreen");
             var friends = MakeScreen<FriendsScreen>(screens, "FriendsScreen");
             MakeScreen<PromptScreen>(screens, "PromptScreen");
             var hobbies = MakeScreen<HobbiesScreen>(screens, "HobbiesScreen");
             MakeScreen<LibraryScreen>(screens, "LibraryScreen");
             MakeScreen<SewingScreen>(screens, "SewingScreen");
+            MakeScreen<CookingScreen>(screens, "CookingScreen");
             var menu = MakeScreen<MenuScreen>(screens, "MenuScreen");
 
+            menu.AddEntry("Profile", IconPainter.FaceSmile, UiKit.Hex("E58FB0"), () => profile.Open());
             menu.AddEntry("Goals", IconPainter.Goals, UiKit.Primary, () => ObjectivesScreen.Show(ObjectivesScreen.Tab.Quests));
             menu.AddEntry("Map", IconPainter.Map, UiKit.Spring, () => map.Open());
             menu.AddEntry("Collection", IconPainter.Cards, UiKit.Hex("A77BD6"), () => collection.Open());

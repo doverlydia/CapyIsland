@@ -57,6 +57,7 @@ and their generators carry ids and numbers only; never re-introduce prose from `
   `ResourceStore`, `Bubble`, `TutorialDirector`), `Wardrobe`, `DailyGifts`, `Objectives`
 - `Assets/Scripts/Game/Visits/` — fake multiplayer: bot friends, generated islands, flights (`Visit`)
 - `Assets/Scripts/Game/Hobbies/` — fishing, birdwatching, books, sewing (`HobbyLog`)
+- `Assets/Scripts/UI/Cutscenes/` — little movies for big moments (`Cutscene` base: paused game, cinema bars, tap to skip; wedding, Captain's dance). Backdrops in `Assets/Resources/Cutscenes/`, masters in `ArtSource/Cutscenes/`
 - `Assets/Scripts/UI/` — runtime-built HUD (`MobileHud` bootstraps it), `UiKit`/`IconPainter`, screens
 - `Assets/Scripts/CameraRig/`, `Assets/Scripts/UI/`, `Assets/Scripts/Core/`
 - `Assets/Editor/IslandBuilder.cs`

@@ -2,6 +2,7 @@ using CapyIsland.Game;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace CapyIsland.UI
@@ -10,14 +11,27 @@ namespace CapyIsland.UI
     /// The current goal, pinned under the resource bar the way most mobile games do it: an icon,
     /// who asked, and what to do. It refreshes twice a second and bounces when the goal changes.
     /// Tap it for the full list.
+    ///
+    /// It can be tucked away: swipe it left (or tap its little arrow) and it shrinks to just its
+    /// round icon, which still bounces when there is something new. Tap the icon, or swipe right,
+    /// to open it out again. Remembered between sessions.
     /// </summary>
-    public class ObjectiveTracker : MonoBehaviour
+    public class ObjectiveTracker : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
     {
+        const string CollapsedKey = "CapyIsland.TrackerCollapsed";
+        const float CollapsedSize = 108f;
+
+        bool _collapsed;
+        Image _hide;
+        GameObject _chevronGo;
+        float _dragX;
+
         RectTransform _card;
         Image _disc, _icon;
         TextMeshProUGUI _caption, _title;
         string _shown;
         float _next;
+        bool _tall;   // showing a step to do first, under the goal
 
         public static ObjectiveTracker Create(Transform parent)
         {
@@ -30,7 +44,8 @@ namespace CapyIsland.UI
         void Build(RectTransform root)
         {
             root.anchorMin = root.anchorMax = root.pivot = new Vector2(0f, 1f);
-            root.anchoredPosition = new Vector2(16f, -104f);
+            // Beside your profile badge.
+            root.anchoredPosition = new Vector2(16f + ProfileBadge.Size + 12f, -104f);
 
             var card = UiKit.Card(root, "Card", UiKit.Surface, 34);
             _card = card.rectTransform;
@@ -65,8 +80,19 @@ namespace CapyIsland.UI
             _title.fontSizeMin = 22f;
             _title.fontSizeMax = 30f;
 
-            var chevron = UiKit.Image(_card, "More", IconPainter.Arrow, UiKit.InkSoft);
-            UiKit.Place(chevron.rectTransform, new Vector2(1f, 0.5f), new Vector2(-16f, 0f), new Vector2(26f, 26f));
+            // A small tab to tuck the card away, pointing the way it goes.
+            _hide = UiKit.Image(_card, "Hide", UiKit.Circle, UiKit.SurfaceSunk, true);   // catches its own taps, not the card's
+            UiKit.Place(_hide.rectTransform, new Vector2(1f, 0.5f), new Vector2(-10f, 0f), new Vector2(40f, 40f));
+            var arrow = UiKit.Image(_hide.transform, "Arrow", IconPainter.Arrow, UiKit.InkSoft);
+            UiKit.Stretch(arrow.rectTransform, 10f, 10f, 10f, 10f);
+            arrow.rectTransform.localRotation = Quaternion.Euler(0f, 0f, 180f);
+            var hideButton = _hide.gameObject.AddComponent<Button>();
+            hideButton.transition = Selectable.Transition.None;
+            hideButton.onClick.AddListener(() => SetCollapsed(true));
+            _chevronGo = _hide.gameObject;
+
+            _collapsed = PlayerPrefs.GetInt(CollapsedKey, 0) == 1;
+            ApplyCollapsed(animate: false);
 
             Core.ScreenMetrics.Changed += Fit;
             Fit();
@@ -79,8 +105,10 @@ namespace CapyIsland.UI
         {
             var root = (RectTransform)transform;
             var parent = root.parent as RectTransform;
-            float available = parent != null ? parent.rect.width - 16f - 150f : 620f;
-            root.sizeDelta = new Vector2(Mathf.Clamp(available, 380f, 640f), 124f);
+            float available = parent != null ? parent.rect.width - 16f - ProfileBadge.Size - 12f - 150f : 620f;
+            root.sizeDelta = _collapsed
+                ? new Vector2(CollapsedSize, CollapsedSize)
+                : new Vector2(Mathf.Clamp(available, 380f, 640f), _tall ? 168f : 124f);
         }
 
         void Update()
@@ -111,11 +139,26 @@ namespace CapyIsland.UI
             _icon.sprite = portrait ? goal.Icon : icon;
             UiKit.Stretch(_icon.rectTransform, portrait ? 6f : 16f, portrait ? 6f : 16f, portrait ? 6f : 16f, portrait ? 6f : 16f);
 
-            if (_shown == goal.Title) return;
+            string text = goal.Step == null
+                ? goal.Title
+                : goal.Title + "\n<size=78%><color=#C9653A>" + goal.Step + "</color></size>";
+            if (_shown == text) return;
             bool first = _shown == null;
-            _shown = goal.Title;
-            _title.text = goal.Title;
+            _shown = text;
+            _title.text = text;
+            _tall = goal.Step != null;
+            Fit();
             if (first) return;
+
+            // Tucked away: just the icon bounces, so you know something changed.
+            if (_collapsed)
+            {
+                _disc.rectTransform.DOKill();
+                _disc.rectTransform.localScale = Vector3.one;
+                _disc.rectTransform.DOPunchScale(new Vector3(0.25f, 0.25f, 0f), 0.5f, 6, 0.6f).SetUpdate(true);
+                Sfx.Play(SfxKind.Coin, 0.4f);
+                return;
+            }
 
             // A new goal: bounce, and a chime if the old one was just finished.
             _card.DOKill();
@@ -124,8 +167,47 @@ namespace CapyIsland.UI
             Sfx.Play(SfxKind.Coin, 0.5f);
         }
 
+        // ---------------------------------------------------------------- tucking away
+
+        void SetCollapsed(bool collapsed)
+        {
+            if (_collapsed == collapsed) return;
+            _collapsed = collapsed;
+            PlayerPrefs.SetInt(CollapsedKey, collapsed ? 1 : 0);
+            PlayerPrefs.Save();
+            Sfx.Play(SfxKind.Tap, 0.4f);
+            ApplyCollapsed(animate: true);
+        }
+
+        void ApplyCollapsed(bool animate)
+        {
+            bool show = !_collapsed;
+            _caption.gameObject.SetActive(show);
+            _title.gameObject.SetActive(show);
+            _chevronGo.SetActive(show);
+            var root = (RectTransform)transform;
+            var before = root.sizeDelta;
+            Fit();
+            if (!animate) return;
+            var after = root.sizeDelta;
+            root.sizeDelta = before;
+            root.DOKill();
+            root.DOSizeDelta(after, 0.25f).SetEase(Ease.OutCubic).SetUpdate(true);
+        }
+
+        public void OnBeginDrag(PointerEventData e) => _dragX = 0f;
+
+        public void OnDrag(PointerEventData e) => _dragX += e.delta.x;
+
+        public void OnEndDrag(PointerEventData e)
+        {
+            if (_dragX < -40f) SetCollapsed(true);
+            else if (_dragX > 40f) SetCollapsed(false);
+        }
+
         void OpenList()
         {
+            if (_collapsed) { SetCollapsed(false); return; }
             var goal = Objectives.Current();
             ObjectivesScreen.Show(goal.Source == Objectives.Source.Achievement || goal.Source == Objectives.Source.Done
                 ? ObjectivesScreen.Tab.Achievements

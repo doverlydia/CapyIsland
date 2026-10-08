@@ -64,6 +64,9 @@ namespace CapyIsland.UI
             return s;
         }
 
+        /// <summary>One of the painted icons above: plain white, to be tinted wherever it is shown.</summary>
+        public static bool IsIcon(Sprite s) => s != null && _cache.ContainsValue(s);
+
         static Sprite Cached(string key, Sdf shape, int size = 128)
         {
             if (_cache.TryGetValue(key, out var s) && s != null) return s;
@@ -315,6 +318,25 @@ namespace CapyIsland.UI
             float line = x > 0.5f ? Capsule(x, y, 0.58f, 0.68f, 0.62f, -0.3f, 0.025f) : float.MaxValue;
             float hook = y < -0.2f ? Mathf.Abs(Disc(x, y, 0.5f, -0.36f, 0.13f)) - 0.035f : float.MaxValue;
             return Union(Union(pole, reel), Union(line, hook));
+        });
+
+        /// <summary>A cooking spatula: a slotted blade on a handle, tilted.</summary>
+        public static Sprite Spatula => Cached("Spatula", (x, y) =>
+        {
+            float handle = Capsule(x, y, 0.62f, -0.66f, 0.06f, 0.0f, 0.08f);
+            float blade = Box(x, y, -0.24f, 0.32f, 0.34f, 0.3f, 0.1f);
+            // Rotate the slots with the blade's tilt by measuring along the handle direction.
+            float s1 = Capsule(x, y, -0.36f, 0.12f, -0.12f, 0.52f, 0.035f);
+            float s2 = Capsule(x, y, -0.5f, 0.24f, -0.3f, 0.56f, 0.035f);
+            return Cut(Union(handle, blade), Union(s1, s2));
+        });
+
+        /// <summary>A little flame.</summary>
+        public static Sprite Flame => Cached("Flame", (x, y) =>
+        {
+            float body = Disc(x, y, 0f, -0.3f, 0.48f);
+            float tip = Triangle(x, y, new Vector2(-0.42f, -0.15f), new Vector2(0.42f, -0.15f), new Vector2(0.08f, 0.85f), 0.12f);
+            return Union(body, tip);
         });
 
         public static Sprite Bird => Cached("Bird", (x, y) =>

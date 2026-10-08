@@ -21,6 +21,7 @@ namespace CapyIsland.Game
             public string From;       // who asked, if anyone
             public Vector2? Where;    // somewhere to look, if known
             public Sprite Icon;
+            public string Step;       // something to do first (open a bridge), shown under the title
         }
 
         public struct Achievement
@@ -32,6 +33,51 @@ namespace CapyIsland.Game
 
         /// <summary>The single most useful thing to do right now.</summary>
         public static Goal Current()
+        {
+            BridgeGhost.Pointed = null;
+            return Reachable(Pick());
+        }
+
+        /// <summary>
+        /// If the goal is somewhere you cannot walk to yet (on an island you have not opened), it
+        /// keeps its title and gains a step to do first — pay the bridge ghost — and the arrows
+        /// point at that ghost, since that is where to go next.
+        /// </summary>
+        static Goal Reachable(Goal goal)
+        {
+            if (!goal.Where.HasValue) return goal;
+            var step = StepTo(goal.Where.Value, out var ghost);
+            if (step == null) return goal;
+            BridgeGhost.Pointed = ghost;
+            goal.Step = step;
+            goal.Where = ghost.transform.position;
+            return goal;
+        }
+
+        /// <summary>The step needed before you can reach <paramref name="where"/>, or null if you can walk there now.</summary>
+        public static string StepTo(Vector2 where, out BridgeGhost ghost)
+        {
+            ghost = null;
+            var land = LandMap.Instance;
+            var king = UnityEngine.Object.FindFirstObjectByType<PlayerAvatar>();
+            if (land == null || king == null) return null;
+            Vector2 you = king.transform.position;
+            if (land.Reachable(you, where)) return null;
+            ghost = BridgeGhost.Toward(where, you);
+            if (ghost == null) return null;
+            return "First: pay the ghost to open the bridge to " + StoryText.Name(ghost.BridgeName) + " (" + PriceText(ghost.Price) + ")";
+        }
+
+        static string PriceText(Vector3Int p)
+        {
+            var parts = new List<string>();
+            if (p.x > 0) parts.Add(p.x + " wood");
+            if (p.y > 0) parts.Add(p.y + " gold");
+            if (p.z > 0) parts.Add(p.z + " gems");
+            return parts.Count > 0 ? string.Join(", ", parts) : "free";
+        }
+
+        static Goal Pick()
         {
             if (Visit.Active)
                 return new Goal { Source = Source.Visit, Title = "Help " + Visit.Host.name + ": feed hungry workers and chase off pests", From = Visit.Host.name };
@@ -51,7 +97,7 @@ namespace CapyIsland.Game
             {
                 var q = giver.CurrentQuest;
                 if (q == null || q.Stage != QuestSystem.Stage.IntroRead || q.Complete) continue;
-                return new Goal { Source = Source.Quest, Title = QuestGoal(q.Def), From = giver.Speaker, Icon = giver.Portrait };
+                return new Goal { Source = Source.Quest, Title = QuestGoal(q.Def), From = giver.Speaker, Icon = giver.Portrait, Where = QuestWhere(q.Def) };
             }
 
             // Then someone with a new quest to tell you about.
@@ -89,6 +135,39 @@ namespace CapyIsland.Game
         }
 
         /// <summary>The to-do line for a quest: what its completing achievement asks for.</summary>
+        /// <summary>
+        /// Where a quest's task happens, when it is about someone or somewhere in particular — so
+        /// the arrows can point there, and a bridge still to open shows up as the step before it.
+        /// </summary>
+        public static Vector2? QuestWhere(QuestDef q)
+        {
+            if (string.IsNullOrEmpty(q.CompleteMote) || !Motes.TryGetByName(q.CompleteMote, out var m)) return null;
+            switch (m.Func)
+            {
+                case "girl_quest_3":
+                    foreach (var pete in UnityEngine.Object.FindObjectsByType<PiratePete>(FindObjectsSortMode.None))
+                        if (pete.InWorld) return pete.transform.position;
+                    return null;
+                case "wedding_mote":
+                    var church = UnityEngine.Object.FindFirstObjectByType<Church>();
+                    return church != null ? church.transform.position : null;
+                case "girl_quest_5":
+                case "peach_dance":
+                    return GiverOf(QuestGiver.Kind.Peach);
+                case "girl_quest_1":
+                case "girl_quest_10":
+                    return GiverOf(QuestGiver.Kind.Coriander);
+            }
+            return null;
+        }
+
+        static Vector2? GiverOf(QuestGiver.Kind kind)
+        {
+            foreach (var g in UnityEngine.Object.FindObjectsByType<QuestGiver>(FindObjectsSortMode.None))
+                if (g.GiverKind == kind) return g.transform.position;
+            return null;
+        }
+
         public static string QuestGoal(QuestDef q)
         {
             if (!string.IsNullOrEmpty(q.CompleteMote) && Motes.TryGetByName(q.CompleteMote, out var m)) return GoalFor(m);
@@ -134,6 +213,7 @@ namespace CapyIsland.Game
             "hobby_cook" => "Cook a dish from your bag",
             "hobby_bug" => "Catch a bug with your net",
             "hobby_cat" => "Befriend and adopt a stray cat",
+            "hobby_catgift" => "Give a cat a fish, then wait for its present",
             "built_airport" => "Build an airstrip (Neighbours screen)",
             "peach_dance" => "Pay Captain Wasabi 500 gems for a dance",
             _ => m.Title,

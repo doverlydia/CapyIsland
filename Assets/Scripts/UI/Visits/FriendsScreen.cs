@@ -1,4 +1,5 @@
 using System;
+using DG.Tweening;
 using CapyIsland.Game;
 using TMPro;
 using UnityEngine;
@@ -34,9 +35,14 @@ namespace CapyIsland.UI
             UiKit.Stretch((RectTransform)_scroll.transform);
         }
 
+        string _blocked;          // why you can't fly yet, or null
+        RectTransform _fixCard;   // the card that fixes it, bounced when a locked Visit is tapped
+
         protected override void OnOpen()
         {
             ClearChildren(_list);
+            _blocked = Visit.WhyCantFly();
+            _fixCard = null;
 
             if (Visit.Active)
             {
@@ -45,6 +51,7 @@ namespace CapyIsland.UI
             }
 
             if (!Airport.Built && !Visit.Active) AirstripCard();
+            else if (_blocked != null) Notice(_blocked);
             ServerMap();
 
             SectionLabel(_list, "Your friends");
@@ -94,19 +101,84 @@ namespace CapyIsland.UI
                 var ale = add.transform.parent.gameObject.AddComponent<LayoutElement>();
                 ale.preferredWidth = 84f; ale.preferredHeight = 72f;
             }
+            if (friend)
+            {
+                var drop = UiKit.Button(row, "Unfriend", null, UiKit.ButtonStyle.Secondary, () => Unfriend(who), 26f, IconPainter.Close);
+                var dle = drop.transform.parent.gameObject.AddComponent<LayoutElement>();
+                dle.preferredWidth = 76f; dle.preferredHeight = 72f;
+            }
             bool here = Visit.Active && Visit.Host.id == who.id;
             if (!here)
             {
-                var go = UiKit.Button(row, "Visit", "Visit", UiKit.ButtonStyle.Primary, () => { Close(); Visit.Fly(who); }, 28f, IconPainter.Plane);
+                var go = _blocked == null
+                    ? UiKit.Button(row, "Visit", "Visit", UiKit.ButtonStyle.Primary, () => { Close(); Visit.Fly(who); }, 28f, IconPainter.Plane)
+                    : UiKit.Button(row, "Visit", "Visit", UiKit.ButtonStyle.Secondary, Blocked, 28f, IconPainter.Lock);
+                if (_blocked != null) Greyed(go);
                 var le = go.transform.parent.gameObject.AddComponent<LayoutElement>();
                 le.preferredWidth = 170f; le.preferredHeight = 72f;
             }
+        }
+
+        /// <summary>Asks first, then removes a friend (and sends them home if they are visiting).</summary>
+        void Unfriend(FriendProfile who)
+        {
+            PromptScreen.Ask("Unfriend?", who, $"Remove {who.name} from your friends? Their island won't be kept any more.", "Unfriend", "Cancel", () =>
+            {
+                Friends.Remove(who);
+                var bot = VisitorBot.Current;
+                if (bot != null && bot.Who.id == who.id && bot.As == VisitorBot.Role.Guest) bot.SendHome();
+                Hints.Show(who.name + " is no longer your friend.");
+                OnOpen();
+            });
+        }
+
+        /// <summary>A locked Visit was tapped: say why, right here, and point at the fix.</summary>
+        void Blocked()
+        {
+            Hints.Show(_blocked);
+            Game.Sfx.Play(Game.SfxKind.Tap, 0.4f);
+            if (_fixCard == null) return;
+            // The card explaining it is at the top of the list: bring it into view.
+            if (_scroll != null) DOTween.To(() => _scroll.verticalNormalizedPosition, v => _scroll.verticalNormalizedPosition = v, 1f, 0.35f).SetUpdate(true);
+            _fixCard.DOKill();
+            _fixCard.localScale = Vector3.one;
+            _fixCard.DOPunchScale(new Vector3(0.06f, 0.06f, 0f), 0.45f, 6, 0.6f).SetUpdate(true);
+        }
+
+        /// <summary>Visit buttons you can't use yet look it: grey, with a lock.</summary>
+        static void Greyed(Button button)
+        {
+            var face = button.GetComponent<Image>();
+            if (face != null) face.color = UiKit.Hex("D9D4CC");
+            foreach (var g in button.GetComponentsInChildren<Graphic>())
+                if (g != face) g.color = UiKit.Hex("9A9187");
+        }
+
+        /// <summary>A note at the top saying what to do before you can fly.</summary>
+        void Notice(string line)
+        {
+            var card = UiKit.Image(_list, "Notice", UiKit.Rounded(32), UiKit.Hex("FFF1D6")).rectTransform;
+            var h = card.gameObject.AddComponent<HorizontalLayoutGroup>();
+            h.padding = new RectOffset(20, 20, 18, 18);
+            h.spacing = 16f;
+            h.childAlignment = TextAnchor.MiddleLeft;
+            h.childControlWidth = h.childControlHeight = true;
+            h.childForceExpandWidth = h.childForceExpandHeight = false;
+            var icon = UiKit.Image(card, "Icon", IconPainter.Lock, UiKit.Hex("C98A2B"));
+            icon.preserveAspect = true;
+            var ile = icon.gameObject.AddComponent<LayoutElement>();
+            ile.preferredWidth = ile.preferredHeight = 56f;
+            var t = UiKit.Text(card, "Line", line, 28f, UiKit.Ink, true);
+            t.overflowMode = TextOverflowModes.Overflow;
+            t.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1f;
+            _fixCard = card;
         }
 
         /// <summary>Until you have an airstrip, the way to build one.</summary>
         void AirstripCard()
         {
             var card = UiKit.Image(_list, "Airstrip", UiKit.Rounded(32), UiKit.Hex("FFF1D6")).rectTransform;
+            _fixCard = card;
             var h = card.gameObject.AddComponent<HorizontalLayoutGroup>();
             h.padding = new RectOffset(20, 20, 18, 18);
             h.spacing = 18f;
@@ -223,7 +295,7 @@ namespace CapyIsland.UI
                 }
             }
 
-            string label = empty ? "Empty" : seat.IsYou ? "You" : seat.Who.name;
+            string label = empty ? "Empty" : seat.IsYou ? PlayerProfile.Name : seat.Who.name;
             var t = UiKit.Text(tile.transform, "Name", label, 22f, empty ? UiKit.InkSoft : UiKit.Ink, !empty, TextAlignmentOptions.Center);
             t.rectTransform.anchorMin = new Vector2(0f, 0f);
             t.rectTransform.anchorMax = new Vector2(1f, 0.3f);
@@ -239,7 +311,13 @@ namespace CapyIsland.UI
             var who = seat.Who;
             var b = tile.gameObject.AddComponent<Button>();
             b.transition = Selectable.Transition.None;
-            b.onClick.AddListener(() =>
+            if (_blocked != null && !here)
+            {
+                // You can see who is about, but not fly there yet.
+                tile.gameObject.AddComponent<CanvasGroup>().alpha = 0.6f;
+                b.onClick.AddListener(Blocked);
+            }
+            else b.onClick.AddListener(() =>
             {
                 Close();
                 if (!here) Visit.Fly(who);

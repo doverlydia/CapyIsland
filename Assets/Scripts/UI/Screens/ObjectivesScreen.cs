@@ -91,6 +91,13 @@ namespace CapyIsland.UI
                 if (q.Complete) { status = "Reward ready"; chip = UiKit.Sun; line = "Talk to " + giver.Speaker + " to collect your reward"; }
                 else if (q.Stage == QuestSystem.Stage.NotStarted) { status = "New"; chip = UiKit.Primary; line = "Talk to " + giver.Speaker + " to hear what they need"; }
                 else { status = "In progress"; chip = UiKit.Spring; line = Objectives.QuestGoal(q.Def); }
+                // On an island you have not opened yet: say what has to happen first.
+                // Where it happens: the task itself while in progress (a character elsewhere), otherwise the giver.
+                Vector2 where = q.Complete || q.Stage == QuestSystem.Stage.NotStarted
+                    ? (Vector2)giver.transform.position
+                    : Objectives.QuestWhere(q.Def) ?? (Vector2)giver.transform.position;
+                var step = Objectives.StepTo(where, out _);
+                if (step != null) line += "\n<color=#C9653A>" + step + "</color>";
                 Row(giver.Portrait, Color.white, giver.Speaker, line, status, chip, giver.transform.position, portrait: true);
             }
 

@@ -85,8 +85,9 @@ ship () {
   for src in ArtSource/Hobby_*.png; do
     [ -f "$src" ] || continue
     local name; name=$(basename "$src" .png); name=${name#Hobby_}
+    case "$name" in Miso_Dress*) continue ;; esac   # untrimmed, framed like Capy_Coriander: batch_miso.sh ships them
     local size=128
-    case "$name" in Airport) size=320 ;; Plot|Cat_*) size=192 ;; esac
+    case "$name" in Airport) size=320 ;; Plot|Cat_*|Stove|Pot|SewingMachine) size=192 ;; Sailor) size=256 ;; esac
     node Tools/ChatGPT/trim.mjs "$src" "$tmp/$name.png" --alpha 60 > /dev/null &&
       node Tools/ChatGPT/downscale.mjs "$tmp/$name.png" "$out/$name.png" "$size"
     rm -f "$tmp/$name.png"

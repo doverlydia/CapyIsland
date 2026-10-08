@@ -30,6 +30,19 @@ namespace CapyIsland.Game
         public const string Elder = "Elder Matcha";
         public const string Spirit = "Spirit";
 
+        /// <summary>The islanders' own stories, washed up in bottles on your beach.</summary>
+        public static readonly (string title, string by, string text)[] IslandStories =
+        {
+            ("Before the Big Chill", Guide,
+                "When I was young the hot spring never stopped steaming. You could see the clouds of it from the far side of the sea, and sailors steered by it at night.\n\nEvery evening the whole island came down to soak. Workers with sawdust in their fur. Old ones with creaky knees. Little ones who splashed.\n\nThen one winter the steam got thinner, and thinner, and then it stopped.\n\nI am a ghost now, and ghosts do not feel the cold. But I remember warm. If you find this bottle, please keep going. Every warm heart you gather brings the steam a little closer."),
+            ("Rules of the Sea, by a Captain", Captain,
+                "Rule one: never trust a seagull.\n\nRule two: never trust a seagull who says it is your friend.\n\nRule three: a pirate always shares the last biscuit. (This rule is new. Someone kind taught it to me.)\n\nRule four: if your ship freezes into the harbour, do not cry. Dance. Then make friends with whoever is watching you dance.\n\nRule five: see rule one."),
+            ("The Pickle Barrel", Sailor,
+                "Arr. Gather round, whoever you are.\n\nIt was a dark and stormy night, and the sea serpent was this big. No, BIGGER. It wanted my barrel of pickles. I said, \"These are my pickles.\" It said, \"Not for long.\"\n\nSo we arm-wrestled. On the deck. In the storm. For three days.\n\nI won, of course. Then I gave it half the pickles anyway, because it had been a good match.\n\nWe still write. It sends me seaweed at New Year."),
+            ("A List, Folded Very Small", Sweetheart,
+                "Things I will do when the bathhouse is warm again:\n\n- Fill it with yuzu, like Grandma used to.\n- Teach the little ones to float.\n- Hang lanterns along the path so nobody gets lost.\n- Sit in the steam with someone kind and not say anything at all for a very long time.\n\nI think I know who. I am not writing his name in case this bottle washes up somewhere embarrassing."),
+        };
+
         // ---------------------------------------------------------------- names
 
         static readonly Dictionary<string, string> Names = new()
@@ -49,6 +62,13 @@ namespace CapyIsland.Game
             { "Panda House", "Woolly Lodge" },
             { "Fox House", "Burrow Hole" },
             { "Monster House", "Zombie Shack" },
+            { "Garden Shop", "Garden Shop" },
+            { "Vegetable Plot", "Vegetable Plot" },
+            { "Stove", "Cooking Stove" },
+            { "Fishing Rod", "Fishing Rod" },
+            { "Bug Net", "Bug Net" },
+            { "Binoculars", "Binoculars" },
+            { "Sewing Machine", "Sewing Machine" },
             { "Deer House", "Guinea Pig Hutch" },
             { "Pirate House", "Pirate Shack" },
 
@@ -119,6 +139,13 @@ namespace CapyIsland.Game
             { "Panda House", "A warm lodge for woolly capybaras, who feel the cold the least." },
             { "Fox House", "A cosy hillside burrow for small, quick burrow capybaras." },
             { "Monster House", "A place for cured zombie capybaras to call home." },
+            { "Garden Shop", "Seeds, soil and a stove: everything for growing and cooking your own food." },
+            { "Vegetable Plot", "A little bed of rich soil. Plant seeds in it, and come back when they've grown." },
+            { "Stove", "A cosy outdoor stove. Put ingredients in the pot and mind the heat!" },
+            { "Fishing Rod", "Take up fishing: walk to the water's edge and cast." },
+            { "Bug Net", "Take up bug catching: creep up on bugs and catch them." },
+            { "Binoculars", "Take up birdwatching: spot the birds that visit your island." },
+            { "Sewing Machine", "Take up sewing: stitch your own hats and capes." },
             { "Deer House", "A hutch for guinea pigs. Are you sure about this?" },
 
             { "Capybara", "Calm, kind and always ready to help. Put one to work at a sawmill or a mine." },
@@ -225,6 +252,7 @@ namespace CapyIsland.Game
             { "hobby_cook", ("Home Cooking", "You cooked your first dish. The whole island smells wonderful.") },
             { "hobby_bug", ("Bug Catcher", "Your first bug, safely netted and noted in your journal.") },
             { "hobby_cat", ("Cat Person", "A cat has chosen you. Or you chose it. It's hard to tell with cats.") },
+            { "hobby_catgift", ("It's the Thought That Counts", "A cat brought you a present. You said thank you. You meant it, mostly.") },
             { "built_airport", ("Ready for Take-off", "You built an airstrip. The whole archipelago is a short flight away.") },
         };
 

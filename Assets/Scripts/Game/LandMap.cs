@@ -182,6 +182,14 @@ namespace CapyIsland.Game
 
         public Piece Bridge(string name) => pieces.Find(p => p.isBridge && p.name == name);
 
+        /// <summary>True if a bridge piece lands on the island under a Unity position.</summary>
+        public bool BridgeReaches(string bridge, Vector2 unity)
+        {
+            var b = Bridge(bridge);
+            int island = IslandAt(unity);
+            return b != null && island >= 0 && Touches(b, Island(island));
+        }
+
         public bool IsBridgeOpen(string name)
         {
             var b = Bridge(name);

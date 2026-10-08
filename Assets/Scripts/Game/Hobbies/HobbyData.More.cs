@@ -39,6 +39,7 @@ namespace CapyIsland.Game
         {
             new() { Id = "Carrot",     Name = "Carrot",     Minutes = 2f,  SeedGold = 5,  Yield = 3, MinLevel = 1 },
             new() { Id = "Cabbage",    Name = "Cabbage",    Minutes = 3f,  SeedGold = 8,  Yield = 2, MinLevel = 1 },
+            new() { Id = "Cotton",     Name = "Cotton",     Minutes = 5f,  SeedGold = 12, Yield = 3, MinLevel = 2 },   // for sewing hats
             new() { Id = "Tomato",     Name = "Tomato",     Minutes = 4f,  SeedGold = 10, Yield = 3, MinLevel = 2 },
             new() { Id = "Corn",       Name = "Corn",       Minutes = 6f,  SeedGold = 14, Yield = 2, MinLevel = 3 },
             new() { Id = "Strawberry", Name = "Strawberry", Minutes = 8f,  SeedGold = 20, Yield = 4, MinLevel = 4 },
@@ -72,6 +73,7 @@ namespace CapyIsland.Game
             new() { Id = "Snail",        Name = "Garden Snail",   Stars = 1, MinLevel = 1, Home = BugHome.Ground },
             new() { Id = "Bee",          Name = "Bumblebee",      Stars = 2, MinLevel = 2, Home = BugHome.Flower, Flies = true },
             new() { Id = "Beetle",       Name = "Jewel Beetle",   Stars = 2, MinLevel = 2, Home = BugHome.Tree },
+            new() { Id = "Silkworm",     Name = "Silkworm",       Stars = 2, MinLevel = 2, Home = BugHome.Tree },   // spins silk for capes
             new() { Id = "Dragonfly",    Name = "Dragonfly",      Stars = 2, MinLevel = 3, Home = BugHome.Ground, Flies = true },
             new() { Id = "BlueButterfly",Name = "Sky Blue Butterfly", Stars = 3, MinLevel = 4, Home = BugHome.Flower, Flies = true },
             new() { Id = "Firefly",      Name = "Firefly",        Stars = 3, MinLevel = 5, Home = BugHome.Tree, Flies = true, Glows = true },
@@ -116,6 +118,7 @@ namespace CapyIsland.Game
             if (item.StartsWith("fish:")) { var f = FishById(item.Substring(5)); return f != null ? FishPicture(f) : null; }
             if (item.StartsWith("crop:")) return Art("Crop_" + item.Substring(5));
             if (item.StartsWith("dish:")) return Art("Dish_" + item.Substring(5));
+            if (item == "mat:Silk") return Art("Bug_Silkworm");
             return null;
         }
 
@@ -124,6 +127,8 @@ namespace CapyIsland.Game
             if (item == "fish:any") return "any fish";
             if (item.StartsWith("fish:")) return FishById(item.Substring(5))?.Name ?? "Fish";
             if (item.StartsWith("crop:")) return Crop(item.Substring(5))?.Name ?? "Crop";
+            if (item == "dish:Bizarre") return "Bizarre Food";
+            if (item == "mat:Silk") return "Silk";
             if (item.StartsWith("dish:")) return Dish(item.Substring(5))?.Name ?? "Dish";
             return item;
         }

@@ -88,45 +88,83 @@ namespace CapyIsland.UI
             h.childForceExpandWidth = true;
             row.gameObject.AddComponent<LayoutElement>().preferredHeight = 96f;
             UiKit.Button(row, "Bag", "Bag", UiKit.ButtonStyle.Spring, () => Go(Page.Bag), 32f, IconPainter.Gift);
-            UiKit.Button(row, "Kitchen", "Kitchen", UiKit.ButtonStyle.Primary, () => Go(Page.Kitchen), 32f, IconPainter.Star);
+            if (HobbyLog.IsUnlocked(Hobby.Cooking))
+                UiKit.Button(row, "Kitchen", "Kitchen", UiKit.ButtonStyle.Primary, () => Go(Page.Kitchen), 32f, IconPainter.Star);
 
-            HobbyCard(Hobby.Fishing, "Fishing", IconPainter.Rod, UiKit.Spring,
-                $"{HobbyLog.Fish.Count} of {HobbyData.Fish.Length} fish found",
-                "Walk to the water's edge where fish shadows swim, then tap the rod button.",
-                "Journal", () => Go(Page.Fish));
-            HobbyCard(Hobby.Birding, "Birdwatching", IconPainter.Bird, UiKit.Hex("E3A92B"),
-                $"{HobbyLog.Birds.Count} of {HobbyData.Birds.Length} birds spotted",
-                "Birds land in trees and on the shore. Tap one from a few steps away. Don't rush up to it!",
-                "Journal", () => Go(Page.Birds));
-            HobbyCard(Hobby.Bugs, "Bug Catching", IconPainter.Sparkle, UiKit.Hex("7BAE3E"),
-                $"{HobbyLog.Bugs.Count} of {HobbyData.Bugs.Length} bugs caught",
-                "Bugs settle on flowers, trees and grass near you. Tap one to net it, gently.",
-                "Journal", () => Go(Page.Bugs));
-            HobbyCard(Hobby.Gardening, "Gardening", IconPainter.Sparkle, UiKit.Hex("8A5A32"),
-                $"{HobbyLog.Plots.Count} of {Game.Gardening.MaxPlots} plots dug",
-                $"Make a plot ({Game.Gardening.DigWood} wood) and put it anywhere. Tap it to plant seeds, come back when it's grown.",
-                "Dig plot", () =>
-                {
-                    var why = Game.Gardening.Dig();
-                    if (why != null) Hints.Show(why);
-                    else Close();
-                });
-            HobbyCard(Hobby.Cooking, "Cooking", IconPainter.Star, UiKit.Primary,
-                $"{CountDishes()} dish{(CountDishes() == 1 ? "" : "es")} in your bag",
-                "Cook crops and fish into dishes. Serve one to fill every hungry worker at once.",
-                "Kitchen", () => Go(Page.Kitchen));
-            HobbyCard(Hobby.Cats, "Cat Care", IconPainter.Heart, UiKit.Hex("E58FB0"),
-                $"{AdoptedCats()} of {HobbyData.Cats.Length} cats adopted",
-                "Stray cats visit your island. Pet them and share fish until they trust you.",
-                "Cats", () => Go(Page.Cats));
-            HobbyCard(Hobby.Writing, "Writing", IconPainter.Book, UiKit.Hex("A77BD6"),
-                $"{HobbyLog.Books.Count} book{(HobbyLog.Books.Count == 1 ? "" : "s")} written",
-                "Write stories for your shelf, and read the books your friends have written.",
-                "Library", () => { Close(); if (LibraryScreen.Instance != null) LibraryScreen.Instance.Open(); });
-            HobbyCard(Hobby.Sewing, "Sewing", IconPainter.Shirt, UiKit.Hex("C2577F"),
-                $"{HobbyLog.Designs.Count} design{(HobbyLog.Designs.Count == 1 ? "" : "s")} sewn",
-                "Draw your own T-shirt design and wear it around the island.",
-                "Sew", () => { Close(); if (SewingScreen.Instance != null) SewingScreen.Instance.Open(); });
+            // Hobbies you have first; the ones still to take up after them, with how to get them.
+            var all = new (Hobby hobby, string name, Sprite icon, Color colour, System.Action card)[]
+            {
+                (Hobby.Fishing, "Fishing", IconPainter.Rod, UiKit.Spring, () => HobbyCard(Hobby.Fishing, "Fishing", IconPainter.Rod, UiKit.Spring,
+                    $"{HobbyLog.Fish.Count} of {HobbyData.Fish.Length} fish found",
+                    "Walk to the water's edge where fish shadows swim, and tap Start fishing.",
+                    "Journal", () => Go(Page.Fish))),
+                (Hobby.Birding, "Birdwatching", IconPainter.Bird, UiKit.Hex("E3A92B"), () => HobbyCard(Hobby.Birding, "Birdwatching", IconPainter.Bird, UiKit.Hex("E3A92B"),
+                    $"{HobbyLog.Birds.Count} of {HobbyData.Birds.Length} birds spotted",
+                    "Birds land in trees and on the shore. Tap one from a few steps away. Don't rush up to it!",
+                    "Journal", () => Go(Page.Birds))),
+                (Hobby.Bugs, "Bug Catching", IconPainter.Sparkle, UiKit.Hex("7BAE3E"), () => HobbyCard(Hobby.Bugs, "Bug Catching", IconPainter.Sparkle, UiKit.Hex("7BAE3E"),
+                    $"{HobbyLog.Bugs.Count} of {HobbyData.Bugs.Length} bugs caught",
+                    "Bugs settle on flowers, trees and grass near you. Tap one to net it, gently.",
+                    "Journal", () => Go(Page.Bugs))),
+                (Hobby.Gardening, "Gardening", IconPainter.Sparkle, UiKit.Hex("8A5A32"), () => HobbyCard(Hobby.Gardening, "Gardening", IconPainter.Sparkle, UiKit.Hex("8A5A32"),
+                    $"{HobbyLog.Plots.Count} of {Game.Gardening.MaxPlots} plots",
+                    "Buy vegetable plots at the Garden Shop and put them anywhere. Tap one to plant seeds, come back when it's grown.",
+                    "Show me", () => ShowInWorld(FindPlaced("Vegetable Plot") ?? FindPlaced("Garden Shop"), "Buy a vegetable plot at the Garden Shop, then put it down anywhere."))),
+                (Hobby.Cooking, "Cooking", IconPainter.Flame, UiKit.Primary, () => HobbyCard(Hobby.Cooking, "Cooking", IconPainter.Flame, UiKit.Primary,
+                    $"{CountDishes()} dish{(CountDishes() == 1 ? "" : "es")} in your bag",
+                    "Tap your stove and drag ingredients into the pot. Islanders with a dish in a bubble over their head will pay for it.",
+                    "Recipes", () => Go(Page.Kitchen))),
+                (Hobby.Cats, "Cat Care", IconPainter.Heart, UiKit.Hex("E58FB0"), () => HobbyCard(Hobby.Cats, "Cat Care", IconPainter.Heart, UiKit.Hex("E58FB0"),
+                    $"{AdoptedCats()} of {HobbyData.Cats.Length} cats adopted",
+                    "Stray cats visit your island. Pet them and share fish until they trust you.",
+                    "Cats", () => Go(Page.Cats))),
+                (Hobby.Writing, "Writing", IconPainter.Book, UiKit.Hex("A77BD6"), () => HobbyCard(Hobby.Writing, "Writing", IconPainter.Book, UiKit.Hex("A77BD6"),
+                    $"{HobbyLog.Books.Count} stor{(HobbyLog.Books.Count == 1 ? "y" : "ies")} written",
+                    "Message bottles wash up on your beach. Read them, and buy a bottle from the sailor to leave a story of your own.",
+                    "Show me", () => ShowInWorld(SeaLibrary.Spot, "The bottles are on your beach."))),
+                (Hobby.Sewing, "Sewing", IconPainter.Shirt, UiKit.Hex("C2577F"), () => HobbyCard(Hobby.Sewing, "Sewing", IconPainter.Shirt, UiKit.Hex("C2577F"),
+                    $"{HobbyLog.Designs.Count} piece{(HobbyLog.Designs.Count == 1 ? "" : "s")} sewn",
+                    "At your sewing machine: a hat needs cotton from your garden, a cape needs silk from silkworms. Then decorate it and wear it!",
+                    "Show me", () => ShowInWorld(SewingStation.Placed() != null ? SewingStation.Placed().transform : null, "Put your sewing machine down somewhere first."))),
+            };
+            foreach (var c in all) if (HobbyLog.IsUnlocked(c.hobby)) c.card();
+            bool header = false;
+            foreach (var c in all)
+            {
+                if (HobbyLog.IsUnlocked(c.hobby)) continue;
+                if (!header) { SectionLabel(_list, "Still to discover"); header = true; }
+                LockedCard(c.hobby, c.name, c.icon);
+            }
+        }
+
+        /// <summary>A hobby you have not taken up yet: greyed out, with what to buy and where.</summary>
+        void LockedCard(Hobby hobby, string name, Sprite icon)
+        {
+            var card = UiKit.Image(_list, name, UiKit.Rounded(32), new Color(1f, 1f, 1f, 0.6f)).rectTransform;
+            var h = card.gameObject.AddComponent<HorizontalLayoutGroup>();
+            h.padding = new RectOffset(24, 24, 18, 18);
+            h.spacing = 18f;
+            h.childAlignment = TextAnchor.MiddleLeft;
+            h.childControlWidth = h.childControlHeight = true;
+            h.childForceExpandWidth = h.childForceExpandHeight = false;
+            var disc = UiKit.Image(card, "Disc", UiKit.Circle, UiKit.Hex("CFC7BE"));
+            var dle = disc.gameObject.AddComponent<LayoutElement>();
+            dle.preferredWidth = dle.preferredHeight = 80f;
+            var ic = UiKit.Image(disc.transform, "Icon", icon, Color.white);
+            ic.preserveAspect = true;
+            UiKit.Stretch(ic.rectTransform, 18f, 18f, 18f, 18f);
+            var lk = UiKit.Image(disc.transform, "Lock", IconPainter.Lock, UiKit.Hex("8A7563"));
+            UiKit.Place(lk.rectTransform, new Vector2(1f, 0f), new Vector2(4f, -4f), new Vector2(32f, 32f));
+            var col = UiKit.Rect("Column", card);
+            var cv = col.gameObject.AddComponent<VerticalLayoutGroup>();
+            cv.spacing = 4f;
+            cv.childControlWidth = cv.childControlHeight = true;
+            cv.childForceExpandWidth = true;
+            cv.childForceExpandHeight = false;
+            col.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1f;
+            var title = UiKit.Text(col, "Name", name, 34f, UiKit.InkSoft, true);
+            title.textWrappingMode = TextWrappingModes.NoWrap;
+            UiKit.Text(col, "How", HobbyLog.HowToUnlock(hobby), 26f, UiKit.InkSoft);
         }
 
         static int CountDishes()
@@ -297,23 +335,21 @@ namespace CapyIsland.UI
             items.Sort((a, b) => string.CompareOrdinal(a.id, b.id));
             foreach (var e in items)
             {
-                var row = ItemRow(e.id, $"×{e.count}");
-                if (!e.id.StartsWith("dish:")) continue;
-                string dish = e.id.Substring(5);
-                var serve = UiKit.Button(row, "Serve", "Serve", UiKit.ButtonStyle.Primary, () =>
-                {
-                    int fed = Cooking.Serve(dish);
-                    Hints.Show(fed == 0 ? "Nobody here is hungry right now. Save it for later!" : $"You fed {fed} hungry worker{(fed == 1 ? "" : "s")}!");
-                    if (fed > 0) Close();
-                }, 26f);
-                var le = serve.transform.parent.gameObject.AddComponent<LayoutElement>();
-                le.preferredWidth = 150f; le.preferredHeight = 68f;
+                // Dishes go to whoever fancies them: look for a bubble over someone's head.
+                bool dish = e.id.StartsWith("dish:") && e.id != "dish:" + Cooking.Bizarre;
+                ItemRow(e.id, dish ? $"×{e.count}  ·  <size=85%>Someone might fancy this — look for a bubble!</size>" : $"×{e.count}");
             }
         }
 
         void KitchenPage()
         {
             Back();
+            // A recipe book: the cooking itself happens at your stove.
+            var stove = CookingStove.Placed();
+            var go = UiKit.Button(_list, "Stove", stove != null ? "Go to my stove" : "Find a stove at the Garden Shop",
+                UiKit.ButtonStyle.Primary, () => ShowInWorld(stove != null ? stove.transform : FindPlaced("Garden Shop"),
+                    stove != null ? null : "The Garden Shop opens up after the Legendary Gem Store. It sells the Cooking Stove."), 30f, IconPainter.Flame);
+            go.transform.parent.gameObject.AddComponent<LayoutElement>().preferredHeight = 96f;
             int level = HobbyLog.Level(Hobby.Cooking);
             foreach (var dish in HobbyData.Dishes)
             {
@@ -326,17 +362,28 @@ namespace CapyIsland.UI
                     needs.Append(have ? "" : "<color=#C0503E>").Append(count).Append(' ').Append(HobbyData.ItemName(item)).Append(have ? "" : "</color>");
                 }
                 string line = known ? needs.ToString() + "\n<size=85%>" + dish.Blurb + "</size>" : $"Unlocks at cooking level {dish.MinLevel}";
-                var row = ItemRow("dish:" + dish.Id, line, known ? dish.Name : "???");
-                if (!known) continue;
-                var d = dish;
-                var cook = UiKit.Button(row, "Cook", "Cook", UiKit.ButtonStyle.Primary, () =>
-                {
-                    if (Cooking.Cook(d)) { Hints.Show(d.Name + " is ready! It's in your bag."); Refresh(); }
-                }, 26f);
-                cook.interactable = Cooking.CanCook(d);
-                var le = cook.transform.parent.gameObject.AddComponent<LayoutElement>();
-                le.preferredWidth = 150f; le.preferredHeight = 68f;
+                ItemRow("dish:" + dish.Id, line, known ? dish.Name : "???");
             }
+        }
+
+        /// <summary>A placed building of this kind on the island, if any.</summary>
+        static Transform FindPlaced(string storeName)
+        {
+            foreach (var tag in FindObjectsByType<CatalogItem>(FindObjectsSortMode.None))
+            {
+                if (tag.StoreName != storeName) continue;
+                var p = tag.GetComponent<Placeable>();
+                if (p != null && p.Placed) return tag.transform;
+            }
+            return null;
+        }
+
+        /// <summary>Closes the menu and looks at something on the island — or says where to find it.</summary>
+        void ShowInWorld(Transform target, string otherwise)
+        {
+            if (target == null) { if (otherwise != null) Hints.Show(otherwise); Close(); return; }
+            Close();
+            CameraRig.CameraFocus.Show(target.position, 2.5f);
         }
 
         RectTransform ItemRow(string item, string detail, string name = null)
@@ -515,7 +562,25 @@ namespace CapyIsland.UI
             }
         }
 
-        void Write()
+        /// <summary>Opens straight onto a story from a bottle on the beach.</summary>
+        public static void ReadBottle(string title, string by, string text)
+        {
+            if (Instance == null) return;
+            Instance.Open();
+            Instance.Read(title, by, text, by + "/" + title);
+        }
+
+        /// <summary>Opens the page to write the story going into a bottle; <paramref name="written"/> gets it.</summary>
+        public static void WriteBottle(Action<string, string> written)
+        {
+            if (Instance == null) return;
+            Instance.Open();
+            Instance.Write(written);
+        }
+
+        void Write() => Write(null);
+
+        void Write(Action<string, string> written)
         {
             ClearChildren(_list);
             var title = UiKit.Input(_list, "Title", "Title", false, 96f);
@@ -529,12 +594,18 @@ namespace CapyIsland.UI
             h.childForceExpandWidth = true;
             row.gameObject.AddComponent<LayoutElement>().preferredHeight = 96f;
             UiKit.Button(row, "Cancel", "Cancel", UiKit.ButtonStyle.Secondary, Refresh, 30f);
-            UiKit.Button(row, "Save", "Put it on my shelf", UiKit.ButtonStyle.Primary, () =>
+            UiKit.Button(row, "Save", written != null ? "Put it in the bottle" : "Put it on my shelf", UiKit.ButtonStyle.Primary, () =>
             {
                 string t = title.text.Trim(), s = text.text.Trim();
                 if (t.Length == 0 || s.Length < 20)
                 {
-                    Hints.Show("A book needs a title and at least a few sentences.");
+                    Hints.Show("A story needs a title and at least a few sentences.");
+                    return;
+                }
+                if (written != null)
+                {
+                    Close();
+                    written(t, s);
                     return;
                 }
                 HobbyLog.AddBook(t, s);
@@ -548,8 +619,9 @@ namespace CapyIsland.UI
     }
 
     /// <summary>
-    /// The sewing table: paint a T-shirt pixel by pixel from a little palette, save the design,
-    /// and wear it. The canvas only takes paint inside the shirt.
+    /// The sewing machine: pick a pattern — a hat (3 cotton from your garden) or a cape (3 silk
+    /// from silkworms) — paint it pixel by pixel from a little palette, and save it. Every piece
+    /// you sew goes into your wardrobe (hats with the hats, capes on the back) to wear.
     /// </summary>
     public class SewingScreen : UiScreen
     {
@@ -562,18 +634,27 @@ namespace CapyIsland.UI
             UiKit.Hex("2DB3A6"), UiKit.Hex("5B9BD5"), UiKit.Hex("A77BD6"), UiKit.Hex("E58FB0"), UiKit.Hex("8A5A32"), UiKit.Hex("C9C9C9"),
         };
 
+        /// <summary>What can be sewn, and what it takes.</summary>
+        public static readonly (string kind, string name, string material, int count, string where)[] Patterns =
+        {
+            ("hat", "Hat", "crop:Cotton", 3, "Grow cotton in your garden (gardening level 2)."),
+            ("cape", "Cape", "mat:Silk", 3, "Catch silkworms for their silk (bug catching level 2)."),
+        };
+
         protected override string Title => "Sewing";
         protected override Sprite TitleIcon => IconPainter.Shirt;
         protected override Color AccentColour => UiKit.Hex("E58FB0");
 
         Texture2D _texture;
         RawImage _canvas;
+        Image _silhouette;
         int _colour = 2;
         bool _erase;
         readonly char[] _pixels = new char[Size * Size];
         readonly List<Image> _swatches = new();
-        RectTransform _designs;
+        RectTransform _designs, _patternRow;
         int _editing = -1;
+        int _pattern;
         TextMeshProUGUI _status;
 
         void Awake() => Instance = this;
@@ -583,11 +664,42 @@ namespace CapyIsland.UI
             if (Instance == this) Instance = null;
         }
 
-        /// <summary>Is this pixel inside the T-shirt?</summary>
-        public static bool InShirt(int x, int y)
+        string Kind => Patterns[_pattern].kind;
+
+        /// <summary>The outline of a pattern, as a signed distance (negative inside). Shirts are the old designs.</summary>
+        public static float Shape(string kind, float u, float v)
+        {
+            switch (kind)
+            {
+                case "hat":
+                {
+                    // A beanie: a round crown on a turned-up brim, and a bobble on top.
+                    float crown = IconPainter.Disc(u, v, 0f, -0.05f, 0.62f);
+                    crown = Mathf.Max(crown, -0.2f - v);   // flat at the bottom, where the brim goes
+                    float brim = IconPainter.Box(u, v, 0f, -0.33f, 0.8f, 0.16f, 0.1f);
+                    float bobble = IconPainter.Disc(u, v, 0f, 0.66f, 0.17f);
+                    return Mathf.Min(Mathf.Min(crown, brim), bobble);
+                }
+                case "cape":
+                {
+                    // Narrow at the shoulders, flaring out to a wavy hem, with a collar.
+                    float t = Mathf.InverseLerp(0.7f, -0.85f, v);
+                    float half = Mathf.Lerp(0.36f, 0.86f, t);
+                    float side = Mathf.Abs(u) - half;
+                    float top = v - 0.7f, bottom = -0.85f + Mathf.Sin(u * 9f) * 0.04f - v;
+                    float body = Mathf.Max(side, Mathf.Max(top, bottom));
+                    float collar = IconPainter.Box(u, v, 0f, 0.74f, 0.42f, 0.09f, 0.08f);
+                    return Mathf.Min(body, collar);
+                }
+                default:
+                    return IconPainter.ShirtShape(u, v);
+            }
+        }
+
+        static bool Inside(string kind, int x, int y)
         {
             float u = (x + 0.5f) / Size * 2f - 1f, v = (y + 0.5f) / Size * 2f - 1f;
-            return IconPainter.ShirtShape(u, v) < 0f;
+            return Shape(kind, u, v) < 0f;
         }
 
         protected override void Build(RectTransform body)
@@ -595,24 +707,32 @@ namespace CapyIsland.UI
             var scroll = UiKit.ScrollList(body, "List", out var list, 16f, new RectOffset(4, 4, 8, 32));
             UiKit.Stretch((RectTransform)scroll.transform);
 
-            // The canvas: a shirt-coloured silhouette under a painted 16×16 texture.
+            // Which pattern.
+            _patternRow = UiKit.Rect("Patterns", list);
+            var ph = _patternRow.gameObject.AddComponent<HorizontalLayoutGroup>();
+            ph.spacing = 14f;
+            ph.childControlWidth = ph.childControlHeight = true;
+            ph.childForceExpandWidth = true;
+            _patternRow.gameObject.AddComponent<LayoutElement>().preferredHeight = 96f;
+
+            // The canvas: the pattern's silhouette under a painted 16×16 texture.
             var frame = UiKit.Rect("Canvas", list);
             frame.gameObject.AddComponent<LayoutElement>().preferredHeight = 520f;
             var mat = UiKit.Image(frame, "Mat", UiKit.Rounded(36), UiKit.Hex("CFE3E0"));
             UiKit.Place(mat.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(540f, 520f));
             mat.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            var shirt = UiKit.Image(frame, "Shirt", IconPainter.Shirt, UiKit.Hex("F4EBDD"));
-            shirt.preserveAspect = true;
-            UiKit.Place(shirt.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(500f, 500f));
-            shirt.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            _silhouette = UiKit.Image(frame, "Silhouette", null, Color.white);
+            _silhouette.preserveAspect = true;
+            UiKit.Place(_silhouette.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(500f, 500f));
+            _silhouette.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             _texture = new Texture2D(Size, Size, TextureFormat.RGBA32, false) { filterMode = FilterMode.Point, wrapMode = TextureWrapMode.Clamp };
-            var raw = UiKit.Rect("Paint", shirt.transform);
+            var raw = UiKit.Rect("Paint", _silhouette.transform);
             UiKit.Stretch(raw);
             _canvas = raw.gameObject.AddComponent<RawImage>();
             _canvas.texture = _texture;
             raw.gameObject.AddComponent<PaintSurface>().Owner = this;
 
-            _status = UiKit.Text(list, "Status", "Tap or drag to paint your shirt.", 26f, UiKit.InkSoft, false, TextAlignmentOptions.Center);
+            _status = UiKit.Text(list, "Status", "Tap or drag to paint.", 26f, UiKit.InkSoft, false, TextAlignmentOptions.Center);
 
             // Palette.
             var pal = UiKit.Rect("Palette", list);
@@ -646,11 +766,11 @@ namespace CapyIsland.UI
             h.childControlWidth = h.childControlHeight = true;
             h.childForceExpandWidth = true;
             row.gameObject.AddComponent<LayoutElement>().preferredHeight = 90f;
-            UiKit.Button(row, "Clear", "Clear", UiKit.ButtonStyle.Secondary, () => { Clear(); _editing = -1; }, 28f);
-            UiKit.Button(row, "Save", "Save", UiKit.ButtonStyle.Spring, Save, 28f);
-            UiKit.Button(row, "Wear", "Save & wear", UiKit.ButtonStyle.Primary, () => { Save(); HobbyLog.Wear(_editing); Status("You're wearing it! Have a look around the island."); }, 28f);
+            UiKit.Button(row, "Clear", "Clear", UiKit.ButtonStyle.Secondary, () => { Clear(); _editing = -1; Status("A fresh piece of fabric."); }, 28f);
+            UiKit.Button(row, "Save", "Sew it", UiKit.ButtonStyle.Spring, () => Save(false), 28f);
+            UiKit.Button(row, "Wear", "Sew & wear", UiKit.ButtonStyle.Primary, () => Save(true), 28f);
 
-            SectionLabel(list, "Your designs");
+            SectionLabel(list, "Your sewing");
             _designs = UiKit.Rect("Designs", list);
             var dg = _designs.gameObject.AddComponent<GridLayoutGroup>();
             dg.cellSize = new Vector2(150f, 150f);
@@ -665,8 +785,34 @@ namespace CapyIsland.UI
         protected override void OnOpen()
         {
             Swatches();
+            Patterns_();
             Designs();
+            Silhouette();
         }
+
+        void Patterns_()
+        {
+            ClearChildren(_patternRow);
+            for (int i = 0; i < Patterns.Length; i++)
+            {
+                int index = i;
+                var p = Patterns[i];
+                int have = HobbyLog.Count(p.material);
+                string label = $"{p.name}  <size=75%>{have}/{p.count} {HobbyData.ItemName(p.material).ToLower()}</size>";
+                var b = UiKit.Button(_patternRow, p.name, label, index == _pattern ? UiKit.ButtonStyle.Primary : UiKit.ButtonStyle.Secondary, () =>
+                {
+                    if (_pattern == index) return;
+                    _pattern = index;
+                    _editing = -1;
+                    Clear();
+                    Patterns_();
+                    Silhouette();
+                    Status(HobbyLog.Count(Patterns[index].material) >= Patterns[index].count ? "Paint your " + Patterns[index].name.ToLower() + "!" : Patterns[index].where);
+                }, 28f);
+            }
+        }
+
+        void Silhouette() => _silhouette.sprite = DesignSprite(null, Kind);
 
         void Swatches()
         {
@@ -686,7 +832,7 @@ namespace CapyIsland.UI
         internal void PaintAt(Vector2 normalised)
         {
             int x = Mathf.FloorToInt(normalised.x * Size), y = Mathf.FloorToInt(normalised.y * Size);
-            if (x < 0 || y < 0 || x >= Size || y >= Size || !InShirt(x, y)) return;
+            if (x < 0 || y < 0 || x >= Size || y >= Size || !Inside(Kind, x, y)) return;
             char c = _erase ? '.' : (char)('a' + _colour);
             if (_pixels[y * Size + x] == c) return;
             _pixels[y * Size + x] = c;
@@ -702,18 +848,37 @@ namespace CapyIsland.UI
             _texture.Apply();
         }
 
-        void Save()
+        /// <summary>Sews it: a new piece uses its material; changing one you made before is free.</summary>
+        void Save(bool wear)
         {
+            var p = Patterns[_pattern];
+            bool fresh = _editing < 0;
+            if (fresh && !HobbyLog.Take(p.material, p.count))
+            {
+                Status($"A {p.name.ToLower()} needs {p.count} {HobbyData.ItemName(p.material).ToLower()}. {p.where}");
+                return;
+            }
             string data = new string(_pixels);
-            bool firstSave = _editing < 0;
-            _editing = HobbyLog.SaveDesign("Design " + (HobbyLog.Designs.Count + (firstSave ? 1 : 0)), data, Size, _editing);
-            if (firstSave)
+            string name = fresh ? $"My {p.name} {CountOf(p.kind) + 1}" : HobbyLog.Designs[_editing].name;
+            _editing = HobbyLog.SaveDesign(name, data, Size, _editing, p.kind);
+            Wardrobe.Sewn(_editing);
+            if (fresh)
             {
                 HobbyLog.AddXp(Hobby.Sewing, 20);
                 Motes.Trigger("hobby_sew");
             }
-            Status("Saved!");
+            var item = Wardrobe.Find(Wardrobe.DesignId(_editing));
+            if (wear && item != null && Wardrobe.Worn(item.Slot)?.Id != item.Id) Wardrobe.Toggle(item);
+            Status(wear ? "You're wearing it! Have a look around the island." : "Sewn! It's in your wardrobe.");
+            Patterns_();
             Designs();
+        }
+
+        static int CountOf(string kind)
+        {
+            int n = 0;
+            foreach (var d in HobbyLog.Designs) if (d.kind == kind) n++;
+            return n;
         }
 
         void Status(string text) => _status.text = text;
@@ -725,25 +890,30 @@ namespace CapyIsland.UI
             {
                 int index = i;
                 var d = HobbyLog.Designs[i];
-                var tile = UiKit.Image(_designs, d.name, UiKit.Rounded(22), index == HobbyLog.WornDesign ? UiKit.Hex("FDE8F0") : Color.white, true);
-                var pic = UiKit.Image(tile.transform, "Shirt", DesignSprite(d.pixels), Color.white);
+                var tile = UiKit.Image(_designs, d.name, UiKit.Rounded(22), Color.white, true);
+                var pic = UiKit.Image(tile.transform, "Piece", DesignSprite(d.pixels, d.kind), Color.white);
                 pic.preserveAspect = true;
                 UiKit.Stretch(pic.rectTransform, 12f, 12f, 12f, 12f);
                 var b = tile.gameObject.AddComponent<Button>();
                 b.transition = Selectable.Transition.None;
                 b.onClick.AddListener(() =>
                 {
+                    var design = HobbyLog.Designs[index];
+                    int pattern = System.Array.FindIndex(Patterns, x => x.kind == design.kind);
+                    if (pattern < 0) { Status("That's one of your old shirts. Shirts can't be changed any more."); return; }
+                    _pattern = pattern;
                     _editing = index;
-                    var p = HobbyLog.Designs[index].pixels;
-                    for (int k = 0; k < _pixels.Length && k < p.Length; k++) _pixels[k] = p[k];
+                    for (int k = 0; k < _pixels.Length && k < design.pixels.Length; k++) _pixels[k] = design.pixels[k];
                     Redraw();
-                    Status("Editing " + HobbyLog.Designs[index].name + ".");
+                    Patterns_();
+                    Silhouette();
+                    Status("Changing " + design.name + ".");
                 });
             }
         }
 
-        /// <summary>A design as a finished shirt: fabric where unpainted, outlined, pixels crisp.</summary>
-        public static Sprite DesignSprite(string pixels, int res = 64)
+        /// <summary>A sewn piece as a finished picture: fabric where unpainted, seamed, pixels crisp.</summary>
+        public static Sprite DesignSprite(string pixels, string kind = "", int res = 64)
         {
             var tex = new Texture2D(res, res, TextureFormat.RGBA32, false) { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp, hideFlags = HideFlags.DontSave };
             var px = new Color32[res * res];
@@ -753,7 +923,7 @@ namespace CapyIsland.UI
             for (int i = 0; i < res; i++)
             {
                 float u = (i + 0.5f) / res * 2f - 1f, v = (j + 0.5f) / res * 2f - 1f;
-                float d = IconPainter.ShirtShape(u, v);
+                float d = Shape(kind, u, v);
                 if (d > 0.02f) { px[j * res + i] = new Color32(0, 0, 0, 0); continue; }
                 if (d > -0.03f) { px[j * res + i] = seam; continue; }
                 int x = Mathf.Clamp(i * Size / res, 0, Size - 1), y = Mathf.Clamp(j * Size / res, 0, Size - 1);

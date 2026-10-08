@@ -35,6 +35,13 @@ namespace CapyIsland.UI
             _instance = this;
             if (panel != null) panel.SetActive(false);
             if (dismiss != null) dismiss.onClick.AddListener(Dismiss);
+            // A long title shrinks to fit its line rather than spilling into the text below.
+            if (titleLabel != null)
+            {
+                titleLabel.fontSizeMax = titleLabel.fontSize;
+                titleLabel.fontSizeMin = titleLabel.fontSize * 0.6f;
+                titleLabel.enableAutoSizing = true;
+            }
         }
 
         void OnEnable() => Cards.Found += OnCardFound;
@@ -88,6 +95,8 @@ namespace CapyIsland.UI
             {
                 picture.sprite = sprite;
                 picture.enabled = sprite != null;
+                // Painted icons are plain white and would vanish on the cream card: colour them in.
+                picture.color = IconPainter.IsIcon(sprite) ? UiKit.Primary : Color.white;
             }
             if (panel != null) panel.SetActive(true);
             if (card != null)

@@ -8,6 +8,9 @@ namespace CapyIsland.Game
     {
         Garden, Forest, Hill, Workplace, Store, House, FruitTree, Decoration, Bomb, DeerBomb,
         Animal, Gift, Church, Tower, BridgeGhost, Character, BankTrade,
+        Plot, Stove,   // the hobby kit from the Garden Shop (built in code, see HobbyCatalog)
+        Tool,          // hobby gear you carry (rod, net, binoculars): buying it unlocks the hobby
+        Sewing,        // the sewing machine, a placed station
     }
 
     /// <summary>One store item. <see cref="Name"/> is its id; the player sees <see cref="Title"/>.</summary>
@@ -42,12 +45,59 @@ namespace CapyIsland.Game
     {
         static Dictionary<string, StoreItemDef> _byName;
 
+        /// <summary>
+        /// Items that are ours, not the original's: the Garden Shop (the last store, sold at the
+        /// Legendary Gem Store) and the hobby kit it sells. Kept apart from the generated table.
+        /// </summary>
+        public static readonly StoreItemDef[] Extra =
+        {
+            new StoreItemDef("Garden Shop", 200, 6000, 6000, 0, 41f, 0f, 1, StoreItemKind.Store),
+            new StoreItemDef("Vegetable Plot", 201, Gardening.DigWood, 0, 0, 45f, 0f, 99, StoreItemKind.Plot),
+            new StoreItemDef("Stove", 202, 400, 300, 0, 40f, 0f, 1, StoreItemKind.Stove),
+            new StoreItemDef("Fishing Rod", 203, 150, 100, 0, 30f, 0f, 1, StoreItemKind.Tool),
+            new StoreItemDef("Bug Net", 204, 100, 150, 0, 30f, 0f, 1, StoreItemKind.Tool),
+            new StoreItemDef("Binoculars", 205, 400, 400, 0, 30f, 0f, 1, StoreItemKind.Tool),
+            new StoreItemDef("Sewing Machine", 206, 1500, 1500, 0, 40f, 0f, 1, StoreItemKind.Sewing),
+        };
+
+        /// <summary>The hobby a piece of gear (or a station) opens up, if it is one.</summary>
+        public static Hobby? HobbyFor(string name) => name switch
+        {
+            "Fishing Rod" => Hobby.Fishing,
+            "Bug Net" => Hobby.Bugs,
+            "Binoculars" => Hobby.Birding,
+            "Sewing Machine" => Hobby.Sewing,
+            "Vegetable Plot" or "Garden Shop" => Hobby.Gardening,
+            "Stove" => Hobby.Cooking,
+            _ => null,
+        };
+
+        static void AddTo(string list, string item)
+        {
+            if (!Lists.TryGetValue(list, out var items) || System.Array.IndexOf(items, item) >= 0) return;
+            var more = new string[items.Length + 1];
+            items.CopyTo(more, 0);
+            more[items.Length] = item;
+            Lists[list] = more;
+        }
+
+        static StoreData()
+        {
+            Lists["garden_store"] = new[] { "Vegetable Plot", "Stove" };
+            AddTo("gem_store", "Garden Shop");
+            AddTo("bronze_store", "Fishing Rod");
+            AddTo("bronze_store", "Bug Net");
+            AddTo("silver_store", "Binoculars");
+            AddTo("steel_store", "Sewing Machine");
+        }
+
         public static bool TryGet(string name, out StoreItemDef def)
         {
             if (_byName == null)
             {
                 _byName = new Dictionary<string, StoreItemDef>();
                 foreach (var d in All) _byName[d.Name] = d;
+                foreach (var d in Extra) _byName[d.Name] = d;
             }
             return _byName.TryGetValue(name, out def);
         }
@@ -73,6 +123,8 @@ namespace CapyIsland.Game
         /// </summary>
         public static bool IsSoldOut(string name)
         {
+            // On a friend's island the shops are theirs: you can only buy the help you came to give.
+            if (Visit.Active && !ForSaleWhileVisiting(name)) return true;
             switch (name)
             {
                 case "Wedding Dress": return Motes.Has("The Girl's New Dress");
@@ -81,8 +133,20 @@ namespace CapyIsland.Game
             }
             var def = Get(name);
             if (!def.IsValid || def.Max <= 0) return false;
+            // Gear: once you have it, the shop has nothing more to sell you.
+            if (def.Kind == StoreItemKind.Tool && HobbyFor(name) is Hobby gear) return HobbyLog.IsUnlocked(gear);
+            // Plots: as many as your gardening level allows (the display itself counts as one).
+            if (name == "Vegetable Plot") return CountByName(name) > Gardening.MaxPlots;
             return CountByName(name) > def.Max;
         }
+
+        /// <summary>
+        /// What a visitor may buy on someone else's island: food for their workers (flower gardens)
+        /// and the gentle Shoo Bomb for their pests. Everything else would be yours to keep, and the
+        /// one-of-a-kind buildings you already own would turn into second copies back home.
+        /// </summary>
+        public static bool ForSaleWhileVisiting(string name) =>
+            name == "Deer Bomb" || name.EndsWith(" Garden", System.StringComparison.Ordinal);
 
         /// <summary>
         /// How many things named this exist: planted or carried items, bubbles holding one, sale

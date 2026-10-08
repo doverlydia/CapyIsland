@@ -33,6 +33,17 @@ namespace CapyIsland.Game
             Hazards.Register(HazardKind.Monster, at => MakeItem("Monster", at));
             Hazards.Register(HazardKind.Deer, at => MakeItem("Deer", at));
             Hazards.Register(HazardKind.Bomb, at => MakeItem("Bomb", at));
+
+            // Our own items (the Garden Shop and its hobby kit), built in code.
+            HobbyCatalog.RegisterInto(this);
+        }
+
+        /// <summary>Adds a template built at runtime rather than by the island builder.</summary>
+        public void AddTemplate(CatalogItem template)
+        {
+            if (template == null) return;
+            template.gameObject.SetActive(false);
+            _byName[template.StoreName] = template;
         }
 
         void OnDestroy()

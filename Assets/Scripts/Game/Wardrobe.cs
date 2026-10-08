@@ -50,19 +50,21 @@ namespace CapyIsland.Game
 
         public static readonly WearItem[] Items =
         {
-            new() { Id = "Hat_Crown",       Name = "Royal Crown",     Slot = WearSlot.Hat,  Unlock = "start",         Anchor = new(0.47f, 0.84f), Width = 0.42f },
+            new() { Id = "Hat_Crown",       Name = "Royal Crown",     Slot = WearSlot.Hat,  Unlock = "start",         Anchor = new(0.45f, 0.875f), Width = 0.29f },
             new() { Id = "Hat_Yuzu",        Name = "Yuzu",            Slot = WearSlot.Hat,  Unlock = "first_mote",    Anchor = new(0.46f, 0.85f), Width = 0.3f },
-            new() { Id = "Hat_Flowers",     Name = "Flower Crown",    Slot = WearSlot.Hat,  Unlock = "girl_quest_1",  Anchor = new(0.46f, 0.79f), Width = 0.5f },
-            new() { Id = "Hat_Beanie",      Name = "Cosy Beanie",     Slot = WearSlot.Hat,  Unlock = "panda1",        Anchor = new(0.46f, 0.84f), Width = 0.44f },
-            new() { Id = "Hat_Straw",       Name = "Straw Hat",       Slot = WearSlot.Hat,  Unlock = "built_church",  Anchor = new(0.47f, 0.9f), Width = 0.56f },
+            new() { Id = "Hat_Flowers",     Name = "Flower Crown",    Slot = WearSlot.Hat,  Unlock = "girl_quest_1",  Anchor = new(0.46f, 0.825f), Width = 0.38f },
+            new() { Id = "Hat_Beanie",      Name = "Cosy Beanie",     Slot = WearSlot.Hat,  Unlock = "panda1",        Anchor = new(0.46f, 0.86f), Width = 0.35f },
+            new() { Id = "Hat_Straw",       Name = "Straw Hat",       Slot = WearSlot.Hat,  Unlock = "built_church",  Anchor = new(0.46f, 0.87f), Width = 0.46f },
             new() { Id = "Hat_Party",       Name = "Party Hat",       Slot = WearSlot.Hat,  Unlock = "daily",         Anchor = new(0.44f, 0.87f), Width = 0.28f },
             new() { Id = "Hat_Towel",       Name = "Hot Spring Towel", Slot = WearSlot.Hat, Unlock = "daily",         Anchor = new(0.46f, 0.82f), Width = 0.38f },
-            new() { Id = "Neck_Bandana",    Name = "Bandana",         Slot = WearSlot.Neck, Unlock = "fox1",          Anchor = new(0.44f, 0.355f), Width = 0.36f },
-            new() { Id = "Neck_BowTie",     Name = "Bow Tie",         Slot = WearSlot.Neck, Unlock = "wedding_mote",  Anchor = new(0.44f, 0.37f), Width = 0.26f },
-            new() { Id = "Neck_Scarf",      Name = "Red Scarf",       Slot = WearSlot.Neck, Unlock = "daily",         Anchor = new(0.45f, 0.335f), Width = 0.4f },
+            new() { Id = "Neck_Bandana",    Name = "Bandana",         Slot = WearSlot.Neck, Unlock = "fox1",          Anchor = new(0.47f, 0.325f), Width = 0.26f },
+            new() { Id = "Neck_BowTie",     Name = "Bow Tie",         Slot = WearSlot.Neck, Unlock = "wedding_mote",  Anchor = new(0.47f, 0.37f), Width = 0.22f },
+            new() { Id = "Neck_Scarf",      Name = "Red Scarf",       Slot = WearSlot.Neck, Unlock = "daily",         Anchor = new(0.48f, 0.36f), Width = 0.28f },
             new() { Id = "Face_Glasses",    Name = "Reading Glasses", Slot = WearSlot.Face, Unlock = "silver_store",  Anchor = new(0.37f, 0.665f), Width = 0.34f },
             new() { Id = "Face_Sunglasses", Name = "Sunglasses",      Slot = WearSlot.Face, Unlock = "daily",         Anchor = new(0.37f, 0.665f), Width = 0.36f },
-            new() { Id = "Back_Backpack",   Name = "Little Backpack", Slot = WearSlot.Back, Unlock = "place_mine",    Anchor = new(0.74f, 0.56f), Width = 0.32f },
+            new() { Id = "Back_Backpack",   Name = "Little Backpack", Slot = WearSlot.Back, Unlock = "place_mine",    Anchor = new(0.74f, 0.635f), Width = 0.26f },
+            new() { Id = "Hat_Sock",        Name = "Lucky Sock",      Slot = WearSlot.Hat,  Unlock = "cat_gift",      Anchor = new(0.46f, 0.87f), Width = 0.36f },
+            new() { Id = "Neck_Bell",       Name = "Bell Collar",     Slot = WearSlot.Neck, Unlock = "cat_gift",      Anchor = new(0.48f, 0.355f), Width = 0.22f },
             new() { Id = "Back_Cape",       Name = "Royal Cape",      Slot = WearSlot.Back, Unlock = "monster_tame",  Anchor = new(0.6f, 0.45f), Width = 0.76f, Behind = true },
         };
 
@@ -82,9 +84,53 @@ namespace CapyIsland.Game
 
         // ---------------------------------------------------------------- queries
 
-        public static WearItem Find(string id) => Array.Find(Items, i => i.Id == id);
+        public static WearItem Find(string id)
+        {
+            if (id != null && id.StartsWith(DesignPrefix)) return Sewn(id);
+            return Array.Find(Items, i => i.Id == id);
+        }
 
-        public static bool Owns(WearItem item) { Load(); return item != null && _owned.Contains(item.Id); }
+        // ---------------------------------------------------------------- pieces you sewed
+
+        const string DesignPrefix = "Design_";
+
+        public static string DesignId(int index) => DesignPrefix + index;
+
+        /// <summary>Everything to choose from: the shop's and achievements' pieces, then what you sewed.</summary>
+        public static IEnumerable<WearItem> AllItems
+        {
+            get
+            {
+                foreach (var i in Items) yield return i;
+                for (int d = 0; d < HobbyLog.Designs.Count; d++)
+                {
+                    var item = Sewn(DesignId(d));
+                    if (item != null) yield return item;
+                }
+            }
+        }
+
+        /// <summary>A sewn hat or cape as a wardrobe piece (old shirts are not pieces).</summary>
+        static WearItem Sewn(string id)
+        {
+            if (!int.TryParse(id.Substring(DesignPrefix.Length), out var index) || index < 0 || index >= HobbyLog.Designs.Count) return null;
+            var d = HobbyLog.Designs[index];
+            return d.kind switch
+            {
+                "hat" => new WearItem { Id = id, Name = d.name, Slot = WearSlot.Hat, Unlock = "sewn", Anchor = new(0.46f, 0.87f), Width = 0.37f },
+                "cape" => new WearItem { Id = id, Name = d.name, Slot = WearSlot.Back, Unlock = "sewn", Anchor = new(0.6f, 0.45f), Width = 0.76f, Behind = true },
+                _ => null,
+            };
+        }
+
+        /// <summary>A sewn piece was made or changed: draw it afresh, and let whoever is wearing it update.</summary>
+        public static void Sewn(int index)
+        {
+            _art.Remove(DesignId(index));
+            Changed?.Invoke();
+        }
+
+        public static bool Owns(WearItem item) { Load(); return item != null && (item.Unlock == "sewn" || _owned.Contains(item.Id)); }
 
         public static WearItem Worn(WearSlot slot)
         {
@@ -98,6 +144,13 @@ namespace CapyIsland.Game
         public static Sprite Art(string id)
         {
             if (_art.TryGetValue(id, out var s)) return s;
+            if (id.StartsWith(DesignPrefix))
+            {
+                var sewn = Sewn(id);
+                s = sewn != null ? UI.SewingScreen.DesignSprite(HobbyLog.Designs[int.Parse(id.Substring(DesignPrefix.Length))].pixels, sewn.Slot == WearSlot.Hat ? "hat" : "cape") : null;
+                _art[id] = s;
+                return s;
+            }
             s = Resources.Load<Sprite>("Wardrobe/" + id);
             _art[id] = s;
             return s;
@@ -114,6 +167,8 @@ namespace CapyIsland.Game
         {
             if (item.Unlock == "daily") return "Day 7 daily gift";
             if (item.Unlock == "start") return "Yours from the start";
+            if (item.Unlock == "cat_gift") return "A present from a cat";
+            if (item.Unlock == "sewn") return "You sewed this!";
             return Motes.TryGetByFunc(item.Unlock, out var m) ? "Achievement: " + m.Title : "Keep playing";
         }
 
@@ -146,7 +201,7 @@ namespace CapyIsland.Game
         public static void Toggle(WearItem item)
         {
             Load();
-            if (item == null || !_owned.Contains(item.Id)) return;
+            if (item == null || !Owns(item)) return;
             if (_worn.TryGetValue(item.Slot, out var current) && current == item.Id) _worn.Remove(item.Slot);
             else _worn[item.Slot] = item.Id;
             Save();

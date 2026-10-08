@@ -16,7 +16,10 @@ namespace CapyIsland.Game
     ///
     /// No text from them, ever: just emojis, the way strangers in an online game actually talk.
     /// </summary>
-    public class VisitorBot : MonoBehaviour
+    // After YSorter (100): outfit pieces sort against this frame's body order, not last frame's —
+    // otherwise a cape flickers in front of and behind the body as they walk up and down.
+    [DefaultExecutionOrder(110)]
+    public class VisitorBot : MonoBehaviour, IMapMarker
     {
         public enum Role { Host, Guest }
 
@@ -43,7 +46,12 @@ namespace CapyIsland.Game
         float _hop;
         float _nextThink, _nextEmote, _leaveAt = -1f, _giftAt = -1f;
         bool _leaving;
-        Component _task;   // a hungry worker or a pest the guest is heading for
+        Component _task;   // a hungry worker, a pest, or a workplace to plant flowers by
+        float _taskSince, _lastProgress;
+        Vector2 _progressAt;
+        readonly HashSet<Component> _skip = new();   // chores it could not get to
+        int _fed, _pests, _planted, _plantsLeft = 2;
+        float _nextPlant;
         readonly Queue<(float at, Emoji e)> _replies = new();
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -103,6 +111,7 @@ namespace CapyIsland.Game
             {
                 bot._leaveAt = Time.time + UnityEngine.Random.Range(150f, 260f);
                 bot._giftAt = Time.time + UnityEngine.Random.Range(35f, 70f);
+                bot._nextPlant = Time.time + UnityEngine.Random.Range(12f, 25f);
             }
             return bot;
         }
@@ -138,6 +147,26 @@ namespace CapyIsland.Game
         {
             if (Current == this) Current = null;
         }
+
+        // Shown at the screen edge and on the map, so you can always find who is with you.
+        void OnEnable() => MapMarkers.Register(this);
+        void OnDisable() => MapMarkers.Unregister(this);
+        public MarkerKind MarkerKind => MarkerKind.Friend;
+        public bool MarkerActive => !_leaving;
+        public Vector2 MarkerPosition => transform.position;
+        public Sprite MarkerIcon => _body != null ? _body.sprite : null;
+
+        public bool Leaving => _leaving;
+
+        /// <summary>You asked them to go: a wave, and off they go — no "add friend" afterwards.</summary>
+        public void SendHome()
+        {
+            if (_leaving) return;
+            _sentHome = true;
+            LogOff();
+        }
+
+        bool _sentHome;
 
         // ---------------------------------------------------------------- talking
 
@@ -213,7 +242,7 @@ namespace CapyIsland.Game
 
             if (As == Role.Guest)
             {
-                if (_task == null) _task = FindTask(me);
+                if (_task == null) PickTask(me);
                 if (_task != null) { Head(_task.transform.position); return; }
                 if (_giftAt > 0f && Time.time >= _giftAt) { LeaveGift(you); return; }
             }
@@ -223,56 +252,148 @@ namespace CapyIsland.Game
             else if (UnityEngine.Random.value < 0.45f) Head(me + UnityEngine.Random.insideUnitCircle * 3f);
         }
 
-        /// <summary>A guest's chores: the nearest hungry worker, else the nearest pest.</summary>
-        static Component FindTask(Vector2 from)
+        // ---------------------------------------------------------------- helping out
+
+        /// <summary>
+        /// A guest does for you what you do on a friend's island: feeds hungry workers, bombs pests,
+        /// and plants flower gardens by your stations so the workers there have food. It only takes
+        /// on chores it can walk to — a pest on an island you have not opened yet is not its job.
+        /// </summary>
+        void PickTask(Vector2 from)
         {
-            Component best = null;
-            float bestDistance = float.MaxValue;
+            _task = Nearest(from, FindObjectsByType<Worker>(FindObjectsSortMode.None), w => w.IsHungry && w.IsAssigned);
+            if (_task == null) _task = Nearest(from, FindObjectsByType<DeerAnimal>(FindObjectsSortMode.None), _ => true);
+            if (_task == null) _task = Nearest(from, FindObjectsByType<MonsterAnimal>(FindObjectsSortMode.None), m => !m.Tame);
+            if (_task == null && _plantsLeft > 0 && Time.time >= _nextPlant)
+                _task = Nearest(from, FindObjectsByType<Workplace>(FindObjectsSortMode.None), HasWorkers);
+            if (_task == null) return;
+            _taskSince = Time.time;
+            _lastProgress = Time.time;
+            _progressAt = from;
+        }
+
+        static bool HasWorkers(Workplace place)
+        {
             foreach (var w in FindObjectsByType<Worker>(FindObjectsSortMode.None))
+                if (w.Workplace == place) return true;
+            return false;
+        }
+
+        T Nearest<T>(Vector2 from, T[] options, Func<T, bool> wanted) where T : Component
+        {
+            T best = null;
+            float bestDistance = float.MaxValue;
+            foreach (var o in options)
             {
-                if (!w.IsHungry || !w.IsAssigned) continue;
-                float d = Vector2.Distance(from, w.transform.position);
-                if (d < bestDistance) { best = w; bestDistance = d; }
-            }
-            if (best != null) return best;
-            foreach (var deer in FindObjectsByType<DeerAnimal>(FindObjectsSortMode.None))
-            {
-                float d = Vector2.Distance(from, deer.transform.position);
-                if (d < bestDistance) { best = deer; bestDistance = d; }
-            }
-            foreach (var m in FindObjectsByType<MonsterAnimal>(FindObjectsSortMode.None))
-            {
-                if (m.Tame) continue;
-                float d = Vector2.Distance(from, m.transform.position);
-                if (d < bestDistance) { best = m; bestDistance = d; }
+                if (o == null || _skip.Contains(o) || !wanted(o)) continue;
+                Vector2 at = o.transform.position;
+                float d = Vector2.Distance(from, at);
+                if (d >= bestDistance || !Reachable(from, at)) continue;
+                best = o;
+                bestDistance = d;
             }
             return best;
         }
 
+        /// <summary>A walk over land the whole way (no swimming to islands you have not bridged).</summary>
+        static bool Reachable(Vector2 from, Vector2 to)
+        {
+            float length = Vector2.Distance(from, to);
+            int steps = Mathf.CeilToInt(length / 0.3f);
+            for (int i = 1; i <= steps; i++)
+                if (!BunniSpace.PointOnLand(Vector2.Lerp(from, to, i / (float)steps))) return false;
+            return true;
+        }
+
         void WorkOnTask()
         {
-            if (_task == null || As != Role.Guest) return;
-            if (Vector2.Distance(transform.position, _task.transform.position) > 1.3f) return;
+            if (As != Role.Guest) return;
+            if (_task == null) return;   // done, or the pest was dealt with by someone else
+            Vector2 me = transform.position;
 
-            if (_task is Worker w)
+            // Stuck (blocked, or chasing something it cannot catch): leave this chore for good.
+            if (Vector2.Distance(me, _progressAt) > 0.4f) { _progressAt = me; _lastProgress = Time.time; }
+            if (Time.time - _lastProgress > 3f || Time.time - _taskSince > 20f) { GiveUp(); return; }
+
+            float reach = _task is Workplace ? 2.2f : 1.3f;
+            if (Vector2.Distance(me, _task.transform.position) > reach) return;
+
+            switch (_task)
             {
-                w.FeedFromFriend();
-                Emote(Emoji.Heart);
-                Hints.Show(Who.name + " fed one of your hungry workers.");
-            }
-            else
-            {
-                var fx = HarvestEffects.Instance;
-                if (fx != null) fx.Poof(_task.transform.position, new Color(0.7f, 0.65f, 0.6f));
-                Sfx.PlayAt(SfxKind.Boom, _task.transform.position, 0.5f);
-                var pest = _task.gameObject;
-                pest.transform.DOKill();
-                pest.transform.DOScale(0f, 0.3f).SetEase(Ease.InBack).OnComplete(() => { if (pest != null) Destroy(pest); });
-                Emote(Emoji.Star);
-                Hints.Show(Who.name + " chased a pest off your island!");
+                case Worker w:
+                    if (!w.IsHungry) break;
+                    w.FeedFromFriend();
+                    _fed++;
+                    Emote(Emoji.Heart);
+                    Hints.Show(Who.name + " fed one of your hungry workers.");
+                    break;
+                case Workplace place:
+                    if (PlantFlowersBy(place)) _planted++;
+                    else _skip.Add(place);
+                    _plantsLeft--;
+                    _nextPlant = Time.time + UnityEngine.Random.Range(30f, 50f);
+                    break;
+                default:
+                    BombPest(_task.gameObject);
+                    _pests++;
+                    break;
             }
             _task = null;
             _nextThink = Time.time + 1.5f;
+        }
+
+        void GiveUp()
+        {
+            _skip.Add(_task);
+            _task = null;
+            _moving = false;
+            _nextThink = Time.time + 0.5f;
+        }
+
+        /// <summary>A fizz bomb, the way you would do it: a pop, a puff of smoke, and the pest is gone.</summary>
+        void BombPest(GameObject pest)
+        {
+            Vector2 at = pest.transform.position;
+            var fx = HarvestEffects.Instance;
+            if (fx != null) { fx.Poof(at, new Color(0.7f, 0.65f, 0.6f)); fx.Twinkle(at + Vector2.up * 0.5f, 6); }
+            Sfx.PlayAt(SfxKind.Boom, at, 0.6f);
+            pest.transform.DOKill();
+            foreach (var c in pest.GetComponents<MonoBehaviour>()) c.enabled = false;
+            pest.transform.DOScale(0f, 0.35f).SetEase(Ease.InBack).OnComplete(() => { if (pest != null) Destroy(pest); });
+            Emote(Emoji.Star);
+            Hints.Show(Who.name + " bombed a pest on your island!");
+        }
+
+        /// <summary>Plants a small flower garden within reach of a station's workers, if there is room.</summary>
+        bool PlantFlowersBy(Workplace place)
+        {
+            var catalog = ItemCatalog.Instance;
+            if (catalog == null) return false;
+            var gardens = new[] { "Small Posie Garden", "Small Tulip Garden", "Small Rose Garden" };
+            string name = gardens[UnityEngine.Random.Range(0, gardens.Length)];
+            if (!catalog.Has(name)) return false;
+            var item = catalog.Create(name);
+            if (item == null) return false;
+            var placeable = item.GetComponent<Placeable>();
+            if (placeable == null) { Destroy(item); return false; }
+
+            Vector2 centre = place.transform.position;
+            for (int i = 0; i < 40; i++)
+            {
+                var p = centre + UnityEngine.Random.insideUnitCircle * UnityEngine.Random.Range(1.2f, 3f);
+                if (!placeable.CanPlaceAt(p)) continue;
+                item.transform.position = new Vector3(p.x, p.y, 0f);
+                item.SetActive(true);
+                placeable.MarkPlaced(silent: true);
+                var fx = HarvestEffects.Instance;
+                if (fx != null) fx.Twinkle(p + Vector2.up * 0.4f, 8);
+                Sfx.PlayAt(SfxKind.Plop, p, 0.7f);
+                Emote(Emoji.Smile);
+                Hints.Show(Who.name + " planted flowers by your " + StoryText.Name(place.GetComponent<CatalogItem>() is { } tag ? tag.StoreName : "station") + " for your workers.");
+                return true;
+            }
+            Destroy(item);
+            return false;
         }
 
         void LeaveGift(Vector2 near)
@@ -292,11 +413,21 @@ namespace CapyIsland.Game
         {
             _leaving = true;
             Emote(Emoji.Wave);
+            if (As == Role.Guest)
+            {
+                var did = new List<string>();
+                if (_fed > 0) did.Add($"fed {_fed} worker{(_fed > 1 ? "s" : "")}");
+                if (_pests > 0) did.Add($"bombed {_pests} pest{(_pests > 1 ? "s" : "")}");
+                if (_planted > 0) did.Add($"planted {_planted} flower garden{(_planted > 1 ? "s" : "")}");
+                if (did.Count > 0) Hints.Show(Who.name + " " + string.Join(", ", did) + " before heading home.");
+                // Sometimes they leave you a message in a bottle on your beach.
+                if (!_sentHome && UnityEngine.Random.value < 0.45f) SeaLibrary.LeaveNoteFrom(Who);
+            }
             transform.DOScale(transform.localScale * 1.1f, 1.4f).OnComplete(() =>
             {
                 var fx = HarvestEffects.Instance;
                 if (fx != null) fx.Poof(transform.position, Color.white);
-                GuestLeft?.Invoke(Who);
+                if (!_sentHome) GuestLeft?.Invoke(Who);
                 Destroy(gameObject);
             });
         }
@@ -305,7 +436,11 @@ namespace CapyIsland.Game
 
         void Head(Vector2 to)
         {
-            if (!BunniSpace.PointOnLand(to)) return;
+            if (!BunniSpace.PointOnLand(to))
+            {
+                if (_task != null) GiveUp();
+                return;
+            }
             _target = to;
             _moving = true;
         }

@@ -123,6 +123,7 @@ namespace CapyIsland.Game
         void Hit(GameObject victim)
         {
             if (victim == null) return;
+            if (victim.TryGetComponent<CatCare.CatView>(out var rider) && rider.OnHead) return;   // safe on your head
 
             bool wild = victim.GetComponent<DeerAnimal>() != null
                         || (victim.TryGetComponent<MonsterAnimal>(out var monster) && !monster.Tame);

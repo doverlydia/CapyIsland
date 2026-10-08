@@ -11,7 +11,7 @@ const RATE = 22050;
 let seed = 12345;
 const rnd = () => ((seed = (seed * 1103515245 + 12345) >>> 0) / 4294967296) * 2 - 1;
 
-function write(name, samples) {
+function write(name, samples, dir = "Assets/Audio") {
   const n = samples.length, data = Buffer.alloc(44 + n * 2);
   data.write("RIFF", 0); data.writeUInt32LE(36 + n * 2, 4); data.write("WAVE", 8);
   data.write("fmt ", 12); data.writeUInt32LE(16, 16); data.writeUInt16LE(1, 20); data.writeUInt16LE(1, 22);
@@ -20,8 +20,8 @@ function write(name, samples) {
   let peak = 0; for (const s of samples) peak = Math.max(peak, Math.abs(s));
   const gain = peak > 0 ? 0.9 / peak : 1;
   for (let i = 0; i < n; i++) data.writeInt16LE(Math.round(Math.max(-1, Math.min(1, samples[i] * gain)) * 32767), 44 + i * 2);
-  fs.mkdirSync("Assets/Audio", { recursive: true });
-  fs.writeFileSync(`Assets/Audio/${name}.wav`, data);
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(`${dir}/${name}.wav`, data);
   console.log("wrote", name, (n / RATE).toFixed(2) + "s");
 }
 
@@ -135,3 +135,27 @@ write("Sfx_Heart", make(1.1, (t) => {
 
 // UI tap: a soft wooden tick.
 write("Sfx_Tap", make(0.07, (t) => Math.sin(2 * Math.PI * 900 * t) * env(t, 0.001, 0.015)));
+
+// A cat asking for fish: "mee-ow". A buzzy voice through two moving vowel resonances, the pitch
+// rising then falling, the mouth opening from "ee" to "ow". Loaded at runtime from Resources
+// (it arrived after the scene's clip list was baked).
+{ const D = 0.62, breath = lowpassNoise(3000);
+  const lerp = (a, b, k) => a + (b - a) * Math.max(0, Math.min(1, k));
+  const resonator = () => { let y1 = 0, y2 = 0;
+    return (x, f, bw) => { const r = Math.exp(-Math.PI * bw / RATE), a1 = -2 * r * Math.cos(2 * Math.PI * f / RATE), a2 = r * r;
+      const y = (1 - r) * x - a1 * y1 - a2 * y2; y2 = y1; y1 = y; return y; }; };
+  const r1 = resonator(), r2 = resonator(), r3 = resonator();
+  let phase = 0;
+  write("Sfx_Meow", make(D, (t) => {
+    const u = t / D;
+    const f0 = (480 + 330 * Math.sin(Math.PI * Math.pow(u, 0.7))) * (1 + 0.02 * Math.sin(2 * Math.PI * 6 * t));
+    phase += f0 / RATE;
+    let src = 0;
+    for (let k = 1; k * f0 < 5000; k++) src += Math.sin(2 * Math.PI * k * phase) / k;
+    src += breath() * 0.6;
+    const F1 = u < 0.5 ? lerp(380, 950, u / 0.5) : lerp(950, 520, (u - 0.5) / 0.5);
+    const F2 = u < 0.4 ? lerp(2300, 1500, u / 0.4) : lerp(1500, 900, (u - 0.4) / 0.6);
+    const voice = r1(src, F1, 140) + 0.7 * r2(src, F2, 180) + 0.25 * r3(src, 3200, 300);
+    const amp = Math.min(1, t / 0.09) * (u > 0.65 ? Math.pow(1 - (u - 0.65) / 0.35, 1.5) : 1);
+    return voice * amp;
+  }), "Assets/Resources/Sfx"); }

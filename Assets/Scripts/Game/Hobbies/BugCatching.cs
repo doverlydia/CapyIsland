@@ -20,6 +20,7 @@ namespace CapyIsland.Game
         {
             if (_king == null) _king = FindFirstObjectByType<PlayerAvatar>();
             if (_king == null || Time.time < _next) return;
+            if (!HobbyLog.IsUnlocked(Hobby.Bugs)) return;   // no net, no bugs to chase
             _next = Time.time + Random.Range(18f, 35f);
             if (FindObjectsByType<Bug>(FindObjectsSortMode.None).Length >= 3) return;
             Spawn(_king.transform.position);
@@ -120,17 +121,75 @@ namespace CapyIsland.Game
                     Hints.Show("Too far to reach with your net. Tiptoe a little closer.");
                     return;
                 }
-                bool first = HobbyLog.LogBug(_kind.Id);
-                int xp = 5 * _kind.Stars + (first ? 12 : 0);
-                HobbyLog.AddXp(Hobby.Bugs, xp);
-                Motes.Trigger("hobby_bug");
-                Sfx.Play(SfxKind.Pop, 0.6f);
-                UI.CardPopup.Show("You caught " + HobbyData.WithArticle(_kind.Name) + "!",
-                    HobbyData.Rarity(_kind.Stars) + (first ? "\n<color=#2DB3A6><b>New to your journal!</b></color>" : "") + $"\n+{xp} bug catching XP",
-                    _sr.sprite);
-                _gone = true;
-                transform.DOKill();
-                transform.DOScale(0f, 0.25f).SetEase(Ease.InBack).OnComplete(() => Destroy(gameObject));
+                _gone = true;   // it stops still: here comes the net
+                Vector2 paws = king != null
+                    ? (Vector2)king.transform.position + new Vector2(transform.position.x >= king.transform.position.x ? 0.35f : -0.35f, 0.55f)
+                    : (Vector2)transform.position;
+                NetSwoop(paws, _sr.bounds.center, () =>
+                {
+                    // Into the net it goes.
+                    transform.DOKill();
+                    transform.DOScale(0f, 0.2f).SetEase(Ease.InBack);
+                }, () =>
+                {
+                    bool first = HobbyLog.LogBug(_kind.Id);
+                    if (_kind.Id == "Silkworm") HobbyLog.AddToBag("mat:Silk", 1);   // for sewing capes
+                    int xp = 5 * _kind.Stars + (first ? 12 : 0);
+                    HobbyLog.AddXp(Hobby.Bugs, xp);
+                    Motes.Trigger("hobby_bug");
+                    Sfx.Play(SfxKind.Pop, 0.6f);
+                    UI.CardPopup.Show("You caught " + HobbyData.WithArticle(_kind.Name) + "!",
+                        HobbyData.Rarity(_kind.Stars) + (first ? "\n<color=#2DB3A6><b>New to your journal!</b></color>" : "") + $"\n+{xp} bug catching XP",
+                        _sr.sprite);
+                    Destroy(gameObject);
+                });
+            }
+
+            /// <summary>
+            /// The butterfly net: out of your paws, a swoop in an arc down over the bug, a little
+            /// wiggle as it goes in, then lifted away. <paramref name="caught"/> runs as the net lands,
+            /// <paramref name="done"/> once it has gone.
+            /// </summary>
+            static void NetSwoop(Vector2 from, Vector2 to, System.Action caught, System.Action done)
+            {
+                var art = HobbyData.Art("Net");
+                if (art == null) { caught(); done(); return; }
+                var pivot = new GameObject("BugNet").transform;
+                pivot.position = from;
+                var body = new GameObject("Net").AddComponent<SpriteRenderer>();
+                body.transform.SetParent(pivot, false);
+                body.sprite = art;
+                body.sortingOrder = 30200;
+                // The handle (bottom-left of the picture) at the pivot; the hoop (top-right) out along the reach.
+                var e = art.bounds.extents;
+                body.transform.localPosition = new Vector3(e.x * 0.72f, e.y * 0.68f, 0f);
+                var hoop = new Vector2(e.x * 0.98f, e.y * 1.05f);   // the middle of the hoop, measured on the picture
+                float reach = Mathf.Clamp(Vector2.Distance(from, to), 0.5f, 2.2f);
+                pivot.localScale = Vector3.one * (reach / Mathf.Max(0.01f, hoop.magnitude));
+                float aim = Mathf.Atan2(to.y - from.y, to.x - from.x) * Mathf.Rad2Deg - Mathf.Atan2(hoop.y, hoop.x) * Mathf.Rad2Deg;
+                bool right = to.x >= from.x;
+                float raised = aim + (right ? 80f : -80f);
+                pivot.rotation = Quaternion.Euler(0f, 0f, raised);
+                body.color = new Color(1f, 1f, 1f, 0f);
+
+                var seq = DOTween.Sequence();
+                seq.Append(body.DOFade(1f, 0.1f));
+                seq.Append(pivot.DORotate(new Vector3(0f, 0f, aim), 0.22f).SetEase(Ease.InQuad));
+                seq.AppendCallback(() =>
+                {
+                    caught();
+                    Sfx.Play(SfxKind.Plop, 0.7f);
+                    var fx = HarvestEffects.Instance;
+                    if (fx != null) fx.Twinkle(to, 6);
+                });
+                seq.Append(pivot.DOPunchRotation(new Vector3(0f, 0f, 8f), 0.35f, 8, 0.6f));
+                seq.Append(pivot.DORotate(new Vector3(0f, 0f, raised), 0.25f).SetEase(Ease.OutQuad));
+                seq.Join(body.DOFade(0f, 0.25f));
+                seq.OnComplete(() =>
+                {
+                    if (pivot != null) Destroy(pivot.gameObject);
+                    done();
+                });
             }
 
             void Update()

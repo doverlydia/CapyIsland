@@ -39,6 +39,14 @@ namespace CapyIsland.Game
         Transform _body;
         SpriteRenderer _bodyRenderer;
         Sprite _awake;
+
+        /// <summary>A new everyday look (a cured zombie's happy face), kept between naps.</summary>
+        public void SetAwakeSprite(Sprite sprite)
+        {
+            if (sprite == null) return;
+            _awake = sprite;
+            if (_bodyRenderer != null) _bodyRenderer.sprite = sprite;
+        }
         SpriteRenderer _prop;
         Transform _propPivot;
 
@@ -91,8 +99,18 @@ namespace CapyIsland.Game
             TickShake();
         }
 
+        bool _lookedForSleep;
+
         void ShowSleepPose(bool asleep)
         {
+            // Only the plain capybara's nap was baked in by the island builder; the others' live in
+            // Resources/Hobbies/Sleep_<kind>, found the first time they nod off.
+            if (sleeping == null && asleep && !_lookedForSleep)
+            {
+                _lookedForSleep = true;
+                var tag = GetComponent<CatalogItem>();
+                if (tag != null) sleeping = HobbyData.Art("Sleep_" + tag.StoreName);
+            }
             if (_bodyRenderer == null || sleeping == null) return;
             var want = asleep ? sleeping : _awake;
             if (_bodyRenderer.sprite != want) _bodyRenderer.sprite = want;

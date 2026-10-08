@@ -4,7 +4,7 @@ namespace CapyIsland.Game
 {
     public enum SfxKind
     {
-        Chop, Mine, Nibble, Rustle, Plop, Pop, Chest, Coin, Buy, Heart, Bridge, Boom, Fuse, Fell, Tap,
+        Chop, Mine, Nibble, Rustle, Plop, Pop, Chest, Coin, Buy, Heart, Bridge, Boom, Fuse, Fell, Tap, Meow,
     }
 
     /// <summary>
@@ -25,11 +25,16 @@ namespace CapyIsland.Game
         const int Voices = 10;
         AudioSource[] _sources;
         int _next;
-        readonly float[] _lastPlayed = new float[16];
+        readonly float[] _lastPlayed = new float[32];
 
         void Awake()
         {
             _instance = this;
+            // Sounds added after the scene's list was baked load from Resources/Sfx by name.
+            var kinds = System.Enum.GetNames(typeof(SfxKind));
+            if (clips == null || clips.Length < kinds.Length) System.Array.Resize(ref clips, kinds.Length);
+            for (int i = 0; i < kinds.Length; i++)
+                if (clips[i] == null) clips[i] = Resources.Load<AudioClip>("Sfx/Sfx_" + kinds[i]);
             _sources = new AudioSource[Voices];
             for (int i = 0; i < Voices; i++)
             {

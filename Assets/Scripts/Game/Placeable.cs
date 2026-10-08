@@ -54,6 +54,12 @@ namespace CapyIsland.Game
         }
 
         /// <summary>Sets up an item built in code (hobby objects, the airstrip) rather than by the island builder.</summary>
+        /// <summary>
+        /// Set for things that only ride in the trail and are never planted (a cat's junk): dropping
+        /// one anywhere but on Salty Kombu puts it back in the trail with this line.
+        /// </summary>
+        [System.NonSerialized] public string TrailOnly;
+
         public void Configure(string name, float inner, float outer, float carried = 0.6f)
         {
             displayName = name;
@@ -81,6 +87,13 @@ namespace CapyIsland.Game
             {
                 MarkCarried();
                 pete.OfferFor(gameObject, null);
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(TrailOnly))
+            {
+                MarkCarried();
+                Hints.Show(TrailOnly);
                 return;
             }
 

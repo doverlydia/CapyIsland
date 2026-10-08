@@ -5,16 +5,21 @@ using UnityEngine;
 namespace CapyIsland.Game
 {
     /// <summary>
-    /// Gardening. Dig vegetable plots on your own island (each arrives in a bubble, to put wherever you like), plant seeds bought with a little gold,
-    /// and come back when they have grown (real minutes, even while the game is closed). Harvests
-    /// go in your bag, for cooking. The more you grow, the more kinds of seed you can plant and the
-    /// more plots you can dig.
+    /// Gardening. Vegetable plots come from the Garden Shop like any other store item: buy one,
+    /// put it wherever you like, tap it to plant seeds bought with a little gold, and come back
+    /// when they have grown (real minutes, even while the game is closed). Harvests go in your
+    /// bag, for cooking at your stove. The more you grow, the more kinds of seed you can plant
+    /// and the more plots the shop will sell you.
+    ///
+    /// Each plot's crop is kept in <see cref="HobbyLog.Plots"/> by where the plot stands, so a
+    /// plot and its growing seeds survive saving, loading and the odd bomb (which loses the crop).
     /// </summary>
     public class Gardening : MonoBehaviour
     {
         public const int DigWood = 20;
         public static Gardening Instance { get; private set; }
 
+        /// <summary>How many plots the shop will sell you at your gardening level.</summary>
         public static int MaxPlots => 2 + HobbyLog.Level(Hobby.Gardening);
 
         void Awake() => Instance = this;
@@ -27,29 +32,42 @@ namespace CapyIsland.Game
         void Start()
         {
             if (Visit.Active) return;   // your plots grow on your island
-            for (int i = 0; i < HobbyLog.Plots.Count; i++)
-            {
-                if (!HobbyLog.Plots[i].unplaced) PlotView.Make(i).Plant(HobbyLog.Plots[i].pos);
-                else
-                {
-                    int index = i;
-                    HobbyItems.AfterLoad(this, () => HobbyItems.Offer(PlotView.Make(index).gameObject));
-                }
-            }
+            HobbyItems.AfterLoad(this, Migrate);
         }
 
-        /// <summary>Makes a new plot and hands it over in a bubble. Returns a reason it could not, or null.</summary>
-        public static string Dig()
+        /// <summary>
+        /// Plots made before they were store items live only in the hobby log: turn each into a real
+        /// plot where it stood (or a bubble, if it was never put down). Ones already in the world —
+        /// every plot bought from the shop — are found by position and left alone.
+        /// </summary>
+        void Migrate()
         {
-            if (Visit.Active) return "You can only dig plots on your own island.";
-            if (HobbyLog.Plots.Count >= MaxPlots) return $"You have all {MaxPlots} plots your gardening level allows. Level up for more!";
-            var store = ResourceStore.Instance;
-            if (store == null || !store.TrySpend(DigWood, 0, 0)) return $"A new plot needs {DigWood} wood for its frame.";
-
-            HobbyLog.Plots.Add(new HobbyLog.Plot { unplaced = true });
+            var catalog = ItemCatalog.Instance;
+            if (catalog == null) return;
+            var views = FindObjectsByType<PlotView>(FindObjectsSortMode.None);
+            for (int i = HobbyLog.Plots.Count - 1; i >= 0; i--)
+            {
+                var plot = HobbyLog.Plots[i];
+                bool standing = false;
+                foreach (var v in views)
+                    if (v.Data == plot) { standing = true; break; }
+                if (standing) continue;
+                if (plot.unplaced)
+                {
+                    HobbyLog.Plots.RemoveAt(i);
+                    var king = FindFirstObjectByType<PlayerAvatar>();
+                    catalog.MakeStore("Vegetable Plot", king != null ? (Vector2)king.transform.position + new Vector2(1.6f, -0.8f) : plot.pos);
+                }
+                else catalog.MakeItem("Vegetable Plot", plot.pos);   // finds its record by position
+            }
             HobbyLog.Save();
-            HobbyItems.Offer(PlotView.Make(HobbyLog.Plots.Count - 1).gameObject,
-                "Here's your new vegetable plot! Pop the bubble and put it somewhere sunny.");
+        }
+
+        /// <summary>The crop record for a plot standing at <paramref name="at"/>, if any.</summary>
+        static HobbyLog.Plot PlotAt(Vector2 at)
+        {
+            foreach (var p in HobbyLog.Plots)
+                if (!p.unplaced && (p.pos - at).sqrMagnitude < 0.09f) return p;
             return null;
         }
 
@@ -57,59 +75,56 @@ namespace CapyIsland.Game
 
         public class PlotView : MonoBehaviour, ITappable
         {
-            int _index;
+            HobbyLog.Plot _data;
             SpriteRenderer _soil, _crop;
             Placeable _placeable;
             string _shownStage;
             float _lastY = float.NaN;
 
-            HobbyLog.Plot Data => _index < HobbyLog.Plots.Count ? HobbyLog.Plots[_index] : null;
+            public HobbyLog.Plot Data => _data;
 
-            /// <summary>The plot as an item: inactive, ready for a bubble or to be planted where it stood.</summary>
-            public static PlotView Make(int index)
+            void Awake()
             {
-                var go = HobbyItems.Make("Vegetable plot", HobbyData.Art("Plot"), 1.3f, 0f, 45f, ySort: false);
-                var view = go.AddComponent<PlotView>();
-                view._index = index;
-                view._soil = go.transform.Find("Sprite").GetComponent<SpriteRenderer>();
-                view._placeable = go.GetComponent<Placeable>();
-
-                var crop = new GameObject("Crop");
-                crop.transform.SetParent(go.transform, false);
-                view._crop = crop.AddComponent<SpriteRenderer>();
-                view._crop.enabled = false;
-                return view;
-            }
-
-            /// <summary>Stands a saved plot back where it was.</summary>
-            public void Plant(Vector2 at)
-            {
-                transform.position = new Vector3(at.x, at.y, 0f);
-                gameObject.SetActive(true);
-                _placeable.MarkPlaced(silent: true);
+                _soil = transform.Find("Sprite").GetComponent<SpriteRenderer>();
+                _crop = transform.Find("Crop").GetComponent<SpriteRenderer>();
+                _placeable = GetComponent<Placeable>();
             }
 
             void OnPlacedInWorld()
             {
-                var d = Data;
-                if (d == null) return;
-                bool first = d.unplaced;
-                d.pos = transform.position;
-                d.unplaced = false;
-                HobbyLog.Save();
+                if (Visit.Active)
+                {
+                    // Seeds only grow at home; on a friend's island it is just a pretty bed of soil.
+                    _data = null;
+                    return;
+                }
+                Vector2 at = transform.position;
+                _data = PlotAt(at);
+                bool fresh = _data == null;
+                if (fresh)
+                {
+                    _data = new HobbyLog.Plot { pos = at };
+                    HobbyLog.Plots.Add(_data);
+                    HobbyLog.Save();
+                }
                 _shownStage = null;
                 Refresh();
-                if (!first) return;
-                Sfx.PlayAt(SfxKind.Plop, transform.position);
-                if (string.IsNullOrEmpty(d.crop)) Hints.Show("Tap your plot to plant some seeds.");
+                if (fresh && !SaveGame.Restoring)
+                {
+                    Sfx.PlayAt(SfxKind.Plop, at);
+                    Hints.Show("Tap your plot to plant some seeds.");
+                }
             }
 
+            /// <summary>Knocked back into a bubble (a bomb): the crop is lost; a new one starts when it is put down.</summary>
             void OnReturnedToBubble()
             {
-                var d = Data;
-                if (d == null) return;
-                d.unplaced = true;
-                HobbyLog.Save();
+                if (_data != null)
+                {
+                    HobbyLog.Plots.Remove(_data);
+                    HobbyLog.Save();
+                }
+                _data = null;
                 if (_crop != null) _crop.enabled = false;
             }
 

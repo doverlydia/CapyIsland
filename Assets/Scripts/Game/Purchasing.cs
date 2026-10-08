@@ -62,6 +62,11 @@ namespace CapyIsland.Game
                     GiftGiven?.Invoke(name);
                     break;
 
+                case StoreItemKind.Tool:
+                    // Gear goes straight into your paws: the hobby opens up, with a little movie.
+                    if (StoreData.HobbyFor(name) is Hobby gear && HobbyLog.Unlock(gear)) UI.HobbyCutscene.Show(gear);
+                    break;
+
                 case StoreItemKind.Church:
                     if (catalog != null)
                     {
@@ -92,6 +97,9 @@ namespace CapyIsland.Game
                     if (placeable != null) placeable.MarkCarried();
                     break;
             }
+
+            // Stations and plots open their hobby too.
+            if (def.Kind != StoreItemKind.Tool && StoreData.HobbyFor(name) is Hobby h && HobbyLog.Unlock(h)) UI.HobbyCutscene.Show(h);
 
             Announce(name, item);
             return item;

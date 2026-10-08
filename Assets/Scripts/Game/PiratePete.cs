@@ -27,7 +27,7 @@ namespace CapyIsland.Game
         void OnEnable() => TapTargets.Register(this);
         void OnDisable() => TapTargets.Unregister(this);
 
-        bool InWorld => _placeable == null || _placeable.Placed;
+        public bool InWorld => _placeable == null || _placeable.Placed;
         Sprite Face => _body != null ? _body.sprite : null;
 
         public float TapDistance(Vector2 worldPoint)
@@ -61,6 +61,16 @@ namespace CapyIsland.Game
         /// </summary>
         public bool OfferFor(GameObject item, System.Action noDeal)
         {
+            // A cat's present. He has seen worse.
+            var junk = item.GetComponent<CatJunk>();
+            if (junk != null)
+            {
+                UI.SpeechDialog.Show(Face, StoryText.Sailor, new[] { $"A {junk.Name}? Arr… I've traded for worse. One gold, and not a coin more." }, null,
+                    ("Deal", () => Deal(item, new Vector3Int(0, 1, 0))),
+                    ("No Deal", noDeal));
+                return true;
+            }
+
             var tag = item.GetComponent<CatalogItem>();
             if (tag == null) return false;
 

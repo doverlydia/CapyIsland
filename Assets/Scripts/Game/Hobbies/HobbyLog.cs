@@ -19,9 +19,12 @@ namespace CapyIsland.Game
 
         [Serializable] public class Entry { public string id; public int count; public float best; }
         [Serializable] public class Book { public string title; public string text; public long writtenTicks; }
-        [Serializable] public class Design { public string name; public string pixels; public int size; }
+        /// <summary>A sewn piece: <c>kind</c> is "hat" or "cape" (empty for the old shirts).</summary>
+        [Serializable] public class Design { public string name; public string pixels; public int size; public string kind; }
         /// <summary>An adopted cat lives around <c>home</c>; <c>unplaced</c> while it waits in a bubble or your trail for one.</summary>
-        [Serializable] public class Cat { public string id; public int bond; public bool adopted; public long lastFussTicks; public Vector2 home; public bool unplaced; }
+        [Serializable] public class Cat { public string id; public int bond; public bool adopted; public long lastFussTicks; public Vector2 home; public bool unplaced; public long giftDueTicks; public int gifts; public int fed;
+            /// <summary>Has ever had a fish from you (older saves only know it from presents).</summary>
+            public bool EverFed => fed > 0 || gifts > 0 || giftDueTicks != 0; }
         /// <summary><c>unplaced</c> while the plot waits in a bubble or your trail (false, so older saves stay put).</summary>
         [Serializable] public class Plot { public Vector2 pos; public string crop; public long plantedTicks; public bool unplaced; }
 
@@ -35,6 +38,7 @@ namespace CapyIsland.Game
             public List<Cat> cats = new();
             public List<Plot> plots = new();
             public int wornDesign = -1;
+            public List<string> unlocked = new();   // hobbies whose gear you have bought
         }
 
         static Data _data;
@@ -80,6 +84,42 @@ namespace CapyIsland.Game
         public static int XpForLevel(int level) => level <= 1 ? 0 : 40 * (level - 1) * level;
 
         public static int Xp(Hobby h) => D.xp[(int)h];
+
+        /// <summary>
+        /// Whether you can take up a hobby yet. Cats and writing are there from the start (strays
+        /// wander in; the beach is full of bottles); the rest need their gear from a shop. Anything
+        /// you have already made progress in stays open.
+        /// </summary>
+        public static bool IsUnlocked(Hobby h)
+        {
+            if (h == Hobby.Cats || h == Hobby.Writing) return true;
+            var d = D;
+            if ((int)h < d.xp.Length && d.xp[(int)h] > 0) return true;
+            if (h == Hobby.Gardening && d.plots.Count > 0) return true;
+            return d.unlocked.Contains(h.ToString());
+        }
+
+        /// <summary>Unlocks a hobby (its gear was bought). True if it was locked before.</summary>
+        public static bool Unlock(Hobby h)
+        {
+            if (IsUnlocked(h)) return false;
+            D.unlocked.Add(h.ToString());
+            Save();
+            Changed?.Invoke();
+            return true;
+        }
+
+        /// <summary>What to buy, and where, to take a hobby up.</summary>
+        public static string HowToUnlock(Hobby h) => h switch
+        {
+            Hobby.Fishing => "Buy a Fishing Rod at the Bronze Store",
+            Hobby.Bugs => "Buy a Bug Net at the Bronze Store",
+            Hobby.Birding => "Buy Binoculars at the Silver Store",
+            Hobby.Sewing => "Buy a Sewing Machine at the Steel Store",
+            Hobby.Gardening => "Buy a Vegetable Plot at the Garden Shop (after the Legendary Gem Store)",
+            Hobby.Cooking => "Buy a Cooking Stove at the Garden Shop (after the Legendary Gem Store)",
+            _ => "",
+        };
 
         public static int Level(Hobby h)
         {
@@ -195,6 +235,14 @@ namespace CapyIsland.Game
 
         public static IReadOnlyList<Cat> Cats => D.cats;
 
+        /// <summary>Presents brought by every cat so far.</summary>
+        public static int TotalCatGifts()
+        {
+            int n = 0;
+            foreach (var c in D.cats) n += c.gifts;
+            return n;
+        }
+
         public static Cat CatState(string id)
         {
             var c = D.cats.Find(x => x.id == id);
@@ -226,9 +274,9 @@ namespace CapyIsland.Game
         public static IReadOnlyList<Design> Designs => D.designs;
         public static int WornDesign => D.wornDesign;
 
-        public static int SaveDesign(string name, string pixels, int size, int replace = -1)
+        public static int SaveDesign(string name, string pixels, int size, int replace = -1, string kind = "")
         {
-            var design = new Design { name = name, pixels = pixels, size = size };
+            var design = new Design { name = name, pixels = pixels, size = size, kind = kind };
             if (replace >= 0 && replace < D.designs.Count) D.designs[replace] = design;
             else { D.designs.Add(design); replace = D.designs.Count - 1; }
             Save();

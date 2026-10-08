@@ -1,3 +1,4 @@
+using DG.Tweening;
 using CapyIsland.CameraRig;
 using UnityEngine;
 
@@ -134,6 +135,26 @@ namespace CapyIsland.Game
             var scale = _body.localScale;
             scale.x = Mathf.Abs(scale.x) * (dx < 0f ? -1f : 1f);
             _body.localScale = scale;
+        }
+
+        /// <summary>
+        /// Map travel: off in a puff, and here in another — with everything in your trail. The
+        /// camera jumps with you rather than gliding across the whole island.
+        /// </summary>
+        public void TravelTo(Vector2 to)
+        {
+            Vector2 from = transform.position;
+            var delta = to - from;
+            var fx = HarvestEffects.Instance;
+            if (fx != null) fx.Poof(from, Color.white);
+            transform.position = new Vector3(to.x, to.y, transform.position.z);
+            _velocity = Vector2.zero;
+            foreach (var f in FindObjectsByType<Follower>(FindObjectsSortMode.None))
+                if (f.Carried) f.transform.position += (Vector3)delta;
+            if (_rig != null) _rig.MoveTo(new Vector3(to.x, to.y, _rig.transform.position.z));
+            if (fx != null) { fx.Poof(to, Color.white); fx.Twinkle(to + Vector2.up * 0.8f, 8); }
+            Sfx.Play(SfxKind.Pop, 0.6f);
+            if (_body != null) _body.DOPunchScale(new Vector3(0.15f, 0.2f, 0f), 0.35f, 6, 0.6f);
         }
 
         void FollowCamera()

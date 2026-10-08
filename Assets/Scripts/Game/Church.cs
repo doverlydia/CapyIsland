@@ -94,8 +94,13 @@ namespace CapyIsland.Game
         {
             var store = ResourceStore.Instance;
             if (store == null || !store.TrySpend(WeddingWood, WeddingGold, 0)) return;
-            Motes.Trigger("wedding_mote");
-            Celebrate();
+            bool renewal = Motes.Has("The wedding bells toll for thee");
+            // The little movie first (as the original did), then the party carries on outside.
+            UI.WeddingCutscene.Show(renewal, () =>
+            {
+                Motes.Trigger("wedding_mote");
+                Celebrate();
+            });
         }
 
         /// <summary>The wedding: the camera comes over, hearts and sparkles everywhere.</summary>

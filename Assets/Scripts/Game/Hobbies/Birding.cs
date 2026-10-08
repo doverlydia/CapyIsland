@@ -21,6 +21,7 @@ namespace CapyIsland.Game
         {
             if (_king == null) _king = FindFirstObjectByType<PlayerAvatar>();
             if (_king == null || Time.time < _nextBird) return;
+            if (!HobbyLog.IsUnlocked(Hobby.Birding)) return;   // birds come once you have binoculars
             _nextBird = Time.time + Random.Range(25f, 50f);
             if (FindObjectsByType<Bird>(FindObjectsSortMode.None).Length >= 2) return;
             TryLand(_king.transform.position);

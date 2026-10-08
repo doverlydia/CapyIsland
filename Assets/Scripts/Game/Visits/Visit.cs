@@ -63,28 +63,25 @@ namespace CapyIsland.Game
         {
             if (Travelling) return;
             if (to == null && !Active) return;
-            var tutorial = TutorialDirector.Instance;
-            if (!Active && tutorial != null && !tutorial.Finished)
-            {
-                Hints.Show("Let's get your own island settled first. Then you can fly anywhere you like!");
-                return;
-            }
-            if (!Active && !Airport.Built)
-            {
-                Hints.Show("You'll need an airstrip before you can fly. Build one from the Neighbours screen!");
-                return;
-            }
-            if (!Active && !Airport.Placed)
-            {
-                Hints.Show("Put your airstrip down somewhere first. Pop its bubble and drag it to a clear spot!");
-                return;
-            }
+            var why = WhyCantFly();
+            if (why != null) { Hints.Show(why); return; }
             Travelling = true;
             string label = to != null ? "Flying to " + to.name + "'s island" : "Flying home";
             UI.FlightTransition.Play(label, () => Swap(to), () => Travelling = false);
         }
 
         public static void FlyHome() => Fly(null);
+
+        /// <summary>Why you can't take off from home right now, or null if you can. (Flying home is always allowed.)</summary>
+        public static string WhyCantFly()
+        {
+            if (Active) return null;
+            var tutorial = TutorialDirector.Instance;
+            if (tutorial != null && !tutorial.Finished) return "Let's get your own island settled first. Then you can fly anywhere you like!";
+            if (!Airport.Built) return "You'll need an airstrip before you can fly. Build one above!";
+            if (!Airport.Placed) return "Put your airstrip down somewhere first. Pop its bubble and drag it to a clear spot!";
+            return null;
+        }
 
         /// <summary>Behind the clouds: put the old island away and load the new one.</summary>
         static void Swap(FriendProfile to)

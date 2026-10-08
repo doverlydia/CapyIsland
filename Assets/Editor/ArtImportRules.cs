@@ -18,7 +18,8 @@ namespace CapyIsland.EditorTools
             // Wardrobe art loads at runtime from Resources, so it lives outside Assets/Art.
             bool wardrobe = assetPath.StartsWith("Assets/Resources/Wardrobe/");
             bool hobbies = assetPath.StartsWith("Assets/Resources/Hobbies/");
-            if (!assetPath.StartsWith("Assets/Art/") && !wardrobe && !hobbies) return;
+            bool cutscene = assetPath.StartsWith("Assets/Resources/Cutscenes/");   // full-stage paintings
+            if (!assetPath.StartsWith("Assets/Art/") && !wardrobe && !hobbies && !cutscene) return;
             if (!assetImporter.importSettingsMissing) return;
 
             var importer = (TextureImporter)assetImporter;
@@ -32,7 +33,7 @@ namespace CapyIsland.EditorTools
 
             // Outfit pieces sit centred on their anchor; the bare capybara stands on its feet like the king.
             bool centred = assetPath.StartsWith("Assets/Art/FX/") || assetPath.StartsWith("Assets/Art/UI/")
-                           || hobbies || (wardrobe && !assetPath.EndsWith("/Capy_Player.png"));
+                           || (hobbies && !assetPath.EndsWith("/Monster_Happy.png") && !assetPath.Contains("/Sleep_") && !assetPath.EndsWith("/Sailor.png") && !assetPath.Contains("/Miso_Dress")) || cutscene || (wardrobe && !assetPath.EndsWith("/Capy_Player.png"));
             var settings = new TextureImporterSettings();
             importer.ReadTextureSettings(settings);
             settings.spriteAlignment = (int)(centred ? SpriteAlignment.Center : SpriteAlignment.BottomCenter);
@@ -41,7 +42,7 @@ namespace CapyIsland.EditorTools
 
             var web = importer.GetPlatformTextureSettings("WebGL");
             web.overridden = true;
-            web.maxTextureSize = 256;
+            web.maxTextureSize = cutscene ? 1024 : 256;
             web.crunchedCompression = true;
             web.compressionQuality = 60;
             web.format = TextureImporterFormat.Automatic;
