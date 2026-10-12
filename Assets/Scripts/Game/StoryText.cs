@@ -28,6 +28,34 @@ namespace CapyIsland.Game
         public const string Captain = "Captain Wasabi";
         public const string Sailor = "Salty Kombu";
         public const string Elder = "Elder Matcha";
+
+        /// <summary>The opening movie's narration, in order (UI/Cutscenes/IntroCutscene).</summary>
+        public static readonly string[] Intro =
+        {
+            "Long ago, the Capy Isles were the warmest place in the whole sea.",
+            "A great hot spring bubbled under the Steam Tower, and everyone came to soak.",
+            "Then, one night, the Big Chill came.",
+            "The spring froze. The gardens withered. One by one, the capybaras drifted away.",
+            // Old Yuzu tells it herself: she is the ghost who has just woken and asked your name.
+            "I was the keeper of the spring, so I gathered the last of my magic...",
+            "...and sealed everything I could save into bubbles of warm air.",
+            "But there was no bubble left for me.",
+            "So I stayed by the frozen spring, day after day, waiting for the warmth to come back.",
+            "I gathered wood and built a little fire, and kept it burning night after night.",
+            "But the wind grew stronger, and I grew older... and one night, the fire went out.",
+            "The warmth never came back. One quiet winter night, I lay down in the snow and closed my eyes...",
+            "...and the last little warmth on the islands went out.",
+            "But the spring wasn't finished with me. With its last warm breath, it caught my spirit in a bubble...",
+            "...and there I slept, for years and years.",
+            "Little by little, the Big Chill passed. The snow melted, and the islands turned green again... but there was no one left to see it.",
+            "Far out at sea, little {0} drifted on and on...",
+            "...until one morning, the tide brought {0} home.",
+            "There on the beach, {0} found a bubble with a sleepy old ghost inside...",
+            "Pop! Oh my... green grass and warm sun! The Big Chill is over!",
+            "And you woke me, little {0}. Will you help me bring the islands back to life?",
+        };
+
+        public const string IntroTitle = "Capy Island", IntroSubtitle = "The Big Chill";
         public const string Spirit = "Spirit";
 
         /// <summary>The islanders' own stories, washed up in bottles on your beach.</summary>
@@ -210,6 +238,31 @@ namespace CapyIsland.Game
         /// <summary>The line about an item in the shop and on its cards.</summary>
         public static string Blurb(string id) =>
             !string.IsNullOrEmpty(id) && Blurbs.TryGetValue(id, out var b) && b.Length > 0 ? b : "";
+
+        /// <summary>
+        /// What a worker home's capybara is good at, for its buy panel — so a pricier breed says why.
+        /// Read off the species stats (game.xml &lt;animals&gt;, built in IslandBuilder.BuildAnimal):
+        /// a capybara has speed 3, and speed sets both walking and how much a swing takes off.
+        /// </summary>
+        static readonly Dictionary<string, string[]> Strengths = new()
+        {
+            { "Capy House", new[] { "Works at a steady pace, at every job.", "Eats an ordinary amount." } },
+            // speed 6; ironwood and tulips 12
+            { "Fox House", new[] { "Walks and works twice as fast as a capybara.", "Chops ironwood 4 times quicker.", "Eats tulips in a flash." } },
+            // speed 2; maple and tulips 8; food rate 2
+            { "Panda House", new[] { "Walks and works a little slower than a capybara.", "Chops maple nearly 3 times quicker.", "Eats tulips in a flash.", "Each flower keeps it full twice as long." } },
+            // speed 4; daisies 8
+            { "Pirate House", new[] { "Walks and works a third faster than a capybara, at every job.", "Eats daisies in a flash." } },
+            // speed 6; bronze, silver and gold 12
+            { "Monster House", new[] { "Walks and works twice as fast as a capybara.", "Digs bronze, silver and gold 4 times quicker." } },
+        };
+
+        /// <summary>The worker lines for an item's buy panel, or "" when it brings no worker.</summary>
+        public static string WorkerStrengths(string id)
+        {
+            if (string.IsNullOrEmpty(id) || !Strengths.TryGetValue(id, out var lines)) return "";
+            return "<b>As a worker</b>\n" + string.Join("\n", lines);
+        }
 
         // ---------------------------------------------------------------- achievements
 
@@ -455,6 +508,9 @@ namespace CapyIsland.Game
         };
 
         // ---------------------------------------------------------------- the spirit's nudges
+
+        /// <summary>Old Yuzu introducing her granddaughter, the first time you go to talk to her.</summary>
+        public const string MisoIntro = "Oh! That's my granddaughter Miso! She made it through the cold! Go on, see if she needs a hand.";
 
         public static string NudgeFor(QuestGiver.Kind kind) => kind switch
         {

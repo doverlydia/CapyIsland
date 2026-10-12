@@ -85,7 +85,6 @@ namespace CapyIsland.Game
         {
             Lists["garden_store"] = new[] { "Vegetable Plot", "Stove" };
             AddTo("gem_store", "Garden Shop");
-            AddTo("bronze_store", "Fishing Rod");
             AddTo("bronze_store", "Bug Net");
             AddTo("silver_store", "Binoculars");
             AddTo("steel_store", "Sewing Machine");

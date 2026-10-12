@@ -15,7 +15,7 @@ namespace CapyIsland.UI
     public class BathCutscene : Cutscene
     {
         // Where things are in the painting (fractions of the stage).
-        static readonly Vector2 PoolEdge = new(0.2f, 0.1f), InPool = new(0.43f, 0.22f), Out = new(0.74f, 0.08f);
+        static readonly Vector2 PoolEdge = new(0.3f, 0.13f), InPool = new(0.45f, 0.22f), Out = new(0.62f, 0.13f);
         const float WaterY = 0.31f;
 
         public static void Show(Action done = null) => Play<BathCutscene>(done);
@@ -25,6 +25,9 @@ namespace CapyIsland.UI
             var catalog = ItemCatalog.Instance;
             return catalog != null && catalog.Has(name) ? catalog.Icon(name) : null;
         }
+
+        /// <summary>In its bubble: the spring, a little close.</summary>
+        protected override Vector3 BubbleView => new(0.47f, 0.42f, 1.2f);
 
         protected override IEnumerator Script()
         {

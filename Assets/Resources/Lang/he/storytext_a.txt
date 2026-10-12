@@ -1,0 +1,1072 @@
+# StoryText.cs lines 1-300: cast names, island stories, item names, blurbs,
+# achievements, discovery cards 1-35.
+
+# ---------------------------------------------------------------- cast
+
+@ Old Yuzu
+= סבתא יוזו
+
+@ Miso
+= מיסו
+
+@ Captain Wasabi
+= קפטן וואסאבי
+
+@ Salty Kombu
+= קומבו המלוח
+
+@ Elder Matcha
+= הזקן מאצ'ה
+
+@ Spirit
+= רוח
+
+# ---------------------------------------------------------------- island stories (bottles)
+
+@ The Big Chill
+= הקור הגדול
+
+@ Before the Big Chill
+= לפני הקור הגדול
+
+@ When I was young the hot spring never stopped steaming. You could see the clouds of it from the far side of the sea, and sailors steered by it at night.
+= כשהייתי צעירה, המעיין החם אף פעם לא הפסיק להעלות אדים. אפשר היה לראות את העננים שלו מהצד השני של הים, ומלחים ניווטו לפיהם בלילה.
+
+@ Every evening the whole island came down to soak. Workers with sawdust in their fur. Old ones with creaky knees. Little ones who splashed.
+= בכל ערב כל האי ירד לטבול. פועלים עם נסורת בפרווה. זקנים עם ברכיים חורקות. קטנטנים שהשפריצו לכל עבר.
+
+@ Then one winter the steam got thinner, and thinner, and then it stopped.
+= ואז, בחורף אחד, האדים נעשו דלילים, ועוד יותר דלילים, ואז הם פסקו.
+
+@ I am a ghost now, and ghosts do not feel the cold. But I remember warm. If you find this bottle, please keep going. Every warm heart you gather brings the steam a little closer.
+= עכשיו אני רוח רפאים, ורוחות רפאים לא מרגישות בקור. אבל אני זוכרת מה זה חום. אם מצאת את הבקבוק הזה, בבקשה אל תפסיק. כל לב חם שאתה אוסף מקרב את האדים עוד קצת.
+
+@ Rules of the Sea, by a Captain
+= חוקי הים, מאת קפטנית
+
+@ Rule one: never trust a seagull.
+= חוק ראשון: לעולם אל תסמוך על שחף.
+
+@ Rule two: never trust a seagull who says it is your friend.
+= חוק שני: לעולם אל תסמוך על שחף שאומר שהוא חבר שלך.
+
+@ Rule three: a pirate always shares the last biscuit. (This rule is new. Someone kind taught it to me.)
+= חוק שלישי: פיראט תמיד מתחלק בביסקוויט האחרון. (החוק הזה חדש. מישהו טוב לב לימד אותי אותו.)
+
+@ Rule four: if your ship freezes into the harbour, do not cry. Dance. Then make friends with whoever is watching you dance.
+= חוק רביעי: אם הספינה שלך קופאת בנמל, אל תבכה. תרקוד. ואז תתיידד עם מי שמסתכל עליך רוקד.
+
+@ Rule five: see rule one.
+= חוק חמישי: ראה חוק ראשון.
+
+@ The Pickle Barrel
+= חבית החמוצים
+
+@ Arr. Gather round, whoever you are.
+= ארר. התקבצו סביבי, מי שלא תהיו.
+
+@ It was a dark and stormy night, and the sea serpent was this big. No, BIGGER. It wanted my barrel of pickles. I said, "These are my pickles." It said, "Not for long."
+= זה היה בלילה חשוך וסוער, ונחש הים היה בגודל כזה. לא, יותר גדול! הוא רצה את חבית החמוצים שלי. אמרתי: "אלה החמוצים שלי." הוא אמר: "לא לעוד הרבה זמן."
+
+@ So we arm-wrestled. On the deck. In the storm. For three days.
+= אז עשינו הורדת ידיים. על הסיפון. בסערה. שלושה ימים רצוף.
+
+@ I won, of course. Then I gave it half the pickles anyway, because it had been a good match.
+= ניצחתי, כמובן. ואז נתתי לו חצי מהחמוצים בכל זאת, כי זה היה קרב טוב.
+
+@ We still write. It sends me seaweed at New Year.
+= אנחנו עדיין מתכתבים. הוא שולח לי אצות בראש השנה.
+
+@ A List, Folded Very Small
+= רשימה, מקופלת קטן־קטן
+
+@ Things I will do when the bathhouse is warm again:
+= דברים שאעשה כשבית המרחץ יהיה חם שוב:
+
+@ - Fill it with yuzu, like Grandma used to.
+= - למלא אותו ביוזו, כמו שסבתא נהגה לעשות.
+
+@ - Teach the little ones to float.
+= - ללמד את הקטנטנים לצוף.
+
+@ - Hang lanterns along the path so nobody gets lost.
+= - לתלות פנסים לאורך השביל כדי שאף אחד לא ילך לאיבוד.
+
+@ - Sit in the steam with someone kind and not say anything at all for a very long time.
+= - לשבת באדים עם מישהו טוב לב ולא להגיד כלום במשך הרבה מאוד זמן.
+
+@ I think I know who. I am not writing his name in case this bottle washes up somewhere embarrassing.
+= נראה לי שאני יודעת עם מי. אני לא כותבת את השם שלו, למקרה שהבקבוק הזה ייסחף למקום מביך.
+
+# ---------------------------------------------------------------- names (Names table values)
+
+@ Woolly Capybara
+= קפיברה צמרירית
+
+@ Burrow Capybara
+= קפיברת מחילות
+
+@ Zombie Capybara
+= קפיברת זומבי
+
+@ Guinea Pig
+= שרקן
+
+@ Pirate Capybara
+= קפיברה פיראטית
+
+@ Woolly Lodge
+= אכסניה צמרירית
+
+@ Burrow Hole
+= מחילה
+
+@ Zombie Shack
+= צריף זומבים
+
+@ Garden Shop
+= חנות גינון
+
+@ Vegetable Plot
+= ערוגת ירקות
+
+@ Cooking Stove
+= כירת בישול
+
+@ Fishing Rod
+= חכה
+
+@ Bug Net
+= רשת חרקים
+
+@ Binoculars
+= משקפת
+
+@ Sewing Machine
+= מכונת תפירה
+
+@ Guinea Pig Hutch
+= כלוב שרקנים
+
+@ Pirate Shack
+= צריף פיראטים
+
+@ Fizz Bomb
+= פצצת תסס
+
+@ Shoo Bomb
+= פצצת קישטה
+
+@ Blossom Chapel
+= קפלת הפריחה
+
+@ Spirit Statue
+= פסל הרוח
+
+@ Steam Tower
+= מגדל האדים
+
+@ Pearl Necklace
+= מחרוזת פנינים
+
+@ Zombie Den
+= מאורת זומבים
+
+@ Sprout
+= נבט
+
+@ Autumn Tree
+= עץ סתווי
+
+@ Bubbling Fountain
+= מזרקה מבעבעת
+
+@ White Blossom Tree
+= עץ פריחה לבן
+
+@ Pink Blossom Tree
+= עץ פריחה ורוד
+
+@ Small Daisy Garden
+= גינת חינניות קטנה
+
+@ Medium Daisy Garden
+= גינת חינניות בינונית
+
+@ Large Daisy Garden
+= גינת חינניות גדולה
+
+@ Mossy Meadow
+= אחו האזוב
+
+@ Pebble Cove
+= מפרץ החלוקים
+
+@ Blossom Isle
+= אי הפריחה
+
+@ Barnacle Bay
+= מפרץ הצדפות
+
+@ Gloomfen
+= ביצת הקדרות
+
+# ---------------------------------------------------------------- store ids shown as-is (not in Names)
+
+@ Small Tulip Garden
+= גינת צבעונים קטנה
+
+@ Medium Tulip Garden
+= גינת צבעונים בינונית
+
+@ Large Tulip Garden
+= גינת צבעונים גדולה
+
+@ Small Rose Garden
+= גינת ורדים קטנה
+
+@ Medium Rose Garden
+= גינת ורדים בינונית
+
+@ Large Rose Garden
+= גינת ורדים גדולה
+
+@ Small Pine Forest
+= יער אורנים קטן
+
+@ Medium Pine Forest
+= יער אורנים בינוני
+
+@ Large Pine Forest
+= יער אורנים גדול
+
+@ Small Maple Forest
+= יער אדרים קטן
+
+@ Medium Maple Forest
+= יער אדרים בינוני
+
+@ Large Maple Forest
+= יער אדרים גדול
+
+@ Small Ironwood Forest
+= יער עצי ברזל קטן
+
+@ Medium Ironwood Forest
+= יער עצי ברזל בינוני
+
+@ Large Ironwood Forest
+= יער עצי ברזל גדול
+
+@ Capy House
+= בית קפיברות
+
+@ Capybara
+= קפיברה
+
+@ Sawmill
+= מנסרה
+
+@ Mine
+= מכרה
+
+@ General Store
+= חנות כלבו
+
+@ Bronze Store
+= חנות הארד
+
+@ Steel Store
+= חנות הפלדה
+
+@ Silver Store
+= חנות הכסף
+
+@ Gold Store
+= חנות הזהב
+
+@ Apple Tree
+= עץ תפוח
+
+@ Pear Tree
+= עץ אגס
+
+@ Legendary Plum Tree
+= עץ שזיף אגדי
+
+@ Legendary Gem Store
+= חנות היהלומים האגדית
+
+@ Legendary Sawmill
+= מנסרה אגדית
+
+@ Legendary Mine
+= מכרה אגדי
+
+@ Gem Statue
+= פסל יהלום
+
+@ Small Gray Hill
+= גבעה אפורה קטנה
+
+@ Medium Gray Hill
+= גבעה אפורה בינונית
+
+@ Large Gray Hill
+= גבעה אפורה גדולה
+
+@ Small Black Hill
+= גבעה שחורה קטנה
+
+@ Medium Black Hill
+= גבעה שחורה בינונית
+
+@ Large Black Hill
+= גבעה שחורה גדולה
+
+@ Small Gold Hill
+= גבעת זהב קטנה
+
+@ Medium Gold Hill
+= גבעת זהב בינונית
+
+@ Large Gold Hill
+= גבעת זהב גדולה
+
+@ Wedding Dress
+= שמלת כלה
+
+@ Tiara
+= נזר
+
+@ Bank
+= בנק
+
+@ Buy Gems
+= קנה יהלומים
+
+@ Buy Wood
+= קנה עץ
+
+@ Buy Gold
+= קנה זהב
+
+@ Fancy Store
+= חנות הקישוטים
+
+@ Bushy Tree
+= עץ עבות
+
+@ Tiny Bush
+= שיח קטנטן
+
+# ---------------------------------------------------------------- item blurbs
+
+@ A little patch of daisies. Feeds one hungry capybara.
+= חלקה קטנה של חינניות. מאכילה קפיברה רעבה אחת.
+
+@ A cheerful bed of daisies. Feeds two capybaras.
+= ערוגה עליזה של חינניות. מאכילה שתי קפיברות.
+
+@ A whole meadow of daisies, enough for a busy crew.
+= אחו שלם של חינניות, מספיק לצוות עמוס עבודה.
+
+@ Bright tulips, twice as filling as daisies. Feeds two capybaras.
+= צבעונים בוהקים, משביעים פי שניים מחינניות. מאכילים שתי קפיברות.
+
+@ A bigger bed of tulips for a hungrier workforce.
+= ערוגת צבעונים גדולה יותר לצוות רעב יותר.
+
+@ Rows and rows of tulips. Nobody goes to bed hungry.
+= שורות על שורות של צבעונים. אף אחד לא הולך לישון רעב.
+
+@ Roses are the most filling flower of all, and they grow back fast. Feeds three capybaras.
+= ורדים הם הפרח המשביע מכולם, והם צומחים מחדש מהר. מאכילים שלוש קפיברות.
+
+@ A fragrant rose garden for a large crew.
+= גינת ורדים ריחנית לצוות גדול.
+
+@ A grand rose garden. Your capybaras will dine like royalty.
+= גינת ורדים מפוארת. הקפיברות שלך יסעדו כמו מלכים.
+
+@ A few pines. Each tree gives 3 wood.
+= כמה עצי אורן. כל גזע מניב 3 עץ.
+
+@ A stand of pines that spreads on its own. Each tree gives 3 wood.
+= חורשת אורנים שמתפשטת מעצמה. כל גזע מניב 3 עץ.
+
+@ A big pine wood. Each tree gives 3 wood.
+= יער אורנים גדול. כל גזע מניב 3 עץ.
+
+@ Maples give 7 wood a tree and regrow faster than pines.
+= כל אדר מניב 7 עץ, והאדרים צומחים מחדש מהר יותר מאורנים.
+
+@ A maple grove. 7 wood a tree.
+= חורשת אדרים. 7 עץ מכל גזע.
+
+@ A great maple wood, rustling with leaves. 7 wood a tree.
+= יער אדרים גדול ומרשרש עלים. 7 עץ מכל גזע.
+
+@ Hard as iron and quick to regrow. 15 wood a tree.
+= קשה כמו ברזל וצומח מחדש מהר. 15 עץ מכל גזע.
+
+@ A dark ironwood grove. 15 wood a tree.
+= חורשה כהה של עצי ברזל. 15 עץ מכל גזע.
+
+@ A towering ironwood forest. 15 wood a tree, and it never stays bare for long.
+= יער עצי ברזל מתנשא. 15 עץ מכל גזע, והוא אף פעם לא נשאר חשוף לאורך זמן.
+
+@ A small rocky hill with bronze inside. 2 gold a rock.
+= גבעה סלעית קטנה עם ארד בפנים. 2 זהב מכל סלע.
+
+@ A rocky hill full of bronze. 2 gold a rock.
+= גבעה סלעית מלאה ארד. 2 זהב מכל סלע.
+
+@ A big bronze hill that keeps a mine busy. 2 gold a rock.
+= גבעת ארד גדולה שמעסיקה מכרה שלם. 2 זהב מכל סלע.
+
+@ A dark little hill hiding silver. 7 gold a rock.
+= גבעה קטנה וכהה שמסתירה כסף. 7 זהב מכל סלע.
+
+@ A silver hill, dark and glinting. 7 gold a rock.
+= גבעת כסף, כהה ומנצנצת. 7 זהב מכל סלע.
+
+@ A great silver hill. 7 gold a rock.
+= גבעת כסף גדולה. 7 זהב מכל סלע.
+
+@ A glittering hill with real gold inside. 20 gold a rock.
+= גבעה נוצצת עם זהב אמיתי בפנים. 20 זהב מכל סלע.
+
+@ A gold hill, and it grows back quickly. 20 gold a rock.
+= גבעת זהב, והיא צומחת מחדש מהר. 20 זהב מכל סלע.
+
+@ A mountain of gold. 20 gold a rock.
+= הר של זהב. 20 זהב מכל סלע.
+
+@ A snug home. Capybaras come to live here, ready to work.
+= בית נעים וחמים. קפיברות באות לגור כאן, מוכנות לעבודה.
+
+@ A driftwood shack with a flag on the roof, for pirate capybaras.
+= צריף מעצי סחף עם דגל על הגג, לקפיברות פיראטיות.
+
+@ A warm lodge for woolly capybaras, who feel the cold the least.
+= אכסניה חמימה לקפיברות צמריריות, שהכי פחות מרגישות בקור.
+
+@ A cosy hillside burrow for small, quick burrow capybaras.
+= מחילה נעימה במדרון לקפיברות מחילות קטנות וזריזות.
+
+@ A place for cured zombie capybaras to call home.
+= מקום שקפיברות זומבי שהבריאו יכולות לקרוא לו בית.
+
+@ Seeds, soil and a stove: everything for growing and cooking your own food.
+= זרעים, אדמה וכירה: כל מה שצריך כדי לגדל ולבשל אוכל בעצמך.
+
+@ A little bed of rich soil. Plant seeds in it, and come back when they've grown.
+= ערוגה קטנה של אדמה פורייה. שתול בה זרעים, וחזור כשהם יגדלו.
+
+@ A cosy outdoor stove. Put ingredients in the pot and mind the heat!
+= כירה נעימה בחוץ. שים מצרכים בסיר ושים לב לחום!
+
+@ Take up fishing: walk to the water's edge and cast.
+= התחל לדוג: לך לשפת המים והטל את החכה.
+
+@ Take up bug catching: creep up on bugs and catch them.
+= התחל לצוד חרקים: התגנב אל החרקים ותפוס אותם.
+
+@ Take up birdwatching: spot the birds that visit your island.
+= התחל בצפרות: גלה את הציפורים שמבקרות באי שלך.
+
+@ Take up sewing: stitch your own hats and capes.
+= התחל לתפור: תפור כובעים וגלימות משלך.
+
+@ A hutch for guinea pigs. Are you sure about this?
+= כלוב לשרקנים. אתה בטוח בזה?
+
+@ Calm, kind and always ready to help. Put one to work at a sawmill or a mine.
+= רגועה, טובת לב ותמיד מוכנה לעזור. שלח אותה לעבוד במנסרה או במכרה.
+
+@ A capybara with sea legs. Strong, if a little loud.
+= קפיברה עם רגלי ים. חזקה, אם כי קצת רעשנית.
+
+@ A capybara in a fluffy winter coat. Waddles beautifully, works hard.
+= קפיברה במעיל חורף פלומתי. מתנדנדת להפליא ועובדת קשה.
+
+@ A small, speedy capybara that loves to dig.
+= קפיברה קטנה וזריזה שאוהבת לחפור.
+
+@ A capybara who stayed out in the cold too long. A few gems for a warm bath cures it, and then it works for you.
+= קפיברה שנשארה בקור יותר מדי זמן. כמה יהלומים לאמבטיה חמה ירפאו אותה, ואז היא תעבוד בשבילך.
+
+@ A guinea pig. Eats every flower it can find. You probably don't want one.
+= שרקן. אוכל כל פרח שהוא מוצא. כנראה שאתה לא רוצה אחד כזה.
+
+@ Workers chop the trees in its circle and carry the wood here.
+= הפועלים כורתים את העצים שבמעגל שלה ומביאים את העץ לכאן.
+
+@ Workers dig the rocks in its circle and bring back gold.
+= הפועלים חופרים בסלעים שבמעגל שלו ומביאים זהב.
+
+@ A sawmill so grand the trees almost chop themselves.
+= מנסרה כל כך מפוארת, שהעצים כמעט כורתים את עצמם.
+
+@ The deepest, shiniest mine on the isles.
+= המכרה העמוק והנוצץ ביותר באיים.
+
+@ The first shop on the islands. Every store keeps the plans for the next.
+= החנות הראשונה באיים. כל חנות שומרת את התוכניות לחנות הבאה.
+
+@ Maple trees, tulips, burrow holes and shoo bombs.
+= עצי אדר, צבעונים, מחילות ופצצות קישטה.
+
+@ Wind chimes in the door and peppermint in the air.
+= פעמוני רוח בדלת וריח מנטה באוויר.
+
+@ Sturdy supplies for serious builders.
+= ציוד חסון לבנאים רציניים.
+
+@ The fanciest shop on the isles, with gold letters over the door.
+= החנות המפוארת ביותר באיים, עם אותיות זהב מעל הדלת.
+
+@ Glittering things, bought with gems.
+= דברים נוצצים, שקונים ביהלומים.
+
+@ Decorations to make your island beautiful.
+= קישוטים שיעשו את האי שלך יפהפה.
+
+@ Trade your gems for wood or gold.
+= החלף את היהלומים שלך בעץ או בזהב.
+
+@ Trade for gems.
+= החלף תמורת יהלומים.
+
+@ Trade gems for wood.
+= החלף יהלומים בעץ.
+
+@ Trade gems for gold.
+= החלף יהלומים בזהב.
+
+@ A chapel under blossom that never falls. Weddings held here.
+= קפלה תחת פריחה שלעולם לא נושרת. כאן עורכים חתונות.
+
+@ It stands over the old hot spring. Every warm heart you find flies here.
+= הוא עומד מעל המעיין החם הישן. כל לב חם שתמצא עף לכאן.
+
+@ Shake it for apples, and the odd surprise.
+= נער אותו ויפלו תפוחים, ולפעמים גם הפתעה.
+
+@ Shake it for pears and hidden treats.
+= נער אותו ויפלו אגסים ומטעמים חבויים.
+
+@ Rare, sweet plums, and treasures tucked among the branches.
+= שזיפים מתוקים ונדירים, ואוצרות חבויים בין הענפים.
+
+@ Soft white blossom, like warm snow.
+= פריחה לבנה ורכה, כמו שלג חמים.
+
+@ Pink petals, all year round.
+= עלי כותרת ורודים, כל השנה.
+
+@ A stone capybara to watch over the springs. Every statue raises your score.
+= קפיברת אבן ששומרת על המעיינות. כל פסל מעלה את הניקוד שלך.
+
+@ A statue that sparkles in the sun.
+= פסל שמנצנץ בשמש.
+
+@ A round, friendly tree.
+= עץ עגול וחביב.
+
+@ A tree that's always dressed for autumn.
+= עץ שתמיד לבוש בבגדי סתיו.
+
+@ Small, green and cheerful.
+= קטן, ירוק ועליז.
+
+@ A fresh green sprout.
+= נבט ירוק ורענן.
+
+@ A fountain that bubbles like a little hot spring.
+= מזרקה שמבעבעת כמו מעיין חם קטן.
+
+@ A muddy den where zombie capybaras like to nap.
+= מאורה בוצית שבה קפיברות זומבי אוהבות לנמנם.
+
+@ A friendly spirit with an errand for you.
+= רוח ידידותית עם שליחות בשבילך.
+
+@ An old sailor full of tall tales. Drag spare items onto him to sell them.
+= מלח זקן מלא סיפורי בדים. גרור אליו פריטים מיותרים כדי למכור אותם.
+
+@ A pirate captain whose ship froze in the harbour. Loud, sparkly and kind-hearted.
+= קפטנית פיראטים שהספינה שלה קפאה בנמל. רועשת, נוצצת וטובת לב.
+
+@ Old Yuzu's granddaughter. She dreams of reopening the family bathhouse.
+= הנכדה של סבתא יוזו. היא חולמת לפתוח מחדש את בית המרחץ המשפחתי.
+
+@ A dress the colour of cherry blossom.
+= שמלה בצבע פריחת הדובדבן.
+
+@ Pearls that glow like little moons.
+= פנינים שזוהרות כמו ירחים קטנים.
+
+@ On these islands, a tiara means 'you'll always be my favourite'.
+= באיים האלה, נזר פירושו 'תמיד תהיי האהובה שלי'.
+
+@ Pay the spirit to raise the bridge to Mossy Meadow.
+= שלם לרוח כדי שתרים את הגשר אל אחו האזוב.
+
+@ Pay the spirit to raise the bridge to Pebble Cove.
+= שלם לרוח כדי שתרים את הגשר אל מפרץ החלוקים.
+
+@ Pay the spirit to raise the bridge to Blossom Isle.
+= שלם לרוח כדי שתרים את הגשר אל אי הפריחה.
+
+@ Pay the spirit to raise the bridge to Barnacle Bay.
+= שלם לרוח כדי שתרים את הגשר אל מפרץ הצדפות.
+
+@ Pay the spirit to raise the bridge to the Gloomfen.
+= שלם לרוח כדי שתרים את הגשר אל ביצת הקדרות.
+
+@ Goes fizz, then BOOM. Clears pests, and turns everything nearby back into bubbles.
+= עושה פשששש, ואז בום! מגרשת מזיקים והופכת את כל מה שסביבה בחזרה לבועות.
+
+@ A gentler bomb. Sends guinea pigs and zombie capybaras packing and leaves everything else alone.
+= פצצה עדינה יותר. מבריחה שרקנים וקפיברות זומבי ולא נוגעת בשום דבר אחר.
+
+# ---------------------------------------------------------------- achievements
+
+@ First Warmth
+= חום ראשון
+
+@ Your first warm heart! Each one you find brings a little more warmth back to the islands.
+= הלב החם הראשון שלך! כל לב שתמצא מחזיר עוד קצת חום לאיים.
+
+@ A Little Burrower
+= חופרת קטנה
+
+@ A burrow capybara has moved in. Mind the new hole in the lawn.
+= קפיברת מחילות עברה לגור כאן. זהירות מהבור החדש בדשא.
+
+@ Burrow Village
+= כפר המחילות
+
+@ Five burrow capybaras, five front doors, one very happy hillside.
+= חמש קפיברות מחילות, חמש דלתות כניסה, ומדרון אחד מאושר מאוד.
+
+@ Fluff Has Arrived
+= הפלומה הגיעה
+
+@ You found a woolly capybara. It is mostly fluff.
+= מצאת קפיברה צמרירית. היא בעיקר פלומה.
+
+@ Wind chimes and peppermint. The Silver Store is open again.
+= פעמוני רוח ומנטה. חנות הכסף פתוחה שוב.
+
+@ Sturdy tools for a sturdy builder.
+= כלים חסונים לבנאי חסון.
+
+@ The Gold Store
+= חנות הזהב
+
+@ Gold letters over the door and cinnamon in the air.
+= אותיות זהב מעל הדלת וריח קינמון באוויר.
+
+@ The Blossom Chapel
+= קפלת הפריחה
+
+@ A chapel for celebrations, under blossom that never falls.
+= קפלה לחגיגות, תחת פריחה שלעולם לא נושרת.
+
+@ Tulips for Miso
+= צבעונים למיסו
+
+@ You planted tulips. Miso pretended not to notice, then smiled for an hour.
+= שתלת צבעונים. מיסו העמידה פנים שהיא לא שמה לב, ואז חייכה שעה שלמה.
+
+@ The Blossom Dress
+= שמלת הפריחה
+
+@ Miso's new dress is the colour of cherry blossom.
+= השמלה החדשה של מיסו בצבע פריחת הדובדבן.
+
+@ A Tall Tale
+= סיפור בדים
+
+@ Salty Kombu told you a story. Some of it may even have been true.
+= קומבו המלוח סיפר לך סיפור. אולי חלק ממנו אפילו היה נכון.
+
+@ Roses for the Captain
+= ורדים לקפטנית
+
+@ You planted roses as red as Captain Wasabi's favourite chilli.
+= שתלת ורדים אדומים כמו הצ'ילי האהוב על קפטן וואסאבי.
+
+@ Pearls Like Moons
+= פנינים כמו ירחים
+
+@ A pearl necklace, and one very flustered Miso.
+= מחרוזת פנינים, ומיסו אחת נבוכה מאוד.
+
+@ Guinea Pig Patrol
+= סיירת השרקנים
+
+@ The guinea pig gang has been sent packing. The gardens are safe.
+= כנופיית השרקנים גורשה. הגינות מוגנות.
+
+@ Head Over Paws
+= מאוהבים עד קצות הכפות
+
+@ Miso said it first. Then you said it too.
+= מיסו אמרה את זה ראשונה. ואז גם אתה אמרת.
+
+@ Happily Ever After
+= ויחיו באושר ועושר
+
+@ A wedding at the Blossom Chapel. The whole island came, even the ghosts.
+= חתונה בקפלת הפריחה. כל האי הגיע, אפילו רוחות הרפאים.
+
+@ Legendary Store
+= החנות האגדית
+
+@ Gems, glitter and fancy fountains, all for sale.
+= יהלומים, נצנצים ומזרקות מפוארות, הכול למכירה.
+
+@ A little stone capybara watches over the springs again. Every statue raises your score.
+= קפיברת אבן קטנה שומרת שוב על המעיינות. כל פסל מעלה את הניקוד שלך.
+
+@ The second shop on the islands. More goodies await!
+= החנות השנייה באיים. עוד הפתעות מחכות!
+
+@ Fluffy Lumberjack
+= חוטבת עצים פלומתית
+
+@ A woolly capybara is chopping wood for Captain Wasabi. Look at that waddle.
+= קפיברה צמרירית חוטבת עצים בשביל קפטן וואסאבי. תראה איך היא מתנדנדת.
+
+@ Plum Orchard
+= מטע שזיפים
+
+@ Five plum trees and one very sticky captain.
+= חמישה עצי שזיף וקפטנית אחת דביקה מאוד.
+
+@ Warm Again
+= חמים שוב
+
+@ Five zombie capybaras had a warm bath and remembered how to smile.
+= חמש קפיברות זומבי טבלו באמבטיה חמה ונזכרו איך מחייכים.
+
+@ The Hot Pepper Hornpipe
+= ריקוד הפלפל החריף
+
+@ Captain Wasabi danced for you. There was a spin. There was nearly a splash.
+= קפטן וואסאבי רקדה בשבילך. היה סחרור. כמעט היה גם שפריץ.
+
+@ The Tiara
+= הנזר
+
+@ You gave Miso a tiara. On these islands, that means something special.
+= נתת למיסו נזר. באיים האלה, זה אומר משהו מיוחד.
+
+@ Into the Hills
+= אל הגבעות
+
+@ You placed a mine. Now the hills will share their gold.
+= הצבת מכרה. עכשיו הגבעות יחלקו איתך את הזהב שלהן.
+
+@ Dressed Up
+= מגונדר
+
+@ You put together your very first outfit. Looking sharp!
+= הרכבת את התלבושת הראשונה שלך. אתה נראה מצוין!
+
+@ Good Neighbour
+= שכן טוב
+
+@ You visited three friends' islands. Island life is better together.
+= ביקרת באיים של שלושה חברים. חיי האי טובים יותר ביחד.
+
+@ Lunch Delivery
+= משלוח צהריים
+
+@ You fed a hungry worker on a friend's island.
+= האכלת פועל רעב באי של חבר.
+
+@ Pest Control
+= הדברה
+
+@ You chased the pests off a friend's island.
+= גירשת את המזיקים מהאי של חבר.
+
+@ First Catch
+= השלל הראשון
+
+@ Your very first fish! The sea is full of them.
+= הדג הראשון שלך! הים מלא בהם.
+
+@ Bird Spotter
+= צפר
+
+@ You spotted your first bird. Keep your eyes on the treetops.
+= זיהית את הציפור הראשונה שלך. תמשיך להביט בצמרות העצים.
+
+@ Published Author
+= סופר עם ספר
+
+@ Your first book is on the shelf. Friends who visit can read it.
+= הספר הראשון שלך על המדף. חברים שבאים לבקר יכולים לקרוא אותו.
+
+@ Fashion Designer
+= מעצב אופנה
+
+@ You sewed your first T-shirt design. Very stylish.
+= תפרת את עיצוב החולצה הראשון שלך. ממש אופנתי.
+
+@ Green Thumb
+= יד ירוקה
+
+@ Your first harvest! Vegetables taste better when you grew them yourself.
+= הקציר הראשון שלך! ירקות טעימים יותר כשמגדלים אותם בעצמך.
+
+@ Home Cooking
+= בישול ביתי
+
+@ You cooked your first dish. The whole island smells wonderful.
+= בישלת את המנה הראשונה שלך. כל האי מריח נפלא.
+
+@ Bug Catcher
+= צייד חרקים
+
+@ Your first bug, safely netted and noted in your journal.
+= החרק הראשון שלך, נתפס ברשת בשלום ונרשם ביומן.
+
+@ Cat Person
+= איש של חתולים
+
+@ A cat has chosen you. Or you chose it. It's hard to tell with cats.
+= חתול בחר בך. או שאתה בחרת בו. עם חתולים קשה לדעת.
+
+@ It's the Thought That Counts
+= העיקר הכוונה
+
+@ A cat brought you a present. You said thank you. You meant it, mostly.
+= חתול הביא לך מתנה. אמרת תודה. ובערך גם התכוונת.
+
+@ Ready for Take-off
+= מוכנים להמראה
+
+@ You built an airstrip. The whole archipelago is a short flight away.
+= בנית מסלול המראה. כל הארכיפלג במרחק טיסה קצרה.
+
+# achievement ids with no StoryText entry: AchievementTitle falls back to the raw name
+@ Welcome Back
+= ברוך שובך
+
+@ Visit Forums
+= בקר בפורומים
+
+# ---------------------------------------------------------------- discovery cards 1-35
+
+@ Every shop on the islands starts here.
+= כל חנות באיים מתחילה כאן.
+
+@ Maple trees, tulips and handy shoo bombs.
+= עצי אדר, צבעונים ופצצות קישטה שימושיות.
+
+@ The fanciest shop on the isles.
+= החנות המפוארת ביותר באיים.
+
+@ Gray Hill
+= גבעה אפורה
+
+@ A rocky hill full of bronze. Put a mine beside it.
+= גבעה סלעית מלאה ארד. הצב לידה מכרה.
+
+@ Black Hill
+= גבעה שחורה
+
+@ A dark hill hiding silver.
+= גבעה כהה שמסתירה כסף.
+
+@ Gold Hill
+= גבעת זהב
+
+@ A glittering hill with gold inside.
+= גבעה נוצצת עם זהב בפנים.
+
+@ Pine Tree
+= עץ אורן
+
+@ Quick to spread. A sawmill's best friend.
+= מתפשט מהר. החבר הכי טוב של המנסרה.
+
+@ Maple Tree
+= עץ אדר
+
+@ More wood with every swing.
+= יותר עץ בכל מכה.
+
+@ Ironwood Tree
+= עץ ברזל
+
+@ Hard as iron, and it grows back fast.
+= קשה כמו ברזל, וצומח מחדש מהר.
+
+@ Capybaras chop nearby trees and bring the wood here.
+= קפיברות כורתות את העצים שבסביבה ומביאות את העץ לכאן.
+
+@ So grand the trees line up to be chopped.
+= כל כך מפוארת, שהעצים עומדים בתור כדי שיכרתו אותם.
+
+@ Workers dig gold out of nearby hills.
+= הפועלים חופרים זהב מהגבעות שבסביבה.
+
+@ Calm, kind and always ready to help. The heart of every island.
+= רגועה, טובת לב ותמיד מוכנה לעזור. הלב של כל אי.
+
+@ A capybara in a fluffy winter coat. Waddles beautifully.
+= קפיברה במעיל חורף פלומתי. מתנדנדת להפליא.
+
+@ Small, quick and fond of digging cosy holes.
+= קטנה, זריזה ואוהבת לחפור מחילות נעימות.
+
+@ Grumbly and muddy, until someone gives it a warm bath.
+= רטנונית ובוצית, עד שמישהו נותן לה אמבטיה חמה.
+
+@ Daisies
+= חינניות
+
+@ Sweet little flowers. A snack for hungry capybaras.
+= פרחים קטנים ומתוקים. חטיף לקפיברות רעבות.
+
+@ Tulips
+= צבעונים
+
+@ Bright tulips that keep workers well fed.
+= צבעונים בוהקים שמשאירים את הפועלים שבעים.
+
+@ Roses
+= ורדים
+
+@ The most filling flower, and quick to grow back.
+= הפרח הכי משביע, והוא צומח מחדש מהר.
+
+@ Her ship froze in the harbour. Loud, sparkly and kind-hearted.
+= הספינה שלה קפאה בנמל. רועשת, נוצצת וטובת לב.
+
+@ An old sailor full of tall tales. He'll buy your spare loot.
+= מלח זקן מלא סיפורי בדים. הוא יקנה ממך את השלל המיותר.
+
+@ Where the islands come together to celebrate.
+= המקום שבו האיים מתאספים כדי לחגוג.
+
+@ A stone capybara that watches over the springs.
+= קפיברת אבן ששומרת על המעיינות.
+
+@ A cosy hillside home for burrow capybaras.
+= בית נעים במדרון לקפיברות מחילות.
+
+# ---------------------------------------------------------------- the opening movie (StoryText.Intro)
+
+@ Long ago, the Capy Isles were the warmest place in the whole sea.
+= לפני הרבה זמן, איי הקאפי היו המקום הכי חמים בכל הים.
+
+@ A great hot spring bubbled under the Steam Tower, and everyone came to soak.
+= מעיין חם וגדול בעבע מתחת למגדל האדים, וכולם באו לטבול בו.
+
+@ Then, one night, the Big Chill came.
+= ואז, לילה אחד, הגיע הקור הגדול.
+
+@ The spring froze. The gardens withered. One by one, the capybaras drifted away.
+= המעיין קפא. הגינות קמלו. אחד אחד, הקפיברות נסחפו משם.
+
+@ I was the keeper of the spring, so I gathered the last of my magic...
+= אני הייתי שומרת המעיין, אז אספתי את שארית הקסם שלי...
+
+@ ...and sealed everything I could save into bubbles of warm air.
+= ...וחתמתי כל מה שיכולתי להציל בתוך בועות של אוויר חם.
+
+@ But there was no bubble left for me.
+= אבל לא נשארה בועה בשבילי.
+
+@ So I stayed by the frozen spring, day after day, waiting for the warmth to come back.
+= אז נשארתי ליד המעיין הקפוא, יום אחרי יום, וחיכיתי שהחום יחזור.
+
+@ I gathered wood and built a little fire, and kept it burning night after night.
+= אספתי עצים והדלקתי מדורה קטנה, ושמרתי שתבער לילה אחרי לילה.
+
+@ But the wind grew stronger, and I grew older... and one night, the fire went out.
+= אבל הרוח התחזקה, ואני הזדקנתי... ולילה אחד, המדורה כבתה.
+
+@ The warmth never came back. One quiet winter night, I lay down in the snow and closed my eyes...
+= החום לא חזר. לילה חורפי ושקט אחד, נשכבתי בשלג ועצמתי את העיניים...
+
+@ ...and the last little warmth on the islands went out.
+= ...והחום הקטן האחרון באיים כבה.
+
+@ But the spring wasn't finished with me. With its last warm breath, it caught my spirit in a bubble...
+= אבל המעיין עוד לא סיים איתי. בנשימה החמה האחרונה שלו, הוא אסף את הרוח שלי לתוך בועה...
+
+@ ...and there I slept, for years and years.
+= ...ושם ישנתי, שנים על גבי שנים.
+
+@ Little by little, the Big Chill passed. The snow melted, and the islands turned green again... but there was no one left to see it.
+= לאט לאט, הקור הגדול חלף. השלג נמס, והאיים הוריקו מחדש... אבל לא נשאר אף אחד לראות את זה.
+
+@ There on the beach, {0} found a bubble with a sleepy old ghost inside...
+= שם על החוף, {0} מצא בועה ובתוכה רוח רפאים זקנה ומנומנמת...
+
+@ Pop! Oh my... green grass and warm sun! The Big Chill is over!
+= פופ! אוי ואבוי... דשא ירוק ושמש חמה! הקור הגדול נגמר!
+
+@ And you woke me, little {0}. Will you help me bring the islands back to life?
+= ואתה הערת אותי, {0} הקטן. תעזור לי להחזיר את האיים לחיים?
+
+@ Far out at sea, little {0} drifted on and on...
+= רחוק בלב הים, {0} הקטן נסחף ונסחף...
+
+@ ...until one morning, the tide brought {0} home.
+= ...עד שבוקר אחד, הגאות החזירה את {0} הביתה.
+
+@ Mmm... oh! A little capybara. I must have dozed off, it's been so cold for so long. Before I tell you how all this began: which language do you speak? And what shall I call you?
+= ממממ... אוי! קפיברה קטנה. כנראה נרדמתי, כל כך קר כבר כל כך הרבה זמן. לפני שאספר לך איך הכול התחיל: באיזו שפה אתה מדבר? ואיך לקרוא לך?
+
+@ Continue
+= המשך
+
+@ Tap the bubble!
+= הקש על הבועה!
+
+@ As a worker
+= כעובד
+
+@ Works at a steady pace, at every job.
+= עובד בקצב יציב, בכל עבודה.
+
+@ Eats an ordinary amount.
+= אוכל כמות רגילה.
+
+@ Walks and works twice as fast as a capybara.
+= הולך ועובד מהר פי שניים מקפיברה.
+
+@ Chops ironwood 4 times quicker.
+= כורת עצי ברזל מהר פי 4.
+
+@ Eats tulips in a flash.
+= זולל צבעונים בן רגע.
+
+@ Walks and works a little slower than a capybara.
+= הולך ועובד קצת לאט יותר מקפיברה.
+
+@ Chops maple nearly 3 times quicker.
+= כורת אדרים מהר כמעט פי 3.
+
+@ Each flower keeps it full twice as long.
+= כל פרח משביע אותו פי שניים זמן.
+
+@ Walks and works a third faster than a capybara, at every job.
+= הולך ועובד מהר בשליש מקפיברה, בכל עבודה.
+
+@ Eats daisies in a flash.
+= זולל חינניות בן רגע.
+
+@ Digs bronze, silver and gold 4 times quicker.
+= חופר ארד, כסף וזהב מהר פי 4.

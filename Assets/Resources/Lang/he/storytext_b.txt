@@ -1,0 +1,520 @@
+# storytext_b: StoryText.cs (cards 35+, quest pages, Miso/Wasabi chat, nudges) + QuestGiver.cs
+
+@ A cosy hillside home for burrow capybaras.
+= בית נעים בצלע הגבעה לקפיברות מחילות.
+
+@ Where cured zombie capybaras come to live.
+= לכאן באות לגור קפיברות זומבי שהבריאו.
+
+@ A home for guinea pigs. Brave choice.
+= בית לשרקנים. בחירה אמיצה.
+
+@ A home for pirate capybaras, with a flag on the roof.
+= בית לקפיברות פיראטיות, עם דגל על הגג.
+
+@ A snug home where capybaras come to live and work.
+= בית חמים שאליו קפיברות באות לגור ולעבוד.
+
+@ A warm lodge for woolly capybaras.
+= בקתה חמימה לקפיברות צמריריות.
+
+@ Rare, sweet plums with treasures in the branches.
+= שזיפים נדירים ומתוקים, ואוצרות בין הענפים.
+
+@ Ooooh... oh! Did I startle you? I'm Mister Kinako. I used to sweep the paths for the Burrowfolk.
+= אוווווו... אה! הבהלתי אותך? אני מר קינקו. פעם טאטאתי את השבילים של בני המחילות.
+
+@ Burrow capybaras, little ones! They dug cosy holes in the hillsides and kept their tunnels spotless.
+= קפיברות מחילות, קטנטנות! הן חפרו חורים נעימים בגבעות ושמרו על המנהרות שלהן נקיות ומבריקות.
+
+@ When the Big Chill came, they curled up deep underground and never came out.
+= כשהגיע הקור הגדול, הן התכרבלו עמוק מתחת לאדמה ולא יצאו יותר.
+
+@ Could you coax one back? Look for a Burrow Hole at the Bronze Store.
+= תוכל לפתות אחת מהן לחזור? חפש חור מחילה בחנות הארד.
+
+@ No burrow capybaras yet? Their noses twitch for warm soil. Try the Burrow Hole from the Bronze Store.
+= עדיין אין קפיברות מחילות? האף שלהן מרחרח אדמה חמימה. נסה את חור המחילה מחנות הארד.
+
+@ A burrow capybara, popping its head out of the ground! I could weep, if ghosts had tears.
+= קפיברת מחילות מציצה מהאדמה! הייתי בוכה, אילו לרוחות היו דמעות.
+
+@ Here, take this. Daisies have been growing on my old porch, and I've no use for them now.
+= הנה, קח את זה. חינניות גדלו לי במרפסת הישנה, ואין לי מה לעשות איתן עכשיו.
+
+@ Mister Kinako again! Our burrow capybara is lovely, but lonely.
+= שוב מר קינקו! קפיברת המחילות שלנו מקסימה, אבל בודדה.
+
+@ In the old days the Burrowfolk had a whole village, their round doors all in a row along the hill.
+= פעם, לבני המחילות היה כפר שלם, עם דלתות עגולות בשורה לאורך הגבעה.
+
+@ On the coldest night of the year they'd share one big pot of chestnut soup and sing tunnel songs.
+= בלילה הקר ביותר בשנה הם היו חולקים סיר גדול של מרק ערמונים ושרים שירי מנהרות.
+
+@ Could you gather five of them? Then they'd have a proper village again.
+= תוכל לאסוף חמש מהן? ואז יהיה להן שוב כפר אמיתי.
+
+@ Still fewer than five burrow capybaras. You can't sing a tunnel song as a duet!
+= עדיין פחות מחמש קפיברות מחילות. אי אפשר לשיר שיר מנהרות בדואט!
+
+@ Five burrow capybaras! They've already dug a doorway for each other.
+= חמש קפיברות מחילות! הן כבר חפרו פתח כניסה אחת לשנייה.
+
+@ One of them gave me a chestnut. I can't eat it, being see-through, but I'll treasure it.
+= אחת מהן נתנה לי ערמון. אני לא יכול לאכול אותו, כי אני שקוף, אבל אשמור אותו כמו אוצר.
+
+@ Please, have this ironwood. It always loved them, and it will love you too.
+= בבקשה, קח את עץ הברזל הזה. הוא תמיד אהב אותן, והוא יאהב גם אותך.
+
+@ Hoo-hoo... I'm Sister Hojicha, from the Blossom Chapel. Well, from what's left of it.
+= הו-הו... אני האחות הוג'יצ'ה, מקפלת הפריחה. טוב, ממה שנשאר ממנה.
+
+@ Long ago every island had spirit statues, little stone capybaras keeping watch over the hot springs.
+= פעם, בכל אי היו פסלי רוח, קפיברות אבן קטנות ששמרו על המעיינות החמים.
+
+@ When the cold came they cracked and tumbled, and the islands have felt unwatched ever since.
+= כשהגיע הקור הם נסדקו והתמוטטו, ומאז האיים מרגישים שאף אחד לא שומר עליהם.
+
+@ The Legendary Gem Store sells Spirit Statues now. Would you raise one? Every statue adds to your island's score.
+= חנות היהלומים האגדית מוכרת עכשיו פסלי רוח. תקים אחד? כל פסל מוסיף לניקוד של האי שלך.
+
+@ Not a single spirit statue yet. Who is keeping an eye on the springs?
+= עדיין אין אף פסל רוח. מי ישגיח על המעיינות?
+
+@ A spirit statue! Look at its little stone smile.
+= פסל רוח! תראה את החיוך האבני הקטן שלו.
+
+@ Every one you build raises your island's score. The more watchful stone friends, the merrier.
+= כל פסל שאתה בונה מעלה את הניקוד של האי שלך. כמה שיותר חברי אבן שומרים, יותר שמח.
+
+@ Oh! Hello. Sorry, I'm Miso. I've been inside a bubble so long I forgot how to say hello.
+= אה! שלום. סליחה, אני מיסו. הייתי כל כך הרבה זמן בתוך בועה ששכחתי איך אומרים שלום.
+
+@ Before the Big Chill there were shops all over the islands. Now there's barely a stall.
+= לפני הקור הגדול היו חנויות בכל האיים. עכשיו אין כמעט אפילו דוכן.
+
+@ I saved this one, the General Store. Every shop keeps the plans for the next.
+= את זאת הצלתי, המכולת. כל חנות שומרת את התוכניות של החנות הבאה.
+
+@ Could you build the Bronze Store? It would be a start.
+= תוכל לבנות את חנות הארד? זאת תהיה התחלה.
+
+@ The Bronze Store sells maple trees, and shoo bombs too. Very handy.
+= חנות הארד מוכרת עצי אדר, וגם פצצות קישטה. שימושי מאוד.
+
+@ The Bronze Store is open! We should keep a few bombs about, in case the guinea pigs come back.
+= חנות הארד פתוחה! כדאי שיהיו לנו כמה פצצות בהישג יד, למקרה שהשרקנים יחזרו.
+
+@ Thank you. It feels like the whole island just took a deep breath.
+= תודה. מרגיש כאילו כל האי לקח נשימה עמוקה.
+
+@ Grandma used to read me sea stories by the bathhouse fire. Storms, sea serpents, buried treasure...
+= סבתא הייתה מקריאה לי סיפורי ים ליד האח של בית המרחץ. סערות, נחשי ים, אוצרות קבורים...
+
+@ I've heard there's a real sailor washed up on the beach. Salty Kombu, he calls himself.
+= שמעתי שיש מלח אמיתי שנסחף לחוף. קומבו המלוח, ככה הוא קורא לעצמו.
+
+@ Would you go and hear one of his stories? Then come back and tell me everything!
+= תלך לשמוע אחד מהסיפורים שלו? ואז תחזור ותספר לי הכול!
+
+@ Have you talked to Salty Kombu yet? I want a story with at least one sea serpent in it.
+= כבר דיברת עם קומבו המלוח? אני רוצה סיפור עם לפחות נחש ים אחד.
+
+@ You heard one of Kombu's tales? Tell me, tell me!
+= שמעת סיפור של קומבו? ספר לי, ספר לי!
+
+@ A giant squid that juggled lanterns? A lighthouse made of cheese? I don't believe a word of it. I love it.
+= דיונון ענק שמלהטט בפנסים? מגדלור עשוי גבינה? אני לא מאמינה למילה. אני מתה על זה.
+
+@ Here, a little ironwood grove, for being my storyteller.
+= הנה, חורשת עץ ברזל קטנה, כי היית המספר שלי.
+
+@ When I was little, Grandma took me to the Silver Store every spring. It had wind chimes in the doorway and smelled of peppermint.
+= כשהייתי קטנה, סבתא לקחה אותי לחנות הכסף בכל אביב. היו פעמוני רוח בכניסה והיה ריח של מנטה.
+
+@ I'd press my nose to the glass and choose the things I'd buy one day.
+= הייתי מצמידה את האף לזכוכית ובוחרת את הדברים שאקנה יום אחד.
+
+@ Do you think its plans are still around somewhere? I'd love to see it again.
+= אתה חושב שהתוכניות שלה עדיין נמצאות איפשהו? הייתי שמחה לראות אותה שוב.
+
+@ No Silver Store yet... I can almost hear the wind chimes, though.
+= עדיין אין חנות כסף... אבל אני כמעט שומעת את פעמוני הרוח.
+
+@ The Silver Store! The chimes, the peppermint, everything!
+= חנות הכסף! הפעמונים, המנטה, הכול!
+
+@ Grandma left a purse of gold for a special day. I think today counts.
+= סבתא השאירה ארנק זהב ליום מיוחד. אני חושבת שהיום נחשב.
+
+@ Have you seen the dress in the Silver Store window? It's the colour of cherry blossom.
+= ראית את השמלה בחלון של חנות הכסף? היא בצבע של פריחת הדובדבן.
+
+@ I know it's silly, wanting something pretty while the island's still so chilly. But I keep thinking about it.
+= אני יודעת שזה טיפשי, לרצות משהו יפה כשהאי עדיין כל כך קר. אבל אני לא מפסיקה לחשוב עליה.
+
+@ I walked past the Silver Store three times today. Just to look. Not because of the dress. Ahem.
+= עברתי ליד חנות הכסף שלוש פעמים היום. רק כדי להסתכל. לא בגלל השמלה. אהם.
+
+@ You bought it? For me?!
+= קנית אותה? בשבילי?!
+
+@ I'm wearing it right now. It feels like spring came early.
+= אני לובשת אותה עכשיו. מרגיש כאילו האביב הגיע מוקדם.
+
+@ Do... do I look all right? Don't answer that. No, answer it.
+= אני... אני נראית בסדר? אל תענה על זה. לא, כן תענה.
+
+@ Shh! Do you hear that? Nibble, nibble, nibble...
+= ששש! אתה שומע? כרסום, כרסום, כרסום...
+
+@ Guinea pigs. A whole gang of them. They came with the cold and ate every flower on the islands.
+= שרקנים. כנופיה שלמה. הם באו עם הקור ואכלו כל פרח באיים.
+
+@ They've turned up again, on our island and the next one over.
+= הם חזרו שוב, לאי שלנו ולאי השכן.
+
+@ Please be careful, and take some bombs. They only scatter when something goes fizz!
+= בבקשה תיזהר, וקח כמה פצצות. הם מתפזרים רק כשמשהו עושה פשששש!
+
+@ Nibble, nibble... they're still out there. A bomb under their noses will send them packing.
+= כרסום, כרסום... הם עדיין שם בחוץ. פצצה מתחת לאף שלהם תבריח אותם.
+
+@ No more nibbling! The gardens are safe!
+= לא עוד כרסומים! הגינות בטוחות!
+
+@ I'll sleep tonight without dreaming about tiny teeth. Take these gems. You've earned them, hero.
+= הלילה אישן בלי לחלום על שיניים קטנטנות. קח את היהלומים האלה. הרווחת אותם, גיבור.
+
+@ Hello again, crown-wearer. I'm starting to like that little crown of yours, you know.
+= שוב שלום, בעל הכתר. אתה יודע, אני מתחילה לחבב את הכתר הקטן שלך.
+
+@ Grandma always said the Steel Store sold the sturdiest tools on the isles. Builders came from everywhere.
+= סבתא תמיד אמרה שחנות הפלדה מכרה את הכלים הכי חזקים באיים. בנאים הגיעו מכל מקום.
+
+@ With all the building you're doing, maybe you need one?
+= עם כל הבנייה שאתה עושה, אולי אתה צריך אחת?
+
+@ Still no Steel Store. Your hammer must be getting tired.
+= עדיין אין חנות פלדה. הפטיש שלך בטח מתעייף.
+
+@ The Steel Store is open! Here, Grandpa's old woodpile. He'd want it to go to a real builder.
+= חנות הפלדה פתוחה! הנה, ערימת העצים הישנה של סבא. הוא היה רוצה שתגיע לבנאי אמיתי.
+
+@ The new shop has a counter full of pearls. Have you seen them? They glow like little moons.
+= בחנות החדשה יש דלפק מלא פנינים. ראית אותן? הן זוהרות כמו ירחים קטנים.
+
+@ I was hoping... maybe we could go and look at them together sometime?
+= קיוויתי... אולי נלך להסתכל עליהן ביחד מתישהו?
+
+@ Oh. You're busy. That's fine. Everyone's busy.
+= אה. אתה עסוק. זה בסדר. כולם עסוקים.
+
+@ I'm not sulking. I'm just... thinking about pearls. On my own.
+= אני לא נעלבת. אני רק... חושבת על פנינים. לבד.
+
+@ You went and bought the necklace? I only wanted to look at it with you!
+= הלכת וקנית את השרשרת? רק רציתי להסתכל עליה איתך!
+
+@ Oh, you sweet, ridiculous capybara. I'm never taking it off.
+= אוי, קפיברה מתוק ומגוחך שלי. אני אף פעם לא אוריד אותה.
+
+@ Can I tell you a secret? There was a shop at the edge of the island with gold letters over the door.
+= אפשר לספר לך סוד? בקצה האי הייתה חנות עם אותיות זהב מעל הדלת.
+
+@ An old gentleman ran it, in a velvet waistcoat, with a cane topped with a sapphire.
+= ניהל אותה אדון זקן, עם וסט קטיפה ומקל הליכה עם ספיר בראשו.
+
+@ I never had enough to buy anything. I'd just stand inside and breathe in the cinnamon and polish.
+= אף פעם לא היה לי מספיק כסף לקנות משהו. רק הייתי עומדת בפנים ונושמת את ריח הקינמון והליטוש.
+
+@ I wonder if anyone could ever build it again...
+= מעניין אם מישהו יוכל לבנות אותה שוב אי פעם...
+
+@ I was daydreaming about the Gold Store again. I think the Big Chill froze it solid.
+= שוב חלמתי בהקיץ על חנות הזהב. נראה לי שהקור הגדול הקפיא אותה לגמרי.
+
+@ The Gold Store is back! Same gold letters, same cinnamon smell.
+= חנות הזהב חזרה! אותן אותיות זהב, אותו ריח קינמון.
+
+@ Grandma bought her wedding lantern there. Here, some timber she was saving. Build something wonderful.
+= סבתא קנתה שם את פנס החתונה שלה. הנה, קורות עץ שהיא שמרה. תבנה משהו נפלא.
+
+@ Grandma had a tiara, you know. Grandpa saved for a whole year to buy it for her.
+= לסבתא היה נזר, אתה יודע. סבא חסך שנה שלמה כדי לקנות לה אותו.
+
+@ On these islands, when you give someone a tiara, it means 'you'll always be my favourite'.
+= באיים האלה, כשנותנים למישהי נזר, זה אומר 'את תמיד תהיי האהובה שלי'.
+
+@ Hers was lost in the cold. I suppose old traditions get lost too.
+= הנזר שלה אבד בקור. כנראה גם מסורות ישנות הולכות לאיבוד.
+
+@ There's a tiara in the Gold Store window. Some lucky capybara is going to be very happy one day.
+= יש נזר בחלון של חנות הזהב. איזו קפיברה בת מזל תהיה מאושרת מאוד יום אחד.
+
+@ A tiara... for me?
+= נזר... בשבילי?
+
+@ I don't know what to say. My heart is doing somersaults.
+= אני לא יודעת מה להגיד. הלב שלי עושה סלטות.
+
+@ Can you give me a little while to think? I want to say this right.
+= תיתן לי קצת זמן לחשוב? אני רוצה להגיד את זה נכון.
+
+@ There you are! I didn't sleep a wink last night. I kept practising this.
+= הנה אתה! לא עצמתי עין כל הלילה. התאמנתי על זה שוב ושוב.
+
+@ Okay. Deep breath.
+= טוב. נשימה עמוקה.
+
+@ When you washed up here, everything was cold and grey. Then you started building, and planting, and smiling at me, and...
+= כשנסחפת לכאן, הכול היה קר ואפור. ואז התחלת לבנות, ולשתול, ולחייך אליי, ו...
+
+@ I love you. There. I said it.
+= אני אוהבת אותך. זהו. אמרתי את זה.
+
+@ Would you... would you marry me?
+= תתחתן... תתחתן איתי?
+
+@ Well? Don't leave me standing here like a frozen puddle!
+= נו? אל תשאיר אותי עומדת פה כמו שלולית קפואה!
+
+@ You said yes! You said YES!
+= אמרת כן! אמרת כן!!!
+
+@ Go and find Elder Matcha at the Blossom Chapel! I've saved a few gems for the celebration.
+= לך למצוא את הזקן מאצ'ה בקפלת הפריחה! שמרתי כמה יהלומים לחגיגה.
+
+@ Ahoy! Captain Wasabi of the good ship Hot Pepper, at your service! Phew, that bubble was a tight squeeze.
+= אהוי! קפטן וואסאבי מהספינה הטובה "הפלפל החריף", לשירותך! פיו, הבועה הזאת הייתה צפופה.
+
+@ My ship froze stiff in the harbour when the cold came, and my crew went off to find somewhere warmer.
+= הספינה שלי קפאה בנמל כשהגיע הקור, והצוות שלי הלך לחפש מקום חמים יותר.
+
+@ Now, a captain needs a bit of colour. Plant me some roses and I'll make you an honorary first mate!
+= ובכן, קפטנית צריכה קצת צבע. שתול לי כמה ורדים ואמנה אותך לסגן ראשון של כבוד!
+
+@ Roses, matey! Red ones! Don't make me walk you off a plank.
+= ורדים, מלח! אדומים! אל תכריח אותי להוריד אותך מהקרש.
+
+@ Roses! Red as my favourite chilli! You've got taste.
+= ורדים! אדומים כמו הצ'ילי האהוב עליי! יש לך טעם.
+
+@ Have this maple grove, first mate. A good captain rewards loyalty.
+= קח את חורשת האדר הזאת, סגן ראשון. קפטנית טובה מתגמלת נאמנות.
+
+@ This island has all the sparkle of a wet sock. Practical, aye, but where's the treasure?
+= לאי הזה יש נצנוץ של גרב רטובה. מעשי, נכון, אבל איפה האוצר?
+
+@ Build the Legendary Gem Store and we'll give this place some real dazzle.
+= בנה את חנות היהלומים האגדית, וניתן למקום הזה קצת זוהר אמיתי.
+
+@ Last I saw, the Steel Store had the plans.
+= בפעם האחרונה שבדקתי, התוכניות היו בחנות הפלדה.
+
+@ No Gem Store yet? A captain can't live on practical alone!
+= עדיין אין חנות יהלומים? קפטנית לא יכולה לחיות רק ממעשיות!
+
+@ Now that's more like it! Gems, glitter, fancy fountains, the works!
+= זה כבר משהו! יהלומים, נצנצים, מזרקות מפוארות, הכול!
+
+@ Here's a chest of gold from my cabin. Spend it on something shiny.
+= הנה תיבת זהב מהתא שלי. תבזבז אותה על משהו נוצץ.
+
+@ Nothing like a ripe plum on a long voyage. Sweet, juicy, gloriously messy.
+= אין כמו שזיף בשל במסע ארוך. מתוק, עסיסי, ומלכלך להפליא.
+
+@ Pity there isn't a plum tree for leagues.
+= חבל שאין עץ שזיף למרחק מילים ימיים.
+
+@ Plant me an orchard, would you? Five Legendary Plum Trees should do it.
+= תשתול לי מטע, טוב? חמישה עצי שזיף אגדיים יספיקו.
+
+@ Five plum trees, matey. I'm counting!
+= חמישה עצי שזיף, מלח. אני סופרת!
+
+@ An orchard! I've already eaten nine plums. Don't tell anyone.
+= מטע! כבר אכלתי תשעה שזיפים. אל תספר לאף אחד.
+
+@ Here, some ironwood for you. Sturdy, like our friendship.
+= הנה, קצת עץ ברזל בשבילך. חזק, כמו החברות שלנו.
+
+@ Truth be told, it's been lonely since my crew left. A captain without a crew is just a capybara in a fancy hat.
+= האמת? היה בודד מאז שהצוות שלי הלך. קפטנית בלי צוות היא סתם קפיברה עם כובע מפואר.
+
+@ But look who I found snoozing in a bubble! A woolly capybara! The fluffiest crew member a captain could want.
+= אבל תראה את מי מצאתי מנמנם בבועה! קפיברה צמרירית! חבר הצוות הכי פרוותי שקפטנית יכולה לבקש.
+
+@ Would you give this fluffball a job at a sawmill? Watching them waddle cheers me right up.
+= תיתן לכדור הפרווה הזה עבודה במנסרה? לראות אותו מתנדנד בהליכה משמח אותי מיד.
+
+@ Is our woolly friend chopping wood yet? Pop them on a sawmill!
+= החבר הצמרירי שלנו כבר חוטב עצים? תציב אותו במנסרה!
+
+@ Look at that fluff waddle! Best crew member I've ever had, and I once had a parrot who could do sums.
+= תראה איך הפרווה הזאת מתנדנדת! חבר הצוות הכי טוב שהיה לי, ופעם היה לי תוכי שידע חשבון.
+
+@ Here, a little gold for the wages.
+= הנה, קצת זהב למשכורת.
+
+@ When I first sailed in, I was nearly nibbled by zombie capybaras! Grumbly, muddy, stumbling about.
+= כשהפלגתי לכאן בפעם הראשונה, קפיברות זומבי כמעט כרסמו אותי! רוטנות, מלאות בוץ, מועדות לכל עבר.
+
+@ Thing is, they're not bad. They're just cold. They stayed out in the Gloomfen too long and forgot how to be warm.
+= העניין הוא שהן לא רעות. פשוט קר להן. הן נשארו בביצת הקדרות יותר מדי זמן ושכחו איך להיות חמות.
+
+@ A few gems buys one a nice hot bath, and it turns right back into a sweetheart.
+= כמה יהלומים קונים לאחת אמבטיה חמה ונעימה, והיא חוזרת להיות מתוקה.
+
+@ Warm up five of them for me, would you? Every crew needs a few big softies.
+= תחמם לי חמש מהן, טוב? כל צוות צריך כמה רכרוכיים גדולים.
+
+@ Five zombie capybaras, warmed up and happy. Gems for their bathwater, remember!
+= חמש קפיברות זומבי, מחוממות ומאושרות. יהלומים למי האמבטיה שלהן, אל תשכח!
+
+@ Five warm, happy, ex-zombies! They follow you about like ducklings.
+= חמש קפיברות חמות, מאושרות, זומבים לשעבר! הן הולכות אחריך כמו ברווזונים.
+
+@ Here's a stack of timber from my ship. She won't be sailing anywhere cold again.
+= הנה ערימת קורות עץ מהספינה שלי. היא לא תפליג שוב למקום קר.
+
+@ Psst. I've been practising a dance. The Hot Pepper Hornpipe! Very traditional. Very spicy.
+= פססט. התאמנתי על ריקוד. ריקוד הפלפל החריף! מסורתי מאוד. חריף מאוד.
+
+@ Trouble is, a proper performance needs a proper costume, and a proper costume needs sparkles.
+= הבעיה היא שהופעה אמיתית צריכה תלבושת אמיתית, ותלבושת אמיתית צריכה נצנצים.
+
+@ Five hundred gems' worth of sparkles. For you, I'll dance it!
+= נצנצים בשווי חמש מאות יהלומים. בשבילך, ארקוד אותו!
+
+@ The offer stands: five hundred gems and you get the Hot Pepper Hornpipe.
+= ההצעה עדיין בתוקף: חמש מאות יהלומים ותקבל את ריקוד הפלפל החריף.
+
+@ Ta-daaa! Did you see the spin at the end? I nearly fell in the sea!
+= טה-דאם! ראית את הסיבוב בסוף? כמעט נפלתי לים!
+
+@ Truth is, I didn't need all those gems for the costume. I just like being spoiled. You're a good egg, first mate.
+= האמת? לא באמת הייתי צריכה את כל היהלומים האלה לתלבושת. אני פשוט אוהבת שמפנקים אותי. אתה בחור זהב, סגן ראשון.
+
+@ Grandma used to say a hot bath fixes almost everything. I'm still working out what it doesn't fix.
+= סבתא תמיד אמרה שאמבטיה חמה מתקנת כמעט הכול. אני עדיין מנסה לגלות מה היא לא מתקנת.
+
+@ Some nights I sit on the bathhouse steps and imagine the steam rising again.
+= בחלק מהלילות אני יושבת על המדרגות של בית המרחץ ומדמיינת את האדים עולים שוב.
+
+@ Do you ever talk to the trees? I do. The maples are good listeners.
+= אתה מדבר לפעמים עם העצים? אני כן. עצי האדר יודעים להקשיב.
+
+@ I found a single mitten in the snow this morning. I feel like that sometimes.
+= מצאתי הבוקר כפפה בודדה בשלג. לפעמים אני מרגישה בדיוק כמוה.
+
+@ When the spring flows again, I'm going to open the bathhouse and give everyone a free first soak.
+= כשהמעיין יזרום שוב, אפתח את בית המרחץ ואתן לכולם טבילה ראשונה בחינם.
+
+@ You've been stopping by a lot lately. Not that I mind. I don't mind at all.
+= אתה קופץ לבקר הרבה בזמן האחרון. לא שזה מפריע לי. ממש לא מפריע לי.
+
+@ What a lovely day for sitting and chatting.
+= איזה יום יפה לשבת ולפטפט.
+
+@ Grandma's ghost hums when she's happy. She's been humming a lot since you arrived.
+= הרוח של סבתא מזמזמת כשהיא שמחה. היא מזמזמת המון מאז שהגעת.
+
+@ I like a capybara who works hard. And who brings snacks.
+= אני אוהבת קפיברה שעובד קשה. ושמביא חטיפים.
+
+@ When you say hello, I bounce a little. I can't help it.
+= כשאתה אומר שלום, אני קצת קופצת. אני לא יכולה להתאפק.
+
+@ It almost feels like spring. Even the bees look giddy.
+= כמעט מרגיש כמו אביב. אפילו הדבורים נראות מסוחררות מאושר.
+
+@ A crown, though? Couldn't you have washed up in a sensible hat?
+= אבל כתר? לא יכולת להיסחף לחוף עם כובע נורמלי?
+
+@ Have you tried floating on your back in warm water? It's the best feeling in the world.
+= ניסית לצוף על הגב במים חמימים? זאת ההרגשה הכי טובה בעולם.
+
+@ Why are you looking at me like that? You're making me blush.
+= למה אתה מסתכל עליי ככה? אתה גורם לי להסמיק.
+
+@ You have very kind eyes. Small, but kind.
+= יש לך עיניים טובות מאוד. קטנות, אבל טובות.
+
+@ Salty Kombu told me he once wrestled a whale. I think the whale won.
+= קומבו המלוח סיפר לי שפעם הוא נאבק בלווייתן. נראה לי שהלווייתן ניצח.
+
+@ I hope the guinea pigs never come back. Their tiny teeth haunt me.
+= אני מקווה שהשרקנים לא יחזרו אף פעם. השיניים הקטנטנות שלהם רודפות אותי.
+
+@ I think we make a good team, you and I.
+= נראה לי שאנחנו צוות טוב, אתה ואני.
+
+@ If we ever have little ones, they're going to love swimming.
+= אם יהיו לנו פעם קטנטנים, הם יאהבו לשחות.
+
+@ I keep a list of everything we've built together. It's getting very long.
+= אני מנהלת רשימה של כל מה שבנינו ביחד. היא נהיית ארוכה מאוד.
+
+@ A captain never shows fear. Except of crabs. Crabs are the worst.
+= קפטנית אף פעם לא מראה פחד. חוץ מסרטנים. סרטנים הם הכי גרועים.
+
+@ My ship's still frozen in the harbour. I talk to her every morning so she doesn't get lonely.
+= הספינה שלי עדיין קפואה בנמל. אני מדברת איתה כל בוקר כדי שלא תרגיש בודדה.
+
+@ Sparkly things make everything better. That's not an opinion, it's a law of the sea.
+= דברים נוצצים משפרים הכול. זאת לא דעה, זה חוק הים.
+
+@ My grandfather sailed these waters. He swore the hot spring could be smelled from three islands away.
+= סבא שלי הפליג במים האלה. הוא נשבע שאפשר להריח את המעיין החם משלושה איים משם.
+
+@ I left home with nothing but a hat and a hunch. The hat's held up better than the hunch.
+= עזבתי את הבית רק עם כובע ותחושת בטן. הכובע החזיק מעמד יותר טוב מהתחושה.
+
+@ Treasure isn't always gold, first mate. Sometimes it's plums.
+= אוצר הוא לא תמיד זהב, סגן ראשון. לפעמים הוא שזיפים.
+
+@ If you ever need someone shouted at, I'm your capybara.
+= אם אי פעם תצטרך שמישהו יצעק על מישהו, אני הקפיברה שלך.
+
+@ Did you know zombie capybaras purr when they get warm? Like a big muddy kettle.
+= ידעת שקפיברות זומבי מגרגרות כשחם להן? כמו קומקום גדול ובוצי.
+
+@ The guinea pigs ate my map once. The whole map. I had to sail by vibes for a month.
+= פעם השרקנים אכלו לי את המפה. את כל המפה. הייתי צריכה להפליג לפי תחושה במשך חודש.
+
+@ A dance a day keeps the cold away!
+= ריקוד ביום מרחיק את הקור מהתחום!
+
+@ My crew used to call me Captain Spicy. I'm not sure it was a compliment.
+= הצוות שלי קרא לי פעם קפטן חריפה. אני לא בטוחה שזאת הייתה מחמאה.
+
+@ Gems sparkle, plums are sweet, and a good friend is worth both.
+= יהלומים נוצצים, שזיפים מתוקים, וחבר טוב שווה את שניהם.
+
+@ Someday I'll sail again. But I might just stay a while.
+= יום אחד אפליג שוב. אבל אולי אשאר כאן עוד קצת.
+
+@ Secret: I get seasick. Don't tell the crew.
+= סוד: אני סובלת ממחלת ים. אל תספר לצוות.
+
+@ Miso keeps looking at you when you're not watching. Just saying.
+= מיסו כל הזמן מסתכלת עליך כשאתה לא שם לב. סתם אומרת.
+
+@ Oh! My granddaughter Miso made it through the cold! Tap her and see if she needs a hand.
+= אה! הנכדה שלי מיסו שרדה את הקור! הקש עליה ובדוק אם היא צריכה עזרה.
+
+@ There's a pirate captain on the next island. Captain Wasabi knows how to raise the bridge to Barnacle Bay.
+= יש קפטנית פיראטים באי הבא. קפטן וואסאבי יודעת איך להרים את הגשר למפרץ הצדפות.
+
+@ A spirit has appeared with an errand for you. Tap them to find out more.
+= רוח הופיעה ויש לה שליחות בשבילך. הקש עליה כדי לגלות עוד.
+
+@ Give 500 gems
+= תן 500 יהלומים
+
+@ Cancel
+= ביטול
+
+@ Oh! That's my granddaughter Miso! She made it through the cold! Go on, see if she needs a hand.
+= אה! זאת הנכדה שלי, מיסו! היא שרדה את הקור! לך תראה אם היא צריכה עזרה.

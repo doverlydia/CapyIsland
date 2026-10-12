@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Art for the hobbies (gardening, cooking, bug catching, cat care) and the airport.
+# Art for the hobbies (gardening, cooking, bug catching, fishing, birdwatching, cat care) and the airport.
 # Masters go to ArtSource/Hobby_*.png; `ship` trims and downscales them into
 # Assets/Resources/Hobbies/, where the game loads them by name.
 #
-#   batch_hobbies.sh props|crops|dishes|bugs|cats   — one group
+#   batch_hobbies.sh props|crops|dishes|bugs|fish|birds|baits|cats   — one group
 #   batch_hobbies.sh all                            — everything, then ship
 #   batch_hobbies.sh ship                           — only trim and downscale
 #   batch_hobbies.sh <Name>                         — one master again, e.g. Crop_Carrot
@@ -14,6 +14,9 @@ MATCH="Match the attached reference image's rendering style, outline weight, sha
 TAIL="Rendered in clean vector style with soft airbrushed gradients, with a dark warm brown medium-weight outline, exactly like the reference. Chunky rounded generous shapes that read clearly at 64px. Muted natural palette. Subject only, centered with a small margin, on a fully transparent background, no backdrop, no scenery, no ground plane, no shadow, no cast shadow, no glow beneath the subject, no pale oval or ellipse or smudge under the subject, nothing at all beneath it, no border, no text."
 PROP="ArtSource/Hill_Gray.png"
 ANIMAL="ArtSource/Capy_Idle.png"
+CRITTER="ArtSource/Hobby_Bug_Bee.png"   # creatures match the bug set: outlined, cute, chunky
+FISHVIEW="seen from the side, facing left, as if just caught, cute and chunky with a simple round dot eye"
+BIRDVIEW="standing, seen from the side facing left, cute plump storybook bird with a simple round dot eye"
 VIEW="seen from a 3/4 top-down oblique angle about 50 degrees above"
 
 gen () {
@@ -66,7 +69,52 @@ bugs () {
   gen Bug_Firefly "$PROP" "a single little firefly with a softly glowing yellow-green tail and small wings, seen from the side."
   gen Bug_Snail "$PROP" "a single cute garden snail with a swirly brown shell and little eye stalks, seen from the side."
   gen Bug_StagBeetle "$PROP" "a single dark brown stag beetle with big curved antler jaws, seen from above."
+  gen Bug_RainFrog "$CRITTER" "a single tiny cute bright green tree frog sitting, big round eyes, glossy skin with a few raindrops on it, little round toe pads, seen from the front-side, chunky and simple."
   gen Bug_RainbowMoth "$PROP" "a single rare moth with wings shimmering in soft rainbow pastel colours, wings open, seen from above."
+}
+
+fish () {
+  gen Fish_sardine "$CRITTER" "a single small slim sardine with a shiny silver-blue body and a darker blue back, $FISHVIEW."
+  gen Fish_anchovy "$CRITTER" "a single tiny slender anchovy, pale silver with a soft silver stripe along its side, $FISHVIEW."
+  gen Fish_mackerel "$CRITTER" "a single plump mackerel with a blue-green back covered in wavy dark stripes and a silvery white belly, $FISHVIEW."
+  gen Fish_bream "$CRITTER" "a single rosy pink sea bream with a tall rounded back, soft red fins and a pale belly, $FISHVIEW."
+  gen Fish_clownfish "$CRITTER" "a single bright orange clownfish with three white bands edged in thin black, rounded fins, $FISHVIEW."
+  gen Fish_puffer "$CRITTER" "a single round puffed-up pufferfish like a ball, sandy yellow with brown spots, short soft rounded spikes and tiny fins, $FISHVIEW."
+  gen Fish_flounder "$CRITTER" "a single flat oval flounder lying flat, seen from above, sandy brown with speckles, both little eyes on the top side, frilly fins all around its edge."
+  gen Fish_squid "$CRITTER" "a single cute little squid, pale pink-white with soft lilac spots, a pointed mantle with two small fins, two big round eyes and a bunch of short curly tentacles, seen from the side, pointing left, chunky and simple."
+  gen Fish_salmon "$CRITTER" "a single chunky salmon with silver-pink sides, a coral belly and a dark speckled back, $FISHVIEW."
+  gen Fish_octopus "$CRITTER" "a single cute round octopus, rosy magenta-red with paler spots, a big round head and eight short curly tentacles curled beneath it, seen from the front-side, friendly."
+  gen Fish_tuna "$CRITTER" "a single big chunky bluefin tuna with a dark navy back, a shiny silver belly and little yellow finlets near the tail, $FISHVIEW."
+  gen Fish_yuzuray "$CRITTER" "a single ray seen from above, wide rounded diamond-shaped wings, sunny citrus yellow with soft orange spots like a yuzu fruit, a short tail, small eyes on top."
+  gen Fish_moonfish "$CRITTER" "a single round flat moonfish (opah), silvery blue body with white spots and bright red fins and lips, $FISHVIEW."
+  gen Fish_swordfish "$CRITTER" "a single sleek slate-blue swordfish with a long pointed sword bill, a tall curved dorsal fin and a pale belly, $FISHVIEW, chunky rather than thin."
+  gen Fish_snapper "$CRITTER" "a single golden snapper with shiny gold and orange scales and a slight sparkle, a prized rare catch, $FISHVIEW."
+  gen Fish_steameel "$CRITTER" "a single friendly mint-teal eel with a soft wavy body curled in an S shape, a little fin along its back, and a few soft wisps of steam rising off it as if it came from a hot spring, $FISHVIEW."
+  gen Fish_rainbowtrout "$CRITTER" "a single rainbow trout with a speckled olive-green back, a soft pink and lilac rainbow stripe along its side and a pale belly, glistening with a few raindrops, $FISHVIEW."
+  gen Fish_coelacanth "$CRITTER" "a single ancient coelacanth, deep blue body with white speckles, chunky pale blue lobed fins like little legs and a three-lobed tail, a legendary rare catch, $FISHVIEW."
+}
+
+birds () {
+  gen Bird_sparrow "$CRITTER" "a single sparrow with a streaky brown back, a grey cap and a cream breast, $BIRDVIEW."
+  gen Bird_robin "$CRITTER" "a single round European robin with an olive-brown back and a bright orange-red breast and face, $BIRDVIEW."
+  gen Bird_bluetit "$CRITTER" "a single blue tit with a bright blue cap and wings, white cheeks, a dark eye stripe and a yellow breast, $BIRDVIEW."
+  gen Bird_finch "$CRITTER" "a single goldfinch with a red face, a black and white head, a tan body and black wings with a bright yellow bar, $BIRDVIEW."
+  gen Bird_dove "$CRITTER" "a single turtle dove, soft pinkish-grey with scalloped orange-brown wings and a little striped neck patch, $BIRDVIEW."
+  gen Bird_heron "$CRITTER" "a single grey heron standing tall on long legs, grey body, white neck folded in an S, a black crest stripe and a long yellow dagger beak, $BIRDVIEW."
+  gen Bird_kingfisher "$CRITTER" "a single kingfisher with a brilliant blue back and head, an orange breast, a white throat and a long pointed dark beak, $BIRDVIEW."
+  gen Bird_parrot "$CRITTER" "a single green parrot with red and blue wing feathers, a yellow patch and a curved pale beak, perched upright, $BIRDVIEW."
+  gen Bird_toucan "$CRITTER" "a single toucan with a black body, a white throat and a huge chunky orange and yellow beak, $BIRDVIEW."
+  gen Bird_egret "$CRITTER" "a single snowy egret, pure white with soft wispy plumes, standing on black legs with yellow feet, a slim black beak, $BIRDVIEW."
+  gen Bird_hummingbird "$CRITTER" "a single tiny hummingbird hovering, shimmering green body, a bright pink throat, a long thin beak and soft blurred wings, seen from the side facing left."
+  gen Bird_crane "$CRITTER" "a single red-crowned crane standing on long legs, white body, black neck and black tail feathers, a small red cap on its head, $BIRDVIEW."
+  gen Bird_owl "$CRITTER" "a single round fluffy tawny owl perched upright, warm brown and cream mottled feathers, big round dark eyes in a pale heart-shaped face, tiny ear tufts, $BIRDVIEW but turning its head to look at the viewer."
+  gen Bird_pheasant "$CRITTER" "a single golden pheasant with a golden crest, a bright red body, an orange striped cape around its neck and a long striped tail, a legendary rare bird, $BIRDVIEW."
+}
+
+baits () {
+  gen Bait_Worm "$PROP" "a small round wooden bait tin, open, full of three cute wiggly pink earthworms curling over the rim, $VIEW."
+  gen Bait_Shrimp "$PROP" "a little paper bait cone holding three plump pink cooked-looking shrimps with curled tails, $VIEW."
+  gen Bait_Lure "$PROP" "a single shiny golden fishing lure shaped like a little fish, with a soft sparkle and a small hook ring, a precious rare item."
 }
 
 cats () {
@@ -87,7 +135,7 @@ ship () {
     local name; name=$(basename "$src" .png); name=${name#Hobby_}
     case "$name" in Miso_Dress*) continue ;; esac   # untrimmed, framed like Capy_Coriander: batch_miso.sh ships them
     local size=128
-    case "$name" in Airport) size=320 ;; Plot|Cat_*|Stove|Pot|SewingMachine) size=192 ;; Sailor) size=256 ;; esac
+    case "$name" in Airport) size=320 ;; Plot|Cat_*|Stove|Pot|SewingMachine) size=192 ;; Sailor|Fish_*|Bird_*|Bug_*) size=256 ;; esac
     node Tools/ChatGPT/trim.mjs "$src" "$tmp/$name.png" --alpha 60 > /dev/null &&
       node Tools/ChatGPT/downscale.mjs "$tmp/$name.png" "$out/$name.png" "$size"
     rm -f "$tmp/$name.png"
@@ -99,10 +147,13 @@ case "${1:-}" in
   crops) crops ;;
   dishes) dishes ;;
   bugs) bugs ;;
+  fish) fish ;;
+  birds) birds ;;
+  baits) baits ;;
   cats) cats ;;
-  all) props; crops; dishes; bugs; cats; ship ;;
+  all) props; crops; dishes; bugs; fish; birds; cats; ship ;;
   ship) ship ;;
-  "") echo "usage: batch_hobbies.sh props|crops|dishes|bugs|cats|all|ship|<Name>" ;;
+  "") echo "usage: batch_hobbies.sh props|crops|dishes|bugs|fish|birds|cats|all|ship|<Name>" ;;
   *) line=$(grep -E "^  gen $1 " "$0") && eval "${line#  }" || echo "no such master: $1" ;;
 esac
 echo "=== HOBBIES DONE ==="

@@ -94,8 +94,18 @@ namespace CapyIsland.Game
             if (Instance == this) Instance = null;
         }
 
+        /// <summary>
+        /// True from the moment this play session loaded. Static, so a code reload in the editor
+        /// mid-Play (a script changed while playing) clears it — and with it the bridges, quests and
+        /// everything else kept in static memory. From then on the game must not save: it would
+        /// write that half-forgotten state over a good save. Restarting Play sets it again.
+        /// </summary>
+        static bool _session;
+        bool _warnedReload;
+
         void Start()
         {
+            _session = true;
             Suspended = false;
             if (Visit.Active) LoadVisit();
             else if (HasSave) Load();
@@ -108,6 +118,12 @@ namespace CapyIsland.Game
             get
             {
                 var tutorial = FindFirstObjectByType<TutorialDirector>();
+                if (_loaded && !_session)
+                {
+                    if (!_warnedReload) Debug.LogWarning("[SaveGame] Scripts reloaded during Play: saving is off until you restart Play, so the save isn't damaged.");
+                    _warnedReload = true;
+                    return false;
+                }
                 return _loaded && !Suspended && (tutorial == null || tutorial.Finished);
             }
         }
@@ -153,7 +169,7 @@ namespace CapyIsland.Game
         /// <summary>Saves your island now, whatever the autosave timer says (before a flight).</summary>
         public bool SaveHomeNow()
         {
-            if (Visit.Active || !_loaded) return false;
+            if (Visit.Active || !_loaded || !_session) return false;
             Save();
             return true;
         }
@@ -347,6 +363,27 @@ namespace CapyIsland.Game
         }
 
         /// <summary>
+        /// A save that has you (or things you built) on an island its bridges don't reach would
+        /// leave you stranded there. Open the bridges on the way instead, and say so in the log.
+        /// </summary>
+        static void HealBridges(LandMap land, SaveData d)
+        {
+            var spots = new List<Vector2> { d.king };
+            foreach (var item in d.placed) spots.Add(item.pos);
+            foreach (var spot in spots)
+            {
+                int island = land.IslandAt(spot);
+                if (island <= 0) continue;
+                foreach (var bridge in land.BridgesToReach(island))
+                {
+                    Debug.LogWarning($"[SaveGame] The save had no '{bridge}', but you have things across it: opening it.");
+                    land.OpenBridge(bridge, animate: false);
+                    if (!d.bridges.Contains(bridge)) d.bridges.Add(bridge);
+                }
+            }
+        }
+
+        /// <summary>
         /// Builds the island from <paramref name="d"/>. The trail — what is carried, and the animals
         /// following the king — comes from <paramref name="trail"/>, which is the same save at
         /// home and the player's own save when visiting, so your trail always travels with you.
@@ -364,6 +401,7 @@ namespace CapyIsland.Game
 
             var land = LandMap.Instance;
             if (land != null) foreach (var b in d.bridges) land.OpenBridge(b, animate: false);
+            if (land != null && !visiting) HealBridges(land, d);
 
             var king = FindFirstObjectByType<PlayerAvatar>();
             if (king != null)

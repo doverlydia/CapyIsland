@@ -1,0 +1,530 @@
+# Hebrew strings for Assets/Scripts/Game/*.cs (core gameplay) and the IslandBuilder HUD.
+# Item, character and achievement names come from StoryText and live in another table.
+
+# ---------------------------------------------------------------- TutorialDirector: goals
+
+@ Look around your new island
+= הסתכל סביב באי החדש שלך
+
+@ Pop the bubble to get a forest
+= פוצץ את הבועה כדי לקבל יער
+
+@ Drag the forest onto the grass
+= גרור את היער אל הדשא
+
+@ Pop the bubble to get a sawmill
+= פוצץ את הבועה כדי לקבל מנסרה
+
+@ Plant the sawmill beside the trees
+= הצב את המנסרה ליד העצים
+
+@ Pop the bubble to get a house
+= פוצץ את הבועה כדי לקבל בית
+
+@ Plant the capy house
+= הצב את בית הקפיברות
+
+@ Buy your first capybara
+= קנה את הקפיברה הראשונה שלך
+
+@ Drag the capybara onto the sawmill
+= גרור את הקפיברה אל המנסרה
+
+@ Watch your capybara work
+= צפה בקפיברה שלך עובדת
+
+@ Pop the garden bubble
+= פוצץ את בועת הגינה
+
+@ Plant flowers by the sleepy capybara
+= שתול פרחים ליד הקפיברה המנומנמת
+
+@ Tap the warm heart following you
+= הקש על הלב החם שהולך אחריך
+
+@ Walk across the new bridge
+= חצה את הגשר החדש
+
+@ Find the Steam Tower and tap it
+= מצא את מגדל האדים והקש עליו
+
+# ---------------------------------------------------------------- TutorialDirector: Old Yuzu's lines
+
+@ Hello, little one! I'm Old Yuzu, or what's left of me. Welcome to my chilly island. Without a home, nothing here will ever warm up again.
+= שלום, קטנטן! אני סבתא יוזו, או מה שנשאר ממני. ברוך הבא לאי הקריר שלי. בלי בית, שום דבר כאן לא יתחמם לעולם.
+
+@ Tap the bubble to collect the pine forest inside it.
+= הקש על הבועה כדי לאסוף את יער האורנים שבתוכה.
+
+@ Planting time! Drag the tree out and drop it to plant a forest.
+= הגיע זמן לשתול! גרור את העץ החוצה ושחרר אותו כדי לשתול יער.
+
+@ There's another bubble. Tap it to find a Sawmill.
+= יש עוד בועה. הקש עליה כדי למצוא מנסרה.
+
+@ One more bubble. That one holds a Capy House.
+= עוד בועה אחת. בתוכה מחכה בית קפיברות.
+
+@ Drag the Capy House out and drop it anywhere on the grass.
+= גרור את בית הקפיברות החוצה ושחרר אותו איפה שתרצה על הדשא.
+
+@ That sawmill is too far from the trees. Its capybaras can't walk that far to chop.
+= המנסרה הזאת רחוקה מדי מהעצים. הקפיברות שלה לא יכולות ללכת כל כך רחוק כדי לכרות.
+
+@ Drop the sawmill near your trees. Its capybaras chop the forest around it.
+= שחרר את המנסרה ליד העצים שלך. הקפיברות שלה כורתות את היער שמסביבה.
+
+@ Tap the capybara by the house to welcome one in. It costs 10 wood and 10 gold.
+= הקש על הקפיברה שליד הבית כדי לקבל אחת אל האי. זה עולה 10 עץ ו-10 זהב.
+
+@ That's the rhythm: forest, sawmill, capybara. Watch the wood pile up with every chop.
+= זה הקצב: יער, מנסרה, קפיברה. תראה איך העץ נערם עם כל מכה.
+
+@ Now drag the capybara onto the sawmill to put it to work.
+= עכשיו גרור את הקפיברה אל המנסרה כדי שתתחיל לעבוד.
+
+@ Your capybara has dozed off. It's hungry! Capybaras eat flowers, and there's a garden in that bubble.
+= הקפיברה שלך נרדמה. היא רעבה! קפיברות אוכלות פרחים, ובבועה ההיא יש גינה.
+
+@ Tap the bubble to collect the daisy garden.
+= הקש על הבועה כדי לאסוף את גינת החינניות.
+
+@ Plant the garden close to the sleepy capybara so it can reach the flowers.
+= שתול את הגינה קרוב לקפיברה המנומנמת, כדי שתוכל להגיע לפרחים.
+
+@ Oh! A warm heart! All your building is waking the island up. The spirits can feel it.
+= אוי! לב חם! כל מה שאתה בונה מעורר את האי. הרוחות מרגישות את זה.
+
+@ That glowing heart following you is a warm heart. Tap it to send it home.
+= הלב הזוהר שהולך אחריך הוא לב חם. הקש עליו כדי לשלוח אותו הביתה.
+
+@ Wonderful! A bridge has risen to the next island. Hold your finger down to walk your capybara across.
+= נפלא! גשר עלה אל האי הבא. החזק את האצבע על המסך כדי ללכת עם הקפיברה שלך לצד השני.
+
+@ Ah... this is the heart of the Capy Isles. The old hot spring is here somewhere.
+= אה... זה הלב של איי הקפיברות. המעיין החם הישן נמצא כאן איפשהו.
+
+@ Whenever you're stuck, visit the Steam Tower. Bring the warmth back to the islands!
+= בכל פעם שאתה תקוע, בקר במגדל האדים. החזר את החום לאיים!
+
+@ Find the tall Steam Tower and tap it. Let's see what's inside.
+= מצא את מגדל האדים הגבוה והקש עליו. בוא נראה מה יש בפנים.
+
+# ---------------------------------------------------------------- Objectives
+# The bridge step and Salty Kombu's offer below come in one variant per price combination
+# (wood / gold / gems), so no bare "{0} gems"-style template is needed.
+
+@ First: build the {0}
+= קודם: בנה את {0}
+
+@ First: put down the {0}
+= קודם: הנח את {0}
+
+@ First: pay the ghost to open the bridge to {0} ({1} wood, {2} gold, {3} gems)
+= קודם: שלם לרוח כדי לפתוח את הגשר אל {0} ({1} עץ, {2} זהב, {3} יהלומים)
+
+@ First: pay the ghost to open the bridge to {0} ({1} wood, {2} gold)
+= קודם: שלם לרוח כדי לפתוח את הגשר אל {0} ({1} עץ, {2} זהב)
+
+@ First: pay the ghost to open the bridge to {0} ({1} wood, {2} gems)
+= קודם: שלם לרוח כדי לפתוח את הגשר אל {0} ({1} עץ, {2} יהלומים)
+
+@ First: pay the ghost to open the bridge to {0} ({1} gold, {2} gems)
+= קודם: שלם לרוח כדי לפתוח את הגשר אל {0} ({1} זהב, {2} יהלומים)
+
+@ First: pay the ghost to open the bridge to {0} ({1} wood)
+= קודם: שלם לרוח כדי לפתוח את הגשר אל {0} ({1} עץ)
+
+@ First: pay the ghost to open the bridge to {0} ({1} gold)
+= קודם: שלם לרוח כדי לפתוח את הגשר אל {0} ({1} זהב)
+
+@ First: pay the ghost to open the bridge to {0} ({1} gems)
+= קודם: שלם לרוח כדי לפתוח את הגשר אל {0} ({1} יהלומים)
+
+@ First: pay the ghost to open the bridge to {0} (free)
+= קודם: בקש מהרוח לפתוח את הגשר אל {0} (בחינם)
+
+@ Help {0}: feed hungry workers and chase off pests
+= עזור ל-{0}: האכל פועלים רעבים וגרש מזיקים
+
+@ Collect your reward from {0}
+= אסוף את הפרס שלך אצל {0}
+
+@ Talk to {0}
+= דבר עם {0}
+
+@ Every goal complete. Enjoy your island!
+= כל המטרות הושלמו. תהנה מהאי שלך!
+
+@ Finish the task you were given
+= סיים את המשימה שקיבלת
+
+@ Plant flowers for a hungry capybara
+= שתול פרחים בשביל קפיברה רעבה
+
+@ Bring a burrow capybara to the island
+= הבא קפיברת מחילות אל האי
+
+@ Gather five burrow capybaras
+= אסוף חמש קפיברות מחילות
+
+@ Find a woolly capybara
+= מצא קפיברה צמרירית
+
+@ Build the Silver Store
+= בנה את חנות הכסף
+
+@ Build the Steel Store
+= בנה את חנות הפלדה
+
+@ Build the Gold Store
+= בנה את חנות הזהב
+
+@ Build the Bronze Store
+= בנה את חנות הארד
+
+@ Build the Legendary Gem Store
+= בנה את חנות היהלומים האגדית
+
+@ Build the Blossom Chapel
+= בנה את קפלת הפריחה
+
+@ Build a Spirit Statue
+= בנה פסל רוח
+
+@ Place a mine
+= הצב מכרה
+
+@ Plant a tulip garden for Miso
+= שתול גינת צבעונים בשביל מיסו
+
+@ Buy the Wedding Dress
+= קנה את שמלת הכלה
+
+@ Hear Salty Kombu's story
+= הקשב לסיפור של קומבו המלוח
+
+@ Plant a rose garden for the Captain
+= שתול גינת ורדים בשביל קפטן וואסאבי
+
+@ Buy the Pearl Necklace
+= קנה את שרשרת הפנינים
+
+@ Chase every guinea pig off the island
+= גרש את כל השרקנים מהאי
+
+@ Keep helping Miso
+= המשך לעזור למיסו
+
+@ Buy the Tiara
+= קנה את הנזר
+
+@ Hold the wedding at the Blossom Chapel
+= ערוך את החתונה בקפלת הפריחה
+
+@ Put a woolly capybara to work at a sawmill
+= שלח קפיברה צמרירית לעבוד במנסרה
+
+@ Grow five Legendary Plum Trees
+= גדל חמישה עצי שזיף אגדיים
+
+@ Warm up five zombie capybaras
+= חמם חמש קפיברות זומבי
+
+@ Try on an outfit in the Wardrobe
+= מדוד תלבושת בארון הבגדים
+
+@ Visit three friends' islands
+= בקר באיים של שלושה חברים
+
+@ Feed a hungry worker on a friend's island
+= האכל פועל רעב באי של חבר
+
+@ Chase the pests off a friend's island
+= גרש את המזיקים מהאי של חבר
+
+@ Catch a fish (walk to the shore)
+= תפוס דג (לך אל החוף)
+
+@ Spot a bird in the trees
+= גלה ציפור בין העצים
+
+@ Write a book in the Library
+= כתוב ספר בספרייה
+
+@ Sew your own T-shirt design
+= תפור עיצוב חולצה משלך
+
+@ Grow and harvest a vegetable
+= גדל ירק וקטוף אותו
+
+@ Cook a dish from your bag
+= בשל מנה ממה שיש לך בתיק
+
+@ Catch a bug with your net
+= תפוס חרק ברשת שלך
+
+@ Befriend and adopt a stray cat
+= התיידד עם חתול רחוב ואמץ אותו
+
+@ Give a cat a fish, then wait for its present
+= תן לחתול דג, ואז חכה למתנה שלו
+
+@ Build an airstrip (Neighbours screen)
+= בנה מסלול נחיתה (מסך השכנים)
+
+@ Pay Captain Wasabi 500 gems for a dance
+= שלם לקפטן וואסאבי 500 יהלומים תמורת ריקוד
+
+# ---------------------------------------------------------------- Island hints (Hints.Show)
+
+@ A {0} ate the last flower in the garden. Plant bigger gardens for your hungry workers.
+= הפרח האחרון בגינה נאכל בידי {0}. שתול גינות גדולות יותר בשביל הפועלים הרעבים שלך.
+
+@ A {0} chopped down the last tree in a forest. Too many workers on one forest will strip it bare.
+= העץ האחרון ביער נכרת בידי {0}. יותר מדי פועלים על יער אחד ישאירו אותו קירח.
+
+@ A {0} dug out the last rock in a hill. With no rocks in reach, the mine will close.
+= הסלע האחרון בגבעה נחצב בידי {0}. בלי סלעים בהישג יד, המכרה ייסגר.
+
+@ You found a free <b>{0}</b>! Tap the bubble to pick it up.
+= מצאת <b>{0}</b> בחינם! הקש על הבועה כדי לאסוף.
+
+@ Tap fruit trees to shake them. All sorts of goodies fall out, sometimes even gems.
+= הקש על עצי פרי כדי לנער אותם. נופלים מהם כל מיני דברים טובים, ולפעמים אפילו יהלומים.
+
+@ You shook a <b>{0}</b>
+= ניערת <b>{0}</b>
+
+@ A worker ran out of trees and chopped down a fruit tree! Uh oh, a zombie capybara climbed out!
+= לפועל נגמרו העצים והוא כרת עץ פרי! אוי לא, קפיברת זומבי טיפסה ממנו החוצה!
+
+@ A worker ran out of trees and chopped down a fruit tree! Uh oh, a guinea pig jumped out!
+= לפועל נגמרו העצים והוא כרת עץ פרי! אוי לא, שרקן קפץ ממנו החוצה!
+
+@ A worker ran out of trees and chopped down a fruit tree, and a fizz bomb fell out! Stand back!
+= לפועל נגמרו העצים והוא כרת עץ פרי, ופצצת תסס נפלה ממנו! התרחק!
+
+@ A guinea pig is nibbling all your flowers! Find it and plant a bomb right next to it.
+= שרקן מכרסם את כל הפרחים שלך! מצא אותו והנח פצצה ממש לידו.
+
+@ A zombie capybara is stumbling about, wrecking trees and rocks! Give it some gems for a warm bath and it'll switch sides.
+= קפיברת זומבי משוטטת באי והורסת עצים וסלעים! תן לה כמה יהלומים לאמבטיה חמה, והיא תעבור לצד שלך.
+
+@ Welcome home! Your island missed you.
+= ברוך שובך הביתה! האי שלך התגעגע אליך.
+
+@ Welcome back! Your island kept warm while you were away.
+= ברוך שובך! האי שלך שמר על החום בזמן שלא היית.
+
+# ---------------------------------------------------------------- Zombie capybara (MonsterAnimal)
+
+@ Grrrnnh... so cold... (It needs a warm bath. Come back with 20 gems.)
+= גררררנה... כל כך קר... (היא צריכה אמבטיה חמה. חזור עם 20 יהלומים.)
+
+@ Grrrnnh... so cold... (A warm bath costs 20 gems. Afterwards it'll happily work for you.)
+= גררררנה... כל כך קר... (אמבטיה חמה עולה 20 יהלומים. אחרי זה היא תעבוד בשבילך בשמחה.)
+
+@ Pay 20 Gems
+= שלם 20 יהלומים
+
+# ---------------------------------------------------------------- Salty Kombu (PiratePete)
+
+@ Arr, back again? If you've spare goods, drag 'em onto me and I'll make you an offer.
+= ארר, שוב כאן? אם יש לך סחורה מיותרת, גרור אותה אליי ואציע לך מחיר.
+
+@ *Salty Kombu leans in and tells you about the time he arm-wrestled a sea serpent for a barrel of pickles. It goes on for quite a while.*
+= *קומבו המלוח רוכן קדימה ומספר לך על הפעם שבה התמודד בהורדת ידיים עם נחש ים על חבית מלפפונים חמוצים. הסיפור נמשך די הרבה זמן.*
+
+@ A {0}? Arr… I've traded for worse. One gold, and not a coin more.
+= {0}? ארר… החלפתי דברים גרועים מזה. זהב אחד, ולא מטבע יותר.
+
+@ Can't take that one off your paws, I'm afraid.
+= את זה אני לא יכול לקחת לך מהכפות, חוששני.
+
+@ I'll give you {0} wood and {1} gold and {2} gems for your {3}.
+= אתן לך {0} עץ, {1} זהב ו-{2} יהלומים תמורת {3}.
+
+@ I'll give you {0} wood and {1} gold for your {2}.
+= אתן לך {0} עץ ו-{1} זהב תמורת {2}.
+
+@ I'll give you {0} wood and {1} gems for your {2}.
+= אתן לך {0} עץ ו-{1} יהלומים תמורת {2}.
+
+@ I'll give you {0} gold and {1} gems for your {2}.
+= אתן לך {0} זהב ו-{1} יהלומים תמורת {2}.
+
+@ I'll give you {0} wood for your {1}.
+= אתן לך {0} עץ תמורת {1}.
+
+@ I'll give you {0} gold for your {1}.
+= אתן לך {0} זהב תמורת {1}.
+
+@ I'll give you {0} gems for your {1}.
+= אתן לך {0} יהלומים תמורת {1}.
+
+@ I'll give you a pat on the back for your {0}.
+= אתן לך טפיחה על השכם תמורת {0}.
+
+@ Deal
+= עסקה
+
+@ No Deal
+= אין עסקה
+
+# ---------------------------------------------------------------- Elder Matcha (Church)
+
+@ Welcome to the Blossom Chapel. I'm Elder Matcha. I'd be delighted to hold a wedding here, once two hearts have found each other. Keep at it, young one.
+= ברוך הבא לקפלת הפריחה. אני הזקן מאצ'ה. אשמח מאוד לערוך כאן חתונה, ברגע ששני לבבות ימצאו זה את זה. תמשיך כך, צעיר שלי.
+
+@ You two are already married! Shall we renew your vows under the blossom?
+= אתם כבר נשואים! שנחדש את הנדרים שלכם תחת הפריחה?
+
+@ Shall we hold the wedding? The ceremony costs 50 wood and 50 gold, for the lanterns and the cake.
+= שנערוך את החתונה? הטקס עולה 50 עץ ו-50 זהב, בשביל הפנסים והעוגה.
+
+@ Renew Vows
+= חידוש נדרים
+
+@ Wedding Ceremony
+= טקס חתונה
+
+@ Cancel
+= ביטול
+
+# ---------------------------------------------------------------- Bank (BankTrade)
+
+@ Bank
+= בנק
+
+@ {0} gems → {1} gold
+= {0} יהלומים ← {1} זהב
+
+@ {0} gems → {1} wood
+= {0} יהלומים ← {1} עץ
+
+@ Trade your gems for gold. You have {0} gems.
+= החלף את היהלומים שלך בזהב. יש לך {0} יהלומים.
+
+@ Trade your gems for wood. You have {0} gems.
+= החלף את היהלומים שלך בעץ. יש לך {0} יהלומים.
+
+# ---------------------------------------------------------------- Steam Tower (TowerOfLove)
+
+@ <b>{0}.</b> {1}% of its warmth has returned. {2}
+= <b>{0}.</b> {1}% מהחום שלו כבר חזר. {2}
+
+@ The island is still cold and quiet
+= האי עדיין קר ושקט
+
+@ Little sparks of life are popping up
+= ניצוצות קטנים של חיים מתחילים לצוץ
+
+@ The island is waking up
+= האי מתעורר
+
+@ The island is busy, bright and humming
+= האי עסוק, מואר ומזמזם
+
+@ The whole island is glowing
+= כל האי זוהר
+
+@ Every heart is home.
+= כל הלבבות בבית.
+
+@ One heart still to bring home.
+= נשאר עוד לב אחד להחזיר הביתה.
+
+@ {0} hearts still to bring home.
+= נשארו עוד {0} לבבות להחזיר הביתה.
+
+# ---------------------------------------------------------------- Bridge ghosts
+
+@ Bridge to {0}
+= גשר אל {0}
+
+# ---------------------------------------------------------------- Wardrobe
+
+@ Royal Crown
+= כתר מלכותי
+
+@ Yuzu
+= יוזו
+
+@ Flower Crown
+= זר פרחים
+
+@ Cosy Beanie
+= כובע גרב חמים
+
+@ Straw Hat
+= כובע קש
+
+@ Party Hat
+= כובע מסיבה
+
+@ Hot Spring Towel
+= מגבת המעיין החם
+
+@ Bandana
+= בנדנה
+
+@ Bow Tie
+= עניבת פרפר
+
+@ Red Scarf
+= צעיף אדום
+
+@ Reading Glasses
+= משקפי קריאה
+
+@ Sunglasses
+= משקפי שמש
+
+@ Little Backpack
+= תרמיל קטן
+
+@ Lucky Sock
+= גרב המזל
+
+@ Bell Collar
+= קולר עם פעמון
+
+@ Royal Cape
+= גלימה מלכותית
+
+@ Day 7 daily gift
+= מתנה יומית ביום ה-7
+
+@ Yours from the start
+= שלך מההתחלה
+
+@ A present from a cat
+= מתנה מחתול
+
+@ You sewed this!
+= תפרת את זה!
+
+@ Achievement: {0}
+= הישג: {0}
+
+@ Keep playing
+= המשך לשחק
+
+# ---------------------------------------------------------------- Player profile
+
+@ Capy
+= קפי
+
+# ---------------------------------------------------------------- IslandBuilder HUD (purchase dialog)
+
+@ Purchase
+= קנייה
+
+@ Tap to shake down fruit
+= הקש כדי לנער פירות
+
+# ---------------------------------------------------------------- Game/Atmosphere.cs
+
+@ A wish on a shooting star! +{0} gold
+= משאלה על כוכב נופל! +{0} זהב

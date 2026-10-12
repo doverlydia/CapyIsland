@@ -11,14 +11,14 @@ const RATE = 22050;
 let seed = 12345;
 const rnd = () => ((seed = (seed * 1103515245 + 12345) >>> 0) / 4294967296) * 2 - 1;
 
-function write(name, samples, dir = "Assets/Audio") {
+function write(name, samples, dir = "Assets/Audio", peakTo = 0.9) {
   const n = samples.length, data = Buffer.alloc(44 + n * 2);
   data.write("RIFF", 0); data.writeUInt32LE(36 + n * 2, 4); data.write("WAVE", 8);
   data.write("fmt ", 12); data.writeUInt32LE(16, 16); data.writeUInt16LE(1, 20); data.writeUInt16LE(1, 22);
   data.writeUInt32LE(RATE, 24); data.writeUInt32LE(RATE * 2, 28); data.writeUInt16LE(2, 32); data.writeUInt16LE(16, 34);
   data.write("data", 36); data.writeUInt32LE(n * 2, 40);
   let peak = 0; for (const s of samples) peak = Math.max(peak, Math.abs(s));
-  const gain = peak > 0 ? 0.9 / peak : 1;
+  const gain = peak > 0 ? peakTo / peak : 1;
   for (let i = 0; i < n; i++) data.writeInt16LE(Math.round(Math.max(-1, Math.min(1, samples[i] * gain)) * 32767), 44 + i * 2);
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(`${dir}/${name}.wav`, data);
@@ -159,3 +159,178 @@ write("Sfx_Tap", make(0.07, (t) => Math.sin(2 * Math.PI * 900 * t) * env(t, 0.00
     const amp = Math.min(1, t / 0.09) * (u > 0.65 ? Math.pow(1 - (u - 0.65) / 0.35, 1.5) : 1);
     return voice * amp;
   }), "Assets/Resources/Sfx"); }
+
+// ---------------------------------------------------------------- ambience
+// Loaded at runtime from Resources by Ambience.cs. Appended after everything above so the seeded
+// noise those sounds use is unchanged — regenerating keeps every earlier file byte-identical.
+
+// Soft noise: white noise through several low-passes in a row (a steep roll-off, so no hiss up
+// top) and a gentle high-pass (so no rumble a phone speaker cannot play): a band of soft air in
+// the middle. The top of the band may move, which is how a wave "opens" at its crest.
+function softNoise(stages, low = 180) {
+  const y = new Array(stages).fill(0); let hp = 0;
+  const b = Math.exp(-2 * Math.PI * low / RATE);
+  return (cut) => {
+    const a = Math.exp(-2 * Math.PI * cut / RATE);
+    let x = rnd();
+    for (let i = 0; i < stages; i++) x = y[i] = (1 - a) * x + a * y[i];
+    hp = (1 - b) * x + b * hp;
+    return x - hp;
+  };
+}
+
+// A seamless loop: render a little extra and cross-fade the tail into the head.
+function loop(seconds, xfade, fn) {
+  const n = Math.round(seconds * RATE), x = Math.round(xfade * RATE);
+  const raw = make(seconds + xfade, fn);
+  const out = new Float32Array(n);
+  for (let i = 0; i < n; i++) out[i] = raw[i];
+  for (let i = 0; i < x; i++) {
+    const k = i / x;
+    out[i] = raw[i] * Math.sqrt(k) + raw[n + i] * Math.sqrt(1 - k);
+  }
+  return out;
+}
+
+// Gentle waves: a low, soft wash that swells and draws back three times a loop. The filter opens
+// only a little at each crest, so it reads as water on sand rather than static.
+{ const body = softNoise(3, 160), foam = softNoise(4, 300);
+  const swells = [0.0, 4.6, 9.0], L = 13.5;
+  const swell = (t) => {
+    let a = 0;
+    for (const s of swells) for (const off of [0, L]) {
+      const u = t - s - off;
+      if (u < 0 || u > 5.5) continue;
+      a += u < 1.8 ? Math.pow(Math.sin(Math.PI / 2 * u / 1.8), 2) : Math.exp(-(u - 1.8) / 1.3);
+    }
+    return Math.min(1.2, a);
+  };
+  write("Amb_Waves", loop(L, 2, (t) => {
+    const s = swell(t);
+    return body(520 + 260 * s) * (0.5 + 0.6 * s) + foam(900 + 700 * s) * 0.45 * s * s;
+  }), "Assets/Resources/Sfx", 0.45); }
+
+// A soft breeze: low air moving, a slow whoosh rising and falling; no whistle, no hiss.
+{ const air = softNoise(4, 200);
+  write("Amb_Wind", loop(12, 2, (t) => {
+    const breath = 0.45 + 0.35 * Math.pow(Math.sin(Math.PI * t / 6), 2) + 0.2 * Math.sin(2 * Math.PI * t / 4.1 + 1);
+    return air(480 + 380 * breath) * breath;
+  }), "Assets/Resources/Sfx", 0.45); }
+
+// Birdsong: four little calls, sine voices sliding in pitch with a quick flutter.
+function tweet(t, start, len, f0, f1, flutter = 0) {
+  const u = t - start; if (u < 0 || u > len) return 0;
+  const k = u / len, f = f0 + (f1 - f0) * k;
+  const shape = Math.sin(Math.PI * k);
+  return Math.sin(2 * Math.PI * f * u + flutter * Math.sin(2 * Math.PI * 38 * u)) * shape;
+}
+write("Amb_Chirp1", make(0.5, (t) =>   // three quick rising tweets
+  tweet(t, 0.0, 0.09, 3200, 4600) + tweet(t, 0.15, 0.09, 3300, 4800) + tweet(t, 0.3, 0.11, 3400, 5000)), "Assets/Resources/Sfx");
+write("Amb_Chirp2", make(0.8, (t) => {  // a falling trill
+  let s = 0;
+  for (let k = 0; k < 8; k++) s += tweet(t, k * 0.085, 0.07, 4800 - k * 230, 4300 - k * 230) * (1 - k * 0.07);
+  return s;
+}), "Assets/Resources/Sfx");
+write("Amb_Chirp3", make(0.7, (t) =>   // "tee-oo"
+  tweet(t, 0.0, 0.22, 3900, 4200, 1.2) + tweet(t, 0.3, 0.32, 3300, 2500, 1.5)), "Assets/Resources/Sfx");
+write("Amb_Chirp4", make(0.9, (t) => {  // a little warble
+  const u = t / 0.9; if (u >= 1) return 0;
+  const f = 3600 + 600 * Math.sin(2 * Math.PI * 9 * t);
+  return Math.sin(2 * Math.PI * f * t) * Math.pow(Math.sin(Math.PI * u), 1.5) * (0.6 + 0.4 * Math.sin(2 * Math.PI * 4 * t));
+}), "Assets/Resources/Sfx");
+
+// Soft rain: lots of tiny droplet ticks (each a little decaying tone, high but gentle) over a
+// quiet airy bed. Mastered low, like the waves.
+{ const bed = softNoise(4, 300);
+  const L = 8, drops = [];
+  for (let t = 0; t < L + 1; t += -Math.log(1 - (rnd() * 0.5 + 0.5)) / 38) {
+    drops.push({ t, f: 1300 + (rnd() * 0.5 + 0.5) * 1800, a: 0.25 + (rnd() * 0.5 + 0.5) * 0.75, d: 0.004 + (rnd() * 0.5 + 0.5) * 0.008 });
+  }
+  write("Amb_Rain", loop(L, 1, (t) => {
+    let s = bed(1400) * 0.9;
+    for (const dr of drops) {
+      const u = t - dr.t;
+      if (u < 0 || u > 0.05) continue;
+      s += Math.sin(2 * Math.PI * dr.f * u) * Math.exp(-u / dr.d) * dr.a * 0.06;
+    }
+    return s;
+  }), "Assets/Resources/Sfx", 0.4); }
+
+
+// ---------------------------------------------------------------- the opening movie
+// Played by UI/Cutscenes/IntroAudio.cs. Appended last, like the ambience, so every earlier file
+// stays byte-identical. Soft and round: band-limited air, sine bells, nothing hissy.
+
+// a little bell: a sine with a faint fifth above, struck softly and ringing out
+const bell = (t, start, f, ring = 0.6, a = 1) => {
+  const u = t - start; if (u < 0) return 0;
+  const att = Math.min(1, u / 0.006);
+  return a * att * Math.exp(-u / ring) * (Math.sin(2 * Math.PI * f * u) + 0.25 * Math.sin(2 * Math.PI * f * 3 * u) * Math.exp(-u / (ring * 0.3)));
+};
+
+// A cold gust sweeping through: soft air rising and falling, a little brighter at its peak.
+{ const air = softNoise(4, 220);
+  write("Intro_Wind", make(3.2, (t) => {
+    const k = t / 3.2, swell = Math.pow(Math.sin(Math.PI * k), 1.6);
+    return air(380 + 700 * swell) * swell;
+  }), "Assets/Resources/Sfx", 0.5); }
+
+// Freezing over: tiny icy pings scattering and thinning out, over a soft settling hush.
+{ const hush = softNoise(3, 260);
+  const pings = [];
+  for (let i = 0; i < 26; i++) pings.push({ t: Math.pow((rnd() * 0.5 + 0.5), 1.8) * 1.6, f: 1700 + (rnd() * 0.5 + 0.5) * 1500, a: 0.3 + (rnd() * 0.5 + 0.5) * 0.5 });
+  write("Intro_Freeze", make(2.2, (t) => {
+    let s = hush(700) * Math.exp(-t / 0.8) * 0.5;
+    for (const p of pings) s += bell(t, p.t, p.f, 0.12, p.a * 0.35);
+    return s;
+  }), "Assets/Resources/Sfx", 0.45); }
+
+// Old Yuzu's magic: a warm shimmer rising up a pentatonic run of soft bells.
+{ const run = [587, 659, 740, 880, 988, 1175, 1319, 1480];
+  write("Intro_Magic", make(2.8, (t) => {
+    let s = 0;
+    run.forEach((f, i) => { s += bell(t, i * 0.12, f, 0.9, 0.55) * (1 + 0.15 * Math.sin(2 * Math.PI * 6 * t)); });
+    const pad = Math.sin(2 * Math.PI * 294 * t) + 0.6 * Math.sin(2 * Math.PI * 441 * t);
+    return s + pad * 0.12 * Math.sin(Math.PI * Math.min(1, t / 2.8));
+  }), "Assets/Resources/Sfx", 0.5); }
+
+// A bubble of warm air floating up: a round little bloop.
+write("Intro_Bubble", make(0.4, (t) => {
+  const f = 320 + 520 * Math.min(1, t / 0.12);
+  return Math.sin(2 * Math.PI * f * t) * Math.min(1, t / 0.01) * Math.exp(-t / 0.09) + 0.2 * bell(t, 0.05, 1400, 0.08);
+}), "Assets/Resources/Sfx", 0.45);
+
+// Fading into a ghost: a soft, slightly wavering chord sinking away.
+write("Intro_Fade", make(3, (t) => {
+  const glide = 1 - 0.18 * (t / 3);
+  const wob = 1 + 0.004 * Math.sin(2 * Math.PI * 5 * t);
+  const v = [440, 554, 659].reduce((s, f, i) => s + Math.sin(2 * Math.PI * f * glide * wob * t + i), 0);
+  return v * Math.sin(Math.PI * Math.min(1, t / 3)) * 0.5;
+}), "Assets/Resources/Sfx", 0.35);
+
+// One gentle wave washing in and drawing back.
+{ const body = softNoise(3, 160), foam = softNoise(4, 300);
+  write("Intro_Waves", make(4, (t) => {
+    const s = t < 1.6 ? Math.pow(Math.sin(Math.PI / 2 * t / 1.6), 2) : Math.exp(-(t - 1.6) / 1.1);
+    return body(480 + 260 * s) * (0.4 + 0.6 * s) + foam(800 + 600 * s) * 0.35 * s * s;
+  }), "Assets/Resources/Sfx", 0.45); }
+
+// Something glinting in the waves: three quick high twinkles.
+write("Intro_Sparkle", make(1.1, (t) =>
+  bell(t, 0, 1760, 0.25, 0.6) + bell(t, 0.11, 2349, 0.22, 0.5) + bell(t, 0.22, 2637, 0.3, 0.55)), "Assets/Resources/Sfx", 0.45);
+
+// The crown lands: a bright, happy chime up a major chord.
+write("Intro_Crown", make(1.6, (t) =>
+  bell(t, 0, 784, 0.5) + bell(t, 0.08, 988, 0.5) + bell(t, 0.16, 1175, 0.6) + bell(t, 0.26, 1568, 0.8, 0.8)), "Assets/Resources/Sfx", 0.55);
+
+// A little campfire: a soft low breath of flame and a scatter of gentle crackles. Band-limited
+// like the wind, so the crackles are woody ticks, not hiss.
+{ const roar = softNoise(4, 120), snap = softNoise(3, 400);
+  const L = 8, pops = [];
+  for (let t = 0.05; t < L; t += 0.06 + 0.35 * Math.abs(rnd())) pops.push([t, 0.4 + 0.6 * Math.abs(rnd()), 0.008 + 0.018 * Math.abs(rnd())]);
+  write("Amb_Fire", loop(L, 1, (t) => {
+    const breath = 0.6 + 0.25 * Math.sin(2 * Math.PI * t / 2.7) + 0.15 * Math.sin(2 * Math.PI * t / 1.3 + 2);
+    let c = 0;
+    for (const [at, a, d] of pops) { const u = t - at; if (u >= 0 && u < 0.12) c += a * Math.exp(-u / d); }
+    return roar(300 + 160 * breath) * breath * 0.6 + snap(1700) * c * 0.9;
+  }), "Assets/Resources/Sfx", 0.4); }

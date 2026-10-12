@@ -19,6 +19,8 @@ namespace CapyIsland.CameraRig
     /// where you point, which is as accurate as your finger.
     ///
     /// The camera follows the king, so there is no separate pan gesture to conflict with any of it.
+    /// To carry something past the edge of the screen, drag it to the edge: the king walks that way
+    /// (faster the nearer the edge), the camera follows, and the item stays under your finger.
     /// </summary>
     [RequireComponent(typeof(ResponsiveCameraRig))]
     public class CameraInputController : MonoBehaviour
@@ -37,6 +39,10 @@ namespace CapyIsland.CameraRig
         [Tooltip("The king ignores a steer target closer than this, so he does not jitter on the spot.")]
         [SerializeField] float steerDeadZone = 0.35f;
 
+        [Header("Edge walk")]
+        [Tooltip("How near a screen edge, as a fraction of the shorter side, a dragged item makes the king walk.")]
+        [SerializeField] float edgeBand = 0.13f;
+
         /// <summary>Raised on a quick tap that did not land on an item.</summary>
         public event Action<Vector2> Tapped;
 
@@ -45,6 +51,9 @@ namespace CapyIsland.CameraRig
 
         /// <summary>True while the player is dragging an item or pinching.</summary>
         public bool IsManipulating => _heldActor != null || _pinching;
+
+        /// <summary>While a held thing is being let go: true if it was pressed and released without moving.</summary>
+        public static bool ReleaseWasTap { get; private set; }
 
         public float SteerDeadZone => steerDeadZone;
 
@@ -132,6 +141,9 @@ namespace CapyIsland.CameraRig
                 // (the original pauses map input while a menu is open).
                 _ignorePress = ModalOpen || PointerOverUI();
                 if (_ignorePress) { SteerTarget = null; return; }
+
+                // Any touch on the island takes over from walking by himself.
+                Game.PlayerAvatar.StopAutoWalk();
                 _movedBeyondSlop = false;
                 _pressStartScreen = screen;
                 _pressStartTime = Time.unscaledTime;
@@ -139,7 +151,17 @@ namespace CapyIsland.CameraRig
                 var world = ScreenToWorld(screen);
 
                 // Carried items first: the trail rides right behind the king and must stay grabbable.
+                // A bubble under the finger wins over anything behind it, unless a carried item is
+                // the nearer of the two.
                 var carried = Game.DraggableActor.Pick(world);
+                var bubble = Game.Bubble.Pick(world);
+                if (bubble != null && (carried == null ||
+                    Vector2.Distance(bubble.transform.position, world) < Vector2.Distance(carried.GrabCentre, world)))
+                {
+                    _pendingTap = bubble;
+                    SteerTarget = null;
+                    return;
+                }
                 if (carried != null)
                 {
                     _heldActor = carried;
@@ -168,7 +190,11 @@ namespace CapyIsland.CameraRig
                 if (_pendingTap != null) return;   // holding a tap target does nothing
 
                 var world = ScreenToWorld(screen);
-                if (_heldActor != null) _heldActor.DragTo(world);
+                if (_heldActor != null)
+                {
+                    _heldActor.DragTo(world);
+                    SteerTarget = EdgeWalk(screen);
+                }
                 else SteerTarget = world;   // track the finger
                 return;
             }
@@ -190,8 +216,11 @@ namespace CapyIsland.CameraRig
 
                 if (_heldActor != null)
                 {
+                    // Something held and let go without moving: a tap, as far as it cares (a bottle opens its note).
+                    ReleaseWasTap = !_movedBeyondSlop && Time.unscaledTime - _pressStartTime <= tapMaxDuration;
                     _heldActor.EndDrag();
                     _heldActor = null;
+                    ReleaseWasTap = false;
                     return;
                 }
 
@@ -209,7 +238,31 @@ namespace CapyIsland.CameraRig
             }
         }
 
-        static bool ModalOpen => UI.SpeechDialog.IsOpen || UI.CardPopup.IsShowing || UI.PurchaseDialog.IsOpen || UI.UiScreen.AnyOpen;
+        /// <summary>
+        /// While an item is held near a screen edge, a steer target off that way, so the king walks
+        /// toward the edge and the world scrolls under the item (the map screen does the same).
+        /// Null when the finger is clear of every edge, or when it is the king himself being held.
+        /// </summary>
+        Vector2? EdgeWalk(Vector2 screen)
+        {
+            if (_heldActor == null || _heldActor.GetComponent<Game.PlayerAvatar>() != null) return null;
+            var king = FindFirstObjectByType<Game.PlayerAvatar>();
+            if (king == null) return null;
+
+            float band = Mathf.Min(Screen.width, Screen.height) * edgeBand;
+            float Push(float at, float size) =>
+                at < band ? -Mathf.Clamp01(1f - at / band) : at > size - band ? Mathf.Clamp01(1f - (size - at) / band) : 0f;
+            var push = new Vector2(Push(screen.x, Screen.width), Push(screen.y, Screen.height));
+            if (push.sqrMagnitude < 1e-4f) return null;
+
+            // The king throttles over three dead zones from his target: put the target at a
+            // distance that turns the depth into the edge into his pace.
+            float depth = Mathf.Clamp01(push.magnitude);
+            float distance = steerDeadZone * (1.05f + 1.95f * Mathf.Max(0.35f, depth));
+            return (Vector2)king.transform.position + push.normalized * distance;
+        }
+
+        static bool ModalOpen => UI.TextReader.IsOpen || UI.HudTour.IsOpen || UI.SpeechDialog.IsOpen || UI.CardPopup.IsShowing || UI.PurchaseDialog.IsOpen || UI.UiScreen.AnyOpen;
 
         static bool PointerOverUI()
         {

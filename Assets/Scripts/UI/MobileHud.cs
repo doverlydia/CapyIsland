@@ -49,10 +49,28 @@ namespace CapyIsland.UI
             BorrowResourceIcons();
             Restyle();
             Build();
+            TextWatcher.Sweep();
         }
 
-        void OnEnable() => Wardrobe.Unlocked += AnnounceOutfit;
-        void OnDisable() => Wardrobe.Unlocked -= AnnounceOutfit;
+        void OnEnable()
+        {
+            Wardrobe.Unlocked += AnnounceOutfit;
+            JournalRewards.Completed += AnnounceJournal;
+        }
+
+        void OnDisable()
+        {
+            Wardrobe.Unlocked -= AnnounceOutfit;
+            JournalRewards.Completed -= AnnounceJournal;
+        }
+
+        static void AnnounceJournal(Hobby h, WearItem hat)
+        {
+            string page = h switch { Hobby.Birding => "bird", Hobby.Bugs => "bug", _ => "fish" };
+            string body = $"You found every {page} on the islands! Here are {JournalRewards.Gems} gems"
+                          + (hat != null ? $", and the <b>{hat.Name}</b> is waiting in your wardrobe." : ".");
+            CardPopup.Show($"The {page} journal is complete!", body, hat != null ? Wardrobe.Art(hat) : IconPainter.Trophy);
+        }
 
         void OnDestroy()
         {
@@ -62,7 +80,7 @@ namespace CapyIsland.UI
         static void AnnounceOutfit(WearItem item) =>
             CardPopup.Show("New outfit!", "<b>" + item.Name + "</b> is waiting for you in the Wardrobe.", Wardrobe.Art(item));
 
-        GameObject _giftDot;
+        GameObject _giftDot, _eventsDot;
 
         /// <summary>
         /// The daily gift opens by itself once a session, as soon as the island is yours (after the
@@ -70,6 +88,7 @@ namespace CapyIsland.UI
         /// </summary>
         IEnumerator Start()
         {
+            HudTour.BeginIfFirstTime(this);
             while (true)
             {
                 yield return new WaitForSecondsRealtime(1.5f);
@@ -77,16 +96,28 @@ namespace CapyIsland.UI
                 if (tutorial != null && !tutorial.Finished) continue;
                 if (Visit.Active || Visit.Travelling) yield break;   // gifts wait until you are home
                 if (UiScreen.AnyOpen || SpeechDialog.IsOpen || CardPopup.IsShowing || PurchaseDialog.IsOpen) continue;
+                if (HudTour.IsOpen || TextReader.IsOpen) continue;
+                // A contest that ended while you were away: how you did, once.
+                var result = GameEvents.TakeResult();
+                if (result != null) { EventsScreen.ShowResult(result); continue; }
                 if (DailyGifts.CanClaim && DailyGiftScreen.Instance != null) DailyGiftScreen.Instance.Open();
                 yield break;
             }
         }
 
-        GameObject _addFriend;
+        GameObject _addFriend, _stopWalking;
+        PlayerAvatar _king;
 
         void Update()
         {
+            if (_stopWalking != null)
+            {
+                if (_king == null) _king = FindFirstObjectByType<PlayerAvatar>();
+                bool walking = _king != null && _king.AutoWalking && !UiScreen.AnyOpen;
+                if (_stopWalking.activeSelf != walking) _stopWalking.SetActive(walking);
+            }
             if (_giftDot != null && _giftDot.activeSelf != DailyGifts.CanClaim) _giftDot.SetActive(DailyGifts.CanClaim);
+            if (_eventsDot != null && Time.frameCount % 30 == 0) _eventsDot.SetActive(GameEvents.NeedsAttention);
             if (_addFriend != null && _addFriend.activeSelf != (Visit.Active && !Visit.HostIsFriend))
                 _addFriend.SetActive(Visit.Active && !Visit.HostIsFriend);
         }
@@ -122,6 +153,14 @@ namespace CapyIsland.UI
             emojis.gameObject.AddComponent<EmojiBubbles>();
             afterBar++;
             gameObject.AddComponent<VisitDirector>();
+            gameObject.AddComponent<StationGuide>();
+            gameObject.AddComponent<Ambience>();
+            gameObject.AddComponent<Atmosphere>();
+            gameObject.AddComponent<DayNight>();
+            gameObject.AddComponent<WorldMoments>();
+            gameObject.AddComponent<NightLights>();
+            gameObject.AddComponent<MusicPlayer>();
+            gameObject.AddComponent<TipTriggers>();
             gameObject.AddComponent<Fishing>();
             gameObject.AddComponent<Birding>();
             gameObject.AddComponent<BugCatching>();
@@ -134,6 +173,7 @@ namespace CapyIsland.UI
             var tracker = ObjectiveTracker.Create(_safe);
             tracker.transform.SetSiblingIndex(afterBar + 1);
             ProfileBadge.Create(_safe).transform.SetSiblingIndex(afterBar + 1);
+            ClockPill.Create(_safe).transform.SetSiblingIndex(afterBar + 1);
             VisitorsColumn.Create(_safe).transform.SetSiblingIndex(afterBar + 1);
 
             var side = UiKit.Rect("SideButtons", _safe);
@@ -167,6 +207,8 @@ namespace CapyIsland.UI
             MakeScreen<LibraryScreen>(screens, "LibraryScreen");
             MakeScreen<SewingScreen>(screens, "SewingScreen");
             MakeScreen<CookingScreen>(screens, "CookingScreen");
+            MakeScreen<BaitShopScreen>(screens, "BaitShopScreen");
+            var events = MakeScreen<EventsScreen>(screens, "EventsScreen");
             var menu = MakeScreen<MenuScreen>(screens, "MenuScreen");
 
             menu.AddEntry("Profile", IconPainter.FaceSmile, UiKit.Hex("E58FB0"), () => profile.Open());
@@ -175,6 +217,7 @@ namespace CapyIsland.UI
             menu.AddEntry("Collection", IconPainter.Cards, UiKit.Hex("A77BD6"), () => collection.Open());
             menu.AddEntry("Wardrobe", IconPainter.Hanger, UiKit.Hex("E58FB0"), () => wardrobe.Open(), () => Wardrobe.Ready);
             menu.AddEntry("Daily Gifts", IconPainter.Calendar, UiKit.Sun, () => gifts.Open());
+            menu.AddEntry("Events", IconPainter.Trophy, UiKit.Hex("E3A92B"), () => events.Open());
             menu.AddEntry("Hobbies", IconPainter.Rod, UiKit.Hex("3E9C8F"), () => HobbiesScreen.Show());
             menu.AddEntry("Friends", IconPainter.Plane, UiKit.Hex("5B9BD5"), () => friends.Open());
             menu.AddEntry("Settings", IconPainter.Gear, UiKit.Hex("6B8FA8"), () => settings.Open());
@@ -199,7 +242,22 @@ namespace CapyIsland.UI
                 UiKit.Place(dot.rectTransform, new Vector2(1f, 1f), new Vector2(2f, 2f), new Vector2(34f, 34f));
                 _giftDot = dot.gameObject;
                 UiKit.RoundButton(side, "Friends", IconPainter.Plane, "Friends", UiKit.Hex("5B9BD5"), () => friends.Open());
+                var eventsButton = UiKit.RoundButton(side, "Events", IconPainter.Trophy, "Events", UiKit.Hex("E3A92B"), () => events.Open());
+                var edot = UiKit.Image(eventsButton.transform, "Dot", UiKit.Circle, UiKit.Danger);
+                UiKit.Place(edot.rectTransform, new Vector2(1f, 1f), new Vector2(2f, 2f), new Vector2(34f, 34f));
+                _eventsDot = edot.gameObject;
+                _eventsDot.SetActive(GameEvents.NeedsAttention);
             }
+            // While walking somewhere by itself (an arrow or "Show me" was tapped): a way to stop.
+            var stop = UiKit.Button(_safe, "StopWalking", "Stop walking", UiKit.ButtonStyle.Secondary, PlayerAvatar.StopAutoWalk, 30f, IconPainter.Close);
+            var sr = (RectTransform)stop.transform.parent;
+            sr.anchorMin = sr.anchorMax = sr.pivot = new Vector2(0.5f, 1f);
+            sr.anchoredPosition = new Vector2(0f, -250f);
+            sr.sizeDelta = new Vector2(320f, 88f);
+            sr.SetSiblingIndex(screens.GetSiblingIndex());
+            _stopWalking = sr.gameObject;
+            _stopWalking.SetActive(false);
+
             EmojiBar.Create(_safe).transform.SetSiblingIndex(screens.GetSiblingIndex());
             FishingButton.Create(_safe).transform.SetSiblingIndex(screens.GetSiblingIndex());
 
@@ -293,6 +351,7 @@ namespace CapyIsland.UI
                 pill.rectTransform.anchorMax = Vector2.one;
                 pill.rectTransform.offsetMin = new Vector2(-6f, 2f);
                 pill.rectTransform.offsetMax = new Vector2(-14f, -2f);
+                CounterInfo.Add(group, pill);
                 foreach (var t in group.GetComponentsInChildren<TMP_Text>(true))
                 {
                     t.font = UiKit.HeadingFont != null ? UiKit.HeadingFont : t.font;

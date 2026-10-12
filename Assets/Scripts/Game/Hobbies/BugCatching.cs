@@ -95,7 +95,7 @@ namespace CapyIsland.Game
                 bug._sr = go.AddComponent<SpriteRenderer>();
                 bug._sr.sprite = art;
                 bug._sr.sortingOrder = order;
-                float size = kind.Id == "Snail" || kind.Id == "Ladybug" ? 0.32f : 0.45f;
+                float size = kind.Id == "Snail" || kind.Id == "Ladybug" ? 0.48f : 0.68f;   // big enough to spot on a phone
                 go.transform.localScale = Vector3.one * (size / Mathf.Max(0.01f, art.bounds.size.x));
                 bug._leaveAt = Time.time + Random.Range(30f, 50f);
                 bug._sr.color = new Color(1f, 1f, 1f, 0f);

@@ -158,7 +158,7 @@ namespace CapyIsland.Game
             if (_hintTimer > 0f && InWorld)
             {
                 _hintTimer -= Time.deltaTime;
-                if (_hintTimer <= 0f && !QuestSystem.AnyoneTalkedTo) Hints.Show(NudgeLine);
+                if (_hintTimer <= 0f && !QuestSystem.AnyoneTalkedTo) Hints.Show(NudgeLine, () => !QuestSystem.AnyoneTalkedTo);
             }
         }
 
@@ -211,6 +211,7 @@ namespace CapyIsland.Game
         }
 
         string NudgeLine => StoryText.NudgeFor(kind);
+        bool _introduced;
 
         // ---------------------------------------------------------------- talking
 
@@ -229,6 +230,17 @@ namespace CapyIsland.Game
             var q = Progress;
             var pages = qs.PagesFor(q, kind);
             var face = _bodyRenderer != null ? _bodyRenderer.sprite : null;
+
+            // Meeting Miso for the first time before Old Yuzu got to say who she is: Yuzu says it
+            // first, so it is never missed, and then Miso speaks.
+            if (kind == Kind.Coriander && !QuestSystem.AnyoneTalkedTo && !_introduced
+                && (UI.GhostDialogue.Instance == null || !UI.GhostDialogue.Instance.HasSaid(NudgeLine)))
+            {
+                _introduced = true;
+                var guide = UI.GhostDialogue.Instance != null ? UI.GhostDialogue.Instance.Face : null;
+                UI.SpeechDialog.Show(guide, StoryText.Guide, new[] { StoryText.MisoIntro }, Tap);
+                return;
+            }
             QuestSystem.AnyoneTalkedTo = true;
 
             // Peach's last wish: the dance, for 500 gems.

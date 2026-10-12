@@ -18,8 +18,10 @@ namespace CapyIsland.EditorTools
             // Wardrobe art loads at runtime from Resources, so it lives outside Assets/Art.
             bool wardrobe = assetPath.StartsWith("Assets/Resources/Wardrobe/");
             bool hobbies = assetPath.StartsWith("Assets/Resources/Hobbies/");
-            bool cutscene = assetPath.StartsWith("Assets/Resources/Cutscenes/");   // full-stage paintings
+            bool cutscene = assetPath.StartsWith("Assets/Resources/Cutscenes/")    // full-stage paintings
+                            || assetPath.StartsWith("Assets/Resources/Events/");   // and the event banners
             if (!assetPath.StartsWith("Assets/Art/") && !wardrobe && !hobbies && !cutscene) return;
+            if (assetPath.StartsWith("Assets/Art/Icon/")) return;   // app icons: full size, uncompressed, set by the App Icon menu
             if (!assetImporter.importSettingsMissing) return;
 
             var importer = (TextureImporter)assetImporter;

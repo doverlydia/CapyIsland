@@ -1,3 +1,4 @@
+using DG.Tweening;
 using UnityEngine;
 
 namespace CapyIsland.Game
@@ -50,7 +51,37 @@ namespace CapyIsland.Game
             // Capture the authored scale FIRST. Capturing it lazily inside MarkCarried let a saved,
             // already-shrunken scale be mistaken for full size, so items shrank again on every load.
             CaptureScale();
-            transform.localScale = placed ? _placedScale : _placedScale * carriedScale;
+            transform.localScale = placed ? _placedScale : _placedScale * CarriedScale();
+        }
+
+        void OnEnable() => UI.Accessibility.Changed += Rescale;
+        void OnDisable() => UI.Accessibility.Changed -= Rescale;
+
+        void Rescale()
+        {
+            if (!placed && _capturedScale) transform.localScale = _placedScale * CarriedScale();
+        }
+
+        /// <summary>Smallest a carried item is drawn, in world units across its longer side.</summary>
+        const float MinCarriedSize = 1.1f;
+        const float MinCarriedSizeBig = 1.5f;
+
+        /// <summary>
+        /// The carried shrink, raised for anything that would end up too small to see or pick up in
+        /// the trail — a cat's button, a bomb, a sprout. Big items keep their designed shrink.
+        /// </summary>
+        float CarriedScale()
+        {
+            float s = carriedScale;
+            var sr = GetComponentInChildren<SpriteRenderer>(true);
+            if (sr == null || sr.sprite == null) return s;
+            var art = sr.sprite.bounds.size;
+            var local = sr.transform.localScale;
+            // The picture's size at the item's placed scale, ignoring the facing flip.
+            float across = Mathf.Max(art.x * Mathf.Abs(local.x), art.y * Mathf.Abs(local.y)) * Mathf.Abs(_placedScale.y);
+            float min = UI.Accessibility.BigGrab ? MinCarriedSizeBig : MinCarriedSize;
+            if (across * s < min && across > 0.001f) s = Mathf.Min(min / across, 3f);
+            return s;
         }
 
         /// <summary>Sets up an item built in code (hobby objects, the airstrip) rather than by the island builder.</summary>
@@ -99,8 +130,20 @@ namespace CapyIsland.Game
 
             if (CanPlaceAt(transform.position)) { MarkPlaced(); return; }
 
-            // Blocked: back into the trail at the king's feet, not left hovering over the obstacle.
+            // Blocked: say why, rather than let it look as if the drop was ignored.
+            Hints.Show(BunniSpace.PointOnLand(transform.position)
+                ? "Not enough room there. Drop it where the circle turns green."
+                : "That's water! Things can only be planted on land.");
+
+            // Back into the trail at the king's feet, not left hovering over the obstacle, with a
+            // little bounce so the eye follows it home.
             MarkCarried();
+            var body = transform.Find("Sprite");
+            if (body != null)
+            {
+                body.DOKill(true);
+                body.DOPunchScale(new Vector3(0.25f, -0.2f, 0f), 0.45f, 6, 0.6f);
+            }
             var king = FindFirstObjectByType<PlayerAvatar>();
             if (king != null)
             {
@@ -138,7 +181,7 @@ namespace CapyIsland.Game
             CaptureScale();
             placed = false;
             // Carried items ride in the trail as small icons, not full-size buildings and forests.
-            transform.localScale = _placedScale * carriedScale;
+            transform.localScale = _placedScale * CarriedScale();
 
             var follower = GetComponent<Follower>();
             if (follower != null) follower.PickUpIntoInventory();
@@ -152,7 +195,7 @@ namespace CapyIsland.Game
         {
             CaptureScale();
             placed = false;
-            transform.localScale = _placedScale * carriedScale;
+            transform.localScale = _placedScale * CarriedScale();
             transform.localRotation = Quaternion.identity;
             SendMessage("OnReturnedToBubble", SendMessageOptions.DontRequireReceiver);
         }

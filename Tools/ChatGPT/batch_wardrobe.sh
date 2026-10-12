@@ -55,6 +55,12 @@ items () {
   item Face_Sunglasses "a pair of round dark sunglasses with a thin black frame, seen from the front, lenses with a small white shine."
   item Face_Glasses "a pair of round wire reading glasses with thin gold frames and clear lenses, seen from the front."
   item Back_Backpack "a tiny rounded hiking backpack in forest green with a brown flap and two shoulder straps, seen from the side."
+  item Neck_MedalFish "a shiny round gold winner's medal stamped with a little fish, hanging on a short teal ribbon loop worn around a neck, seen from the front."
+  item Neck_MedalBug "a shiny round gold winner's medal stamped with a little butterfly, hanging on a short leaf-green ribbon loop worn around a neck, seen from the front."
+  item Neck_MedalBird "a shiny round gold winner's medal stamped with a little songbird, hanging on a short sky-blue ribbon loop worn around a neck, seen from the front."
+  item Hat_Angler "a soft olive-green fisherman's bucket hat with a little colourful fishing fly hooked onto its band."
+  item Hat_Feather "a small jaunty red felt cap with one long colourful bird feather tucked into its band."
+  item Hat_Antennae "a thin headband with two springy curled bug antennae, each topped with a fluffy little yellow pom-pom ball."
   item Back_Cape "a short flowing royal cape in deep red with a gold trim edge, drawn as it hangs from the shoulders seen from behind and slightly to the side."
 }
 

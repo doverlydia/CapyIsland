@@ -59,6 +59,9 @@ namespace CapyIsland.UI
             Hobby.Gardening => "Gardening", Hobby.Cooking => "Cooking", Hobby.Writing => "Writing", _ => "Cat care",
         };
 
+        /// <summary>In its bubble: you, and the new hobby landing beside you.</summary>
+        protected override Vector3 BubbleView => new(0.52f, 0.45f, 1.1f);
+
         protected override IEnumerator Script()
         {
             string backdrop = _hobby switch
@@ -68,7 +71,7 @@ namespace CapyIsland.UI
                 _ => "Cutscene_Mill",
             };
             Backdrop(Resources.Load<Sprite>("Cutscenes/" + backdrop), UiKit.Hex("BFE3F2"), UiKit.Hex("8DBA5A"));
-            var you = CastPlayer(new Vector2(0.42f, 0.08f), 0.3f, faceRight: true);
+            var you = CastPlayer(new Vector2(0.44f, 0.12f), 0.3f, faceRight: true);
 
             // The gear drops in with a sparkle.
             var gearArt = _hobby switch

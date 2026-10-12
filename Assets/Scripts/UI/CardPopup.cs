@@ -42,6 +42,9 @@ namespace CapyIsland.UI
                 titleLabel.fontSizeMin = titleLabel.fontSize * 0.6f;
                 titleLabel.enableAutoSizing = true;
             }
+            // The card is a fixed size: with Easy Reading the text grows as far as the card
+            // allows and no further (tap or hold it to read it in the big reader).
+            if (bodyLabel != null) bodyLabel.overflowMode = TextOverflowModes.Ellipsis;
         }
 
         void OnEnable() => Cards.Found += OnCardFound;

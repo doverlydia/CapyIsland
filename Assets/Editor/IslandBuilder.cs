@@ -219,18 +219,9 @@ namespace CapyIsland.EditorTools
             sr.sprite = Load("Assets/Art/Common/Bubble.png");
             sr.sortingOrder = order;
 
-            var arrow = new GameObject("Arrow");
-            arrow.transform.SetParent(go.transform, false);
-            arrow.transform.localPosition = new Vector3(0f, 2.0f, 0f);
-            arrow.transform.localScale = Vector3.one * 0.7f;
-            var ar = arrow.AddComponent<SpriteRenderer>();
-            ar.sprite = Load("Assets/Art/Common/Arrow_Down.png");
-            ar.sortingOrder = order + 2;
-
             var bubble = go.AddComponent<Game.Bubble>();
             var so = new SerializedObject(bubble);
             so.FindProperty("contents").objectReferenceValue = contents;
-            so.FindProperty("arrow").objectReferenceValue = arrow.transform;
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
@@ -276,9 +267,6 @@ namespace CapyIsland.EditorTools
 
         /// <summary>Set before Build to regenerate the island textures instead of reusing them.</summary>
         public static bool RepaintLand;
-
-        [MenuItem("CapyIsland/Delete Save")]
-        public static void DeleteSave() => Game.SaveGame.Delete();
 
         [MenuItem("CapyIsland/Build/Island (repaint land)")]
         public static void BuildRepainting()

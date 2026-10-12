@@ -1,0 +1,76 @@
+{
+  "tracks": [
+    {
+      "name": "Celesta",
+      "instrument": "celesta",
+      "volume": 0.45,
+      "reverb": 0.8,
+      "mute": false,
+      "solo": false,
+      "notes": [
+        { "t": 8, "p": 81, "d": 6, "v": 0.5 },
+        { "t": 14, "p": 77, "d": 2, "v": 0.5 },
+        { "t": 24, "p": 86, "d": 6, "v": 0.5 },
+        { "t": 30, "p": 81, "d": 2, "v": 0.5 },
+        { "t": 40, "p": 79, "d": 6, "v": 0.5 },
+        { "t": 46, "p": 82, "d": 2, "v": 0.5 },
+        { "t": 56, "p": 85, "d": 8, "v": 0.5 }
+      ]
+    },
+    {
+      "name": "Glass pad",
+      "instrument": "glasspad",
+      "volume": 0.55,
+      "reverb": 0.7,
+      "mute": false,
+      "solo": false,
+      "notes": [
+        { "t": 0, "p": 53, "d": 16, "v": 0.5 },
+        { "t": 0, "p": 57, "d": 16, "v": 0.5 },
+        { "t": 0, "p": 64, "d": 16, "v": 0.5 },
+        { "t": 16, "p": 53, "d": 16, "v": 0.5 },
+        { "t": 16, "p": 57, "d": 16, "v": 0.5 },
+        { "t": 16, "p": 62, "d": 16, "v": 0.5 },
+        { "t": 32, "p": 50, "d": 16, "v": 0.5 },
+        { "t": 32, "p": 58, "d": 16, "v": 0.5 },
+        { "t": 32, "p": 65, "d": 16, "v": 0.5 },
+        { "t": 48, "p": 52, "d": 16, "v": 0.5 },
+        { "t": 48, "p": 55, "d": 16, "v": 0.5 },
+        { "t": 48, "p": 61, "d": 16, "v": 0.5 }
+      ]
+    },
+    {
+      "name": "Felt piano",
+      "instrument": "feltpiano",
+      "volume": 0.4,
+      "reverb": 0.6,
+      "mute": false,
+      "solo": false,
+      "notes": [
+        { "t": 0, "p": 50, "d": 16, "v": 0.5 },
+        { "t": 16, "p": 46, "d": 16, "v": 0.5 },
+        { "t": 32, "p": 43, "d": 16, "v": 0.5 },
+        { "t": 48, "p": 45, "d": 16, "v": 0.5 }
+      ]
+    }
+  ],
+  "name": "intro_awaken",
+  "title": "Intro: Awakening",
+  "bpm": 60,
+  "bars": 4,
+  "beatsPerBar": 4,
+  "stepsPerBeat": 4,
+  "key": "D",
+  "scale": "minor",
+  "swing": 0,
+  "loop": true,
+  "humanize": 0.4,
+  "master": {
+    "volume": 0.6,
+    "warmth": 0.2,
+    "reverb": 0.7,
+    "echo": 0.12,
+    "echoTime": 0.5,
+    "echoFeedback": 0.35
+  }
+}

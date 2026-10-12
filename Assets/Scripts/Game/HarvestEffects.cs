@@ -17,6 +17,12 @@ namespace CapyIsland.Game
 
         [Header("Particle sprites")]
         [SerializeField] Sprite leaf;
+
+        /// <summary>The leaf picture, for the air's drifting leaves (Ambience).</summary>
+        public Sprite LeafSprite => leaf;
+
+        /// <summary>The petal picture, for petals drifting off flower gardens (Atmosphere).</summary>
+        public Sprite PetalSprite => petal;
         [SerializeField] Sprite chip;
         [SerializeField] Sprite petal;
         [SerializeField] Sprite grit;
@@ -260,7 +266,7 @@ namespace CapyIsland.Game
         static Material _material;
 
         /// <summary>One shared unlit sprite material for every particle system.</summary>
-        static Material SpriteMaterial()
+        public static Material SpriteMaterial()
         {
             if (_material != null) return _material;
             var shader = Shader.Find("Universal Render Pipeline/2D/Sprite-Unlit-Default")

@@ -85,7 +85,7 @@ namespace CapyIsland.Game
             var s = _sources[_next];
             _next = (_next + 1) % _sources.Length;
             s.pitch = 1f + Random.Range(-pitchJitter, pitchJitter);
-            s.PlayOneShot(clips[k], Mathf.Clamp01(volume) * masterVolume);
+            s.PlayOneShot(clips[k], Mathf.Clamp01(volume) * masterVolume * AudioMix.Effects);
         }
     }
 }

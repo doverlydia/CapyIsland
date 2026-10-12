@@ -112,7 +112,7 @@ namespace CapyIsland.Game
         /// <summary>What to buy, and where, to take a hobby up.</summary>
         public static string HowToUnlock(Hobby h) => h switch
         {
-            Hobby.Fishing => "Buy a Fishing Rod at the Bronze Store",
+            Hobby.Fishing => "Buy a Fishing Rod from Skipper Nori on the beach",
             Hobby.Bugs => "Buy a Bug Net at the Bronze Store",
             Hobby.Birding => "Buy Binoculars at the Silver Store",
             Hobby.Sewing => "Buy a Sewing Machine at the Steel Store",
@@ -166,11 +166,26 @@ namespace CapyIsland.Game
             e.best = Mathf.Max(e.best, size);
             AddToBag("fish:" + id, 1, save: false);
             Save();
+            GameEvents.Record(Hobby.Fishing, HobbyData.FishById(id)?.Stars ?? 1);
+            if (first) JournalRewards.Check(Hobby.Fishing);
             return (first, record);
         }
 
-        public static bool LogBird(string id) => Log(D.birds, id);
-        public static bool LogBug(string id) => Log(D.bugs, id);
+        public static bool LogBird(string id)
+        {
+            bool first = Log(D.birds, id);
+            GameEvents.Record(Hobby.Birding, HobbyData.BirdById(id)?.Stars ?? 1);
+            if (first) JournalRewards.Check(Hobby.Birding);
+            return first;
+        }
+
+        public static bool LogBug(string id)
+        {
+            bool first = Log(D.bugs, id);
+            GameEvents.Record(Hobby.Bugs, HobbyData.Bug(id)?.Stars ?? 1);
+            if (first) JournalRewards.Check(Hobby.Bugs);
+            return first;
+        }
 
         static bool Log(List<Entry> list, string id)
         {

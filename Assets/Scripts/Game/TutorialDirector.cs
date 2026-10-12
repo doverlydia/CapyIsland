@@ -93,21 +93,29 @@ namespace CapyIsland.Game
         }
         float _greetTimer;
 
-        void OnEnable() => Hints.Shown += Say;
-        void OnDisable() => Hints.Shown -= Say;
+        void OnEnable() => Hints.Shown += SayHint;
+        void OnDisable() => Hints.Shown -= SayHint;
+
+        // A hint is an event: if it fires again, it should show again.
+        void SayHint(string line)
+        {
+            if (dialogue != null) dialogue.Say(line, again: true);
+        }
 
         void Start()
         {
             // A returning player (or a visitor on someone else's island) never sees the opening.
             if (Visit.Active || SaveGame.HasSave) SkipForReturningPlayer();
             if (_step == Step.Done) return;
+            // A brand-new game opens with the story of the Big Chill; Old Yuzu says hello once it ends.
+            if (!UI.IntroCutscene.Seen) { UI.IntroCurtain.Drop(); UI.AwakeningScreen.Show(() => UI.IntroCutscene.Show()); }
             _greetTimer = greetSeconds;
             Say("Hello, little one! I'm Old Yuzu, or what's left of me. Welcome to my chilly island. Without a home, nothing here will ever warm up again.");
         }
 
         void Update()
         {
-            if (dialogue != null) dialogue.HoldLastLine = _step != Step.Done;
+            if (dialogue != null) dialogue.HoldLastLine = _step != Step.Done && !Guidance.Off;
 
             switch (_step)
             {
@@ -132,6 +140,8 @@ namespace CapyIsland.Game
                 case Step.CrossToHeart: TickCrossToHeart(); break;
                 case Step.OpenTower: TickOpenTower(); break;
             }
+            // The tutorial was ended: its steps still move the story on, but nothing points.
+            if (Guidance.Off && pointer != null) pointer.Hide();
         }
 
         // ---------------------------------------------------------------- steps
@@ -158,11 +168,10 @@ namespace CapyIsland.Game
             if (item == null) return;                       // still inside its bubble
             if (item.Placed) { Advance(next); return; }
 
-            Say(line);
-            // Show the drag: from the thing in your trail to open ground ahead of the king.
+            Say(CircleLineOr(item, line, PlantCircleLine));
+            // Show the drag: from the thing in your trail to the nearest open ground beside the king.
             var king = FindFirstObjectByType<PlayerAvatar>();
-            if (pointer != null && king != null)
-                pointer.DragFrom(item.transform, (Vector2)king.transform.position + new Vector2(3.2f, 2.2f));
+            if (king != null) ShowDrag(item, (Vector2)king.transform.position + new Vector2(1.4f, 0.4f), 7f);
         }
 
         void TickPlantSawmill()
@@ -176,7 +185,7 @@ namespace CapyIsland.Game
                 // Planted, but out of reach of any tree: say so rather than let it look broken.
                 if (workplace != null && !workplace.HasWorkInReach())
                 {
-                    Say("That sawmill is too far from the trees. It only works on the forest inside its circle.");
+                    Say("That sawmill is too far from the trees. Its capybaras can't walk that far to chop.");
                     var forest = FindPlaceable("Forest");
                     if (pointer != null && forest != null) pointer.PointAt(forest.transform);
                     return;
@@ -185,10 +194,9 @@ namespace CapyIsland.Game
                 return;
             }
 
-            Say("Drop the sawmill right beside your trees. It can only reach the forest inside its circle.");
+            Say(CircleLineOr(mill, "Drop the sawmill near your trees. Its capybaras chop the forest around it.", PlantCircleLine));
             var trees = FindPlaceable("Forest");
-            if (pointer != null && trees != null)
-                pointer.DragFrom(mill.transform, (Vector2)trees.transform.position + new Vector2(2.6f, -1.4f));
+            if (trees != null) ShowDrag(mill, (Vector2)trees.transform.position + new Vector2(2.6f, -1.4f), 4f);
         }
 
         void TickBuy()
@@ -253,12 +261,11 @@ namespace CapyIsland.Game
             if (gardenItem == null) { Advance(Step.Done); return; }
             if (gardenItem.Placed) { AwakenSpirits(); return; }
 
-            Say("Plant the garden close to the sleepy capybara so it can reach the flowers.");
+            Say(CircleLineOr(gardenItem, "Plant the garden close to the sleepy capybara so it can reach the flowers.", PlantCircleLine));
             Worker sleeper = null;
             foreach (var w in FindObjectsByType<Worker>(FindObjectsSortMode.None))
                 if (w.IsAsleep && w.IsHungry) { sleeper = w; break; }
-            if (pointer != null && sleeper != null)
-                pointer.DragFrom(gardenItem.transform, (Vector2)sleeper.transform.position + new Vector2(2.2f, -1.2f));
+            if (sleeper != null) ShowDrag(gardenItem, (Vector2)sleeper.transform.position + new Vector2(2.2f, -1.2f), 3f);
         }
 
         /// <summary>
@@ -354,15 +361,128 @@ namespace CapyIsland.Game
 
         // ---------------------------------------------------------------- helpers
 
+        Placeable _spotFor;
+        Vector2 _spotWanted, _spot;
+        float _spotCheckAt;
+
+        /// <summary>
+        /// The pointing hand drags the item to where it can really be planted: the nearest spot to
+        /// <paramref name="wanted"/> (within <paramref name="reach"/>) where its circle would be
+        /// green. Copying the hand must never end in a red circle. The spot is kept while it stays
+        /// clear, so the hand doesn't wander as the king walks.
+        /// </summary>
+        void ShowDrag(Placeable item, Vector2 wanted, float reach)
+        {
+            if (pointer == null || item == null) return;
+            bool stale = item != _spotFor || (wanted - _spotWanted).sqrMagnitude > 9f;
+            if (stale || Time.time >= _spotCheckAt)
+            {
+                _spotCheckAt = Time.time + 0.5f;
+                if (stale || !Roomy(item, _spot, pointer.FingertipLift) || !OnScreen(_spot, pointer.FingertipLift))
+                {
+                    _spotFor = item;
+                    _spotWanted = wanted;
+                    _spot = OpenSpotNear(item, wanted, reach, pointer.FingertipLift) ?? wanted;
+                }
+            }
+            pointer.DragFrom(item.transform, _spot);
+        }
+
+        /// <summary>
+        /// Clear with room to spare. Someone copying the hand lets go where its fingertip is (a
+        /// little above the point it aims at) and never exactly on it, so the circle has to be green
+        /// at the point, under the fingertip, and a finger's width around both.
+        /// </summary>
+        static bool Roomy(Placeable item, Vector2 p, float lift)
+        {
+            var tip = p + Vector2.up * lift;
+            if (!item.CanPlaceAt(p) || !item.CanPlaceAt(tip)) return false;
+            var mid = (p + tip) * 0.5f;
+            for (int i = 0; i < 8; i++)
+            {
+                float a = i * Mathf.PI / 4f;
+                if (!item.CanPlaceAt(mid + new Vector2(Mathf.Cos(a) * 0.7f, Mathf.Sin(a) * 0.45f))) return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// The closest spot to <paramref name="wanted"/> the item fits, preferring one you can see:
+        /// a hand dragging off the edge of the screen shows nothing. Only if nothing on screen will
+        /// do does it look further.
+        /// </summary>
+        static Vector2? OpenSpotNear(Placeable item, Vector2 wanted, float reach, float lift) =>
+            OpenSpotNear(item, wanted, reach, lift, true) ?? OpenSpotNear(item, wanted, reach, lift, false);
+
+        /// <summary>Well inside the screen, clear of the edges and the bars along them.</summary>
+        static bool OnScreen(Vector2 p, float lift)
+        {
+            var cam = Camera.main;
+            if (cam == null) return true;
+            foreach (var q in new[] { p, p + Vector2.up * lift })
+            {
+                var v = cam.WorldToViewportPoint(q);
+                if (v.x < 0.12f || v.x > 0.88f || v.y < 0.18f || v.y > 0.8f) return false;
+            }
+            return true;
+        }
+
+        static Vector2? OpenSpotNear(Placeable item, Vector2 wanted, float reach, float lift, bool seen)
+        {
+            bool Good(Vector2 p) => (!seen || OnScreen(p, lift)) && Roomy(item, p, lift);
+            if (Good(wanted)) return wanted;
+            // Rings outward from the wanted spot; the first clear one is the closest.
+            for (float r = 0.6f; r <= reach; r += 0.6f)
+            {
+                int around = Mathf.Max(8, Mathf.RoundToInt(r * 6f));
+                float turn = Random.value;   // not always the same side first
+                for (int i = 0; i < around; i++)
+                {
+                    float a = (i / (float)around + turn) * Mathf.PI * 2f;
+                    var p = wanted + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * r;
+                    if (Good(p)) return p;
+                }
+            }
+            // Nowhere roomy: at least somewhere it fits.
+            for (float r = 0.6f; r <= reach; r += 0.6f)
+                for (int i = 0; i < 16; i++)
+                {
+                    float a = i * Mathf.PI / 8f;
+                    var p = wanted + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * r;
+                    if ((!seen || OnScreen(p, lift)) && item.CanPlaceAt(p)) return p;
+                }
+            return null;
+        }
+
+        const string PlantCircleLine =
+            "See the circle around it? Green means there's room to plant it there. Red means something is in the way, so move it a little. Let go to plant it.";
+
+        bool _circleExplained;
+
+        /// <summary>
+        /// The first time the player actually picks something up, the circle under it is on
+        /// screen: that is the moment to explain it. From then on the explanation stays the line
+        /// for this step, so the two lines do not take turns.
+        /// </summary>
+        string CircleLineOr(Placeable item, string line, string circleLine)
+        {
+            var drag = item != null ? item.GetComponent<DraggableActor>() : null;
+            if (drag != null && drag.IsHeld) _circleExplained = true;
+            return _circleExplained ? circleLine : line;
+        }
+
         void Advance(Step next)
         {
             _step = next;
+            _circleExplained = false;
             if (pointer != null) pointer.Hide();
         }
 
         void Say(string line)
         {
-            if (dialogue != null) dialogue.Say(line);
+            if (Guidance.Off) return;   // the tutorial was ended: the story goes on, quietly
+            // the latest instruction replaces any older one still waiting, so she never lags behind
+            if (dialogue != null) dialogue.Instruct(line);
         }
 
         static Bubble FindBubble(string nameFragment)

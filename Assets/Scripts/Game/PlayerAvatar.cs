@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using DG.Tweening;
 using CapyIsland.CameraRig;
 using UnityEngine;
@@ -39,6 +40,77 @@ namespace CapyIsland.Game
         ResponsiveCameraRig _rig;
         CameraInputController _input;
 
+        // Walking somewhere by itself (an edge arrow was tapped), until it gets there or you steer.
+        Vector2? _autoTarget;
+        float _autoArrive;
+        float _autoBest, _autoBestAt;
+
+        /// <summary>True while walking to a tapped arrow's target.</summary>
+        public bool AutoWalking => _autoTarget.HasValue;
+
+        /// <summary>
+        /// Walks to <paramref name="target"/> on its own, stopping <paramref name="arrive"/> short
+        /// of it. Any touch on the ground, a key, or picking something up takes control back; if
+        /// the way is blocked (water between), it stops and says so.
+        /// </summary>
+        public void WalkTo(Vector2 target, float arrive = 1.6f)
+        {
+            // A route over land: round a bay, over a bridge — never straight into the sea.
+            var land = LandMap.Instance;
+            _route = land != null ? land.FindPath(transform.position, target) : new List<Vector2> { target };
+            if (_route == null || _route.Count == 0)
+            {
+                _autoTarget = null;
+                Hints.Show(Unreachable);
+                return;
+            }
+            _routeAt = 0;
+            _replans = 0;
+            _autoTarget = target;
+            _autoArrive = arrive;
+            _autoBest = Vector2.Distance(transform.position, _route[0]);
+            _autoBestAt = Time.time;
+        }
+
+        List<Vector2> _route;
+        int _routeAt, _replans;
+
+        public void StopWalking() => _autoTarget = null;
+
+        /// <summary>
+        /// "Take me there": the king walks to <paramref name="target"/> (edge arrows, Goals' Show
+        /// me). Without a king, the camera just looks.
+        /// </summary>
+        public static void GoTo(Vector2 target)
+        {
+            var king = FindFirstObjectByType<PlayerAvatar>();
+            if (king == null) { CameraFocus.Show(target, 2.5f); return; }
+
+            // Across the water with no open bridge: say so, and don't set off at all.
+            var land = LandMap.Instance;
+            if (land != null && !land.Reachable(king.transform.position, target))
+            {
+                Hints.Show(Unreachable);
+                return;
+            }
+            king.WalkTo(target);
+        }
+
+        const string Unreachable = "You can't get there from here.";
+
+        /// <summary>Stops the king walking by himself, if he is.</summary>
+        public static void StopAutoWalk()
+        {
+            var king = FindFirstObjectByType<PlayerAvatar>();
+            if (king != null) king.StopWalking();
+        }
+
+        /// <summary>Fired each time a hop lands while walking (the footstep dust listens).</summary>
+        public event System.Action Landed;
+
+        /// <summary>Current walking velocity, in units per second.</summary>
+        public Vector2 Velocity => _velocity;
+
         /// <summary>Current speed as a fraction of the maximum. Useful for animation later.</summary>
         public float SpeedFraction => moveSpeed <= 0f ? 0f : _velocity.magnitude / moveSpeed;
 
@@ -50,6 +122,7 @@ namespace CapyIsland.Game
             // The wardrobe dresses the player; added here so the island builder needn't know.
             if (GetComponent<CapyOutfit>() == null) gameObject.AddComponent<CapyOutfit>();
             if (GetComponent<DesignWear>() == null) gameObject.AddComponent<DesignWear>();
+            if (GetComponent<Footsteps>() == null) gameObject.AddComponent<Footsteps>();
         }
 
         void OnEnable()
@@ -87,7 +160,14 @@ namespace CapyIsland.Game
                 (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow) ? -1f : 0f) +
                 (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow) ? 1f : 0f));
             if (keyboard.sqrMagnitude > 0.01f)
+            {
+                _autoTarget = null;
                 return keyboard.sqrMagnitude > 1f ? keyboard.normalized : keyboard;
+            }
+
+            // Your finger always wins over walking by itself.
+            if (_input != null && (_input.SteerTarget.HasValue || _input.IsManipulating)) _autoTarget = null;
+            if (_autoTarget.HasValue) return AutoDirection();
 
             if (_input == null || !_input.SteerTarget.HasValue) return Vector2.zero;
 
@@ -98,6 +178,52 @@ namespace CapyIsland.Game
             // Ease off over the last stride so he arrives rather than skidding past the point.
             float throttle = Mathf.Clamp01(distance / (_input.SteerDeadZone * 3f));
             return to / distance * throttle;
+        }
+
+        Vector2 AutoDirection()
+        {
+            // Close enough to the end: arrived.
+            if (Vector2.Distance(_autoTarget.Value, transform.position) <= _autoArrive) { _autoTarget = null; return Vector2.zero; }
+
+            // Head for the next corner of the route; on reaching it, the one after.
+            bool last = _route == null || _routeAt >= _route.Count - 1;
+            Vector2 waypoint = _route != null && _route.Count > 0 ? _route[Mathf.Min(_routeAt, _route.Count - 1)] : _autoTarget.Value;
+            Vector2 to = waypoint - (Vector2)transform.position;
+            float distance = to.magnitude;
+            if (!last && distance < 0.6f)
+            {
+                _routeAt++;
+                waypoint = _route[_routeAt];
+                to = waypoint - (Vector2)transform.position;
+                distance = to.magnitude;
+                _autoBest = distance; _autoBestAt = Time.time;
+                last = _routeAt >= _route.Count - 1;
+            }
+            if (last && distance <= _autoArrive) { _autoTarget = null; return Vector2.zero; }
+
+            // Not getting any closer for a couple of seconds — stuck, or sliding along a coast
+            // with the sea in between: stop and say so.
+            if (distance < _autoBest - 0.4f) { _autoBest = distance; _autoBestAt = Time.time; }
+            else if (Time.time - _autoBestAt > 1.5f)
+            {
+                // Snagged on a corner of the coast: plan again from here before giving up.
+                var land = LandMap.Instance;
+                var again = _replans < 2 && land != null ? land.FindPath(transform.position, _autoTarget.Value) : null;
+                if (again != null && again.Count > 0)
+                {
+                    _replans++;
+                    _route = again; _routeAt = 0;
+                    _autoBest = Vector2.Distance(transform.position, _route[0]); _autoBestAt = Time.time;
+                    return Vector2.zero;
+                }
+                _autoTarget = null;
+                Hints.Show(Unreachable);
+                return Vector2.zero;
+            }
+
+            // Ease off over the last stride, like steering by finger; full pace round the corners.
+            float throttle = last ? Mathf.Clamp01((distance - _autoArrive) / 1.2f + 0.35f) : 1f;
+            return to / Mathf.Max(0.0001f, distance) * throttle;
         }
 
         void Move()
@@ -117,7 +243,10 @@ namespace CapyIsland.Game
             if (hopHeight <= 0f || _body == null) return;
 
             // Hop faster the faster he moves, so the bounce matches the pace.
+            float before = _hopPhase;
             _hopPhase += Time.deltaTime * hopRate * SpeedFraction * Mathf.PI * 2f;
+            // Each time the bounce comes back down, the feet touch the ground.
+            if (Mathf.FloorToInt(_hopPhase / Mathf.PI) != Mathf.FloorToInt(before / Mathf.PI)) Landed?.Invoke();
             float lift = Mathf.Abs(Mathf.Sin(_hopPhase)) * hopHeight * SpeedFraction;
             _body.localPosition = _bodyRestLocal + new Vector3(0f, lift, 0f);
         }
@@ -133,7 +262,8 @@ namespace CapyIsland.Game
         {
             if (_body == null || Mathf.Abs(dx) < 0.01f) return;
             var scale = _body.localScale;
-            scale.x = Mathf.Abs(scale.x) * (dx < 0f ? -1f : 1f);
+            // the pictures face left: mirror them to walk right
+            scale.x = Mathf.Abs(scale.x) * (dx > 0f ? -1f : 1f);
             _body.localScale = scale;
         }
 
@@ -174,22 +304,48 @@ namespace CapyIsland.Game
         /// One step that never leaves land. Blocked straight ahead, it tries turning a little either
         /// way, further each time, so the king slides along the coast instead of sticking to it —
         /// the original's NextStep, which rotates the step in 5 degree increments.
+        ///
+        /// The whole stride is checked, not just where it lands: a long step on a stuttery frame
+        /// must not hop a narrow channel onto the next island.
         /// </summary>
         static Vector2 StepOnLand(Vector2 here, Vector2 step)
         {
             if (step.sqrMagnitude < 1e-8f) return here;
-            if (BunniSpace.PointOnLand(here + step)) return here + step;
-            // Already off land (e.g. spawned on water): let him walk back.
-            if (!BunniSpace.PointOnLand(here)) return here + step;
+            // Stranded on water somehow (an old save, a spawn spot): back to the nearest shore,
+            // never free to wander the sea.
+            if (!BunniSpace.PointOnLand(here)) return TowardLand(here, step.magnitude);
+            if (Walkable(here, here + step)) return here + step;
 
             for (int turn = 5; turn <= 85; turn += 5)
             {
                 var left = (Vector2)(Quaternion.Euler(0f, 0f, turn) * step);
-                if (BunniSpace.PointOnLand(here + left)) return here + left * Mathf.Cos(turn * Mathf.Deg2Rad);
+                if (Walkable(here, here + left)) return here + left * Mathf.Cos(turn * Mathf.Deg2Rad);
                 var right = (Vector2)(Quaternion.Euler(0f, 0f, -turn) * step);
-                if (BunniSpace.PointOnLand(here + right)) return here + right * Mathf.Cos(turn * Mathf.Deg2Rad);
+                if (Walkable(here, here + right)) return here + right * Mathf.Cos(turn * Mathf.Deg2Rad);
             }
             return here;
+        }
+
+        static bool Walkable(Vector2 from, Vector2 to)
+        {
+            if (!BunniSpace.PointOnLand(to)) return false;
+            var land = LandMap.Instance;
+            return land == null || land.SegmentOnLand(from, to);
+        }
+
+        /// <summary>A step toward the nearest land, whichever way the player is pushing.</summary>
+        static Vector2 TowardLand(Vector2 here, float stride)
+        {
+            for (float r = 0.25f; r <= 10f; r += 0.25f)
+            for (int i = 0; i < 24; i++)
+            {
+                float a = i * Mathf.PI * 2f / 24f;
+                var p = here + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * r;
+                if (!BunniSpace.PointOnLand(p)) continue;
+                var to = p - here;
+                return here + to.normalized * Mathf.Min(to.magnitude, Mathf.Max(stride, 0.12f));
+            }
+            return here;   // no land anywhere near: stay put rather than drift out to sea
         }
     }
 }

@@ -1,0 +1,958 @@
+# CapyIsland Hebrew: hobby screens, cutscenes, visits, friends, flights.
+# Sources: Assets/Scripts/UI/Hobbies/, UI/Cutscenes/, UI/Visits/, Game/Visits/
+
+# ---------------------------------------------------------------- Game/Visits/Server.cs (server names)
+
+@ Capy Isles · Willow {0}
+= איי הקפיברות · ערבה {0}
+
+@ Capy Isles · Maple {0}
+= איי הקפיברות · אדר {0}
+
+@ Capy Isles · Juniper {0}
+= איי הקפיברות · ערער {0}
+
+@ Capy Isles · Mochi {0}
+= איי הקפיברות · מוצ'י {0}
+
+@ Capy Isles · Hazel {0}
+= איי הקפיברות · לוז {0}
+
+@ Capy Isles · Bamboo {0}
+= איי הקפיברות · במבוק {0}
+
+@ Capy Isles · Clover {0}
+= איי הקפיברות · תלתן {0}
+
+@ Capy Isles · Pebble {0}
+= איי הקפיברות · חלוק {0}
+
+@ Capy Isles · Saffron {0}
+= איי הקפיברות · זעפרן {0}
+
+@ Capy Isles · Lotus {0}
+= איי הקפיברות · לוטוס {0}
+
+# ---------------------------------------------------------------- Game/Visits/Airport.cs
+
+@ Airstrip
+= מסלול המראה
+
+@ Build your airstrip on your own island.
+= את מסלול ההמראה בונים על האי שלך.
+
+@ An airstrip costs {0} wood and {1} gold.
+= מסלול המראה עולה {0} עץ ו-{1} זהב.
+
+@ Your airstrip is ready! Tap it any time to see who's online.
+= מסלול ההמראה שלך מוכן! הקש עליו מתי שתרצה כדי לראות מי מחובר.
+
+# ---------------------------------------------------------------- Game/Visits/Visit.cs
+
+@ Flying to {0}'s island...
+= טסים לאי של {0}...
+
+@ Flying home...
+= טסים הביתה...
+
+@ Let's get your own island settled first. Then you can fly anywhere you like!
+= קודם נסדר את האי שלך. אחר כך תוכל לטוס לאן שתרצה!
+
+@ You'll need an airstrip before you can fly. Build one above!
+= כדי לטוס צריך מסלול המראה. בנה אחד למעלה!
+
+@ Put your airstrip down somewhere first. Pop its bubble and drag it to a clear spot!
+= קודם הנח את מסלול ההמראה איפשהו. פוצץ את הבועה שלו וגרור אותו למקום פנוי!
+
+# ---------------------------------------------------------------- Game/Visits/VisitorBot.cs
+
+@ {0} fed one of your hungry workers.
+= אחד הפועלים הרעבים שלך קיבל אוכל מ-{0}.
+
+@ {0} bombed a pest on your island!
+= בום! מזיק עף מהאי שלך בזכות {0}!
+
+@ {0} planted flowers by your {1} for your workers.
+= פרחים חדשים ליד {1} שלך: מתנה מ-{0} לפועלים שלך.
+
+@ station
+= התחנה
+
+@ {0} left you a gift bubble!
+= בועת מתנה מחכה לך, מאת {0}!
+
+# ---------------------------------------------------------------- UI/Visits/FlightTransition.cs, VisitDirector.cs
+
+@ {0} is offline right now, but you can still look around and lend a hand.
+= {0} לא כאן כרגע, אבל אפשר להסתכל מסביב ולעזור.
+
+@ {0} is waving at you! Lend a hand: feed hungry workers and chase off pests.
+= נפנוף שלום מ-{0}! תן יד: האכל פועלים רעבים וגרש מזיקים.
+
+@ Visitor!
+= יש ביקור!
+
+@ <b>{0}</b> wants to visit your island!
+= <b>{0}</b> רוצה לבקר באי שלך!
+
+@ Let them in
+= הזמן פנימה
+
+@ Not now
+= לא עכשיו
+
+@ {0} has landed on your island!
+= המטוס של {0} נחת באי שלך!
+
+@ {0} has logged off. See you next time!
+= הביקור של {0} נגמר. נתראה בפעם הבאה!
+
+@ Logged off
+= הביקור נגמר
+
+@ <b>{0}</b> had to go. Add them as a friend so you can visit their island?
+= הגיע הזמן של <b>{0}</b> לחזור הביתה. להוסיף לחברים, כדי שתוכל לבקר באי ההוא?
+
+@ Add friend
+= הוסף חבר
+
+@ No thanks
+= לא תודה
+
+@ {0} is now your friend. Visit them from the Friends menu!
+= {0} ברשימת החברים שלך! אפשר לבקר דרך תפריט החברים.
+
+# ---------------------------------------------------------------- UI/Visits/VisitorsColumn.cs
+
+@ Visitor
+= ביקור
+
+@ {0} is visiting your island and helping out.
+= {0} בביקור באי שלך. כל עזרה מתקבלת בברכה!
+
+@ Ask to leave
+= סיום ביקור
+
+@ Let them stay
+= המשך ביקור
+
+@ {0} waves goodbye and heads home.
+= נפנוף לשלום, ו-{0} בדרך הביתה.
+
+@ Your friend
+= חבר שלך
+
+@ You're on {0}'s island.
+= אתה באי של {0}.
+
+@ Unfriend
+= הסר חבר
+
+@ Close
+= סגור
+
+@ {0} is no longer your friend.
+= {0} כבר לא ברשימת החברים שלך.
+
+@ Make a friend?
+= חבר חדש?
+
+@ You're on {0}'s island. Add them as a friend to visit again — their island will be kept.
+= אתה באי של {0}. הוסף לחברים כדי לבקר שוב — האי יישמר בשבילך.
+
+@ {0} is your friend now!
+= {0} עכשיו ברשימת החברים שלך!
+
+# ---------------------------------------------------------------- UI/Visits/FriendsScreen.cs
+
+@ Neighbours
+= שכנים
+
+@ Fly home
+= טוס הביתה
+
+@ Your friends
+= החברים שלך
+
+@ No friends yet. Visit someone on the server above, and add them from their island!
+= עוד אין לך חברים. בקר מישהו בשרת שלמעלה, והוסף אותו מהאי שלו!
+
+@ <color=#5DBB63>Online</color> · Island level {0}
+= <color=#5DBB63>מחובר</color> · רמת אי {0}
+
+@ <color=#A89A8C>Offline</color> · Island level {0}
+= <color=#A89A8C>לא מחובר</color> · רמת אי {0}
+
+@ <color=#5DBB63>Online</color> · Island level {0} · {1}
+= <color=#5DBB63>מחובר</color> · רמת אי {0} · {1}
+
+@ <color=#A89A8C>Offline</color> · Island level {0} · {1}
+= <color=#A89A8C>לא מחובר</color> · רמת אי {0} · {1}
+
+@ You're here now
+= אתה כאן עכשיו
+
+@ Visit
+= בקר
+
+@ Unfriend?
+= להסיר מהחברים?
+
+@ Remove {0} from your friends? Their island won't be kept any more.
+= להסיר את {0} מהחברים שלך? האי לא יישמר יותר.
+
+@ Cancel
+= ביטול
+
+@ Build an airstrip
+= בנה מסלול המראה
+
+@ You need one to fly to your neighbours. {0} wood and {1} gold.
+= צריך אחד כדי לטוס לשכנים. {0} עץ ו-{1} זהב.
+
+@ Build
+= בנה
+
+@ Here's your airstrip! Pop the bubble, then drag it wherever you'd like it to stand.
+= הנה מסלול ההמראה שלך! פוצץ את הבועה וגרור אותו לאן שתרצה.
+
+@ {0} of {1} islands online
+= {0} מתוך {1} איים מחוברים
+
+@ Switch server
+= החלף שרת
+
+@ Tap an island to fly there. Lend a hand, and add the ones you like as friends.
+= הקש על אי כדי לטוס אליו. תן יד, והוסף לחברים את מי שאהבת.
+
+@ Empty
+= ריק
+
+@ never visited
+= עוד לא ביקרת
+
+@ visited just now
+= ביקרת הרגע
+
+@ visited {0} min ago
+= ביקרת לפני {0} דק׳
+
+@ visited {0} h ago
+= ביקרת לפני {0} שע׳
+
+@ visited {0} d ago
+= ביקרת לפני {0} ימים
+
+@ Yes
+= כן
+
+@ No
+= לא
+
+# ---------------------------------------------------------------- UI/Hobbies/HobbyScreens.cs: hobbies hub
+
+@ Hobbies
+= תחביבים
+
+@ Fish Journal
+= יומן דגים
+
+@ Bird Journal
+= יומן ציפורים
+
+@ Bug Journal
+= יומן חרקים
+
+@ Cats
+= חתולים
+
+@ Bag
+= תיק
+
+@ Kitchen
+= מטבח
+
+@ Fishing
+= דיג
+
+@ Birdwatching
+= צפרות
+
+@ Bug Catching
+= ציד חרקים
+
+@ Gardening
+= גינון
+
+@ Cooking
+= בישול
+
+@ Cat Care
+= טיפול בחתולים
+
+@ Writing
+= כתיבה
+
+@ Sewing
+= תפירה
+
+@ Fishing  <size=75%><color=#2DB3A6>Level {0}</color></size>
+= דיג  <size=75%><color=#2DB3A6>רמה {0}</color></size>
+
+@ Birdwatching  <size=75%><color=#E3A92B>Level {0}</color></size>
+= צפרות  <size=75%><color=#E3A92B>רמה {0}</color></size>
+
+@ Bug Catching  <size=75%><color=#7BAE3E>Level {0}</color></size>
+= ציד חרקים  <size=75%><color=#7BAE3E>רמה {0}</color></size>
+
+@ Gardening  <size=75%><color=#8A5A32>Level {0}</color></size>
+= גינון  <size=75%><color=#8A5A32>רמה {0}</color></size>
+
+@ Cooking  <size=75%><color=#FF8A3D>Level {0}</color></size>
+= בישול  <size=75%><color=#FF8A3D>רמה {0}</color></size>
+
+@ Cat Care  <size=75%><color=#E58FB0>Level {0}</color></size>
+= טיפול בחתולים  <size=75%><color=#E58FB0>רמה {0}</color></size>
+
+@ Writing  <size=75%><color=#A77BD6>Level {0}</color></size>
+= כתיבה  <size=75%><color=#A77BD6>רמה {0}</color></size>
+
+@ Sewing  <size=75%><color=#C2577F>Level {0}</color></size>
+= תפירה  <size=75%><color=#C2577F>רמה {0}</color></size>
+
+@ {0} of {1} fish found
+= נמצאו {0} מתוך {1} דגים
+
+@ Walk to the water's edge where fish shadows swim, and tap Start fishing.
+= לך לשפת המים, איפה שצללי דגים שוחים, והקש על "התחל לדוג".
+
+@ Journal
+= יומן
+
+@ {0} of {1} birds spotted
+= נצפו {0} מתוך {1} ציפורים
+
+@ Birds land in trees and on the shore. Tap one from a few steps away. Don't rush up to it!
+= ציפורים נוחתות על עצים ועל החוף. הקש על אחת מכמה צעדים. אל תמהר להתקרב!
+
+@ {0} of {1} bugs caught
+= נתפסו {0} מתוך {1} חרקים
+
+@ Bugs settle on flowers, trees and grass near you. Tap one to net it, gently.
+= חרקים נוחתים על פרחים, עצים ודשא לידך. הקש על אחד כדי לתפוס אותו ברשת, בעדינות.
+
+@ {0} of {1} plots
+= {0} מתוך {1} ערוגות
+
+@ Buy vegetable plots at the Garden Shop and put them anywhere. Tap one to plant seeds, come back when it's grown.
+= קנה ערוגות ירקות בחנות הגינה והנח אותן איפה שתרצה. הקש על ערוגה כדי לשתול זרעים, וחזור כשהיא גדלה.
+
+@ Show me
+= הראה לי
+
+@ Buy a vegetable plot at the Garden Shop, then put it down anywhere.
+= קנה ערוגת ירקות בחנות הגינה, ואז הנח אותה איפה שתרצה.
+
+@ {0} dish in your bag
+= {0} מנה בתיק שלך
+
+@ {0} dishes in your bag
+= {0} מנות בתיק שלך
+
+@ Tap your stove and drag ingredients into the pot. Islanders with a dish in a bubble over their head will pay for it.
+= הקש על הכיריים וגרור מצרכים לסיר. תושבים עם מנה בבועה מעל הראש ישלמו עליה.
+
+@ Recipes
+= מתכונים
+
+@ {0} of {1} cats adopted
+= אומצו {0} מתוך {1} חתולים
+
+@ Stray cats visit your island. Pet them and share fish until they trust you.
+= חתולי רחוב מבקרים באי שלך. לטף אותם ושתף איתם דגים עד שיסמכו עליך.
+
+@ {0} story written
+= נכתב {0} סיפור
+
+@ {0} stories written
+= נכתבו {0} סיפורים
+
+@ Message bottles wash up on your beach. Read them, and buy a bottle from the sailor to leave a story of your own.
+= בקבוקים עם מכתבים נסחפים לחוף שלך. קרא אותם, וקנה בקבוק מהמלח כדי להשאיר סיפור משלך.
+
+@ The bottles are on your beach.
+= הבקבוקים מחכים על החוף שלך.
+
+@ {0} piece sewn
+= נתפר {0} פריט
+
+@ {0} pieces sewn
+= נתפרו {0} פריטים
+
+@ At your sewing machine: a hat needs cotton from your garden, a cape needs silk from silkworms. Then decorate it and wear it!
+= ליד מכונת התפירה: לכובע צריך כותנה מהגינה, ולגלימה צריך משי מתולעי משי. אחר כך מקשטים ולובשים!
+
+@ Put your sewing machine down somewhere first.
+= קודם הנח את מכונת התפירה איפשהו.
+
+@ Still to discover
+= עוד לגלות
+
+@ Back to hobbies
+= חזרה לתחביבים
+
+# ---------------------------------------------------------------- journals, cats, bag, kitchen
+
+@ ×{0} · best {1} cm
+= ×{0} · שיא {1} ס״מ
+
+@ Stray cat
+= חתול רחוב
+
+@ Adopted!
+= אומץ!
+
+@ Trust {0}/{1}
+= אמון {0}/{1}
+
+@ Not met yet
+= עוד לא נפגשנו
+
+@ Strays wander onto your island every so often. Pet them, share a fish, and once they trust you, adopt them.
+= מדי פעם חתולי רחוב משוטטים לאי שלך. לטף אותם, שתף דג, וכשהם סומכים עליך, אמץ אותם.
+
+@ Your bag is empty. Catch fish, grow vegetables and cook dishes to fill it.
+= התיק שלך ריק. דוג דגים, גדל ירקות ובשל מנות כדי למלא אותו.
+
+@ ×{0}  ·  <size=85%>Someone might fancy this — look for a bubble!</size>
+= ×{0}  ·  <size=85%>אולי מישהו ישמח לזה — חפש בועה!</size>
+
+@ Go to my stove
+= לכיריים שלי
+
+@ Find a stove at the Garden Shop
+= כיריים יש בחנות הגינה
+
+@ The Garden Shop opens up after the Legendary Gem Store. It sells the Cooking Stove.
+= חנות הגינה נפתחת אחרי חנות היהלומים האגדית. שם מוכרים כיריים לבישול.
+
+@ Unlocks at cooking level {0}
+= נפתח ברמת בישול {0}
+
+# Second line of a known recipe row: the dish blurb (translated on its own entry) in a size tag.
+@ <size=85%>{0}</size>
+= <size=85%>{0}</size>
+
+# ---------------------------------------------------------------- Library
+
+@ Library
+= ספרייה
+
+@ Friends' books
+= ספרי חברים
+
+@ My books
+= הספרים שלי
+
+@ Make friends to read their books. Visit an island from the Friends menu!
+= הכר חברים כדי לקרוא את הספרים שלהם. בקר באי דרך תפריט החברים!
+
+@ {0}'s shelf (you're here)
+= המדף של {0} (אתה כאן)
+
+@ {0}'s shelf
+= המדף של {0}
+
+@ by {0}
+= מאת {0}
+
+@ by you
+= מאתך
+
+@ Write a new book
+= כתוב ספר חדש
+
+@ Your shelf is empty. Every great author starts with one page.
+= המדף שלך ריק. כל סופר גדול מתחיל מעמוד אחד.
+
+@ Read
+= קרא
+
+@ Back to the shelf
+= חזרה למדף
+
+@ Take off the shelf
+= הורד מהמדף
+
+@ Title
+= כותרת
+
+@ Once upon a time, on a little island...
+= היה היה, על אי קטן...
+
+@ Put it in the bottle
+= הכנס לבקבוק
+
+@ Put it on my shelf
+= שים על המדף שלי
+
+@ A story needs a title and at least a few sentences.
+= לסיפור צריך כותרת ולפחות כמה משפטים.
+
+@ "{0}" is on your shelf. Friends who visit can read it!
+= "{0}" על המדף שלך. חברים שמבקרים יכולים לקרוא אותו!
+
+# Book dates ("d MMM yyyy" in an English culture)
+@ {0} Jan {1}
+= {0} בינואר {1}
+
+@ {0} Feb {1}
+= {0} בפברואר {1}
+
+@ {0} Mar {1}
+= {0} במרץ {1}
+
+@ {0} Apr {1}
+= {0} באפריל {1}
+
+@ {0} May {1}
+= {0} במאי {1}
+
+@ {0} Jun {1}
+= {0} ביוני {1}
+
+@ {0} Jul {1}
+= {0} ביולי {1}
+
+@ {0} Aug {1}
+= {0} באוגוסט {1}
+
+@ {0} Sep {1}
+= {0} בספטמבר {1}
+
+@ {0} Oct {1}
+= {0} באוקטובר {1}
+
+@ {0} Nov {1}
+= {0} בנובמבר {1}
+
+@ {0} Dec {1}
+= {0} בדצמבר {1}
+
+# ---------------------------------------------------------------- Sewing
+
+@ Hat  <size=75%>{0}/{1} cotton</size>
+= כובע  <size=75%>{0}/{1} כותנה</size>
+
+@ Cape  <size=75%>{0}/{1} silk</size>
+= גלימה  <size=75%>{0}/{1} משי</size>
+
+@ Grow cotton in your garden (gardening level 2).
+= גדל כותנה בגינה שלך (רמת גינון 2).
+
+@ Catch silkworms for their silk (bug catching level 2).
+= תפוס תולעי משי בשביל המשי שלהן (רמת ציד חרקים 2).
+
+@ Paint your hat!
+= צבע את הכובע שלך!
+
+@ Paint your cape!
+= צבע את הגלימה שלך!
+
+@ A hat needs {0} cotton. Grow cotton in your garden (gardening level 2).
+= לכובע צריך {0} כותנה. גדל כותנה בגינה שלך (רמת גינון 2).
+
+@ A cape needs {0} silk. Catch silkworms for their silk (bug catching level 2).
+= לגלימה צריך {0} משי. תפוס תולעי משי בשביל המשי שלהן (רמת ציד חרקים 2).
+
+@ My Hat {0}
+= הכובע שלי {0}
+
+@ My Cape {0}
+= הגלימה שלי {0}
+
+@ Changing {0}.
+= עורכים את: {0}.
+
+@ Tap or drag to paint.
+= הקש או גרור כדי לצבוע.
+
+@ Clear
+= נקה
+
+@ A fresh piece of fabric.
+= פיסת בד חדשה.
+
+@ Sew it
+= תפור
+
+@ Sew & wear
+= תפור ולבש
+
+@ Your sewing
+= התפירות שלך
+
+@ You're wearing it! Have a look around the island.
+= אתה לובש את זה! צא לסיבוב באי.
+
+@ Sewn! It's in your wardrobe.
+= נתפר! זה מחכה בארון הבגדים שלך.
+
+@ That's one of your old shirts. Shirts can't be changed any more.
+= זאת אחת החולצות הישנות שלך. אי אפשר לשנות חולצות יותר.
+
+# ---------------------------------------------------------------- UI/Hobbies/FishingButton.cs
+
+@ Start fishing
+= התחל לדוג
+
+@ Stop
+= עצור
+
+@ Stop fishing
+= הפסק לדוג
+
+@ Hold to aim
+= החזק כדי לכוון
+
+@ Hold anywhere, let go to cast
+= החזק בכל מקום, שחרר כדי להטיל
+
+@ Let go to cast!
+= שחרר כדי להטיל!
+
+@ The ring is where your bobber will land
+= הטבעת מראה איפה המצוף ינחת
+
+@ Wait…
+= חכה…
+
+@ A fish is coming to look
+= דג בא להציץ
+
+@ Wait for it…
+= רגע, עוד לא…
+
+@ Nibble, nibble… wait for the big splash
+= נשנוש, נשנוש… חכה לשפריץ הגדול
+
+@ Let go!
+= שחרר!
+
+@ The line is about to snap
+= החוט עומד להיקרע
+
+@ Careful…
+= זהירות…
+
+@ Hold to reel!
+= החזק כדי לגלגל!
+
+@ Ease off when it turns red
+= הרפה כשזה נהיה אדום
+
+@ Reeling…
+= מגלגל…
+
+@ It's pulling hard!
+= הוא מושך חזק!
+
+@ Bring it in
+= משוך אותו פנימה
+
+@ Hooked!
+= נתפס!
+
+@ Fishing level {0}!
+= דיג: רמה {0}!
+
+@ Birdwatching level {0}!
+= צפרות: רמה {0}!
+
+@ Writing level {0}!
+= כתיבה: רמה {0}!
+
+@ Sewing level {0}!
+= תפירה: רמה {0}!
+
+@ Gardening level {0}!
+= גינון: רמה {0}!
+
+@ Cooking level {0}!
+= בישול: רמה {0}!
+
+@ Bug catching level {0}!
+= ציד חרקים: רמה {0}!
+
+@ Cat care level {0}!
+= טיפול בחתולים: רמה {0}!
+
+@ Rarer fish will start to swim near the shore, and your line holds a little better.
+= דגים נדירים יותר יתחילו לשחות ליד החוף, והחוט שלך יחזיק קצת יותר טוב.
+
+@ Rarer birds will start to visit.
+= ציפורים נדירות יותר יתחילו לבקר.
+
+@ Rarer bugs will start to appear.
+= חרקים נדירים יותר יתחילו להופיע.
+
+@ New seeds to plant, and room for another plot!
+= זרעים חדשים לשתילה, ומקום לעוד ערוגה!
+
+@ New recipes in the kitchen.
+= מתכונים חדשים במטבח.
+
+@ Keep it up!
+= המשך כך!
+
+# ---------------------------------------------------------------- UI/Hobbies/CookingScreen.cs
+
+@ Cook!
+= בשל!
+
+@ Drag ingredients into the pot
+= גרור מצרכים לסיר
+
+@ No ingredients yet — catch fish and grow vegetables!
+= עוד אין מצרכים — דוג דגים וגדל ירקות!
+
+@ <color=#8A7563>Empty pot</color>
+= <color=#8A7563>סיר ריק</color>
+
+@ <size=70%><color=#8A7563>No recipe for this…</color></size>
+= <size=70%><color=#8A7563>אין לזה מתכון…</color></size>
+
+@ The pot is full! Tap something in it to take it out.
+= הסיר מלא! הקש על משהו בתוכו כדי להוציא אותו.
+
+@ Tap the spatula when it appears, to stir and cool it down!
+= הקש על המרית כשהיא מופיעה, כדי לערבב ולקרר!
+
+@ <color=#3E9C4F><b>Perfect stir!</b></color>
+= <color=#3E9C4F><b>ערבוב מושלם!</b></color>
+
+@ Good stir!
+= ערבוב טוב!
+
+@ <color=#D9534F><b>Too slow! It's getting hot…</b></color>
+= <color=#D9534F><b>לאט מדי! זה מתחמם…</b></color>
+
+@ Bizarre Food…
+= אוכל מוזר…
+
+@ It's in your bag. Look for someone with this dish in a bubble over their head!
+= זה בתיק שלך. חפש מישהו עם המנה הזאת בבועה מעל הראש!
+
+@ It burned to a crisp. Tap the spatula sooner to keep the heat down!
+= זה נשרף לגמרי. הקש על המרית מוקדם יותר כדי להוריד את החום!
+
+@ Nobody has a recipe for that, and now we know why.
+= לאף אחד אין מתכון לזה, ועכשיו ברור למה.
+
+@ Cook something else?
+= לבשל עוד משהו?
+
+@ Try again?
+= לנסות שוב?
+
+@ <color=#E3A92B><b>Five stars — perfect!</b></color>
+= <color=#E3A92B><b>חמישה כוכבים — מושלם!</b></color>
+
+@ <color=#E3A92B><b>Four stars — delicious.</b></color>
+= <color=#E3A92B><b>ארבעה כוכבים — טעים!</b></color>
+
+@ <b>Three stars — pretty good.</b>
+= <b>שלושה כוכבים — די טוב.</b>
+
+@ <b>Two stars — edible.</b>
+= <b>שני כוכבים — אכיל.</b>
+
+@ <b>One star — it's… food.</b>
+= <b>כוכב אחד — זה… אוכל.</b>
+
+# ---------------------------------------------------------------- UI/Cutscenes
+
+@ tap to skip
+= הקש כדי לדלג
+
+@ Warmed right up!
+= חמים ונעים עכשיו!
+
+@ <size=55%>Ready to work for you</size>
+= <size=55%>מוכנה לעבוד בשבילך</size>
+
+@ A bridge to {0}!
+= גשר אל {0}!
+
+@ A bridge to a new island!
+= גשר אל אי חדש!
+
+@ <size=55%>Off you go, explorer</size>
+= <size=55%>לדרך, הרפתקן</size>
+
+@ The Hot Pepper Hornpipe!
+= ריקוד הפלפל החריף!
+
+@ <size=55%>Bravo, Captain!</size>
+= <size=55%>בראבו, קפטן!</size>
+
+@ Hungry workers nap
+= פועלים רעבים נרדמים
+
+@ <size=55%>Flowers wake them up!</size>
+= <size=55%>פרחים מעירים אותם!</size>
+
+@ Vows renewed!
+= הנדרים חודשו!
+
+@ Just married!
+= זוג טרי!
+
+@ <size=55%>You & Miso</size>
+= <size=55%>אתה ומיסו</size>
+
+@ New hobby: {0}!
+= תחביב חדש: {0}!
+
+@ <size=55%>Let's give it a go</size>
+= <size=55%>בוא ננסה!</size>
+
+@ How to fish
+= איך דגים
+
+@ Walk to the water's edge where fish shadows swim and tap Start fishing.
+= לך לשפת המים, איפה שצללי דגים שוחים, והקש על "התחל לדוג".
+
+@ Hold to aim, let go to cast. When it bites, hold to reel and let go when the line turns red!
+= החזק כדי לכוון, שחרר כדי להטיל. כשדג נתפס, החזק כדי לגלגל ושחרר כשהחוט נהיה אדום!
+
+@ How to catch bugs
+= איך תופסים חרקים
+
+@ Bugs settle on flowers, trees and grass. Walk close and tap one to swing your net.
+= חרקים נוחתים על פרחים, עצים ודשא. התקרב והקש על אחד כדי להניף את הרשת.
+
+@ Some are shy, so don't run straight at them!
+= חלקם ביישנים, אז אל תרוץ ישר אליהם!
+
+@ How to watch birds
+= איך צופים בציפורים
+
+@ Birds land in trees and on the shore. Tap one from a few steps away to spot it through your binoculars.
+= ציפורים נוחתות על עצים ועל החוף. הקש על אחת מכמה צעדים כדי לצפות בה במשקפת.
+
+@ Get too close and it flies off!
+= אם תתקרב יותר מדי, היא תעוף!
+
+@ How to sew
+= איך תופרים
+
+@ Put your sewing machine down, then tap it.
+= הנח את מכונת התפירה, ואז הקש עליה.
+
+@ A hat needs cotton from your garden, a cape needs silk from silkworms. Decorate it, and it goes in your wardrobe!
+= לכובע צריך כותנה מהגינה, ולגלימה צריך משי מתולעי משי. קשט אותם, והם נכנסים לארון הבגדים שלך!
+
+@ How to garden
+= איך מגדלים גינה
+
+@ Put a vegetable plot down anywhere and tap it to plant seeds.
+= הנח ערוגת ירקות איפה שתרצה והקש עליה כדי לשתול זרעים.
+
+@ They grow while you're away. Tap again to harvest!
+= הם גדלים כשאתה לא כאן. הקש שוב כדי לקטוף!
+
+@ How to cook
+= איך מבשלים
+
+@ Put your stove down and tap it. Drag ingredients into the pot, press Cook, and tap the spatula in time to keep the heat down.
+= הנח את הכיריים והקש עליהן. גרור מצרכים לסיר, לחץ על "בשל!", והקש על המרית בזמן כדי לשמור על חום נמוך.
+
+@ Islanders with a dish in a bubble will pay for it!
+= תושבים עם מנה בבועה ישלמו עליה!
+
+@ New hobby!
+= תחביב חדש!
+
+@ Find it in Hobbies, in the menu.
+= תמצא אותו בתחביבים, בתפריט.
+
+# ---------------------------------------------------------------- VisitorBot.cs LogOff: guest's summary (all combinations)
+
+@ {0} fed {1} worker before heading home.
+= {0} בדרך הביתה. בזמן הביקור {1} פועל קיבל אוכל.
+
+@ {0} fed {1} workers before heading home.
+= {0} בדרך הביתה. בזמן הביקור {1} פועלים קיבלו אוכל.
+
+@ {0} bombed {1} pest before heading home.
+= {0} בדרך הביתה. בזמן הביקור {1} מזיק גורש.
+
+@ {0} bombed {1} pests before heading home.
+= {0} בדרך הביתה. בזמן הביקור {1} מזיקים גורשו.
+
+@ {0} fed {1} worker, bombed {2} pest before heading home.
+= {0} בדרך הביתה. בזמן הביקור {1} פועל קיבל אוכל ו-{2} מזיק גורש.
+
+@ {0} fed {1} workers, bombed {2} pest before heading home.
+= {0} בדרך הביתה. בזמן הביקור {1} פועלים קיבלו אוכל ו-{2} מזיק גורש.
+
+@ {0} fed {1} worker, bombed {2} pests before heading home.
+= {0} בדרך הביתה. בזמן הביקור {1} פועל קיבל אוכל ו-{2} מזיקים גורשו.
+
+@ {0} fed {1} workers, bombed {2} pests before heading home.
+= {0} בדרך הביתה. בזמן הביקור {1} פועלים קיבלו אוכל ו-{2} מזיקים גורשו.
+
+@ {0} planted {1} flower garden before heading home.
+= {0} בדרך הביתה. בזמן הביקור {1} ערוגת פרחים נשתלה.
+
+@ {0} planted {1} flower gardens before heading home.
+= {0} בדרך הביתה. בזמן הביקור {1} ערוגות פרחים נשתלו.
+
+@ {0} fed {1} worker, planted {2} flower garden before heading home.
+= {0} בדרך הביתה. בזמן הביקור {1} פועל קיבל אוכל ו-{2} ערוגת פרחים נשתלה.
+
+@ {0} fed {1} workers, planted {2} flower garden before heading home.
+= {0} בדרך הביתה. בזמן הביקור {1} פועלים קיבלו אוכל ו-{2} ערוגת פרחים נשתלה.
+
+@ {0} fed {1} worker, planted {2} flower gardens before heading home.
+= {0} בדרך הביתה. בזמן הביקור {1} פועל קיבל אוכל ו-{2} ערוגות פרחים נשתלו.
+
+@ {0} fed {1} workers, planted {2} flower gardens before heading home.
+= {0} בדרך הביתה. בזמן הביקור {1} פועלים קיבלו אוכל ו-{2} ערוגות פרחים נשתלו.
+
+@ {0} bombed {1} pest, planted {2} flower garden before heading home.
+= {0} בדרך הביתה. בזמן הביקור {1} מזיק גורש ו-{2} ערוגת פרחים נשתלה.
+
+@ {0} bombed {1} pests, planted {2} flower garden before heading home.
+= {0} בדרך הביתה. בזמן הביקור {1} מזיקים גורשו ו-{2} ערוגת פרחים נשתלה.
+
+@ {0} bombed {1} pest, planted {2} flower gardens before heading home.
+= {0} בדרך הביתה. בזמן הביקור {1} מזיק גורש ו-{2} ערוגות פרחים נשתלו.
+
+@ {0} bombed {1} pests, planted {2} flower gardens before heading home.
+= {0} בדרך הביתה. בזמן הביקור {1} מזיקים גורשו ו-{2} ערוגות פרחים נשתלו.
+
+@ {0} fed {1} worker, bombed {2} pest, planted {3} flower garden before heading home.
+= {0} בדרך הביתה. בזמן הביקור {1} פועל קיבל אוכל, {2} מזיק גורש ו-{3} ערוגת פרחים נשתלה.
+
+@ {0} fed {1} workers, bombed {2} pest, planted {3} flower garden before heading home.
+= {0} בדרך הביתה. בזמן הביקור {1} פועלים קיבלו אוכל, {2} מזיק גורש ו-{3} ערוגת פרחים נשתלה.
+
+@ {0} fed {1} worker, bombed {2} pests, planted {3} flower garden before heading home.
+= {0} בדרך הביתה. בזמן הביקור {1} פועל קיבל אוכל, {2} מזיקים גורשו ו-{3} ערוגת פרחים נשתלה.
+
+@ {0} fed {1} workers, bombed {2} pests, planted {3} flower garden before heading home.
+= {0} בדרך הביתה. בזמן הביקור {1} פועלים קיבלו אוכל, {2} מזיקים גורשו ו-{3} ערוגת פרחים נשתלה.
+
+@ {0} fed {1} worker, bombed {2} pest, planted {3} flower gardens before heading home.
+= {0} בדרך הביתה. בזמן הביקור {1} פועל קיבל אוכל, {2} מזיק גורש ו-{3} ערוגות פרחים נשתלו.
+
+@ {0} fed {1} workers, bombed {2} pest, planted {3} flower gardens before heading home.
+= {0} בדרך הביתה. בזמן הביקור {1} פועלים קיבלו אוכל, {2} מזיק גורש ו-{3} ערוגות פרחים נשתלו.
+
+@ {0} fed {1} worker, bombed {2} pests, planted {3} flower gardens before heading home.
+= {0} בדרך הביתה. בזמן הביקור {1} פועל קיבל אוכל, {2} מזיקים גורשו ו-{3} ערוגות פרחים נשתלו.
+
+@ {0} fed {1} workers, bombed {2} pests, planted {3} flower gardens before heading home.
+= {0} בדרך הביתה. בזמן הביקור {1} פועלים קיבלו אוכל, {2} מזיקים גורשו ו-{3} ערוגות פרחים נשתלו.

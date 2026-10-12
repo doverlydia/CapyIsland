@@ -61,6 +61,7 @@ namespace CapyIsland.Game
         {
             DraggableActor best = null;
             float bestDistance = float.MaxValue;
+            float finger = FingerRadius();
             foreach (var a in FindObjectsByType<DraggableActor>(FindObjectsSortMode.None))
             {
                 if (a == null || !a.isActiveAndEnabled) continue;
@@ -71,11 +72,25 @@ namespace CapyIsland.Game
                 var placeable = a.GetComponent<Placeable>();
                 if (placeable != null && placeable.Placed) continue;
                 float d = Vector2.Distance(a.GrabCentre, worldPoint);
-                if (d > a.GrabRadius || d >= bestDistance) continue;
+                // However small something is drawn, a fingertip-sized press on it counts.
+                if (d > Mathf.Max(a.GrabRadius, finger) || d >= bestDistance) continue;
                 best = a;
                 bestDistance = d;
             }
             return best;
+        }
+
+        /// <summary>
+        /// A fingertip in world units at the current zoom: about 6 mm of screen in radius (8 mm with
+        /// Easy Reading's bigger grab), so tiny trail items stay easy to pick up on a phone.
+        /// </summary>
+        static float FingerRadius()
+        {
+            var cam = Camera.main;
+            if (cam == null || !cam.orthographic || Screen.height <= 0) return 0f;
+            float inches = UI.Accessibility.BigGrab ? 0.32f : 0.24f;
+            float pixels = Screen.dpi > 0f ? Screen.dpi * inches : Screen.height * inches / 6f;
+            return pixels * (2f * cam.orthographicSize / Screen.height);
         }
 
         public void BeginDrag()

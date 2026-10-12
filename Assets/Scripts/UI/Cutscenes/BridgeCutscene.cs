@@ -33,6 +33,9 @@ namespace CapyIsland.UI
             return catalog != null && catalog.Has(name) ? catalog.Icon(name) : null;
         }
 
+        /// <summary>In its bubble: the shore, the bridge and the island across.</summary>
+        protected override Vector3 BubbleView => new(0.52f, 0.45f, 1.1f);
+
         protected override IEnumerator Script()
         {
             Backdrop(Resources.Load<Sprite>("Cutscenes/Cutscene_Shore"), UiKit.Hex("BFE3F2"), UiKit.Hex("6FB7C9"));
@@ -55,8 +58,8 @@ namespace CapyIsland.UI
             }
 
             var worker = Icon("Capybara");
-            var mate = worker != null ? Cast(worker, new Vector2(0.12f, 0.06f), 0.22f, faceRight: true) : null;
-            var you = CastPlayer(new Vector2(0.28f, 0.02f), 0.26f, faceRight: true);
+            var mate = worker != null ? Cast(worker, new Vector2(0.36f, 0.13f), 0.22f, faceRight: true) : null;
+            var you = CastPlayer(new Vector2(0.46f, 0.09f), 0.26f, faceRight: true);
 
             var ghostArt = Icon("Ghost");
             var ghost = ghostArt != null ? Cast(ghostArt, GhostAt, 0.22f, tint: new Color(0.85f, 0.95f, 1f, 0f)) : null;
@@ -129,7 +132,7 @@ namespace CapyIsland.UI
             {
                 for (int i = 0; i < 3; i++)
                 {
-                    var tiny = Cast(worker, new Vector2(i == 2 ? 0.86f : 0.63f + i * 0.06f, SeaTop), 0.07f);
+                    var tiny = Cast(worker, new Vector2(i == 2 ? 0.76f : 0.6f + i * 0.06f, SeaTop), 0.07f);
                     tiny.Root.localScale = Vector3.zero;
                     Track(tiny.Root.DOScale(1f, 0.3f).SetDelay(i * 0.12f).SetEase(Ease.OutBack).SetUpdate(true));
                     tiny.Hop(4, 0.3f, 0.3f);

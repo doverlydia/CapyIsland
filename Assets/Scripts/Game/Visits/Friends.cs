@@ -43,6 +43,9 @@ namespace CapyIsland.Game
             "PebblePaws", "snoozy_suki", "BathBomber", "fluffcaptain", "OnsenOtis", "tulip.tilly", "RiverRoo",
         };
 
+        /// <summary>Every name a bot capybara can have (event leaderboards borrow them too).</summary>
+        public static IReadOnlyList<string> NamePool => Names;
+
         public static IReadOnlyList<FriendProfile> All
         {
             get

@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Capy Music Studio</title>
+  <link rel="icon" href="icon.svg">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="bar top">
+    <div class="brand"><img src="icon.svg" alt=""><span>Capy Music Studio</span></div>
+
+    <div class="group">
+      <select id="songList" title="Open a song"></select>
+      <button id="newSong" title="Start a new song">New</button>
+      <button id="copySong" title="Save a copy under a new name">Copy</button>
+      <button id="deleteSong" class="ghost" title="Delete this song (it goes to songs/trash)">Delete</button>
+      <span id="saveState" class="muted"></span>
+    </div>
+
+    <div class="group transport">
+      <button id="toStart" title="Back to the start (Home)">⏮</button>
+      <button id="play" class="primary big" title="Play / stop (Space)">▶ Play</button>
+      <button id="loop" class="toggle on" title="Loop playback">🔁 Loop</button>
+      <span id="clock" class="clock">1.1</span>
+      <span id="rendering" class="muted"></span>
+    </div>
+
+    <div class="group right">
+      <button id="undo" title="Undo (Ctrl+Z)">↶</button>
+      <button id="redo" title="Redo (Ctrl+Y)">↷</button>
+      <button id="help" title="How to use the studio">?</button>
+      <button id="export" class="accent" title="Render this song into the game">Put in game…</button>
+    </div>
+  </header>
+
+  <section class="bar song">
+    <label>Title <input id="title" type="text" size="16"></label>
+    <label>Tempo <input id="bpm" type="number" min="40" max="220" step="1"> bpm</label>
+    <label>Bars <input id="bars" type="number" min="1" max="128" step="1"></label>
+    <label>Beats/bar <select id="beatsPerBar"><option>3</option><option>4</option><option>6</option></select></label>
+    <label>Key <select id="key"></select></label>
+    <select id="scale" title="Scale: its notes are highlighted in the grid"></select>
+    <label title="Pushes every second eighth note late, for a lilting, bouncy feel">Swing <input id="swing" type="range" min="0" max="1" step="0.05"></label>
+    <label title="Plays like a person: notes a touch early or late, softer or louder, chords rolled from the bottom up">Human feel <input id="humanize" type="range" min="0" max="1" step="0.05"></label>
+    <span class="sep"></span>
+    <label>Volume <input id="mVolume" type="range" min="0.2" max="1" step="0.01"></label>
+    <label title="Softens the bright top end: higher is darker and cosier">Warmth <input id="mWarmth" type="range" min="0" max="1" step="0.01"></label>
+    <label title="How much of the room you hear">Room <input id="mReverb" type="range" min="0" max="1" step="0.01"></label>
+    <label title="A soft repeat of everything">Echo <input id="mEcho" type="range" min="0" max="0.8" step="0.01"></label>
+    <label title="Time between echoes, in seconds">Echo time <input id="mEchoTime" type="range" min="0.1" max="0.8" step="0.01"></label>
+  </section>
+
+  <main>
+    <aside id="tracks">
+      <div id="trackList"></div>
+      <button id="addTrack" class="wide">＋ Add track</button>
+    </aside>
+
+    <section id="editor">
+      <div class="bar tools">
+        <span class="label">Note</span>
+        <div class="seg" id="noteLen">
+          <button data-v="1" title="Sixteenth">1/16</button>
+          <button data-v="2" title="Eighth">1/8</button>
+          <button data-v="4" title="Quarter (one beat)">1/4</button>
+          <button data-v="8" title="Half">1/2</button>
+          <button data-v="16" title="A whole bar">1 bar</button>
+        </div>
+        <span class="label">Chord</span>
+        <div class="seg" id="chordMode" title="Click once, place a whole chord from the scale">
+          <button data-v="off">Single</button>
+          <button data-v="triad">Triad</button>
+          <button data-v="seventh">7th</button>
+        </div>
+        <label class="check" title="Notes you place land on the scale's notes"><input type="checkbox" id="scaleSnap"> Stay in key</label>
+        <label class="check" title="Faintly show the other tracks' notes"><input type="checkbox" id="ghosts" checked> Show others</label>
+        <label title="Loudness of new notes">Loudness <input id="velocity" type="range" min="0.1" max="1" step="0.05"></label>
+        <span class="sep"></span>
+        <span id="drumTools" hidden>
+          <select id="drumPattern" title="Fill the selected bars (or the whole song) with a drum pattern">
+            <option value="">Drum pattern…</option>
+          </select>
+        </span>
+        <button id="arp" title="Turn the selected chords into a rolling arpeggio">Arpeggio</button>
+        <span class="sep"></span>
+        <button id="zoomOut" title="Zoom out">−</button>
+        <button id="zoomIn" title="Zoom in">＋</button>
+      </div>
+
+      <div id="rangeBar" class="bar range" hidden>
+        <span id="rangeLabel"></span>
+        <button id="rangeCopy" title="Copy these bars (all tracks)">Copy bars</button>
+        <button id="rangePaste" title="Paste copied bars at the start of the selection">Paste here</button>
+        <button id="rangeDup" title="Repeat these bars right after themselves">Repeat after</button>
+        <button id="rangeClear" title="Clear these bars (all tracks)">Clear</button>
+        <button id="rangeOff" class="ghost" title="Unselect (Esc)">✕</button>
+      </div>
+
+      <div id="scroller">
+        <div id="spacer"></div>
+        <canvas id="roll"></canvas>
+      </div>
+      <canvas id="velLane" title="Drag up and down to make notes louder or softer"></canvas>
+      <div class="bar status" id="status">Click the grid to add a note · drag a note to move it · drag its right edge to lengthen · right-click deletes · Space plays</div>
+    </section>
+  </main>
+
+  <dialog id="modal">
+    <form method="dialog">
+      <h2 id="modalTitle"></h2>
+      <div id="modalBody"></div>
+      <menu>
+        <button value="ok" class="primary" id="modalOk">OK</button>
+        <button value="cancel" class="ghost" id="modalCancel" formnovalidate>Cancel</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,680 @@
+# Hobbies: fishing, birdwatching, bug catching, gardening, cooking, cats, sea library, books
+# Source: Assets/Scripts/Game/Hobbies/*.cs
+
+# ---------------------------------------------------------------- fish (HobbyData.cs)
+
+@ Sardine
+= סרדין
+
+@ Anchovy
+= אנשובי
+
+@ Mackerel
+= מקרל
+
+@ Sea Bream
+= דניס
+
+@ Clownfish
+= דג ליצן
+
+@ Pufferfish
+= אבו נפחא
+
+@ Flounder
+= דג משה רבנו
+
+@ Squid
+= דיונון
+
+@ Salmon
+= סלמון
+
+@ Octopus
+= תמנון
+
+@ Tuna
+= טונה
+
+@ Yuzu Ray
+= טריגון יוזו
+
+@ Moonfish
+= דג ירח
+
+@ Swordfish
+= דג חרב
+
+@ Golden Snapper
+= סנאפר זהוב
+
+@ Hot Spring Eel
+= צלופח המעיין החם
+
+@ Coelacanth
+= לטימריה
+
+# ---------------------------------------------------------------- birds (HobbyData.cs)
+
+@ Sparrow
+= דרור
+
+@ Robin
+= אדום-חזה
+
+@ Blue Tit
+= ירגזי כחול
+
+@ Goldfinch
+= חוחית
+
+@ Turtle Dove
+= תור
+
+@ Grey Heron
+= אנפה אפורה
+
+@ Kingfisher
+= שלדג
+
+@ Parrot
+= תוכי
+
+@ Toucan
+= טוקן
+
+@ Snowy Egret
+= לבנית שלג
+
+@ Hummingbird
+= יונק דבש
+
+@ Red-crowned Crane
+= עגור אדום-כתר
+
+@ Golden Pheasant
+= פסיון זהוב
+
+# ---------------------------------------------------------------- rarity (HobbyData.Rarity)
+
+@ Common
+= נפוץ
+
+@ Uncommon
+= לא נפוץ
+
+@ Rare
+= נדיר
+
+@ Very rare
+= נדיר מאוד
+
+@ Legendary
+= אגדי
+
+# ---------------------------------------------------------------- crops (HobbyData.More.cs)
+
+@ Carrot
+= גזר
+
+@ Cabbage
+= כרוב
+
+@ Cotton
+= כותנה
+
+@ Tomato
+= עגבנייה
+
+@ Corn
+= תירס
+
+@ Strawberry
+= תות
+
+@ Pumpkin
+= דלעת
+
+# Plurals built by Gardening.Harvest ("You harvested 3 carrots!") - the code just adds "s".
+@ carrots
+= גזרים
+
+@ cabbages
+= כרובים
+
+@ cottons
+= פקעות כותנה
+
+@ tomatos
+= עגבניות
+
+@ corns
+= קלחי תירס
+
+@ strawberrys
+= תותים
+
+@ pumpkins
+= דלעות
+
+# ---------------------------------------------------------------- dishes (HobbyData.More.cs)
+
+@ Carrot Soup
+= מרק גזר
+
+@ Smooth, warm and orange. Fills a hungry worker right up.
+= חלק, חם וכתום. משביע כל פועל רעב עד הסוף.
+
+@ Grilled Fish
+= דג צלוי
+
+@ Crispy skin, a squeeze of lemon. A fisher's favourite.
+= עור פריך וסחיטת לימון. האהוב על הדייגים.
+
+@ Tomato Salad
+= סלט עגבניות
+
+@ Fresh and crunchy, straight from the garden.
+= טרי ופריך, ישר מהגינה.
+
+@ Veggie Stew
+= תבשיל ירקות
+
+@ A whole garden in one pot.
+= גינה שלמה בסיר אחד.
+
+@ Corn Chowder
+= מרק תירס סמיך
+
+@ Creamy, sweet and very filling.
+= קרמי, מתקתק ומשביע מאוד.
+
+@ Strawberry Mochi
+= מוצ'י תות
+
+@ Soft, sweet and impossible to eat just one.
+= רך, מתוק ואי אפשר לאכול רק אחד.
+
+@ Yuzu Hot Pot
+= סיר יוזו מהביל
+
+@ Bubbling broth with a slice of yuzu. Warms you to the toes.
+= ציר מבעבע עם פרוסת יוזו. מחמם עד קצות האצבעות.
+
+@ Pumpkin Pie
+= פאי דלעת
+
+@ The pride of any island kitchen.
+= הגאווה של כל מטבח באי.
+
+@ Bizarre Food
+= אוכל מוזר
+
+@ Silk
+= משי
+
+@ any fish
+= דג כלשהו
+
+# Recipes as DishOrders.Recipe builds them (count + item name, comma-joined)
+@ 3 Carrot
+= 3 גזרים
+
+@ 2 any fish
+= 2 דגים כלשהם
+
+@ 2 Tomato, 1 Cabbage
+= 2 עגבניות, 1 כרוב
+
+@ 2 Carrot, 1 Tomato, 1 Cabbage
+= 2 גזרים, 1 עגבנייה, 1 כרוב
+
+@ 2 Corn, 1 any fish
+= 2 קלחי תירס, 1 דג כלשהו
+
+@ 3 Strawberry
+= 3 תותים
+
+@ 2 any fish, 2 Cabbage, 1 Carrot
+= 2 דגים כלשהם, 2 כרובים, 1 גזר
+
+@ 1 Pumpkin, 2 Strawberry
+= 1 דלעת, 2 תותים
+
+# ---------------------------------------------------------------- bugs (HobbyData.More.cs)
+
+@ Ladybug
+= פרת משה רבנו
+
+@ Sulphur Butterfly
+= פרפר לימוני
+
+@ Garden Snail
+= חילזון גינה
+
+@ Bumblebee
+= דבורת בומבוס
+
+@ Jewel Beetle
+= חיפושית תכשיט
+
+@ Silkworm
+= תולעת משי
+
+@ Dragonfly
+= שפירית
+
+@ Sky Blue Butterfly
+= פרפר תכלת
+
+@ Firefly
+= גחלילית
+
+@ Stag Beetle
+= חיפושית קרנית
+
+@ Rainbow Moth
+= עש הקשת
+
+# ---------------------------------------------------------------- cats (HobbyData.More.cs)
+
+@ Marmalade
+= ג'ינג'י
+
+@ Loves naps in the sun and anyone holding a fish.
+= אוהב תנומות בשמש וכל מי שמחזיק דג.
+
+@ Soot
+= פיח
+
+@ Shy at first, then follows you everywhere.
+= ביישן בהתחלה, ואחר כך הולך אחריך לכל מקום.
+
+@ Patches
+= טלאי
+
+@ Curious about every bubble on the island.
+= סקרן לגבי כל בועה באי.
+
+@ Pebble
+= חלוקי
+
+@ A very serious cat. Secretly adores being petted.
+= חתול רציני מאוד. בסתר הוא מת על ליטופים.
+
+@ Miso Jr.
+= מיסו הקטן
+
+@ Chatty. Has opinions about your fishing technique.
+= פטפטן. יש לו דעות על טכניקת הדיג שלך.
+
+@ Snowball
+= כדור שלג
+
+@ Fluffy, gentle and fond of the hot spring.
+= רך, עדין ומחבב את המעיין החם.
+
+# ---------------------------------------------------------------- hobby kit (HobbyCatalog.cs, StoryText names)
+
+@ Garden Shop
+= חנות הגינה
+
+@ Vegetable Plot
+= ערוגת ירקות
+
+@ Stove
+= כיריים
+
+@ Cooking Stove
+= כיריים
+
+@ Fishing Rod
+= חכה
+
+@ Bug Net
+= רשת חרקים
+
+@ Binoculars
+= משקפת
+
+@ Sewing Machine
+= מכונת תפירה
+
+# ---------------------------------------------------------------- unlocking (HobbyLog.HowToUnlock)
+
+@ Buy a Fishing Rod from Skipper Nori on the beach
+= קנה חכה מהסקיפר נורי בחוף
+
+@ Buy a Fishing Rod at the Bronze Store
+= קנה חכה בחנות הארד
+
+@ Buy a Bug Net at the Bronze Store
+= קנה רשת חרקים בחנות הארד
+
+@ Buy Binoculars at the Silver Store
+= קנה משקפת בחנות הכסף
+
+@ Buy a Sewing Machine at the Steel Store
+= קנה מכונת תפירה בחנות הפלדה
+
+@ Buy a Vegetable Plot at the Garden Shop (after the Legendary Gem Store)
+= קנה ערוגת ירקות בחנות הגינה (אחרי חנות היהלומים האגדית)
+
+@ Buy a Cooking Stove at the Garden Shop (after the Legendary Gem Store)
+= קנה כיריים בחנות הגינה (אחרי חנות היהלומים האגדית)
+
+# ---------------------------------------------------------------- shared catch cards (Fishing, Birding, BugCatching)
+
+@ You caught a {0}!
+= תפסת {0}!
+
+@ You caught an {0}!
+= תפסת {0}!
+
+@ You spotted a {0}!
+= זיהית {0}!
+
+@ You spotted an {0}!
+= זיהית {0}!
+
+@ {0} cm · {1}
+= {0} ס"מ · {1}
+
+@ <color=#2DB3A6><b>New to your journal!</b></color>
+= <color=#2DB3A6><b>חדש ביומן שלך!</b></color>
+
+@ <color=#E3A92B><b>A new record!</b></color>
+= <color=#E3A92B><b>שיא חדש!</b></color>
+
+@ +{0} fishing XP
+= +{0} נק' ניסיון בדיג
+
+@ +{0} birding XP
+= +{0} נק' ניסיון בצפרות
+
+@ +{0} bug catching XP
+= +{0} נק' ניסיון בציד חרקים
+
+# ---------------------------------------------------------------- fishing (Fishing.cs)
+
+@ Wait for the big splash — then hold to reel.
+= חכה להתזה הגדולה — ואז לחץ והחזק כדי למשוך.
+
+@ Walk right up to the water's edge to fish.
+= גש עד קצה המים כדי לדוג.
+
+@ You walked off and the fish got away.
+= התרחקת, והדג ברח.
+
+@ Nothing's biting here. Try casting just in front of a fish shadow.
+= שום דבר לא נוגס פה. נסה להטיל ממש לפני צל של דג.
+
+@ It's hooked! Hold to reel. If the line turns red, let go until it calms down.
+= הדג על הקרס! החזק כדי למשוך. אם החוט נהיה אדום, שחרר עד שיירגע.
+
+@ Snap! The line broke. Let go when it turns red.
+= טראח! החוט נקרע. שחרר כשהוא נהיה אדום.
+
+@ It swam off. Keep reeling between its pulls.
+= הוא שחה לו. המשך למשוך בין הטלטולים שלו.
+
+# ---------------------------------------------------------------- birding and bugs (Birding.cs, BugCatching.cs)
+
+@ That bird is too far away to see properly. Creep a little closer.
+= הציפור הזאת רחוקה מדי בשביל לראות אותה טוב. התגנב קצת יותר קרוב.
+
+@ Too far to reach with your net. Tiptoe a little closer.
+= רחוק מדי בשביל הרשת שלך. התקרב על קצות האצבעות.
+
+# ---------------------------------------------------------------- gardening (Gardening.cs)
+
+@ Tap your plot to plant some seeds.
+= הקש על הערוגה כדי לשתול זרעים.
+
+@ Your {0} will be ready in {1}.
+= {0}: עוד {1} עד הקטיף.
+
+@ less than a minute
+= פחות מדקה
+
+@ about {0} min
+= בערך {0} דק'
+
+@ {0} ({1} gold)
+= {0} ({1} זהב)
+
+@ Not now
+= לא עכשיו
+
+@ What would you like to plant? Seeds grow while you're away, too.
+= מה תרצה לשתול? הזרעים גדלים גם כשאתה לא כאן.
+
+@ {0} seeds planted! Ready in {1} min.
+= זרעי {0} נשתלו! מוכן בעוד {1} דק'.
+
+@ You harvested {0} {1}! They're in your bag.
+= קטפת {0} {1}! הכול בתיק שלך.
+
+# ---------------------------------------------------------------- cats (CatCare.cs)
+
+@ A stray cat has wandered onto your island. Go and say hello!
+= חתול משוטט הגיע לאי שלך. לך להגיד לו שלום!
+
+@ The stray cat
+= החתול המשוטט
+
+@ {0} has brought you something! Tap it to see.
+= {0} הביא לך משהו! הקש עליו כדי לראות.
+
+@ {0} hopped up onto your head! Take them for a walk.
+= {0} קפץ לך על הראש! קח אותו לטיול.
+
+@ {0} remembers exactly who has the fish…
+= {0} זוכר בדיוק למי יש את הדגים…
+
+@ The cat
+= החתול
+
+@ <b>{0}</b> meows at you. Then at your bag. Then at you again, louder.
+= <b>{0}</b> מיילל אליך. ואז אל התיק שלך. ואז שוב אליך, יותר חזק.
+
+@ <b>{0}</b> purrs and bumps your hand.
+= <b>{0}</b> מגרגר ומתחכך לך ביד.
+
+@ A stray cat. It watches you carefully.
+= חתול משוטט. הוא מתבונן בך בזהירות.
+
+@ <size=80%>{0}</size>
+= <size=80%>{0}</size>
+
+@ Pet
+= לטף
+
+@ Give a fish ({0})
+= תן דג ({0})
+
+@ The cat licks its whiskers and gives you a long, thoughtful look. It's planning something…
+= החתול מלקק את השפם ונועץ בך מבט ארוך ומהורהר. הוא זומם משהו…
+
+@ Adopt!
+= אמץ!
+
+@ Leave
+= עזוב
+
+@ Stray cat
+= חתול משוטט
+
+@ {0}  ·  Trust {1}/{2}
+= {0}  ·  אמון {1}/{2}
+
+@ It's had plenty of fuss for now. Come back in a little while.
+= הוא קיבל מספיק פינוקים בינתיים. חזור עוד קצת.
+
+@ This cat really trusts you now. Tap it to adopt it!
+= החתול הזה כבר ממש סומך עליך. הקש עליו כדי לאמץ אותו!
+
+@ {0} is yours!
+= {0} שלך!
+
+@ Pop the bubble and put {0} wherever you'd like their home to be.
+= פוצץ את הבועה ושים את {0} איפה שתרצה שיהיה הבית שלו.
+
+# ---------------------------------------------------------------- cat presents (CatGifts.cs)
+
+# {0} is a cat's name or "the stray cat" (matched case-insensitively by "The stray cat" above)
+@ A present from {0}!
+= מתנה מ{0}!
+
+@ A {0}! Where did it even find that?
+= {0}! איפה הוא בכלל מצא את זה?
+
+@ <size=85%>It's in your wardrobe now.</size>
+= <size=85%>זה כבר בארון הבגדים שלך.</size>
+
+@ A little pile of {0} shiny gems. Good cat!
+= ערימה קטנה של {0} יהלומים נוצצים. חתול טוב!
+
+@ Something it dug up… and it's still growing! Pop the bubble to see.
+= משהו שהוא חפר… והוא עדיין גדל! פוצץ את הבועה כדי לראות.
+
+@ A cockroach. It looks extremely proud of itself.
+= ג'וק. החתול נראה גאה בעצמו להפליא.
+
+@ A soggy old boot. Nobody knows where it found it. Nobody wants to.
+= מגף ישן ורטוב. אף אחד לא יודע איפה הוא מצא אותו. ואף אחד לא רוצה לדעת.
+
+@ A fish skeleton. It is your fish. Well. It was your fish.
+= שלד של דג. זה הדג שלך. נו. זה היה הדג שלך.
+
+@ <size=85%>Salty Kombu might give you a coin for it.</size>
+= <size=85%>אולי קומבו המלוח ייתן לך מטבע תמורתו.</size>
+
+@ A lit fizz bomb?! Run!
+= פצצת תסס דולקת?! רוץ!
+
+@ A zombie capybara. It followed the cat home, and it isn't leaving.
+= קפיברת זומבי. היא הלכה אחרי החתול הביתה, ואין לה שום כוונה ללכת.
+
+@ A whole family of guinea pigs. They're already eyeing your flowers.
+= משפחה שלמה של שרקנים. הם כבר לוטשים עיניים לפרחים שלך.
+
+@ cockroach
+= ג'וק
+
+@ soggy old boot
+= מגף ישן ורטוב
+
+@ fish skeleton
+= שלד של דג
+
+@ Nobody wants a {0} lying about. Drop it on Salty Kombu, he might buy it!
+= אף אחד לא רוצה {0} שמתגלגל סתם. זרוק אותו על קומבו המלוח, אולי הוא יקנה!
+
+# ---------------------------------------------------------------- dish orders (DishOrders.cs)
+
+@ {0} would love some {1}! Cook it at your stove: {2}.
+= ל{0} מתחשק {1}! בשל את זה בכיריים שלך: {2}.
+
+@ "{0}! Now THAT'S proper ship's cooking!" The Captain pays you in gems.
+= "{0}! זה כבר בישול של ספינה כמו שצריך!" הקפטן משלמת לך ביהלומים.
+
+@ "Arr, {0}. Reminds me of me old mum's." Salty Kombu pays you in wood and gold.
+= "ארר, {0}. בדיוק כמו של אמא שלי הזקנה." קומבו המלוח משלם לך בעץ ובזהב.
+
+@ "{0}? You remembered!" Miso beams and pays you in gold.
+= "{0}? זכרת!" מיסו קורנת ומשלמת לך בזהב.
+
+# ---------------------------------------------------------------- sea library (SeaLibrary.cs)
+
+@ Skipper Nori
+= הסקיפר נורי
+
+@ by you
+= מאתך
+
+@ by {0}
+= מאת {0}
+
+@ a note from {0}
+= פתק מאת {0}
+
+@ {0} left a message bottle on your beach!
+= בקבוק עם מכתב מאת {0} מחכה על החוף שלך!
+
+@ Your bottle is on {0}'s beach. They'll find it!
+= הבקבוק שלך מחכה על החוף של {0}. בקרוב ימצאו אותו!
+
+@ Your bottle is on the beach. Friends who visit can read it!
+= הבקבוק שלך מחכה על החוף. חברים שבאים לבקר יוכלו לקרוא אותו!
+
+@ Ahoy! Leave {0} a message in a bottle? One gold coin, and I'll set it on the sand for 'em.
+= אהוי! להשאיר ל{0} מכתב בבקבוק? מטבע זהב אחד, ואני כבר אניח אותו על החול.
+
+@ Ahoy! Fancy a message bottle? One gold coin. Write what you like and I'll set it on the shore for anyone passing by.
+= אהוי! מתחשק לך בקבוק עם מכתב? מטבע זהב אחד. כתוב מה שבא לך, ואני אניח אותו על החוף לכל מי שעובר.
+
+@ Buy a bottle (1 gold)
+= קנה בקבוק (1 זהב)
+
+# ---------------------------------------------------------------- islanders' books (BotBooks.cs)
+
+@ The Longest Nap
+= התנומה הכי ארוכה
+
+@ It started after lunch, under the maple by the mill.\n\nI only meant to close my eyes for a moment. When I opened them, the sun had moved to the other side of the tree, a burrow capybara had dug a hole beside my ear, and somebody had balanced a yuzu on my head.\n\nI never found out who. I kept the yuzu.\n\nThe moral of this story is that naps are excellent, and that you should always check your head afterwards.
+= זה התחיל אחרי ארוחת הצהריים, מתחת לאדר שליד המנסרה.\n\nרק רציתי לעצום עיניים לרגע. כשפקחתי אותן, השמש כבר עברה לצד השני של העץ, קפיברת מחילות חפרה בור ליד האוזן שלי, ומישהו איזן לי יוזו על הראש.\n\nאף פעם לא גיליתי מי. את היוזו שמרתי.\n\nמוסר ההשכל של הסיפור הזה: תנומות הן דבר נפלא, ותמיד כדאי לבדוק את הראש אחריהן.
+
+@ Guinea Pig Diaries
+= יומני השרקנים
+
+@ Day 1. A guinea pig ate my tulips.\n\nDay 2. It came back with a friend. They ate the roses.\n\nDay 3. I planted daisies, which everyone says guinea pigs do not like. Everyone was wrong.\n\nDay 4. I bought a fizz bomb. I could not do it. They looked so happy.\n\nDay 5. I planted a second garden, just for them, far away from the mill. Now they leave my workers' flowers alone, and sometimes they wave.\n\nI think we are friends now.
+= יום 1. שרקן אכל לי את הצבעונים.\n\nיום 2. הוא חזר עם חבר. הם אכלו את הוורדים.\n\nיום 3. שתלתי חינניות, כי כולם אומרים ששרקנים לא אוהבים אותן. כולם טעו.\n\nיום 4. קניתי פצצת תסס. לא הצלחתי. הם נראו כל כך מאושרים.\n\nיום 5. שתלתי גינה שנייה, רק בשבילם, רחוק מהמנסרה. עכשיו הם עוזבים בשקט את הפרחים של הפועלים שלי, ולפעמים הם מנופפים לי.\n\nנראה לי שאנחנו חברים עכשיו.
+
+@ How to Catch a Coelacanth
+= איך לתפוס לטימריה
+
+@ Step one: go fishing.\n\nStep two: go fishing again.\n\nStep three: catch four hundred sardines. Learn to love sardines. Name your favourite one Gerald.\n\nStep four: one morning, when the mist is thick and you have nearly given up, see the biggest shadow you have ever seen.\n\nStep five: wait. Do not reel at the nibbles. Wait for the tug.\n\nStep six: I will let you know when I get to step six.
+= שלב ראשון: צא לדוג.\n\nשלב שני: צא לדוג שוב.\n\nשלב שלישי: תפוס ארבע מאות סרדינים. למד לאהוב סרדינים. לסרדין האהוב עליך תקרא ג'רלד.\n\nשלב רביעי: בוקר אחד, כשהערפל סמיך וכמעט התייאשת, תראה את הצל הכי גדול שראית בחיים.\n\nשלב חמישי: חכה. אל תמשוך בנגיסות הקטנות. חכה למשיכה החזקה.\n\nשלב שישי: אודיע לך כשאגיע לשלב שישי.
+
+@ Letters to the Hot Spring
+= מכתבים למעיין החם
+
+@ Dear Hot Spring,\n\nI know you are still cold. I know you have been cold for a long time. But I planted a garden today and it felt warm, and my workers sang while they chopped, and I think you heard them.\n\nI will keep building. I will keep finding warm hearts and sending them your way.\n\nPlease wake up soon. We have saved you the best spot.\n\nLove, an islander
+= מעיין חם יקר,\n\nאני יודע שאתה עדיין קר. אני יודע שאתה קר כבר הרבה זמן. אבל היום שתלתי גינה והרגשתי חום, והפועלים שלי שרו בזמן שחטבו עצים, ואני חושב ששמעת אותם.\n\nאמשיך לבנות. אמשיך למצוא לבבות חמים ולשלוח אותם אליך.\n\nבבקשה תתעורר בקרוב. שמרנו לך את המקום הכי טוב.\n\nבאהבה, תושב האי
+
+@ Captain Wasabi Taught Me to Dance
+= קפטן וואסאבי לימדה אותי לרקוד
+
+@ She said the Hot Pepper Hornpipe has seven steps. I counted eleven. She said that was because I kept falling over and getting up again, and that this counted as style.\n\nWe danced until the moon came up over the harbour. My feet hurt for two days.\n\nWorth every gem.
+= היא אמרה שבריקוד המלחים "הפלפל החריף" יש שבעה צעדים. אני ספרתי אחד-עשר. היא אמרה שזה כי כל הזמן נפלתי וקמתי שוב, ושגם זה נחשב סטייל.\n\nרקדנו עד שהירח עלה מעל הנמל. הרגליים כאבו לי יומיים.\n\nשווה כל יהלום.
+
+@ The Woolly One
+= הצמרירי
+
+@ My woolly capybara is the slowest worker on the island. He stops to look at every cloud. He stops to look at every flower. Once he stopped to look at a pebble for twenty minutes.\n\nBut when it rains, everyone huddles against him, because he is warm and dry right through to the middle.\n\nSome workers are fast. Some are the best place to be on a rainy day.
+= הצמרירי שלי הוא הפועל הכי איטי באי. הוא עוצר להסתכל על כל ענן. הוא עוצר להסתכל על כל פרח. פעם הוא עצר להסתכל על חלוק אבן במשך עשרים דקות.\n\nאבל כשיורד גשם, כולם מתכרבלים צמוד אליו, כי הוא חם ויבש עד הלב.\n\nיש פועלים מהירים. ויש כאלה שהם המקום הכי טוב להיות בו ביום גשום.
+
+@ A Very Small Book About Bubbles
+= ספר קטן מאוד על בועות
+
+@ Bubbles are where things wait.\n\nForests wait in bubbles. Houses wait in bubbles. Once I found a whole sawmill waiting in one, looking very patient.\n\nOld Yuzu says she filled them with warm air before the cold came, so that nothing would be lost.\n\nI pop them gently. It seems polite.
+= בועות הן המקום שבו דברים מחכים.\n\nיערות מחכים בבועות. בתים מחכים בבועות. פעם מצאתי מנסרה שלמה שחיכתה באחת, ונראתה סבלנית מאוד.\n\nסבתא יוזו אומרת שהיא מילאה אותן באוויר חם לפני שהקור הגיע, כדי ששום דבר לא יאבד.\n\nאני מפוצץ אותן בעדינות. זה נראה לי מנומס.
+
+@ My Zombie Capybara
+= קפיברת הזומבי שלי
+
+@ When I found him he was grey and grumbly and covered in Gloomfen mud, and he tried to eat my rock pile.\n\nI gave him twenty gems for a warm bath.\n\nNow he is brown again, and he hums when he works, and he will not let anyone else carry his pickaxe.\n\nHe still eats the occasional rock. We all have our habits.
+= כשמצאתי אותו הוא היה אפור ורטנוני ומכוסה בבוץ מביצת הקדרות, והוא ניסה לאכול את ערימת האבנים שלי.\n\nנתתי לו עשרים יהלומים בשביל אמבטיה חמה.\n\nעכשיו הוא שוב חום, הוא מזמזם כשהוא עובד, והוא לא נותן לאף אחד אחר לסחוב את המכוש שלו.\n\nמדי פעם הוא עדיין אוכל אבן. לכל אחד יש את ההרגלים שלו.
+
+@ Notes From the Shore
+= רשימות מהחוף
+
+@ The sea is never the same twice.\n\nIn the morning the shadows come close to the sand and you can count them. At noon they drift out to the deeper blue. In the evening something big always swims past, just too far away to cast to.\n\nI have stopped minding. Some fish are for catching. Some are just for knowing they are there.
+= הים אף פעם לא אותו ים פעמיים.\n\nבבוקר הצללים מתקרבים לחול ואפשר לספור אותם. בצהריים הם נסחפים אל הכחול העמוק. בערב תמיד שוחה שם משהו גדול, קצת רחוק מדי בשביל להטיל אליו.\n\nהפסקתי להתבאס. יש דגים שהם בשביל לתפוס. ויש דגים שהם רק בשביל לדעת שהם שם.
+
+@ Ten Things I Love About My Island
+= עשרה דברים שאני אוהב באי שלי
+
+@ 1. The smell of maple after rain.\n2. The sound the mill makes.\n3. My first capy house, which leans a little.\n4. The pear tree that drops pears on my head.\n5. The kingfisher who visits on Tuesdays.\n6. Bubbles.\n7. The bridge I waited three days to open.\n8. My friends' islands, which are nothing like mine.\n9. My friends.\n10. Coming home.
+= 1. הריח של האדר אחרי גשם.\n2. הקול שהמנסרה עושה.\n3. בית הקפיברות הראשון שלי, שנוטה קצת הצידה.\n4. עץ האגס שמפיל לי אגסים על הראש.\n5. השלדג שבא לבקר בימי שלישי.\n6. בועות.\n7. הגשר שחיכיתי שלושה ימים כדי לפתוח.\n8. האיים של החברים שלי, שלא דומים בכלל לשלי.\n9. החברים שלי.\n10. לחזור הביתה.

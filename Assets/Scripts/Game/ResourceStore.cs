@@ -70,6 +70,19 @@ namespace CapyIsland.Game
         public int BestWoodPerMinute { get; private set; }
         public int BestGoldPerMinute { get; private set; }
 
+        int _woodLastMinute, _goldLastMinute;
+
+        /// <summary>
+        /// Roughly how much is coming in a minute right now: the last full minute, or this one
+        /// if it has already beaten it. For the HUD, not for prices.
+        /// </summary>
+        public int PerMinute(ResourceKind kind) => kind switch
+        {
+            ResourceKind.Wood => Mathf.Max(_woodLastMinute, _woodThisMinute),
+            ResourceKind.Gold => Mathf.Max(_goldLastMinute, _goldThisMinute),
+            _ => 0,
+        };
+
         /// <summary>A worker delivered a load to a mill or mine.</summary>
         public void RecordDelivery(ResourceKind kind, int amount)
         {
@@ -83,6 +96,8 @@ namespace CapyIsland.Game
             if (Time.time - _minuteStarted < 60f) return;
             BestWoodPerMinute = Mathf.Max(BestWoodPerMinute, _woodThisMinute);
             BestGoldPerMinute = Mathf.Max(BestGoldPerMinute, _goldThisMinute);
+            _woodLastMinute = _woodThisMinute;
+            _goldLastMinute = _goldThisMinute;
             _woodThisMinute = _goldThisMinute = 0;
             _minuteStarted = Time.time;
         }

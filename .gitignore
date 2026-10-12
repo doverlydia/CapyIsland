@@ -115,3 +115,6 @@ InitTestScene*.unity*
 
 # Local player builds (WebGL folder, APK) — made by CapyIsland/Build menu
 /Builds/
+
+# Capy Music Studio: deleted songs wait here
+Tools/MusicStudio/songs/trash/

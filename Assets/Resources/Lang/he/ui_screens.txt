@@ -1,0 +1,334 @@
+# Hebrew UI text: HUD, menu, screens (UI/*.cs, UI/Screens/*, UI/Kit/*, CameraRig/*, Core/*)
+
+# ---------------------------------------------------------------- MobileHud
+
+@ New outfit!
+= בגד חדש!
+
+@ <b>{0}</b> is waiting for you in the Wardrobe.
+= <b>{0}</b> מחכה לך בארון הבגדים.
+
+@ {0} is now your friend! Their island will be here next time.
+= {0} עכשיו חבר שלך! האי שלו יחכה לך כאן בפעם הבאה.
+
+@ Menu
+= תפריט
+
+@ Map
+= מפה
+
+@ Home
+= הביתה
+
+@ Add
+= הוסף
+
+@ Gifts
+= מתנות
+
+@ Friends
+= חברים
+
+@ Profile
+= פרופיל
+
+@ Goals
+= מטרות
+
+@ Collection
+= אוסף
+
+@ Wardrobe
+= ארון בגדים
+
+@ Daily Gifts
+= מתנות יומיות
+
+@ Hobbies
+= תחביבים
+
+@ Settings
+= הגדרות
+
+# ---------------------------------------------------------------- MenuScreen
+
+@ Soon
+= בקרוב
+
+# ---------------------------------------------------------------- ObjectiveTracker
+
+@ Goal
+= מטרה
+
+@ Getting started
+= צעדים ראשונים
+
+@ Reward ready
+= הפרס מחכה
+
+@ New quest
+= משימה חדשה
+
+@ Quest · {0}
+= משימה · {0}
+
+@ All done
+= הכול הושלם
+
+@ Visiting · {0}
+= ביקור · {0}
+
+@ Next goal
+= המטרה הבאה
+
+@ <size=78%><color=#C9653A>{0}</color></size>
+= <size=78%><color=#C9653A>{0}</color></size>
+
+# ---------------------------------------------------------------- PurchaseDialog
+
+@ <b>Sold out.</b>
+= <b>אזל מהמלאי.</b>
+
+@ <color=#b0413e>You need more wood, gold and gems.</color>
+= <color=#b0413e>צריך עוד עץ, זהב ויהלומים.</color>
+
+@ <color=#b0413e>You need more gems.</color>
+= <color=#b0413e>צריך עוד יהלומים.</color>
+
+@ <color=#b0413e>You need more wood and gold.</color>
+= <color=#b0413e>צריך עוד עץ וזהב.</color>
+
+@ <color=#b0413e>You need more gold.</color>
+= <color=#b0413e>צריך עוד זהב.</color>
+
+@ <color=#b0413e>You need more wood.</color>
+= <color=#b0413e>צריך עוד עץ.</color>
+
+# ---------------------------------------------------------------- SpeechDialog
+
+@ tap to close
+= הקש לסגירה
+
+@ tap to continue
+= הקש להמשך
+
+# ---------------------------------------------------------------- ObjectivesScreen
+
+@ Quests
+= משימות
+
+@ Achievements
+= הישגים
+
+@ Your guide
+= ההדרכה שלך
+
+@ Now
+= עכשיו
+
+@ Nobody needs a hand right now. Keep building, and new friends will turn up with requests.
+= אף אחד לא צריך עזרה כרגע. המשך לבנות, וחברים חדשים יגיעו עם בקשות.
+
+@ Talk to {0} to collect your reward
+= דבר עם {0} כדי לקבל את הפרס שלך
+
+@ Talk to {0} to hear what they need
+= דבר עם {0} כדי לשמוע מה צריך
+
+@ New
+= חדש
+
+@ In progress
+= בתהליך
+
+@ <color=#C9653A>{0}</color>
+= <color=#C9653A>{0}</color>
+
+@ Next up
+= הבא בתור
+
+@ {0} of {1} complete
+= הושלמו {0} מתוך {1}
+
+@ To do
+= לביצוע
+
+@ You've done everything. The island is whole again!
+= עשית הכול. האי שלם שוב!
+
+@ Complete
+= הושלמו
+
+@ <color=#C2577F>Reward: {0}</color>
+= <color=#C2577F>פרס: {0}</color>
+
+@ Show me
+= הראה לי
+
+# ---------------------------------------------------------------- DailyGiftScreen
+
+@ Day {0}
+= יום {0}
+
+@ Outfit!
+= בגד!
+
+@ Welcome! Come back every day and the gifts grow bigger.
+= ברוך הבא! חזור כל יום, והמתנות יגדלו.
+
+@ Day {0} of your streak — keep it going!
+= יום {0} ברצף שלך — המשך כך!
+
+@ <size=80%>Miss a day and the streak starts again from day 1.</size>
+= <size=80%>פספסת יום? הרצף מתחיל מחדש מיום 1.</size>
+
+@ You've collected today's gift. See you tomorrow!
+= אספת את המתנה של היום. נתראה מחר!
+
+@ Collect
+= אסוף
+
+@ Collect day {0}
+= אסוף את יום {0}
+
+@ Come back tomorrow
+= חזור מחר
+
+# ---------------------------------------------------------------- CollectionScreen
+
+@ {0} of {1} discovered
+= התגלו {0} מתוך {1}
+
+# ---------------------------------------------------------------- MapScreen
+
+@ Island Map
+= מפת האיים
+
+@ You
+= אתה
+
+@ Bubble
+= בועה
+
+@ Pest
+= מזיק
+
+@ News
+= חדשות
+
+@ Tap to look · drag yourself to travel
+= הקש כדי להסתכל · גרור את עצמך כדי לנסוע
+
+@ You can't stand in the sea! Drop yourself on land.
+= אי אפשר לעמוד בים! הנח את עצמך על היבשה.
+
+@ That island is still closed. Open its bridge first!
+= האי הזה עדיין סגור. קודם פתח את הגשר שלו!
+
+# ---------------------------------------------------------------- ProfileScreen
+
+@ Change outfit
+= החלף בגדים
+
+@ Your island life
+= החיים שלך באי
+
+@ Name
+= שם
+
+@ Your name
+= השם שלך
+
+@ Outfit pieces
+= פריטי לבוש
+
+@ Islands visited
+= איים שביקרת בהם
+
+@ Kinds of fish
+= סוגי דגים
+
+@ Cats adopted
+= חתולים שאימצת
+
+@ Daily streak
+= רצף יומי
+
+@ Cards found
+= קלפים שמצאת
+
+@ {0}  <color=#8A7563>Lv {1}</color>
+= {0}  <color=#8A7563>רמה {1}</color>
+
+@ Fishing
+= דיג
+
+@ Birdwatching
+= צפרות
+
+@ Bug catching
+= ציד חרקים
+
+@ Gardening
+= גינון
+
+@ Cooking
+= בישול
+
+@ Cat care
+= טיפול בחתולים
+
+@ Writing
+= כתיבה
+
+@ Sewing
+= תפירה
+
+# ---------------------------------------------------------------- WardrobeScreen
+
+@ Hats
+= כובעים
+
+@ Neck
+= צוואר
+
+@ Face
+= פנים
+
+@ Back
+= גב
+
+@ {0} of {1} pieces collected · tap one to try it on
+= נאספו {0} מתוך {1} פריטים · הקש על אחד כדי למדוד
+
+# ---------------------------------------------------------------- SettingsScreen
+
+@ Sound
+= צלילים
+
+@ On
+= פועל
+
+@ Off
+= כבוי
+
+@ Start a new island
+= התחל אי חדש
+
+@ Start over
+= התחל מחדש
+
+@ This erases your island, your capybaras and every goal you've earned. It can't be undone. Your wardrobe and daily streak stay with you.
+= זה ימחק את האי שלך, את הקפיברות שלך ואת כל המטרות שהשגת. אי אפשר לבטל את זה. ארון הבגדים והרצף היומי שלך יישארו איתך.
+
+@ Keep my island
+= השאר את האי שלי
+
+@ Erase it
+= מחק אותו
+
+@ <b>Capy Island</b>
+= <b>אי הקפיברות</b>
+
+@ Fonts: Fredoka and Nunito, under the SIL Open Font License.
+= גופנים: Fredoka ו-Nunito, ברישיון SIL Open Font License.

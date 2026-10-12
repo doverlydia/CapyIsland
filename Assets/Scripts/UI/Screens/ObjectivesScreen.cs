@@ -93,12 +93,17 @@ namespace CapyIsland.UI
                 else { status = "In progress"; chip = UiKit.Spring; line = Objectives.QuestGoal(q.Def); }
                 // On an island you have not opened yet: say what has to happen first.
                 // Where it happens: the task itself while in progress (a character elsewhere), otherwise the giver.
+                string first = null;
                 Vector2 where = q.Complete || q.Stage == QuestSystem.Stage.NotStarted
                     ? (Vector2)giver.transform.position
-                    : Objectives.QuestWhere(q.Def) ?? (Vector2)giver.transform.position;
-                var step = Objectives.StepTo(where, out _);
+                    : Objectives.QuestWhere(q.Def, out first) ?? (Vector2)giver.transform.position;
+                if (first != null) line += "\n<color=#C9653A>" + first + "</color>";
+                var step = Objectives.StepTo(where, out var ghost);
                 if (step != null) line += "\n<color=#C9653A>" + step + "</color>";
-                Row(giver.Portrait, Color.white, giver.Speaker, line, status, chip, giver.transform.position, portrait: true);
+                // "Show me" goes where the task happens (roses for the Captain: to the Captain), or to
+                // the bridge ghost when that has to come first — not back to whoever asked.
+                Vector2 showMe = ghost != null ? (Vector2)ghost.transform.position : where;
+                Row(giver.Portrait, Color.white, giver.Speaker, line, status, chip, showMe, portrait: true);
             }
 
             // What the next achievement is, so the list never leaves you without a plan.
@@ -239,7 +244,7 @@ namespace CapyIsland.UI
                 var go = UiKit.Button(right, "Show", "Show me", UiKit.ButtonStyle.Secondary, () =>
                 {
                     Close();
-                    CameraRig.CameraFocus.Show(spot, 2.5f);
+                    PlayerAvatar.GoTo(spot);   // walk there: a camera peek that snaps back reads as nothing happening
                 }, 26f);
                 var le = go.transform.parent.gameObject.AddComponent<LayoutElement>();
                 le.preferredWidth = 170f;

@@ -69,9 +69,12 @@ namespace CapyIsland.UI
 
             bool soldOut = item.SoldOut;
             bool affordable = store != null && store.CanAfford(price.x, price.y, price.z);
-            string feedback = soldOut ? "<b>Sold out.</b>" : affordable ? "" : "<color=#b0413e>" + Shortfall(price, store) + "</color>";
+            string feedback = soldOut ? "<b>Sold out.</b>" : affordable ? "" : Shortfall(price, store);
             if (blurbLabel != null)
+            {
                 blurbLabel.text = item.Description + (feedback.Length > 0 ? "\n\n" + feedback : "");
+                FitToText();
+            }
 
             if (purchaseButton != null)
             {
@@ -81,18 +84,79 @@ namespace CapyIsland.UI
             if (panel != null) panel.SetActive(true);
         }
 
-        /// <summary>What you are short of — the original's purchase feedback.</summary>
+        /// <summary>
+        /// What you are short of, and by how much — so you know whether to wait a minute or come
+        /// back much later. One line per resource.
+        /// </summary>
         static string Shortfall(Vector3Int price, ResourceStore store)
         {
             if (store == null) return "";
-            bool wood = store.Get(ResourceKind.Wood) < price.x;
-            bool gold = store.Get(ResourceKind.Gold) < price.y;
-            bool gems = store.Get(ResourceKind.Gem) < price.z;
-            if (wood && gold && gems) return "You need more wood, gold and gems.";
-            if (gems) return "You need more gems.";
-            if (gold && wood) return "You need more wood and gold.";
-            if (gold) return "You need more gold.";
-            return "You need more wood.";
+            var lines = new System.Collections.Generic.List<string>();
+            int wood = price.x - store.Get(ResourceKind.Wood);
+            int gold = price.y - store.Get(ResourceKind.Gold);
+            int gems = price.z - store.Get(ResourceKind.Gem);
+            if (wood > 0) lines.Add($"You need {wood} more wood.");
+            if (gold > 0) lines.Add($"You need {gold} more gold.");
+            if (gems > 0) lines.Add(gems == 1 ? "You need 1 more gem." : $"You need {gems} more gems.");
+            // Coloured line by line, so each still matches its translation.
+            for (int i = 0; i < lines.Count; i++) lines[i] = "<color=#b0413e>" + lines[i] + "</color>";
+            return string.Join("\n", lines);
+        }
+
+        /// <summary>Readable size for the blurb; past what fits at this, the panel grows instead.</summary>
+        const float ComfortableFont = 26f;
+
+        RectTransform[] _parts;
+        Vector2[] _partPos, _partSize;
+        Vector2 _panelSize;
+
+        /// <summary>
+        /// A long blurb (a worker's strengths, a shortfall) makes the panel taller rather than the
+        /// words tiny: the blurb grows down the middle, everything above it moves up and the buttons
+        /// move down. A short one leaves the panel as built.
+        /// </summary>
+        void FitToText()
+        {
+            var panelRect = panel != null ? panel.transform as RectTransform : null;
+            if (panelRect == null) return;
+            if (_parts == null)
+            {
+                _panelSize = panelRect.sizeDelta;
+                _parts = new RectTransform[panelRect.childCount];
+                _partPos = new Vector2[_parts.Length];
+                _partSize = new Vector2[_parts.Length];
+                for (int i = 0; i < _parts.Length; i++)
+                {
+                    _parts[i] = (RectTransform)panelRect.GetChild(i);
+                    _partPos[i] = _parts[i].anchoredPosition;
+                    _partSize[i] = _parts[i].sizeDelta;
+                }
+            }
+
+            var blurbRect = blurbLabel.rectTransform;
+            int index = System.Array.IndexOf(_parts, blurbRect);
+            if (index < 0) return;
+            bool auto = blurbLabel.enableAutoSizing;
+            float size = blurbLabel.fontSize;
+            blurbLabel.enableAutoSizing = false;
+            blurbLabel.fontSize = ComfortableFont;
+            float needed = blurbLabel.GetPreferredValues(Loc.T(blurbLabel.text), _partSize[index].x, 0f).y;
+            blurbLabel.enableAutoSizing = auto;
+            blurbLabel.fontSize = size;
+            float extra = Mathf.Clamp(needed + 12f - _partSize[index].y, 0f, 420f);
+
+            panelRect.sizeDelta = _panelSize + new Vector2(0f, extra);
+            for (int i = 0; i < _parts.Length; i++)
+            {
+                if (_parts[i] == null) continue;
+                if (i == index)
+                {
+                    _parts[i].anchoredPosition = _partPos[i];
+                    _parts[i].sizeDelta = _partSize[i] + new Vector2(0f, extra);
+                }
+                else
+                    _parts[i].anchoredPosition = _partPos[i] + new Vector2(0f, _partPos[i].y > -100f ? extra / 2f : -extra / 2f);
+            }
         }
 
         /// <summary>Shows the cost, reddened when you cannot cover it.</summary>

@@ -23,6 +23,9 @@ namespace CapyIsland.UI
             return catalog != null && catalog.Has(name) ? catalog.Icon(name) : null;
         }
 
+        /// <summary>In its bubble: the worker by the mill.</summary>
+        protected override Vector3 BubbleView => new(0.45f, 0.42f, 1.2f);
+
         protected override IEnumerator Script()
         {
             Backdrop(Resources.Load<Sprite>("Cutscenes/Cutscene_Mill"), UiKit.Hex("BFE3F2"), UiKit.Hex("8DBA5A"));
@@ -51,9 +54,21 @@ namespace CapyIsland.UI
             worker.Squash(-0.1f);
             yield return Wait(1.1f);
 
-            // …and over it goes, backwards, away from the log.
-            Track(worker.Body.DOLocalRotate(new Vector3(0f, 0f, 75f), 0.9f).SetEase(Ease.OutBounce).SetUpdate(true));
-            yield return Wait(1f);
+            // …it wobbles, tips over backwards, away from the log, and is fast asleep: curled up,
+            // eyes shut.
+            Track(worker.Body.DOLocalRotate(new Vector3(0f, 0f, 28f), 0.35f).SetEase(Ease.InQuad).SetUpdate(true));
+            yield return Wait(0.3f);
+            var sleepArt = Resources.Load<Sprite>("Cutscenes/Cutscene_CapySleep");
+            if (sleepArt != null)
+            {
+                var asleep = Cast(sleepArt, WorkerAt + new Vector2(-0.03f, 0f), 0.17f, tint: new Color(1f, 1f, 1f, 0f));
+                asleep.Fade(1f, 0.25f);
+                worker.Fade(0f, 0.2f);
+                asleep.Squash(0.12f);
+                Sfx.Play(SfxKind.Plop, 0.5f);
+                worker = asleep;
+            }
+            yield return Wait(0.8f);
 
             // Snoring, and dreaming of flowers.
             var flowers = Icon("Small Posie Garden");
@@ -66,9 +81,10 @@ namespace CapyIsland.UI
             var ghostArt = Icon("Ghost");
             if (ghostArt != null)
             {
-                var yuzu = Cast(ghostArt, new Vector2(-0.12f, 0.14f), 0.22f, tint: new Color(0.85f, 0.95f, 1f, 0.9f));
+                // She floats in high, a ghost, and hovers just off the sleeper's shoulder.
+                var yuzu = Cast(ghostArt, new Vector2(-0.12f, 0.3f), 0.2f, tint: new Color(0.85f, 0.95f, 1f, 0.9f));
                 yuzu.Bob();
-                yuzu.WalkTo(new Vector2(0.27f, 0.13f), 1.2f, 1);
+                yuzu.WalkTo(new Vector2(0.27f, 0.27f), 1.2f, 1);
                 yield return Wait(1.3f);
                 yuzu.Face(true);
                 // A poke.

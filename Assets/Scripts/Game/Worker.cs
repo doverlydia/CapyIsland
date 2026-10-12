@@ -167,22 +167,44 @@ namespace CapyIsland.Game
                 return;
             }
 
-            Workplace best = null;
-            float bestDistance = float.MaxValue;
-            foreach (var w in FindObjectsByType<Workplace>(FindObjectsSortMode.None))
-            {
-                if (!w.HasRoom) continue;
-                var placeable = w.GetComponent<Placeable>();
-                if (placeable != null && !placeable.Placed) continue;   // a station still in the trail
-                float d = Vector2.Distance(w.transform.position, transform.position);
-                if (d > DropOnStationRadius || d >= bestDistance) continue;
-                best = w;
-                bestDistance = d;
-            }
-
+            var best = StationAt(transform.position, out var full);
             if (best != null && best.TryAssign(this)) return;
             Unassign();
             ReturnToKing();
+
+            // Dropped on a station with no room: say why it came back, rather than nothing.
+            if (full != null)
+            {
+                var name = full.TryGetComponent<Placeable>(out var p) ? StoryText.Name(p.DisplayName) : "workplace";
+                Hints.Show($"That {name} is full. It has room for {full.MaxWorkers} capybaras.");
+            }
+        }
+
+        /// <summary>
+        /// The planted station with room that a capybara dropped at <paramref name="at"/> would
+        /// join, or null; <paramref name="full"/> is the nearest full one in reach, for the reason why.
+        /// </summary>
+        public static Workplace StationAt(Vector2 at, out Workplace full)
+        {
+            Workplace best = null;
+            full = null;
+            float bestDistance = float.MaxValue, fullDistance = float.MaxValue;
+            foreach (var w in FindObjectsByType<Workplace>(FindObjectsSortMode.None))
+            {
+                var placeable = w.GetComponent<Placeable>();
+                if (placeable != null && !placeable.Placed) continue;   // a station still in the trail
+                float d = Vector2.Distance(w.transform.position, at);
+                if (d > DropOnStationRadius) continue;
+                if (!w.HasRoom)
+                {
+                    if (d < fullDistance) { full = w; fullDistance = d; }
+                    continue;
+                }
+                if (d >= bestDistance) continue;
+                best = w;
+                bestDistance = d;
+            }
+            return best;
         }
 
         /// <summary>Picked up by the player: drop whatever job it had.</summary>
@@ -472,7 +494,8 @@ namespace CapyIsland.Game
             var body = transform.Find("Sprite");
             if (body == null || Mathf.Abs(dx) < 0.0001f) return;
             var s = body.localScale;
-            s.x = Mathf.Abs(s.x) * (dx < 0f ? -1f : 1f);
+            // the pictures face left: mirror them to walk right
+            s.x = Mathf.Abs(s.x) * (dx > 0f ? -1f : 1f);
             body.localScale = s;
         }
     }

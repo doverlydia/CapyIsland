@@ -1,0 +1,10 @@
+{
+  "name": "capy-music-studio",
+  "private": true,
+  "type": "module",
+  "description": "Capy Island's music studio: compose in a window, export straight into the game.",
+  "scripts": {
+    "start": "node server.js",
+    "render": "node render.js"
+  }
+}

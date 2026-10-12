@@ -13,6 +13,10 @@ namespace CapyIsland.UI
     /// once a fish is on, hold to reel and let go to give it slack. What to do is written large
     /// at the top of the screen — where your thumb isn't — in the colour of the line, with the
     /// catch bar under it. "Stop fishing" puts the rod away and lets you walk again.
+    ///
+    /// "Hold" is not something a player guesses from a tap-everything phone: if they hesitate, a
+    /// hand acts it out — presses and stays down with a ring filling under the fingertip, or lifts
+    /// off when it is time to let go.
     /// </summary>
     public class FishingButton : MonoBehaviour
     {
@@ -21,6 +25,16 @@ namespace CapyIsland.UI
         Image _progress, _warn;
         RectTransform _progressTrack, _sayRect;
         float _flashUntil;
+
+        Image _baitIcon;
+        TextMeshProUGUI _baitLabel;
+        string _baitShown;
+
+        enum Gesture { None, Hold, Release }
+        RectTransform _demo, _hand, _ring;
+        Image _handImage, _ringImage;
+        Gesture _gesture;
+        float _gestureSince;
 
         public static FishingButton Create(Transform parent)
         {
@@ -91,14 +105,127 @@ namespace CapyIsland.UI
             _warn.rectTransform.sizeDelta = new Vector2(640f, 190f);
             _warn.transform.SetSiblingIndex(panel.transform.GetSiblingIndex());
 
-            // The way out.
-            // Bottom-right, clear of the speech box.
-            var stop = UiKit.RoundButton(mode, "StopFishing", IconPainter.Close, "Stop", UiKit.Hex("8A7563"), Exit, 104f);
+            // The way out: a clear, labelled button at the bottom in the middle, below where the
+            // thumb rests while holding to reel. (Old Yuzu waits while fishing, so it has the space.)
+            var stop = UiKit.Button(mode, "StopFishing", "Stop fishing", UiKit.ButtonStyle.Secondary, Exit, 32f, IconPainter.Close);
             var stopR = (RectTransform)stop.transform.parent;
-            stopR.anchorMin = stopR.anchorMax = stopR.pivot = new Vector2(1f, 0f);
-            stopR.anchoredPosition = new Vector2(-24f, 40f);
+            stopR.anchorMin = stopR.anchorMax = stopR.pivot = new Vector2(0.5f, 0f);
+            stopR.anchoredPosition = new Vector2(-150f, 40f);
+            stopR.sizeDelta = new Vector2(340f, 96f);
 
+            BuildBait(mode);
+            BuildDemo(mode);
             _mode.SetActive(false);
+        }
+
+        /// <summary>The bait on the hook, beside the Stop fishing button. Tap to change it.</summary>
+        void BuildBait(RectTransform mode)
+        {
+            var chip = UiKit.Button(mode, "Bait", "", UiKit.ButtonStyle.Secondary, CycleBait, 28f);
+            var r = (RectTransform)chip.transform.parent;
+            // beside Stop fishing, along the bottom
+            r.anchorMin = r.anchorMax = r.pivot = new Vector2(0.5f, 0f);
+            r.anchoredPosition = new Vector2(170f, 40f);
+            r.sizeDelta = new Vector2(250f, 96f);
+            var content = chip.transform.Find("Content");
+            _baitIcon = UiKit.Image(content, "Icon", null, Color.white);
+            _baitIcon.preserveAspect = true;
+            var le = _baitIcon.gameObject.AddComponent<LayoutElement>();
+            le.preferredWidth = le.preferredHeight = 58f;
+            _baitLabel = UiKit.Text(content, "Label", "", 28f, UiKit.Ink, true, TextAlignmentOptions.Center);
+            _baitLabel.textWrappingMode = TextWrappingModes.NoWrap;
+            _baitLabel.enableAutoSizing = true;
+            _baitLabel.fontSizeMin = 18f;
+            _baitLabel.fontSizeMax = 28f;
+        }
+
+        void CycleBait()
+        {
+            bool any = false;
+            foreach (var b in Baits.All) any |= Baits.Count(b) > 0;
+            if (!any) { Hints.Show("No bait yet. Skipper Nori sells it, down on the beach by the bottles."); return; }
+            var now = Baits.Cycle();
+            Hints.Show(now != null ? now.Name + ": " + now.Blurb : "Fishing without bait.");
+        }
+
+        void RefreshBait()
+        {
+            var b = Baits.Current;
+            string key = b != null ? b.Id + Baits.Count(b) : "none";
+            if (key == _baitShown) return;
+            _baitShown = key;
+            _baitIcon.sprite = b != null ? HobbyData.ItemArt(b.Item) : null;
+            _baitIcon.gameObject.SetActive(_baitIcon.sprite != null);
+            _baitLabel.text = b != null ? $"Bait ×{Baits.Count(b)}" : "No bait";
+        }
+
+        void BuildDemo(RectTransform mode)
+        {
+            _demo = UiKit.Rect("HoldDemo", mode);
+            _demo.anchorMin = _demo.anchorMax = new Vector2(0.5f, 0.36f);
+            _demo.sizeDelta = Vector2.zero;
+            _ringImage = UiKit.Image(_demo, "Ring", IconPainter.Ring, Color.white);
+            _ring = _ringImage.rectTransform;
+            _ring.sizeDelta = new Vector2(150f, 150f);
+            _handImage = UiKit.Image(_demo, "Hand", TutorialPointer.HandSprite, Color.white);
+            _handImage.preserveAspect = true;
+            _hand = _handImage.rectTransform;
+            _hand.pivot = new Vector2(0.48f, 0.06f);   // the fingertip
+            _hand.sizeDelta = new Vector2(190f, 190f);
+            _demo.gameObject.SetActive(false);
+        }
+
+        /// <summary>Which gesture the moment calls for, and how long to wait before showing it.</summary>
+        static Gesture Wanted(Fishing f, out float patience)
+        {
+            patience = 1.2f;
+            switch (f.Now)
+            {
+                case Fishing.State.Idle:
+                    return f.Holding ? Gesture.None : Gesture.Hold;
+                case Fishing.State.Aiming:
+                    patience = 2.5f;   // the ring is sliding out: give them time to watch it
+                    return Gesture.Release;
+                case Fishing.State.Fight:
+                    if (f.Tension >= Fishing.RedAt && f.Holding) { patience = 0.35f; return Gesture.Release; }
+                    if (!f.Holding && f.Tension < Fishing.YellowAt) { patience = 0.8f; return Gesture.Hold; }
+                    return Gesture.None;
+                default:
+                    return Gesture.None;   // waiting for a bite: hands off
+            }
+        }
+
+        void UpdateDemo(Fishing f)
+        {
+            var g = Wanted(f, out float patience);
+            if (g != _gesture) { _gesture = g; _gestureSince = Time.unscaledTime; }
+            float shown = Time.unscaledTime - _gestureSince - patience;
+            bool show = g != Gesture.None && shown > 0f && _handImage.sprite != null;
+            if (_demo.gameObject.activeSelf != show) _demo.gameObject.SetActive(show);
+            if (!show) return;
+
+            const float cycle = 1.8f;
+            float p = Mathf.Repeat(shown, cycle) / cycle;
+            float lift, press, fill;
+            if (g == Gesture.Hold)
+            {
+                // Come down, press, stay down while the ring fills, then lift and start over.
+                lift = p < 0.15f ? 1f - p / 0.15f : p > 0.88f ? (p - 0.88f) / 0.12f : 0f;
+                press = p >= 0.15f && p <= 0.88f ? 1f : 0f;
+                fill = Mathf.Clamp01((p - 0.15f) / 0.6f);
+            }
+            else
+            {
+                // Down and holding… then lift clear away, and the ring lets go with it.
+                lift = p < 0.4f ? 0f : Mathf.Clamp01((p - 0.4f) / 0.25f);
+                press = p < 0.4f ? 1f : 0f;
+                fill = 1f - lift;
+            }
+            _hand.anchoredPosition = new Vector2(0f, lift * 70f);
+            _hand.localScale = Vector3.one * (1f - press * 0.08f);
+            _ring.localScale = Vector3.one * Mathf.Lerp(0.35f, 1f, fill);
+            _ringImage.color = new Color(1f, 1f, 1f, press > 0f ? 0.25f + 0.65f * fill : 0.2f * fill);
+            _handImage.color = new Color(1f, 1f, 1f, Mathf.Clamp01(shown * 3f));
         }
 
         /// <summary>The whole screen: finger down is Press, finger up is Release.</summary>
@@ -196,6 +323,8 @@ namespace CapyIsland.UI
             if (!mode) return;
 
             bool fight = f.Now == Fishing.State.Fight;
+            UpdateDemo(f);
+            RefreshBait();
             _progressTrack.gameObject.SetActive(fight);
             _warn.enabled = fight && f.Overload > 0.01f;
             if (_warn.enabled)

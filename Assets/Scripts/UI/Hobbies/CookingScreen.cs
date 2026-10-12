@@ -456,7 +456,7 @@ namespace CapyIsland.UI
             string id = Cooking.Finish(cooked, dish, burnt, stars);
             _pot.Clear();
             bool good = dish != null && !burnt;
-            string title = good ? dish.Name + "!" : "Bizarre Food…";
+            string title = good ? Loc.T(dish.Name) + "!" : "Bizarre Food…";
             string line = good
                 ? StarLine(stars) + "\nIt's in your bag. Look for someone with this dish in a bubble over their head!"
                 : burnt ? "It burned to a crisp. Tap the spatula sooner to keep the heat down!"

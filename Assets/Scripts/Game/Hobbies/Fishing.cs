@@ -17,6 +17,9 @@ namespace CapyIsland.Game
     ///    often the fish fights back hard, so reeling is a rhythm — hold, ease off, hold again.
     ///    Give it slack too long and it swims off.
     ///
+    /// Bait (bought from Skipper Nori) goes on the hook as you cast: worms bring bites sooner,
+    /// shrimp keep the line from straining so fast, a golden lure does both.
+    ///
     /// Catches go in the fish journal and raise your fishing level, which brings rarer fish and a
     /// slightly kinder line.
     /// </summary>
@@ -90,6 +93,9 @@ namespace CapyIsland.Game
 
         // The fight.
         const float LandAt = 0.7f;
+        BaitKind _bait;   // on the hook for this cast, or null
+        float BiteSpeed => _bait != null ? _bait.BiteSpeed : 1f;
+
         float _needed, _remaining, _startDistance, _strength, _phaseUntil, _nextSplash, _slackFor;   // line still to reel in, in reel-seconds
 
         PlayerAvatar _king;
@@ -359,15 +365,29 @@ namespace CapyIsland.Game
             _aimRing.transform.localScale = new Vector3(0.7f, 0.42f, 1f) * pulse;
         }
 
-        /// <summary>The landing point a distance out along the aim, pulled back onto water if it would land on sand.</summary>
+        /// <summary>
+        /// How far the bobber stays from the land's edge. The drawn beach reaches a little past the
+        /// land outline, so "not land" alone can still be sand on screen.
+        /// </summary>
+        const float BobberMargin = 0.7f;
+
+        /// <summary>The landing point a distance out along the aim, always in open water, clear of the beach.</summary>
         Vector2 CastPoint(float distance)
         {
             Vector2 you = _king.transform.position;
             var p = you + _aimDir * distance;
-            if (!BunniSpace.PointOnLand(p)) return p;
-            // Over land: walk further out until it is water (casting across a spit), else the nearest water.
-            for (float d = distance; d < 8f; d += 0.25f)
-                if (!BunniSpace.PointOnLand(you + _aimDir * d)) return you + _aimDir * d;
+            if (OpenWater(p, BobberMargin)) return p;
+            // Short of the water (or on the beach): further out along the aim until it is open water…
+            for (float d = distance; d < 9f; d += 0.25f)
+                if (OpenWater(you + _aimDir * d, BobberMargin)) return you + _aimDir * d;
+            // …else the nearest open water all round.
+            for (float r = 1f; r <= 7f; r += 0.5f)
+                for (int a = 0; a < 16; a++)
+                {
+                    float ang = a * Mathf.PI / 8f;
+                    var q = you + new Vector2(Mathf.Cos(ang), Mathf.Sin(ang) * 0.6f) * r;
+                    if (OpenWater(q, BobberMargin)) return q;
+                }
             return NearestWater(you, 2.6f) ?? p;
         }
 
@@ -396,7 +416,7 @@ namespace CapyIsland.Game
                 // A quick tap: just in front of the nearest fish, as a helping hand.
                 Vector2 at = fish.Go.transform.position;
                 spot = at + (you - at).normalized * 0.9f;
-                if (BunniSpace.PointOnLand(spot)) spot = at;
+                if (!OpenWater(spot, BobberMargin)) spot = at;
             }
             else spot = CastPoint(quick ? 3.2f : _aimDistance);
 
@@ -406,9 +426,10 @@ namespace CapyIsland.Game
             MakeBobber(spot);
             Sfx.Play(SfxKind.Plop, 0.7f);
             Now = State.Waiting;
+            _bait = Baits.UseOne();
             _warnedEarly = false;
             _giveUpAt = Time.time + 14f;
-            _stateUntil = Time.time + 2f;
+            _stateUntil = Time.time + 2f / BiteSpeed;
 
             // The fish nearest the bobber comes over for a look.
             _hooked = NearestShadow(spot, 3.5f);
@@ -445,8 +466,8 @@ namespace CapyIsland.Game
                         // Now and then a fish a little further off notices the bobber and swims over.
                         if (Time.time >= _stateUntil)
                         {
-                            _stateUntil = Time.time + 2f;
-                            var curious = UnityEngine.Random.value < 0.5f ? NearestShadow(_bobberAt, 6f) : null;
+                            _stateUntil = Time.time + 2f / BiteSpeed;
+                            var curious = UnityEngine.Random.value < 0.5f * BiteSpeed ? NearestShadow(_bobberAt, 6f * Mathf.Sqrt(BiteSpeed)) : null;
                             if (curious != null)
                             {
                                 _hooked = curious;
@@ -460,8 +481,9 @@ namespace CapyIsland.Game
                     if (Vector2.Distance(_hooked.Go.transform.position, _bobberAt) < 0.5f)
                     {
                         Now = State.Nibbling;
-                        _nibblesLeft = UnityEngine.Random.Range(1, 4);
-                        _stateUntil = Time.time + UnityEngine.Random.Range(0.7f, 1.4f);
+                        // Bait it can't resist: fewer, quicker nibbles before the bite.
+                        _nibblesLeft = BiteSpeed > 1f ? UnityEngine.Random.Range(0, 2) : UnityEngine.Random.Range(1, 4);
+                        _stateUntil = Time.time + UnityEngine.Random.Range(0.7f, 1.4f) / BiteSpeed;
                     }
                     break;
 
@@ -470,7 +492,7 @@ namespace CapyIsland.Game
                     if (_nibblesLeft-- > 0)
                     {
                         Nibble();
-                        _stateUntil = Time.time + UnityEngine.Random.Range(0.8f, 1.6f);
+                        _stateUntil = Time.time + UnityEngine.Random.Range(0.8f, 1.6f) / BiteSpeed;
                     }
                     else Hook();
                     break;
@@ -554,7 +576,7 @@ namespace CapyIsland.Game
 
             if (Holding)
             {
-                Tension += dt * (Surging ? 0.85f : 0.22f) * _strength;
+                Tension += dt * (Surging ? 0.85f : 0.22f) * _strength * (_bait != null ? _bait.Gentle : 1f);
                 _remaining -= dt * (Surging ? 0.3f : 0.85f);
                 _slackFor = 0f;
             }

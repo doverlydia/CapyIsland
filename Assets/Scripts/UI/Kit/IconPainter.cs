@@ -155,6 +155,46 @@ namespace CapyIsland.UI
         public static Sprite Close => Cached("Close", (x, y) =>
             Union(Capsule(x, y, -0.55f, -0.55f, 0.55f, 0.55f, 0.14f), Capsule(x, y, -0.55f, 0.55f, 0.55f, -0.55f, 0.14f)));
 
+        /// <summary>A trophy cup: a round bowl with two handles, on a stem and a base.</summary>
+        public static Sprite Trophy => Cached("Trophy", (x, y) =>
+        {
+            float bowl = Mathf.Max(Disc(x, y, 0f, 0.28f, 0.5f), y - 0.56f);   // a bowl with a flat rim
+            float handles = Union(Mathf.Abs(Disc(x, y, -0.5f, 0.38f, 0.2f)) - 0.07f, Mathf.Abs(Disc(x, y, 0.5f, 0.38f, 0.2f)) - 0.07f);
+            float stem = Box(x, y, 0f, -0.32f, 0.09f, 0.16f, 0.03f);
+            float foot = Box(x, y, 0f, -0.6f, 0.36f, 0.12f, 0.06f);
+            return Union(Union(bowl, handles), Union(stem, foot));
+        });
+
+        /// <summary>A round sun with eight short rays.</summary>
+        public static Sprite Sun => Cached("Sun", (x, y) =>
+        {
+            float d = Disc(x, y, 0f, 0f, 0.42f);
+            for (int i = 0; i < 8; i++)
+            {
+                float a = i * Mathf.PI / 4f;
+                float cx = Mathf.Cos(a), cy = Mathf.Sin(a);
+                d = Union(d, Capsule(x, y, cx * 0.62f, cy * 0.62f, cx * 0.84f, cy * 0.84f, 0.08f));
+            }
+            return d;
+        });
+
+        /// <summary>A crescent moon.</summary>
+        public static Sprite Moon => Cached("Moon", (x, y) => Cut(Disc(x, y, -0.06f, 0f, 0.72f), Disc(x, y, 0.3f, 0.22f, 0.6f)));
+
+        /// <summary>A magnifying glass: Easy Reading.</summary>
+        public static Sprite Magnifier => Cached("Magnifier", (x, y) =>
+            Union(Mathf.Abs(Disc(x, y, -0.18f, 0.18f, 0.5f)) - 0.11f, Capsule(x, y, 0.2f, -0.2f, 0.68f, -0.68f, 0.15f)));
+
+        /// <summary>A globe with a meridian and an equator: language.</summary>
+        public static Sprite Globe => Cached("Globe", (x, y) =>
+        {
+            float outline = Mathf.Abs(Disc(x, y, 0f, 0f, 0.8f)) - 0.09f;
+            // An ellipse half as wide as the globe, drawn as a ring.
+            float meridian = Mathf.Abs(new Vector2(x / 0.42f, y / 0.8f).magnitude - 1f) * 0.42f - 0.07f;
+            float equator = Mathf.Max(Capsule(x, y, -0.8f, 0f, 0.8f, 0f, 0.07f), Disc(x, y, 0f, 0f, 0.8f));
+            return Union(Union(outline, meridian), equator);
+        });
+
         public static Sprite Check => Cached("Check", (x, y) => Line(x, y, 0.15f, -0.62f, 0.02f, -0.18f, -0.44f, 0.66f, 0.5f));
 
         public static Sprite Lock => Cached("Lock", (x, y) =>

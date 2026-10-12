@@ -97,7 +97,8 @@ namespace CapyIsland.Game
             {
                 var q = giver.CurrentQuest;
                 if (q == null || q.Stage != QuestSystem.Stage.IntroRead || q.Complete) continue;
-                return new Goal { Source = Source.Quest, Title = QuestGoal(q.Def), From = giver.Speaker, Icon = giver.Portrait, Where = QuestWhere(q.Def) };
+                var where = QuestWhere(q.Def, out var first);
+                return new Goal { Source = Source.Quest, Title = QuestGoal(q.Def), From = giver.Speaker, Icon = giver.Portrait, Where = where, Step = first };
             }
 
             // Then someone with a new quest to tell you about.
@@ -139,19 +140,39 @@ namespace CapyIsland.Game
         /// Where a quest's task happens, when it is about someone or somewhere in particular — so
         /// the arrows can point there, and a bridge still to open shows up as the step before it.
         /// </summary>
-        public static Vector2? QuestWhere(QuestDef q)
+        public static Vector2? QuestWhere(QuestDef q) => QuestWhere(q, out _);
+
+        /// <summary>
+        /// Where a quest's task happens, and the step to take first when the thing it needs isn't
+        /// on sale yet ("First: build the Silver Store") — in which case it is where to buy that.
+        /// </summary>
+        public static Vector2? QuestWhere(QuestDef q, out string firstStep)
         {
+            firstStep = null;
             if (string.IsNullOrEmpty(q.CompleteMote) || !Motes.TryGetByName(q.CompleteMote, out var m)) return null;
+
+            // A task done by buying (or buying and planting) something: the stand that sells it — or,
+            // when nothing sells it yet, the stand selling the shop that will.
+            if (ForSale.TryGetValue(m.Func, out var item))
+            {
+                var stand = BuyPath(item, out firstStep, 0);
+                if (stand.HasValue) return stand;
+            }
+
             switch (m.Func)
             {
                 case "girl_quest_3":
                     foreach (var pete in UnityEngine.Object.FindObjectsByType<PiratePete>(FindObjectsSortMode.None))
                         if (pete.InWorld) return pete.transform.position;
+                    // Still asleep in his bubble: that's where to go (and if it's across a bridge
+                    // you haven't opened, the goal says to open it first).
+                    foreach (var bubble in UnityEngine.Object.FindObjectsByType<Bubble>(FindObjectsSortMode.None))
+                        if (!bubble.Taken && bubble.Contents != null && bubble.Contents.GetComponent<PiratePete>() != null)
+                            return bubble.transform.position;
                     return null;
                 case "wedding_mote":
                     var church = UnityEngine.Object.FindFirstObjectByType<Church>();
                     return church != null ? church.transform.position : null;
-                case "girl_quest_5":
                 case "peach_dance":
                     return GiverOf(QuestGiver.Kind.Peach);
                 case "girl_quest_1":
@@ -159,6 +180,99 @@ namespace CapyIsland.Game
                     return GiverOf(QuestGiver.Kind.Coriander);
             }
             return null;
+        }
+
+        /// <summary>
+        /// What a task asks you to buy (or buy and plant), as the name it is sold under — the rose
+        /// garden counts wherever it is planted, so the place to go is the stand, not the Captain.
+        /// </summary>
+        static readonly Dictionary<string, string> ForSale = new()
+        {
+            { "girl_quest_1", "Tulip" }, { "girl_quest_2", "Wedding Dress" }, { "girl_quest_5", "Rose" },
+            { "girl_quest_6", "String of Pearls" }, { "girl_crown", "Tiara" }, { "built_church", "Church" },
+            { "silver_store", "Silver Store" }, { "steel_store", "Steel Store" }, { "gold_store", "Gold Store" },
+            { "bronze_store", "Bronze Store" }, { "gem_store", "Legendary Gem Store" }, { "holy_statue", "Holy Statue" },
+            { "place_mine", "Mine" },
+        };
+
+        /// <summary>
+        /// Where to go to get <paramref name="item"/>: its own stand if one is selling it; otherwise
+        /// the stand selling the shop that stocks it (and so on back down the chain of shops), with
+        /// the shop to build named as the first step.
+        /// </summary>
+        static Vector2? BuyPath(string item, out string firstStep, int depth)
+        {
+            firstStep = null;
+            var stand = StandSelling(item);
+            if (stand.HasValue) return stand;
+            if (depth > 5) return null;
+
+            foreach (var kv in StoreData.Lists)
+            {
+                if (!ShopBuilding.TryGetValue(kv.Key, out var shop)) continue;
+                bool stocks = false;
+                foreach (var n in kv.Value) if (Matches(n, item)) { stocks = true; break; }
+                if (!stocks) continue;
+
+                // Its shop is already up: the item is waiting on something else (a story step).
+                if (Placed(shop)) continue;
+                // Bought but still in your trail: put it down.
+                if (Carried(shop))
+                {
+                    firstStep = "First: put down the " + StoryText.Name(shop);
+                    var king = UnityEngine.Object.FindFirstObjectByType<PlayerAvatar>();
+                    return king != null ? (Vector2)king.transform.position : null;
+                }
+                var at = BuyPath(shop, out var deeper, depth + 1);
+                if (at.HasValue)
+                {
+                    firstStep = deeper ?? "First: build the " + StoryText.Name(shop);
+                    return at;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>Which shop building each stock list belongs to.</summary>
+        static readonly Dictionary<string, string> ShopBuilding = new()
+        {
+            { "general_store", "General Store" }, { "bronze_store", "Bronze Store" }, { "silver_store", "Silver Store" },
+            { "steel_store", "Steel Store" }, { "gold_store", "Gold Store" }, { "gem_store", "Legendary Gem Store" }, { "bank", "Bank" },
+        };
+
+        static bool Matches(string sold, string item) => item == "Mine" ? sold == "Mine" : sold.Contains(item);
+
+        static bool Placed(string name)
+        {
+            foreach (var tag in UnityEngine.Object.FindObjectsByType<CatalogItem>(FindObjectsSortMode.None))
+                if (tag.StoreName == name && tag.GetComponent<Placeable>() is { Placed: true }) return true;
+            return false;
+        }
+
+        static bool Carried(string name)
+        {
+            foreach (var tag in UnityEngine.Object.FindObjectsByType<CatalogItem>(FindObjectsSortMode.None))
+                if (tag.StoreName == name && tag.GetComponent<Placeable>() is { Placed: false } && tag.GetComponent<Follower>() is { Carried: true }) return true;
+            return false;
+        }
+
+        /// <summary>The nearest stand with <paramref name="item"/> on sale — one you can walk to, if there is one.</summary>
+        static Vector2? StandSelling(string item)
+        {
+            var king = UnityEngine.Object.FindFirstObjectByType<PlayerAvatar>();
+            var land = LandMap.Instance;
+            Vector2 you = king != null ? (Vector2)king.transform.position : Vector2.zero;
+            Vector2? best = null; float bestScore = float.MaxValue;
+            foreach (var stand in UnityEngine.Object.FindObjectsByType<SaleDisplay>(FindObjectsSortMode.None))
+            {
+                var name = stand.StoreName;
+                bool match = Matches(name, item);
+                if (!match || stand.SoldOut || !StoreData.IsUnlocked(name)) continue;
+                Vector2 at = stand.transform.position;
+                float score = Vector2.Distance(you, at) + (land != null && !land.Reachable(you, at) ? 10000f : 0f);
+                if (score < bestScore) { bestScore = score; best = at; }
+            }
+            return best;
         }
 
         static Vector2? GiverOf(QuestGiver.Kind kind)

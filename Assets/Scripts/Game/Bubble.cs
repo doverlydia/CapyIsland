@@ -11,7 +11,7 @@ namespace CapyIsland.Game
     ///
     /// In the original these are survivors Grandpa Angel sealed away before the disaster.
     /// </summary>
-    public class Bubble : MonoBehaviour, IMapMarker
+    public class Bubble : MonoBehaviour, ITappable, IMapMarker
     {
         [Header("Contents")]
         [Tooltip("Item held inside, inactive in the scene until collected.")]
@@ -20,10 +20,6 @@ namespace CapyIsland.Game
         [Header("Look")]
         [SerializeField] float bobHeight = 0.18f;
         [SerializeField] float bobRate = 1.1f;
-        [Tooltip("The white arrow that bobs above an uncollected bubble.")]
-        [SerializeField] Transform arrow;
-        [SerializeField] float arrowBobHeight = 0.3f;
-        [SerializeField] float arrowBobRate = 2.2f;
 
         [Tooltip("Largest size of the item picture inside the glass, in world units.")]
         [SerializeField] float iconSize = 1.6f;
@@ -37,7 +33,6 @@ namespace CapyIsland.Game
         Transform _body;
         Vector3 _bodyRest;
         float _bodyScale = 1f;
-        Vector3 _arrowRest;
         bool _taken;
         SpriteRenderer _icon;
 
@@ -64,9 +59,37 @@ namespace CapyIsland.Game
             _body = sprite != null ? sprite : transform;
             _bodyRest = _body.localPosition;
             _bodyScale = _body.localScale.x;
-            if (arrow != null) _arrowRest = arrow.localPosition;
+            // Bubbles built before the arrow was dropped still carry one: the bobbing bubble and
+            // the edge arrows say "look here" well enough on their own.
+            var arrow = transform.Find("Arrow");
+            if (arrow != null) arrow.gameObject.SetActive(false);
+            FloatAbove();
             RefreshIcon();
         }
+
+        /// <summary>Above every prop, below speech bubbles and markers; nearer bubbles in front.</summary>
+        public const int SortBase = 25000;
+
+        /// <summary>
+        /// A bubble floats: it draws over buildings and trees rather than being sorted in among
+        /// them, so one dropped just behind a house is never hidden by it.
+        /// </summary>
+        void FloatAbove()
+        {
+            var glass = _body != null ? _body.GetComponent<SpriteRenderer>() : null;
+            if (glass == null) return;
+            glass.sortingOrder = SortBase + Mathf.Clamp(Mathf.RoundToInt(-transform.position.y * 10f), -1900, 1900) * 2;
+        }
+
+        // A press on a bubble belongs to the bubble, whatever is standing behind it.
+        public float TapDistance(Vector2 worldPoint)
+        {
+            if (_taken || !isActiveAndEnabled) return -1f;
+            float d = Vector2.Distance(transform.position, worldPoint);
+            return d <= tapRadius ? d : -1f;
+        }
+
+        public void Tap() => Collect();
 
         /// <summary>
         /// Shows the item inside the glass. Sits just behind the bubble sprite, so the glass rim and
@@ -148,19 +171,14 @@ namespace CapyIsland.Game
             float t = Time.time;
             if (_body != null)
                 _body.localPosition = _bodyRest + new Vector3(0f, Mathf.Sin(t * bobRate * Mathf.PI * 2f) * bobHeight, 0f);
-
-            // The arrow bobs faster and out of phase, so the pair reads as "look here".
-            if (arrow != null)
-                arrow.localPosition = _arrowRest + new Vector3(0f, Mathf.Abs(Mathf.Sin(t * arrowBobRate * Mathf.PI)) * arrowBobHeight, 0f);
         }
 
         /// <summary>Fills a bubble created at runtime, for an item returning to the world.</summary>
-        public void Fill(GameObject item, Transform arrowTransform)
+        public void Fill(GameObject item)
         {
             contents = item;
-            arrow = arrowTransform;
             _taken = false;
-            Awake();   // re-cache the body, arrow rest positions and the icon
+            Awake();   // re-cache the body and the icon
         }
 
         /// <summary>Nearest uncollected bubble under a world point, or null.</summary>

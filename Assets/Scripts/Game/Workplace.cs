@@ -25,6 +25,7 @@ namespace CapyIsland.Game
         public ResourceKind Accepts => accepts;
         public bool HasRoom => _workers.Count < maxWorkers;
         public int WorkerCount => _workers.Count;
+        public int MaxWorkers => maxWorkers;
 
         /// <summary>The family of node this building's workers harvest.</summary>
         public NodeFamily WorkFamily => accepts == ResourceKind.Wood ? NodeFamily.Tree : NodeFamily.Rock;

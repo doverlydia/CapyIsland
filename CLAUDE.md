@@ -51,6 +51,19 @@ achievement *names* in code ("Coriander", "The Girl's New Dress", "Deer"…) are
 must never be shown directly — show `StoryText.Name(id)` / `MoteDef.Title`. The `*.g.cs` data tables
 and their generators carry ids and numbers only; never re-introduce prose from `docs/reference/*.xml`.
 
+**Sound and music are ours, and generated.** `Tools/fx/sfx.mjs` makes every effect and the ambience
+(waves, wind, rain, birdsong); music is composed in **Capy Music Studio** (`Tools/MusicStudio/`: songs are JSON in
+`songs/`, instruments in `app/engine.js`, `render.js` renders them; see its README). The user
+composes there too, so write songs as JSON they can open and edit, and only render into
+`Assets/Resources/Music` when asked — they disliked the old `Tools/Audio/music.mjs` tunes. Never add recorded or third-party audio. Ambience must stay soft: band-limited noise, mastered
+quiet — harsh hissy noise was rejected. Append new sounds at the end of sfx.mjs so its seeded noise, and
+therefore every existing file, stays byte-identical.
+
+**Hebrew.** Code keeps writing English; `UI/Lang/LocText` translates every label as it is drawn, from
+`Assets/Resources/Lang/he/*.txt` (`@ English` / `= Hebrew`, `{0}` templates; format in `Loc.cs`).
+When you add or change player-visible text, add its Hebrew entry too. Playing in Hebrew in the editor
+appends anything untranslated to `Logs/loc_missing_he.txt`. The player is addressed in the masculine.
+
 ## Layout
 
 - `Assets/Scripts/Game/` — gameplay (`Worker`, `Workplace`, `Harvestable`, `Placeable`,

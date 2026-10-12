@@ -1,0 +1,682 @@
+# Easy Reading, language, the screen tour and the tutorial's placement-circle lines.
+
+@ Easy Reading
+= קריאה נוחה
+
+@ Bigger text, and tap any text to read it in a large window.
+= טקסט גדול יותר, ואפשר להקיש על כל טקסט כדי לקרוא אותו בחלון גדול.
+
+@ Text size
+= גודל הטקסט
+
+@ This is how big the words will be.
+= בגודל הזה יופיעו המילים.
+
+@ Tap text to read it
+= הקשה על טקסט פותחת אותו
+
+@ On buttons, press and hold the words instead.
+= על כפתורים, יש ללחוץ על המילים ולהחזיק.
+
+@ Show whole sentences at once
+= להציג משפטים שלמים מיד
+
+@ Bigger things to drag
+= חפצים גדולים יותר לגרירה
+
+@ Language
+= שפה
+
+@ A−
+= A−
+
+@ A+
+= A+
+
+@ Show me around
+= הראו לי מסביב
+
+@ Start tour
+= התחלת סיור
+
+@ Skip
+= דלג
+
+@ Next
+= הבא
+
+@ Let's play!
+= בוא נשחק!
+
+@ Easy Reading: On
+= קריאה נוחה: פועלת
+
+@ Easy Reading: Off
+= קריאה נוחה: כבויה
+
+# ---- the tour
+
+@ Welcome to Capy Island!
+= ברוך הבא לאי הקפיברות!
+
+@ Before we start, pick your language. If the words are hard to read, turn on Easy Reading for bigger text.
+= לפני שמתחילים, בחר שפה. אם קשה לקרוא את המילים, הפעל קריאה נוחה לטקסט גדול יותר.
+
+@ Your treasure
+= האוצר שלך
+
+@ Wood, gold and gems. Your capybaras gather wood and gold; you spend them in the shops.
+= עץ, זהב ויהלומים. הקפיברות שלך אוספות עץ וזהב, ואתה מוציא אותם בחנויות.
+
+@ What to do next
+= מה עושים עכשיו
+
+@ Your next goal is always here. Tap it to see every goal and quest.
+= המטרה הבאה שלך תמיד כאן. הקש עליה כדי לראות את כל המטרות והמשימות.
+
+@ You
+= זה אתה
+
+@ This is your capybara. Hold your finger on the ground and it walks toward your finger. Let go to stop.
+= זו הקפיברה שלך. החזק את האצבע על הקרקע והיא תלך לכיוון האצבע. הרם את האצבע כדי לעצור.
+
+@ Arrows at the edge
+= חצים בקצה המסך
+
+@ An arrow at the edge of the screen points at something you can't see yet. The picture inside shows what it is. Tap the arrow and your capybara walks there.
+= חץ בקצה המסך מצביע על משהו שעוד לא רואים. התמונה בתוכו מראה מה זה. הקש על החץ והקפיברה שלך תלך לשם.
+
+@ Where Old Yuzu wants you to go
+= לאן סבתא יוזו רוצה שתלך
+
+@ Someone with a quest for you
+= מישהו עם משימה בשבילך
+
+@ A bubble with a present inside
+= בועה עם מתנה בפנים
+
+@ Trouble: pests on your island
+= צרות: מזיקים באי שלך
+
+@ A friend visiting
+= חבר שבא לבקר
+
+@ Placing things
+= להניח דברים
+
+@ Things you collect follow you in a line. Drag one onto the ground to place it.\nWhile you drag, a circle shows the space it needs:
+= דברים שאתה אוסף הולכים אחריך בשורה. גרור אחד מהם אל הקרקע כדי להניח אותו.\nבזמן הגרירה, עיגול מראה כמה מקום הוא צריך:
+
+@ Green: you can let go here
+= ירוק: אפשר לשחרר כאן
+
+@ Red: something is in the way
+= אדום: משהו מפריע
+
+@ Want to put it further away? Drag it to the edge of the screen and your capybara walks that way.
+= רוצה להניח אותו רחוק יותר? גרור אותו לקצה המסך והקפיברה שלך תלך לשם.
+
+@ Old Yuzu
+= סבתא יוזו
+
+@ Old Yuzu talks to you here. Her words tell you what to try next.
+= כאן סבתא יוזו מדברת איתך. המילים שלה אומרות לך מה לנסות עכשיו.
+
+@ Everything else lives here: your goals, the wardrobe, hobbies, friends and settings.
+= כל השאר נמצא כאן: המטרות, ארון הבגדים, התחביבים, החברים וההגדרות.
+
+@ See all the islands. Drag yourself on the map to travel.
+= כל האיים במבט אחד. גרור את עצמך על המפה כדי לנסוע.
+
+@ Daily gifts
+= מתנות יומיות
+
+@ A present every day you play. A red dot means one is waiting.
+= מתנה בכל יום שאתה משחק. נקודה אדומה אומרת שמתנה מחכה לך.
+
+@ Fly to your friends' islands and invite them to visit yours.
+= טוס לאיים של החברים שלך והזמן אותם לבקר באי שלך.
+
+@ Your profile
+= הפרופיל שלך
+
+@ Your name, your island's score and your hobbies.
+= השם שלך, הניקוד של האי שלך והתחביבים שלך.
+
+@ Say hello
+= להגיד שלום
+
+@ Send a wave, a heart or a smile to anyone visiting.
+= שלח נפנוף, לב או חיוך למי שבא לבקר.
+
+@ Need help later?
+= צריך עזרה אחר כך?
+
+@ Bigger text, tap-to-read and the language are in Menu → Settings. You can watch this tour again there too.
+= טקסט גדול, הקשה לקריאה והשפה נמצאים בתפריט ← הגדרות. שם אפשר גם לצפות שוב בסיור.
+
+# ---- the tutorial's placement circle
+
+@ See the circle around it? Green means there's room to plant it there. Red means something is in the way, so move it a little. Let go to plant it.
+= רואה את העיגול סביבו? ירוק אומר שיש מקום לשתול אותו שם. אדום אומר שמשהו מפריע, אז הזז אותו קצת. שחרר כדי לשתול.
+
+@ Previous
+= הקודם
+
+@ English
+= English
+
+# ---- names on the edge arrows
+
+@ Names on edge arrows
+= שמות על החצים בקצה המסך
+
+@ Go here
+= לך לכאן
+
+@ Quest
+= משימה
+
+@ Pests
+= מזיקים
+
+@ Visitor
+= אורח
+
+@ Bubble
+= בועה
+
+# ---- feedback when a drop doesn't take, and walking to an arrow
+
+@ Not enough room there. Drop it where the circle turns green.
+= אין שם מספיק מקום. שחרר אותו במקום שבו העיגול נהיה ירוק.
+
+@ That's water! Things can only be planted on land.
+= זה מים! אפשר לשתול רק על היבשה.
+
+@ That {0} is full. It has room for {1} capybaras.
+= אין יותר מקום ב{0}: יש מקום רק ל-{1} קפיברות.
+
+@ workplace
+= מקום עבודה
+
+@ You can't get there from here.
+= אי אפשר להגיע לשם מכאן.
+
+@ Stop walking
+= עצור
+
+# ---- hold a counter to see what it is
+
+@ Wood
+= עץ
+
+@ Gold
+= זהב
+
+@ Gems
+= יהלומים
+
+@ Capybaras
+= קפיברות
+
+@ Capybaras chop it at a sawmill.
+= הקפיברות כורתות אותו במנסרה.
+
+@ Capybaras dig it at a mine.
+= הקפיברות חופרות אותו במכרה.
+
+@ +{0} a minute
+= עוד {0} בכל דקה
+
+@ Nothing coming in right now.
+= כרגע לא נכנס כלום.
+
+@ Rare treasure from quests, daily gifts and hobbies.
+= אוצר נדיר ממשימות, ממתנות יומיות ומתחביבים.
+
+@ None yet. Welcome one in at a Capy House.
+= עוד אין. אפשר לקבל אחת בבית קפיברות.
+
+@ {0} at work
+= {0} בעבודה
+
+@ {0} asleep
+= {0} ישנות
+
+@ {0} waiting for a job
+= {0} מחכות לעבודה
+
+# ---- how much is missing
+
+@ You need {0} more wood.
+= חסרים לך עוד {0} עץ.
+
+@ You need {0} more gold.
+= חסרים לך עוד {0} זהב.
+
+@ You need 1 more gem.
+= חסר לך עוד יהלום אחד.
+
+@ You need {0} more gems.
+= חסרים לך עוד {0} יהלומים.
+
+# ---- day and night
+
+@ Dawn
+= שחר
+
+@ Day
+= יום
+
+@ Dusk
+= דמדומים
+
+@ Night
+= לילה
+
+@ Daytime
+= שעות היום
+
+@ Any time
+= בכל שעה
+
+@ {0} · {1}
+= {0} · {1}
+
+@ A day on the island lasts 24 minutes.
+= יום באי נמשך 24 דקות.
+
+@ Some fish, birds and bugs only come out at certain times. Your journal says when.
+= חלק מהדגים, הציפורים והחרקים יוצאים רק בשעות מסוימות. היומן שלך מראה מתי.
+
+@ Day and night
+= יום ולילה
+
+@ A day on the island lasts 24 minutes. Some fish, birds and bugs only come out at certain times, so look again later!
+= יום באי נמשך 24 דקות. חלק מהדגים, הציפורים והחרקים יוצאים רק בשעות מסוימות, אז כדאי לחזור ולחפש מאוחר יותר!
+
+@ Tawny Owl
+= ינשוף חום
+
+# ---- the fisherman's bait
+
+@ Bait Shop
+= חנות פיתיונות
+
+@ Bait shop
+= חנות פיתיונות
+
+@ Wiggly Worms
+= תולעים מתפתלות
+
+@ Sweet Shrimp
+= שרימפס מתוק
+
+@ Golden Lure
+= פיתיון זהב
+
+@ Fish come to your bobber and bite sooner.
+= הדגים מגיעים למצוף ונושכים מהר יותר.
+
+@ The line strains more slowly, so reeling in is easier.
+= החוט נמתח לאט יותר, אז קל יותר לגלגל פנימה.
+
+@ Quick bites and a gentle line, both at once.
+= נשיכות מהירות וחוט עדין, שניהם יחד.
+
+@ Bait goes on your hook as you cast, one per cast. Tap the bait button while fishing to choose.
+= הפיתיון עולה על הקרס כשאתה זורק את החכה, אחד בכל זריקה. בזמן הדיג הקש על כפתור הפיתיון כדי לבחור.
+
+@ You have {0}
+= יש לך {0}
+
+@ {0} for {1} gold
+= {0} ב-{1} זהב
+
+@ {0} for {1} gems
+= {0} ב-{1} יהלומים
+
+@ Bait ×{0}
+= פיתיון ×{0}
+
+@ No bait
+= בלי פיתיון
+
+@ No bait yet. Skipper Nori sells it, down on the beach by the bottles.
+= עוד אין לך פיתיון. הסקיפר נורי מוכר, למטה בחוף ליד הבקבוקים.
+
+@ Fishing without bait.
+= דג בלי פיתיון.
+
+@ {0}: {1}
+= {0}: {1}
+
+@ Ahoy! The fish are biting. My rod and bait are laid out on the sand, take your pick. And I've empty bottles, if you've a message for the sea.
+= אהוי! הדגים נושכים היום. החכה והפיתיונות שלי פרושים על החול, בחר מה שתרצה. ויש לי גם בקבוקים ריקים, אם יש לך הודעה לים.
+
+@ Ahoy! The fish are biting. I've bait for an easier catch, and empty bottles if you've a message for the sea.
+= אהוי! הדגים נושכים היום. יש לי פיתיונות לדיג קל יותר, ובקבוקים ריקים אם יש לך הודעה לים.
+
+@ Ahoy! Leave {0} a message in a bottle? One gold coin, and I'll set it on the sand for 'em. My bait's laid out right here, for the fish.
+= אהוי! להשאיר ל{0} הודעה בבקבוק? מטבע זהב אחד, ואניח אותו על החול. הפיתיונות שלי פרושים ממש כאן, בשביל הדגים.
+
+@ Ahoy! Leave {0} a message in a bottle? One gold coin, and I'll set it on the sand for 'em. Or some bait, for the fish here?
+= אהוי! להשאיר ל{0} הודעה בבקבוק? מטבע זהב אחד, ואניח אותו על החול. או אולי פיתיון, בשביל הדגים כאן?
+
+# ---- events
+
+@ Events
+= אירועים
+
+@ Contest
+= תחרות
+
+@ Today's goal
+= המטרה של היום
+
+@ Fishing Contest
+= תחרות דיג
+
+@ Bug Contest
+= תחרות חרקים
+
+@ Birdwatching Contest
+= תחרות צפרות
+
+@ Whoever catches the most fish wins.
+= מי שתופס הכי הרבה דגים מנצח.
+
+@ Whoever catches the most bugs wins.
+= מי שתופס הכי הרבה חרקים מנצח.
+
+@ Whoever spots the most birds wins.
+= מי שמגלה הכי הרבה ציפורים מנצח.
+
+@ Get a fishing rod to take part.
+= כדי להשתתף צריך חכה.
+
+@ Get binoculars to take part.
+= כדי להשתתף צריך משקפת.
+
+@ Get a bug net to take part.
+= כדי להשתתף צריך רשת חרקים.
+
+@ Ends in {0}
+= מסתיים בעוד {0}
+
+@ New goal in {0}
+= מטרה חדשה בעוד {0}
+
+@ {0} days
+= {0} ימים
+
+@ {0} hours
+= {0} שעות
+
+@ {0} minutes
+= {0} דקות
+
+@ 1st: {0} gems + {1}
+= מקום 1: {0} יהלומים + {1}
+
+@ 1st: {0} gems
+= מקום 1: {0} יהלומים
+
+@ 2nd: {0} gems   ·   3rd: {1} gems
+= מקום 2: {0} יהלומים   ·   מקום 3: {1} יהלומים
+
+@ {0} (you)
+= {0} (אתה)
+
+@ Reward: {0}
+= פרס: {0}
+
+@ {0} gems
+= {0} יהלומים
+
+@ {0} gold
+= {0} זהב
+
+@ {0} + {1}
+= {0} + {1}
+
+@ Claim reward
+= קבל את הפרס
+
+@ Claimed! A new goal comes tomorrow.
+= קיבלת! מחר תחכה מטרה חדשה.
+
+@ Get a fishing rod, binoculars or a bug net, and a new goal will be waiting here every day.
+= השג חכה, משקפת או רשת חרקים, וכל יום תחכה כאן מטרה חדשה.
+
+@ Night Fishing
+= דיג לילה
+
+@ Catch 5 fish after dark.
+= תפוס 5 דגים אחרי החשיכה.
+
+@ Golden Hour
+= שעת הזהב
+
+@ Spot 3 birds at dawn or dusk.
+= גלה 3 ציפורים בשחר או בדמדומים.
+
+@ Bug Hunt
+= ציד חרקים
+
+@ Catch 6 bugs.
+= תפוס 6 חרקים.
+
+@ Something Fancy
+= משהו מיוחד
+
+@ Catch 3 fish that are uncommon or rarer.
+= תפוס 3 דגים לא שכיחים או נדירים יותר.
+
+@ Birdwatcher
+= צפר
+
+@ Spot 5 birds.
+= גלה 5 ציפורים.
+
+@ Busy Angler
+= דייג חרוץ
+
+@ Catch 8 fish.
+= תפוס 8 דגים.
+
+@ Moonlight Bugs
+= חרקי אור ירח
+
+@ Catch 3 bugs after dark.
+= תפוס 3 חרקים אחרי החשיכה.
+
+@ {0}: you came first!
+= {0}: הגעת למקום הראשון!
+
+@ {0}: you came second!
+= {0}: הגעת למקום השני!
+
+@ {0}: you came third!
+= {0}: הגעת למקום השלישי!
+
+@ {0}: results
+= {0}: תוצאות
+
+@ You finished first with {0}. Here are {1} gems.
+= סיימת במקום הראשון עם {0}. הנה {1} יהלומים.
+
+@ You finished second with {0}. Here are {1} gems.
+= סיימת במקום השני עם {0}. הנה {1} יהלומים.
+
+@ You finished third with {0}. Here are {1} gems.
+= סיימת במקום השלישי עם {0}. הנה {1} יהלומים.
+
+@ You finished number {0} with {1}. Thanks for taking part: {2} gems for you.
+= סיימת במקום {0} עם {1}. תודה שהשתתפת: {2} יהלומים בשבילך.
+
+@ And the {0} is waiting in your wardrobe!
+= ו{0} מחכה לך בארון הבגדים!
+
+@ Gold Fishing Medal
+= מדליית זהב בדיג
+
+@ Gold Bug Medal
+= מדליית זהב בחרקים
+
+@ Gold Birding Medal
+= מדליית זהב בצפרות
+
+@ First place in a contest
+= מקום ראשון בתחרות
+
+@ A contest every three days (most fish, bugs or birds wins prizes) and a new goal each day.
+= תחרות כל שלושה ימים (מי שאוסף הכי הרבה דגים, חרקים או ציפורים זוכה בפרסים) ומטרה חדשה בכל יום.
+
+@ You
+= אתה
+
+@ gems
+= יהלומים
+
+@ + {0}
+= + {0}
+
+# ---- volume, weather, the world changing, journals
+
+@ Music
+= מוזיקה
+
+@ Effects
+= אפקטים
+
+@ Ambience
+= צלילי סביבה
+
+@ Only in the rain
+= רק בגשם
+
+@ Rainbow Trout
+= פורל קשת
+
+@ Rain Frog
+= צפרדע גשם
+
+@ It's raining! Some shy creatures only come out in the wet.
+= יורד גשם! חלק מהיצורים הביישנים יוצאים רק כשרטוב.
+
+@ The rain has stopped.
+= הגשם נפסק.
+
+@ The rain has stopped. Look, a rainbow!
+= הגשם נפסק. תראה, קשת בענן!
+
+@ The sun is coming up.
+= השמש זורחת.
+
+@ Good morning! It's a bright new day.
+= בוקר טוב! יום חדש ומואר.
+
+@ The sun is setting.
+= השמש שוקעת.
+
+@ Night has fallen.
+= ירד הלילה.
+
+@ Look out for the {0}!
+= {0} בחוץ עכשיו!
+
+@ Look out for the {0} and the {1}!
+= {0} ו{1} בחוץ עכשיו!
+
+@ Complete! You found all {0}.
+= הושלם! מצאת את כל ה-{0}.
+
+@ Found {0} of {1}. Find them all for {2} gems and the {3}.
+= נמצאו {0} מתוך {1}. מצא את כולם ותקבל {2} יהלומים ואת {3}.
+
+@ Found {0} of {1}. Find them all for {2} gems.
+= נמצאו {0} מתוך {1}. מצא את כולם ותקבל {2} יהלומים.
+
+@ The fish journal is complete!
+= יומן הדגים הושלם!
+
+@ The bird journal is complete!
+= יומן הציפורים הושלם!
+
+@ The bug journal is complete!
+= יומן החרקים הושלם!
+
+@ You found every fish on the islands! Here are {0} gems, and the <b>{1}</b> is waiting in your wardrobe.
+= מצאת את כל הדגים באיים! הנה {0} יהלומים, ו<b>{1}</b> מחכה לך בארון הבגדים.
+
+@ You found every bird on the islands! Here are {0} gems, and the <b>{1}</b> is waiting in your wardrobe.
+= מצאת את כל הציפורים באיים! הנה {0} יהלומים, ו<b>{1}</b> מחכה לך בארון הבגדים.
+
+@ You found every bug on the islands! Here are {0} gems, and the <b>{1}</b> is waiting in your wardrobe.
+= מצאת את כל החרקים באיים! הנה {0} יהלומים, ו<b>{1}</b> מחכה לך בארון הבגדים.
+
+@ Angler's Bucket Hat
+= כובע דייגים
+
+@ Feathered Cap
+= כובע עם נוצה
+
+@ Bug Antennae
+= מחושי חרק
+
+@ Complete the fish journal
+= השלם את יומן הדגים
+
+@ Complete the bird journal
+= השלם את יומן הציפורים
+
+@ Complete the bug journal
+= השלם את יומן החרקים
+
+# ---- tips
+
+@ Got it!
+= הבנתי!
+
+@ Old Yuzu talks to you here, and her words tell you what to try next. When she goes quiet, tap her picture to hear her again.
+= כאן סבתא יוזו מדברת איתך, והמילים שלה אומרות לך מה לנסות עכשיו. כשהיא שותקת, הקש על התמונה שלה כדי לשמוע אותה שוב.
+
+@ Everything else lives here: your goals, the wardrobe, hobbies, friends, and Settings (bigger text, language, sound).
+= כל השאר נמצא כאן: המטרות, ארון הבגדים, התחביבים, החברים וההגדרות (טקסט גדול, שפה, צלילים).
+
+@ End tutorial
+= סיים הדרכה
+
+@ Skip
+= דלג
+
+@ Tutorial and tips
+= הדרכה וטיפים
+
+@ Message in a Bottle
+= הודעה בבקבוק
+
+@ An empty bottle for your trail. Drop it on the beach and write a note to put inside.
+= בקבוק ריק לשובל שלך. הנח אותו על החוף וכתוב פתק לשים בתוכו.
+
+@ The story so far
+= הסיפור עד כה
+
+@ Watch
+= צפה
+
+# ---------------------------------------------------------------- Game/Hobbies/MessageBottle.cs
+
+@ Drag your bottle to the beach and drop it on the sand by the water.
+= גרור את הבקבוק לחוף והנח אותו על החול ליד המים.
+
+@ Bottles go on the sand, right by the water.
+= בקבוקים מניחים על החול, ממש ליד המים.
+
+@ Your note is tucked inside. Tap the bottle to change it.
+= הפתק שלך בתוך הבקבוק. הקש על הבקבוק כדי לשנות אותו.
+
+@ Your note is updated.
+= הפתק שלך עודכן.

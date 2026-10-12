@@ -12,6 +12,9 @@ namespace CapyIsland.UI
     /// body. Screens stack — the menu opens the map over itself — and the phone's back button (or
     /// Escape) closes the top one. While any is open the island ignores touches.
     ///
+    /// Only the ✕ and the back button close a screen: a tap that just misses a button near the
+    /// sheet's edge lands on the dimmed island and does nothing.
+    ///
     /// Subclasses build their body once in <see cref="Build"/> and refresh it in <see cref="OnOpen"/>.
     /// </summary>
     public abstract class UiScreen : MonoBehaviour
@@ -97,12 +100,9 @@ namespace CapyIsland.UI
             _root = UiKit.Rect("Root", transform).gameObject;
             UiKit.Stretch((RectTransform)_root.transform);
 
-            // The dimmed island behind: tapping it closes the screen.
+            // The dimmed island behind: catches stray taps so they never reach the game.
             var scrim = UiKit.Image(_root.transform, "Scrim", null, UiKit.Scrim, true);
             UiKit.Stretch(scrim.rectTransform, -400f, -400f, -400f, -400f);
-            var scrimButton = scrim.gameObject.AddComponent<Button>();
-            scrimButton.transition = Selectable.Transition.None;
-            scrimButton.onClick.AddListener(Close);
 
             var card = UiKit.Card(_root.transform, "Sheet", UiKit.Surface, 44);
             Sheet = card.rectTransform;

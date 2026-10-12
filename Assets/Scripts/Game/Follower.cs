@@ -26,11 +26,16 @@ namespace CapyIsland.Game
         [SerializeField] float catchUpBoost = 2.2f;
 
         SpriteRenderer _renderer;
+        DraggableActor _drag;
 
         /// <summary>False while the item is placed, working, or held by the player.</summary>
         public bool Carried { get; private set; } = true;
 
-        void Awake() => _renderer = GetComponentInChildren<SpriteRenderer>();
+        void Awake()
+        {
+            _renderer = GetComponentInChildren<SpriteRenderer>();
+            _drag = GetComponent<DraggableActor>();
+        }
 
         /// <summary>Put back into the trail behind the king.</summary>
         public void PickUpIntoInventory() => Carried = true;
@@ -41,6 +46,7 @@ namespace CapyIsland.Game
         void Update()
         {
             if (!Carried) return;
+            if (_drag != null && _drag.IsHeld) return;   // under the finger, not in the queue
 
             var leader = LeaderTransform();
             if (leader == null) return;
@@ -93,7 +99,8 @@ namespace CapyIsland.Game
             if (_renderer == null || Mathf.Abs(dx) < 0.01f) return;
             var t = _renderer.transform;
             var scale = t.localScale;
-            scale.x = Mathf.Abs(scale.x) * (dx < 0f ? -1f : 1f);
+            // the pictures face left: mirror them to walk right
+            scale.x = Mathf.Abs(scale.x) * (dx > 0f ? -1f : 1f);
             t.localScale = scale;
         }
     }

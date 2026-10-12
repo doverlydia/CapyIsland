@@ -38,16 +38,8 @@ namespace CapyIsland.Game
             sr.sprite = BubbleSprite;
             sr.sortingOrder = order;
 
-            var arrow = new GameObject("Arrow");
-            arrow.transform.SetParent(go.transform, false);
-            arrow.transform.localPosition = new Vector3(0f, 2.0f, 0f);
-            arrow.transform.localScale = Vector3.one * 0.7f;
-            var ar = arrow.AddComponent<SpriteRenderer>();
-            ar.sprite = ArrowSprite;
-            ar.sortingOrder = order + 2;
-
             var bubble = go.AddComponent<Bubble>();
-            bubble.Fill(item.gameObject, arrow.transform);
+            bubble.Fill(item.gameObject);
         }
 
         /// <summary>
@@ -79,24 +71,15 @@ namespace CapyIsland.Game
             sr.sprite = BubbleSprite;
             sr.sortingOrder = order;
 
-            var arrow = new GameObject("Arrow");
-            arrow.transform.SetParent(go.transform, false);
-            arrow.transform.localPosition = new Vector3(0f, 2.0f, 0f);
-            arrow.transform.localScale = Vector3.one * 0.7f;
-            var ar = arrow.AddComponent<SpriteRenderer>();
-            ar.sprite = ArrowSprite;
-            ar.sortingOrder = order + 2;
-
             var bubble = go.AddComponent<Bubble>();
-            bubble.Fill(item, arrow.transform);
+            bubble.Fill(item);
             return bubble;
         }
 
         static Sprite _bubbleSprite;
-        static Sprite _arrowSprite;
 
         /// <summary>
-        /// Borrows the sprites from a bubble already in the scene, so this needs no Resources
+        /// Borrows the sprite from a bubble already in the scene, so this needs no Resources
         /// folder and no inspector wiring.
         /// </summary>
         static Sprite BubbleSprite
@@ -111,21 +94,6 @@ namespace CapyIsland.Game
                     if (sr != null && sr.sprite != null) { _bubbleSprite = sr.sprite; break; }
                 }
                 return _bubbleSprite;
-            }
-        }
-
-        static Sprite ArrowSprite
-        {
-            get
-            {
-                if (_arrowSprite != null) return _arrowSprite;
-                foreach (var b in Resources.FindObjectsOfTypeAll<Bubble>())
-                {
-                    var arrow = b.transform.Find("Arrow");
-                    var sr = arrow != null ? arrow.GetComponent<SpriteRenderer>() : null;
-                    if (sr != null && sr.sprite != null) { _arrowSprite = sr.sprite; break; }
-                }
-                return _arrowSprite;
             }
         }
     }

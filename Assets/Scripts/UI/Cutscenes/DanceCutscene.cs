@@ -24,6 +24,9 @@ namespace CapyIsland.UI
             return catalog != null && catalog.Has(name) ? catalog.Icon(name) : null;
         }
 
+        /// <summary>In its bubble: the crowd and the stage.</summary>
+        protected override Vector3 BubbleView => new(0.45f, 0.44f, 1.15f);
+
         protected override IEnumerator Script()
         {
             Backdrop(Resources.Load<Sprite>("Cutscenes/Cutscene_Dance"), UiKit.Hex("F4D79B"), UiKit.Hex("A9744A"));
@@ -35,10 +38,10 @@ namespace CapyIsland.UI
             // The audience, on the dock.
             var crowd = new List<Actor>();
             var worker = Icon("Capybara");
-            if (worker != null) crowd.Add(Cast(worker, new Vector2(0.1f, 0.16f), 0.22f, faceRight: true));
-            var you = CastPlayer(new Vector2(0.26f, 0.1f), 0.27f, faceRight: true);
+            if (worker != null) crowd.Add(Cast(worker, new Vector2(0.27f, 0.2f), 0.22f, faceRight: true));
+            var you = CastPlayer(new Vector2(0.38f, 0.13f), 0.27f, faceRight: true);
             crowd.Add(you);
-            if (worker != null) crowd.Add(Cast(worker, new Vector2(0.42f, 0.08f), 0.23f, faceRight: true));
+            if (worker != null) crowd.Add(Cast(worker, new Vector2(0.5f, 0.11f), 0.23f, faceRight: true));
 
             yield return Wait(0.5f);
 
@@ -70,7 +73,7 @@ namespace CapyIsland.UI
                 captain.Face(i % 2 == 0);
                 yield return Wait(0.07f);
             }
-            captain.WalkTo(new Vector2(0.6f, 0.08f), 0.55f, 2);
+            captain.WalkTo(new Vector2(0.58f, 0.13f), 0.55f, 2);
             yield return Wait(0.6f);
             captain.Face(false);
 

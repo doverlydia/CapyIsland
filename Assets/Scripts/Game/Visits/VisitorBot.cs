@@ -462,7 +462,8 @@ namespace CapyIsland.Game
             if (_bodyTransform != null && Mathf.Abs(dx) > 0.01f)
             {
                 var s = _bodyTransform.localScale;
-                s.x = Mathf.Abs(s.x) * (dx < 0f ? -1f : 1f);
+                // the pictures face left: mirror them to walk right
+                s.x = Mathf.Abs(s.x) * (dx > 0f ? -1f : 1f);
                 _bodyTransform.localScale = s;
                 _hop += Time.deltaTime * 9f;
                 _bodyTransform.localPosition = _bodyRest + new Vector3(0f, Mathf.Abs(Mathf.Sin(_hop)) * 0.14f, 0f);

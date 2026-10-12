@@ -37,7 +37,14 @@ namespace CapyIsland.Game
 
         public string StoreName => storeName;
         public string Title => StoryText.Name(storeName);
-        public string Description => StoreData.Get(storeName).Description;
+        public string Description
+        {
+            get
+            {
+                string about = StoreData.Get(storeName).Description, strengths = StoryText.WorkerStrengths(storeName);
+                return strengths.Length == 0 ? about : about + "\n\n" + strengths;
+            }
+        }
         public Vector3Int Price => StoreData.Price(storeName);
         public bool SoldOut => StoreData.IsSoldOut(storeName);
         public bool Visible => _alpha > 0.01f;

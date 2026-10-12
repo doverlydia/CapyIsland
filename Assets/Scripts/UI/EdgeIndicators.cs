@@ -10,8 +10,8 @@ namespace CapyIsland.UI
     /// <summary>
     /// Arrows around the edge of the screen pointing at things you cannot see: bubbles (showing what
     /// is inside), pests to bomb or tame, anyone with news, and wherever the guide's hand is pointing.
-    /// Things in the same direction share one arrow with a count. Tap an arrow to glide the camera
-    /// over for a look.
+    /// Things in the same direction share one arrow with a count. Tap an arrow and your capybara
+    /// walks over there (touch the ground to take over again).
     /// </summary>
     public class EdgeIndicators : MonoBehaviour
     {
@@ -26,19 +26,36 @@ namespace CapyIsland.UI
         {
             public RectTransform Root, Arrow;
             public Image Ring, Icon, ArrowImage;
-            public TextMeshProUGUI Count;
+            public TextMeshProUGUI Count, Label;
+            public RectTransform LabelPill;
             public Vector2 Target;
             public MarkerKind Kind;
         }
 
         readonly List<Widget> _pool = new();
+        static EdgeIndicators _instance;
+
+        /// <summary>The first arrow on screen right now, or null (for the arrows tip to point at).</summary>
+        public static RectTransform FirstShown
+        {
+            get
+            {
+                if (_instance == null) return null;
+                foreach (var w in _instance._pool) if (w.Root != null && w.Root.gameObject.activeInHierarchy) return w.Root;
+                return null;
+            }
+        }
         RectTransform _rect;
 
         struct Hit { public IMapMarker Marker; public Vector2 Local; public float Distance; }
         readonly List<Hit> _hits = new();
         readonly List<(Widget w, Vector2 pos, int count)> _placed = new();
 
-        void Awake() => _rect = (RectTransform)transform;
+        void Awake()
+        {
+            _rect = (RectTransform)transform;
+            _instance = this;
+        }
 
         void LateUpdate()
         {
@@ -74,6 +91,11 @@ namespace CapyIsland.UI
                 return pa != pb ? pb.CompareTo(pa) : a.Distance.CompareTo(b.Distance);
             });
 
+            // Old Yuzu's "go here" pointing at something that has its own arrow (a quest giver, a
+            // bubble): show that one instead — knowing who is there beats a second arrow under it.
+            _hits.RemoveAll(h => h.Marker.MarkerKind == MarkerKind.Guide && _hits.Exists(o =>
+                o.Marker.MarkerKind != MarkerKind.Guide && (o.Marker.MarkerPosition - h.Marker.MarkerPosition).sqrMagnitude < 9f));
+
             _placed.Clear();
             int used = 0;
             foreach (var hit in _hits)
@@ -95,6 +117,28 @@ namespace CapyIsland.UI
                 }
                 if (merged || used >= MaxShown) continue;
 
+                // A different arrow already sits here: slide along the edge so both can be seen.
+                bool sideEdge = Mathf.Abs(Mathf.Abs(edge.x - centre.x) - hx) < 1f;
+                var along = sideEdge ? Vector2.up : Vector2.right;
+                for (int tries = 1; tries <= 4 && _placed.Exists(pl => (pl.pos - edge).sqrMagnitude < Size * Size * 0.8f); tries++)
+                {
+                    var shifted = edge + along * Size * 1.05f * ((tries + 1) / 2) * (tries % 2 == 1 ? 1f : -1f);
+                    shifted.x = Mathf.Clamp(shifted.x, left, right);
+                    shifted.y = Mathf.Clamp(shifted.y, bottom, top);
+                    if (!_placed.Exists(pl => (pl.pos - shifted).sqrMagnitude < Size * Size * 0.8f)) { edge = shifted; break; }
+                }
+
+                // Never under Old Yuzu: an arrow that would land on her picture or bubble goes up above her.
+                var ghost = GhostDialogue.Instance;
+                if (ghost != null)
+                {
+                    var screenPt = RectTransformUtility.WorldToScreenPoint(null, _rect.TransformPoint(edge));
+                    float scale = _rect.lossyScale.x;
+                    if (ghost.Covers(screenPt, Size * 0.5f * scale)
+                        && RectTransformUtility.ScreenPointToLocalPointInRectangle(_rect, new Vector2(screenPt.x, ghost.TopOnScreen + Size * 0.7f * scale), null, out var above))
+                        edge = new Vector2(edge.x, Mathf.Min(above.y, top));
+                }
+
                 var widget = Get(used++);
                 widget.Kind = hit.Marker.MarkerKind;
                 widget.Target = hit.Marker.MarkerPosition;
@@ -102,7 +146,17 @@ namespace CapyIsland.UI
                 widget.Root.anchoredPosition = edge;
                 float angle = Mathf.Atan2(d.y, d.x) * Mathf.Rad2Deg;
                 widget.Arrow.localRotation = Quaternion.Euler(0f, 0f, angle);
-                widget.Arrow.anchoredPosition = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad)) * (Size * 0.5f + 6f);
+                var outward = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
+                widget.Arrow.anchoredPosition = outward * (Size * 0.5f + 6f);
+                // The name sits on the screen side of the ring, opposite the arrow, so it is never
+                // pushed off the edge.
+                bool labelled = SettingsScreen.ArrowLabels;
+                widget.LabelPill.gameObject.SetActive(labelled);
+                if (labelled)
+                {
+                    widget.Label.text = LabelOf(widget.Kind);
+                    widget.LabelPill.anchoredPosition = -outward * (Size * 0.5f + 30f);
+                }
                 _placed.Add((widget, edge, 1));
             }
 
@@ -121,6 +175,15 @@ namespace CapyIsland.UI
             MarkerKind.Pest => 2,
             MarkerKind.Friend => 2,
             _ => 1,
+        };
+
+        static string LabelOf(MarkerKind k) => k switch
+        {
+            MarkerKind.Guide => "Go here",
+            MarkerKind.Quest => "Quest",
+            MarkerKind.Pest => "Pests",
+            MarkerKind.Friend => "Visitor",
+            _ => "Bubble",
         };
 
         static Color ColourOf(MarkerKind k) => k switch
@@ -193,12 +256,25 @@ namespace CapyIsland.UI
 
             w.Count = UiKit.Badge(w.Ring.transform, UiKit.Ink, 40f);
 
+            var pill = UiKit.Image(w.Root, "LabelPill", UiKit.Rounded(18), UiKit.HudGlass);
+            w.LabelPill = pill.rectTransform;
+            w.LabelPill.anchorMin = w.LabelPill.anchorMax = w.LabelPill.pivot = new Vector2(0.5f, 0.5f);
+            var ph = pill.gameObject.AddComponent<HorizontalLayoutGroup>();
+            ph.padding = new RectOffset(14, 14, 4, 6);
+            ph.childControlWidth = ph.childControlHeight = true;
+            pill.gameObject.AddComponent<ContentSizeFitter>().horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+            pill.gameObject.GetComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            w.Label = UiKit.Text(pill.transform, "Label", "", 26f, Color.white, true, TextAlignmentOptions.Center);
+            w.Label.textWrappingMode = TextWrappingModes.NoWrap;
+            w.Label.overflowMode = TextOverflowModes.Overflow;
+            w.LabelPill.gameObject.SetActive(false);
+
             var button = w.Ring.gameObject.AddComponent<Button>();
             button.transition = Selectable.Transition.None;
             button.onClick.AddListener(() =>
             {
                 Sfx.Play(SfxKind.Tap, 0.5f);
-                CameraRig.CameraFocus.Show(w.Target, 2.5f);
+                PlayerAvatar.GoTo(w.Target);
             });
             w.Ring.gameObject.AddComponent<PressSquash>();
 

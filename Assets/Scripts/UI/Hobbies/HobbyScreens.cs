@@ -66,9 +66,9 @@ namespace CapyIsland.UI
             };
             switch (_page)
             {
-                case Page.Fish: Journal(HobbyData.Fish.Length, i => (HobbyData.Fish[i].Name, HobbyData.FishPicture(HobbyData.Fish[i]), HobbyData.Fish[i].Stars, HobbyLog.FishEntry(HobbyData.Fish[i].Id)), true); break;
-                case Page.Birds: Journal(HobbyData.Birds.Length, i => (HobbyData.Birds[i].Name, HobbyData.BirdPicture(HobbyData.Birds[i]), HobbyData.Birds[i].Stars, HobbyLog.BirdEntry(HobbyData.Birds[i].Id)), false); break;
-                case Page.Bugs: Journal(HobbyData.Bugs.Length, i => (HobbyData.Bugs[i].Name, HobbyData.Art("Bug_" + HobbyData.Bugs[i].Id), HobbyData.Bugs[i].Stars, HobbyLog.BugEntry(HobbyData.Bugs[i].Id)), false); break;
+                case Page.Fish: Journal(Hobby.Fishing, HobbyData.Fish.Length, i => (HobbyData.Fish[i].Name, HobbyData.FishPicture(HobbyData.Fish[i]), HobbyData.Fish[i].Stars, HobbyLog.FishEntry(HobbyData.Fish[i].Id), HobbyData.Fish[i].Times, HobbyData.Fish[i].RainOnly), true); break;
+                case Page.Birds: Journal(Hobby.Birding, HobbyData.Birds.Length, i => (HobbyData.Birds[i].Name, HobbyData.BirdPicture(HobbyData.Birds[i]), HobbyData.Birds[i].Stars, HobbyLog.BirdEntry(HobbyData.Birds[i].Id), HobbyData.Birds[i].Times, HobbyData.Birds[i].RainOnly), false); break;
+                case Page.Bugs: Journal(Hobby.Bugs, HobbyData.Bugs.Length, i => (HobbyData.Bugs[i].Name, HobbyData.Art("Bug_" + HobbyData.Bugs[i].Id), HobbyData.Bugs[i].Stars, HobbyLog.BugEntry(HobbyData.Bugs[i].Id), HobbyData.Bugs[i].Times, HobbyData.Bugs[i].RainOnly), false); break;
                 case Page.Cats: CatsPage(); break;
                 case Page.Bag: BagPage(); break;
                 case Page.Kitchen: KitchenPage(); break;
@@ -250,21 +250,37 @@ namespace CapyIsland.UI
             return g;
         }
 
-        void Journal(int count, Func<int, (string name, Sprite pic, int stars, HobbyLog.Entry entry)> get, bool sizes)
+        void Journal(Hobby hobby, int count, Func<int, (string name, Sprite pic, int stars, HobbyLog.Entry entry, DayParts times, bool rain)> get, bool sizes)
         {
             Back();
+            JournalHeader(hobby);
             var grid = Grid(count);
             for (int i = 0; i < count; i++)
             {
-                var (name, pic, stars, entry) = get(i);
+                var (name, pic, stars, entry, times, rain) = get(i);
                 bool known = entry != null;
                 var tile = UiKit.Image(grid.transform, name, UiKit.Rounded(26), known ? Color.white : UiKit.SurfaceSunk);
                 Picture(tile.transform, pic, known);
                 Label(tile.transform, known ? name : "???", known);
-                string detail = HobbyData.Rarity(stars);
+                // When it is about, even before you have found one: something to go looking for.
+                string detail = HobbyData.Rarity(stars) + "\n" + (rain ? "Only in the rain" : GameClock.Describe(times));
                 if (known) detail += sizes ? $"\n×{entry.count} · best {entry.best:0} cm" : $"\n×{entry.count}";
                 Detail(tile.transform, detail);
             }
+        }
+
+        /// <summary>How much of the page is found, and what a full page wins.</summary>
+        void JournalHeader(Hobby hobby)
+        {
+            int found = JournalRewards.Found(hobby), total = JournalRewards.Total(hobby);
+            var hat = JournalRewards.Hat(hobby);
+            string line = JournalRewards.Rewarded(hobby)
+                ? $"Complete! You found all {total}."
+                : $"Found {found} of {total}. Find them all for {JournalRewards.Gems} gems" + (hat != null ? " and the " + hat.Name + "." : ".");
+            var t = UiKit.Text(_list, "Progress", line, 28f, UiKit.Ink, true, TextAlignmentOptions.Center);
+            t.overflowMode = TextOverflowModes.Overflow;
+            var bar = UiKit.ProgressBar(_list, "Bar", UiKit.Leaf, 20f);
+            UiKit.SetProgress(bar, total > 0 ? found / (float)total : 0f);
         }
 
         static void Picture(Transform tile, Sprite pic, bool known)
@@ -359,7 +375,8 @@ namespace CapyIsland.UI
                 {
                     if (needs.Length > 0) needs.Append(", ");
                     bool have = HobbyLog.Has(item, count);
-                    needs.Append(have ? "" : "<color=#C0503E>").Append(count).Append(' ').Append(HobbyData.ItemName(item)).Append(have ? "" : "</color>");
+                    // A list no table can hold: each name is translated as it goes in.
+                    needs.Append(have ? "" : "<color=#C0503E>").Append(count).Append(' ').Append(Loc.T(HobbyData.ItemName(item))).Append(have ? "" : "</color>");
                 }
                 string line = known ? needs.ToString() + "\n<size=85%>" + dish.Blurb + "</size>" : $"Unlocks at cooking level {dish.MinLevel}";
                 ItemRow("dish:" + dish.Id, line, known ? dish.Name : "???");
@@ -378,12 +395,12 @@ namespace CapyIsland.UI
             return null;
         }
 
-        /// <summary>Closes the menu and looks at something on the island — or says where to find it.</summary>
+        /// <summary>Closes the menu and walks over to something on the island — or says where to find it.</summary>
         void ShowInWorld(Transform target, string otherwise)
         {
             if (target == null) { if (otherwise != null) Hints.Show(otherwise); Close(); return; }
             Close();
-            CameraRig.CameraFocus.Show(target.position, 2.5f);
+            PlayerAvatar.GoTo(target.position);
         }
 
         RectTransform ItemRow(string item, string detail, string name = null)
@@ -571,29 +588,36 @@ namespace CapyIsland.UI
         }
 
         /// <summary>Opens the page to write the story going into a bottle; <paramref name="written"/> gets it.</summary>
-        public static void WriteBottle(Action<string, string> written)
+        public static void WriteBottle(Action<string, string> written, string title = null, string text = null, Action cancelled = null)
         {
             if (Instance == null) return;
             Instance.Open();
-            Instance.Write(written);
+            Instance.Write(written, title, text, cancelled);
         }
 
         void Write() => Write(null);
 
-        void Write(Action<string, string> written)
+        void Write(Action<string, string> written, string startTitle = null, string startText = null, Action cancelled = null)
         {
             ClearChildren(_list);
             var title = UiKit.Input(_list, "Title", "Title", false, 96f);
             title.characterLimit = 40;
             var text = UiKit.Input(_list, "Story", "Once upon a time, on a little island...", true, 640f);
             text.characterLimit = 2000;
+            if (!string.IsNullOrEmpty(startTitle)) title.text = startTitle;
+            if (!string.IsNullOrEmpty(startText)) text.text = startText;
             var row = UiKit.Rect("Buttons", _list);
             var h = row.gameObject.AddComponent<HorizontalLayoutGroup>();
             h.spacing = 16f;
             h.childControlWidth = h.childControlHeight = true;
             h.childForceExpandWidth = true;
             row.gameObject.AddComponent<LayoutElement>().preferredHeight = 96f;
-            UiKit.Button(row, "Cancel", "Cancel", UiKit.ButtonStyle.Secondary, Refresh, 30f);
+            UiKit.Button(row, "Cancel", "Cancel", UiKit.ButtonStyle.Secondary, () =>
+            {
+                if (cancelled == null) { Refresh(); return; }
+                Close();
+                cancelled();
+            }, 30f);
             UiKit.Button(row, "Save", written != null ? "Put it in the bottle" : "Put it on my shelf", UiKit.ButtonStyle.Primary, () =>
             {
                 string t = title.text.Trim(), s = text.text.Trim();

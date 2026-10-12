@@ -65,6 +65,12 @@ namespace CapyIsland.Game
             new() { Id = "Back_Backpack",   Name = "Little Backpack", Slot = WearSlot.Back, Unlock = "place_mine",    Anchor = new(0.74f, 0.635f), Width = 0.26f },
             new() { Id = "Hat_Sock",        Name = "Lucky Sock",      Slot = WearSlot.Hat,  Unlock = "cat_gift",      Anchor = new(0.46f, 0.87f), Width = 0.36f },
             new() { Id = "Neck_Bell",       Name = "Bell Collar",     Slot = WearSlot.Neck, Unlock = "cat_gift",      Anchor = new(0.48f, 0.355f), Width = 0.22f },
+            new() { Id = "Hat_Angler",      Name = "Angler's Bucket Hat", Slot = WearSlot.Hat, Unlock = "journal_Fishing", Anchor = new(0.46f, 0.84f), Width = 0.42f },
+            new() { Id = "Hat_Feather",     Name = "Feathered Cap",   Slot = WearSlot.Hat,  Unlock = "journal_Birding", Anchor = new(0.45f, 0.875f), Width = 0.38f },
+            new() { Id = "Hat_Antennae",    Name = "Bug Antennae",    Slot = WearSlot.Hat,  Unlock = "journal_Bugs",    Anchor = new(0.46f, 0.845f), Width = 0.33f },
+            new() { Id = "Neck_MedalFish",  Name = "Gold Fishing Medal", Slot = WearSlot.Neck, Unlock = "contest_Fish",  Anchor = new(0.48f, 0.365f), Width = 0.21f },
+            new() { Id = "Neck_MedalBug",   Name = "Gold Bug Medal",     Slot = WearSlot.Neck, Unlock = "contest_Bugs",  Anchor = new(0.48f, 0.365f), Width = 0.21f },
+            new() { Id = "Neck_MedalBird",  Name = "Gold Birding Medal", Slot = WearSlot.Neck, Unlock = "contest_Birds", Anchor = new(0.48f, 0.365f), Width = 0.21f },
             new() { Id = "Back_Cape",       Name = "Royal Cape",      Slot = WearSlot.Back, Unlock = "monster_tame",  Anchor = new(0.6f, 0.45f), Width = 0.76f, Behind = true },
         };
 
@@ -169,6 +175,10 @@ namespace CapyIsland.Game
             if (item.Unlock == "start") return "Yours from the start";
             if (item.Unlock == "cat_gift") return "A present from a cat";
             if (item.Unlock == "sewn") return "You sewed this!";
+            if (item.Unlock.StartsWith("contest_")) return "First place in a contest";
+            if (item.Unlock == "journal_Fishing") return "Complete the fish journal";
+            if (item.Unlock == "journal_Birding") return "Complete the bird journal";
+            if (item.Unlock == "journal_Bugs") return "Complete the bug journal";
             return Motes.TryGetByFunc(item.Unlock, out var m) ? "Achievement: " + m.Title : "Keep playing";
         }
 

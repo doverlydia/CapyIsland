@@ -30,9 +30,23 @@ namespace CapyIsland.Game
         bool _hasStatic;
         Vector3 _velocity;
 
+        /// <summary>The pointing hand's picture, for UI that acts out a gesture (fishing's hold).</summary>
+        public static Sprite HandSprite
+        {
+            get
+            {
+                var p = FindFirstObjectByType<TutorialPointer>(FindObjectsInactive.Include);
+                if (p == null) return null;
+                var sr = p.hand != null ? p.hand : p.GetComponentInChildren<SpriteRenderer>(true);
+                return sr != null ? sr.sprite : null;
+            }
+        }
+
         void Awake()
         {
             if (hand == null) hand = GetComponentInChildren<SpriteRenderer>();
+            // Over the bubbles it points at (they float above every prop).
+            if (hand != null) hand.sortingOrder = Bubble.SortBase + 4500;
             Hide();
         }
 
@@ -142,12 +156,15 @@ namespace CapyIsland.Game
         /// One loop of the drag: press on the thing, slide to where it goes, lift off, fade, again.
         /// The fingertip touches what it presses, rather than hovering over it.
         /// </summary>
+        /// <summary>How far above the point it shows the fingertip sits, in world units.</summary>
+        public float FingertipLift => heightAboveTarget * 0.35f;
+
         void TickDrag()
         {
             if (_dragFrom == null) { Hide(); return; }
             Vector3 from = _dragFrom.position;
             Vector3 to = _dragToTarget != null ? _dragToTarget.position : _dragToPoint;
-            float touch = heightAboveTarget * 0.35f;
+            float touch = FingertipLift;
             float t = Mathf.Repeat(Time.time - _dragStart, DragCycle);
             Vector3 at;
             float press = 0f, alpha = 1f;

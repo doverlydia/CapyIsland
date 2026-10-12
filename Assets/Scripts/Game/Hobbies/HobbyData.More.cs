@@ -25,6 +25,8 @@ namespace CapyIsland.Game
         public int Stars, MinLevel;
         public BugHome Home;
         public bool Flies, Glows;
+        public DayParts Times = DayParts.Any;
+        public bool RainOnly;
     }
 
     public class CatKind
@@ -68,17 +70,18 @@ namespace CapyIsland.Game
 
         public static readonly BugKind[] Bugs =
         {
-            new() { Id = "Ladybug",      Name = "Ladybug",        Stars = 1, MinLevel = 1, Home = BugHome.Flower },
-            new() { Id = "Butterfly",    Name = "Sulphur Butterfly", Stars = 1, MinLevel = 1, Home = BugHome.Flower, Flies = true },
-            new() { Id = "Snail",        Name = "Garden Snail",   Stars = 1, MinLevel = 1, Home = BugHome.Ground },
-            new() { Id = "Bee",          Name = "Bumblebee",      Stars = 2, MinLevel = 2, Home = BugHome.Flower, Flies = true },
-            new() { Id = "Beetle",       Name = "Jewel Beetle",   Stars = 2, MinLevel = 2, Home = BugHome.Tree },
+            new() { Id = "Ladybug",      Name = "Ladybug",        Stars = 1, MinLevel = 1, Home = BugHome.Flower, Times = DayParts.Daylight },
+            new() { Id = "Butterfly",    Name = "Sulphur Butterfly", Stars = 1, MinLevel = 1, Home = BugHome.Flower, Flies = true, Times = DayParts.Day },
+            new() { Id = "Snail",        Name = "Garden Snail",   Stars = 1, MinLevel = 1, Home = BugHome.Ground, Times = DayParts.Night | DayParts.Dawn },
+            new() { Id = "Bee",          Name = "Bumblebee",      Stars = 2, MinLevel = 2, Home = BugHome.Flower, Flies = true, Times = DayParts.Day },
+            new() { Id = "Beetle",       Name = "Jewel Beetle",   Stars = 2, MinLevel = 2, Home = BugHome.Tree, Times = DayParts.Day | DayParts.Dusk },
             new() { Id = "Silkworm",     Name = "Silkworm",       Stars = 2, MinLevel = 2, Home = BugHome.Tree },   // spins silk for capes
-            new() { Id = "Dragonfly",    Name = "Dragonfly",      Stars = 2, MinLevel = 3, Home = BugHome.Ground, Flies = true },
-            new() { Id = "BlueButterfly",Name = "Sky Blue Butterfly", Stars = 3, MinLevel = 4, Home = BugHome.Flower, Flies = true },
-            new() { Id = "Firefly",      Name = "Firefly",        Stars = 3, MinLevel = 5, Home = BugHome.Tree, Flies = true, Glows = true },
-            new() { Id = "StagBeetle",   Name = "Stag Beetle",    Stars = 4, MinLevel = 6, Home = BugHome.Tree },
-            new() { Id = "RainbowMoth",  Name = "Rainbow Moth",   Stars = 5, MinLevel = 8, Home = BugHome.Tree, Flies = true },
+            new() { Id = "Dragonfly",    Name = "Dragonfly",      Stars = 2, MinLevel = 3, Home = BugHome.Ground, Flies = true, Times = DayParts.Day | DayParts.Dusk },
+            new() { Id = "BlueButterfly",Name = "Sky Blue Butterfly", Stars = 3, MinLevel = 4, Home = BugHome.Flower, Flies = true, Times = DayParts.Day },
+            new() { Id = "Firefly",      Name = "Firefly",        Stars = 3, MinLevel = 5, Home = BugHome.Tree, Flies = true, Glows = true, Times = DayParts.Night },
+            new() { Id = "StagBeetle",   Name = "Stag Beetle",    Stars = 4, MinLevel = 6, Home = BugHome.Tree, Times = DayParts.Night },
+            new() { Id = "RainFrog",     Name = "Rain Frog",      Stars = 2, MinLevel = 2, Home = BugHome.Ground, RainOnly = true },
+            new() { Id = "RainbowMoth",  Name = "Rainbow Moth",   Stars = 5, MinLevel = 8, Home = BugHome.Tree, Flies = true, Times = DayParts.Night | DayParts.Dusk },
         };
 
         public static readonly CatKind[] Cats =
@@ -97,7 +100,7 @@ namespace CapyIsland.Game
         public static CatKind CatById(string id) => System.Array.Find(Cats, c => c.Id == id);
 
         public static BugKind RollBug(int level, BugHome home) =>
-            Roll(Bugs, b => b.MinLevel <= level && b.Home == home, b => b.Stars);
+            Roll(Bugs, b => b.MinLevel <= level && b.Home == home && GameClock.Allows(b.Times) && (!b.RainOnly || Weather.IsRaining), b => b.Stars);
 
         // ---------------------------------------------------------------- art
 
@@ -119,6 +122,7 @@ namespace CapyIsland.Game
             if (item.StartsWith("crop:")) return Art("Crop_" + item.Substring(5));
             if (item.StartsWith("dish:")) return Art("Dish_" + item.Substring(5));
             if (item == "mat:Silk") return Art("Bug_Silkworm");
+            if (item.StartsWith("bait:")) return Art("Bait_" + item.Substring(5));
             return null;
         }
 
@@ -129,6 +133,7 @@ namespace CapyIsland.Game
             if (item.StartsWith("crop:")) return Crop(item.Substring(5))?.Name ?? "Crop";
             if (item == "dish:Bizarre") return "Bizarre Food";
             if (item == "mat:Silk") return "Silk";
+            if (item.StartsWith("bait:")) return Baits.ById(item.Substring(5))?.Name ?? "Bait";
             if (item.StartsWith("dish:")) return Dish(item.Substring(5))?.Name ?? "Dish";
             return item;
         }

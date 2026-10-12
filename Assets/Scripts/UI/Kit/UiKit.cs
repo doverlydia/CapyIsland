@@ -49,6 +49,30 @@ namespace CapyIsland.UI
         /// <summary>Friendly, very legible face for running text.</summary>
         public static TMP_FontAsset BodyFont => _body != null ? _body : _body = Resources.Load<TMP_FontAsset>("Fonts/Nunito-Bold SDF");
 
+        /// <summary>
+        /// Nunito has no Hebrew letters; Fredoka does. Making Fredoka the fallback for every face
+        /// means a Hebrew line draws in Fredoka whatever font the label was given.
+        /// </summary>
+        public static void EnsureFallbacks()
+        {
+            var hebrew = HeadingFont;
+            if (hebrew == null) return;
+            foreach (var face in new[] { BodyFont, TMP_Settings.defaultFontAsset })
+            {
+                if (face == null || face == hebrew) continue;
+                // First in line, ahead of LiberationSans (which also has Hebrew, in a mismatched style).
+                face.fallbackFontAssetTable ??= new List<TMP_FontAsset>();
+                face.fallbackFontAssetTable.Remove(hebrew);
+                face.fallbackFontAssetTable.Insert(0, hebrew);
+            }
+            var global = TMP_Settings.fallbackFontAssets;
+            if (global != null)
+            {
+                global.Remove(hebrew);
+                global.Insert(0, hebrew);
+            }
+        }
+
         /// <summary>Re-faces every label under <paramref name="root"/>: bold or big text gets the display face.</summary>
         public static void ApplyFonts(Transform root)
         {
@@ -320,6 +344,7 @@ namespace CapyIsland.UI
             t.raycastTarget = false;
             t.textWrappingMode = TextWrappingModes.Normal;
             t.overflowMode = TextOverflowModes.Ellipsis;
+            LocText.Attach(t);
             return t;
         }
 
@@ -400,9 +425,13 @@ namespace CapyIsland.UI
                 var pill = Image(root, "CaptionPill", Rounded(18), HudGlass);
                 Place(pill.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, -8f), new Vector2(size, 40f));
                 var t = Text(pill.transform, "Caption", caption, 28f, Color.white, true, TextAlignmentOptions.Center);
-                Stretch(t.rectTransform);
+                Stretch(t.rectTransform, 6f, 0f, 6f, 0f);
                 t.textWrappingMode = TextWrappingModes.NoWrap;
                 t.overflowMode = TextOverflowModes.Overflow;
+                // A fixed pill: longer words (and bigger Easy Reading text) shrink to fit it.
+                t.enableAutoSizing = true;
+                t.fontSizeMin = 18f;
+                t.fontSizeMax = 28f;
             }
 
             var button = disc.gameObject.AddComponent<Button>();
@@ -419,6 +448,8 @@ namespace CapyIsland.UI
             Place(dot.rectTransform, new Vector2(1f, 1f), new Vector2(6f, 6f), new Vector2(size, size));
             var t = Text(dot.transform, "Count", "", size * 0.6f, Color.white, true, TextAlignmentOptions.Center);
             Stretch(t.rectTransform);
+            var loc = t.GetComponent<LocText>();
+            loc.NoScale = loc.NoRead = true;
             t.textWrappingMode = TextWrappingModes.NoWrap;
             t.overflowMode = TextOverflowModes.Overflow;
             return t;

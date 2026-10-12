@@ -30,6 +30,9 @@ namespace CapyIsland.UI
             return catalog != null && catalog.Has(name) ? catalog.Icon(name) : null;
         }
 
+        /// <summary>In its bubble: the arch and the couple, the guests along the bottom.</summary>
+        protected override Vector3 BubbleView => new(0.5f, 0.45f, 1.1f);
+
         protected override IEnumerator Script()
         {
             Backdrop(Resources.Load<Sprite>("Cutscenes/Cutscene_Wedding"), UiKit.Hex("F6C9A8"), UiKit.Hex("A7C46A"));
@@ -48,12 +51,12 @@ namespace CapyIsland.UI
             var guests = new List<Actor>();
             if (worker != null)
             {
-                guests.Add(Cast(worker, new Vector2(0.17f, 0.02f), 0.21f, faceRight: true));
-                guests.Add(Cast(worker, new Vector2(0.06f, -0.02f), 0.24f, faceRight: true));
-                guests.Add(Cast(worker, new Vector2(0.95f, -0.02f), 0.23f));
+                guests.Add(Cast(worker, new Vector2(0.3f, 0.08f), 0.21f, faceRight: true));
+                guests.Add(Cast(worker, new Vector2(0.37f, 0.02f), 0.24f, faceRight: true));
+                guests.Add(Cast(worker, new Vector2(0.64f, 0.03f), 0.23f));
             }
             var captainArt = Icon("Pirate Peach");
-            var captain = captainArt != null ? Cast(captainArt, new Vector2(0.81f, 0.0f), 0.26f) : null;
+            var captain = captainArt != null ? Cast(captainArt, new Vector2(0.72f, 0.09f), 0.26f) : null;
 
             // Guests turn to watch.
             foreach (var g in guests) g.Squash(0.06f);

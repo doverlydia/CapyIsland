@@ -10,8 +10,9 @@ namespace CapyIsland.Game
     /// The sea library: a stretch of beach where message bottles wash up, each with a story
     /// inside. On your island there are tales by Old Yuzu, the Captain, Salty Kombu and Miso, your
     /// own stories, and notes that visiting friends leave you. On a friend's island, their stories
-    /// (and any notes you have left them). Skipper Nori sits on the sand selling empty bottles for
-    /// a gold coin: write something, and he sets it on the shore for whoever passes by.
+    /// (and any notes you have left them). Skipper Nori, an old fisherman, sits on the sand with
+    /// his bait box: bait for an easier catch, and empty bottles for a gold coin — write
+    /// something, and he sets it on the shore for whoever passes by.
     /// </summary>
     public class SeaLibrary : MonoBehaviour
     {
@@ -75,6 +76,7 @@ namespace CapyIsland.Game
                 _root.transform.position = spot;
                 MakeSailor(spot - new Vector2(-dir.y, dir.x) * 0.2f + dir * 0.5f);
                 Refresh();
+                MessageBottle.RestoreAll();
                 return;
             }
         }
@@ -93,6 +95,42 @@ namespace CapyIsland.Game
             go.transform.localScale = Vector3.one * (1.7f / Mathf.Max(0.01f, art.bounds.size.y));
             go.AddComponent<YSorter>();
             go.AddComponent<Sailor>().Init(this, sr);
+            LayOutWares(at);
+        }
+
+        static bool BuyBottle()
+        {
+            var store = ResourceStore.Instance;
+            if (store == null || !store.TrySpend(0, 1, 0)) return false;
+            Sfx.Play(SfxKind.Buy, 0.6f);
+            MessageBottle.BuyNew();
+            return true;
+        }
+
+        /// <summary>
+        /// His wares on the sand in front of him, like a shop's: the fishing rod, each bait and a message bottle,
+        /// in an arc on the land side (away from the water).
+        /// </summary>
+        void LayOutWares(Vector2 nori)
+        {
+            var landward = -_shoreDir;
+            var side = new Vector2(-landward.y, landward.x);
+            int count = 2 + Baits.All.Length;
+            for (int i = 0; i < count; i++)
+            {
+                // from one side round to the other, through straight ahead
+                float t = count > 1 ? i / (float)(count - 1) : 0.5f;
+                float a = Mathf.Lerp(-70f, 70f, t) * Mathf.Deg2Rad;
+                var offset = (landward * Mathf.Cos(a) + side * Mathf.Sin(a)) * 1.9f;
+                offset.y *= 0.65f;   // the island is seen from above at an angle: circles are squashed
+                var at = nori + offset;
+                for (int k = 0; k < 6 && !BunniSpace.PointOnLand(at); k++) at += landward * 0.3f;
+                if (i == 0) SaleDisplay.Create("Fishing Rod", at, _root.transform);
+                else if (i <= Baits.All.Length) BaitStand.Create(Baits.All[i - 1], at, _root.transform);
+                else BaitStand.Create("MessageBottle", "Message in a Bottle",
+                    "An empty bottle for your trail. Drop it on the beach and write a note to put inside.",
+                    new Vector3Int(0, 1, 0), HobbyData.Art("Bottle"), BuyBottle, at, _root.transform);
+            }
         }
 
         /// <summary>Lays the bottles out along the sand, newest first.</summary>
@@ -129,7 +167,8 @@ namespace CapyIsland.Game
                 return list;
             }
             for (int i = HobbyLog.Books.Count - 1; i >= 0; i--)
-                list.Add(new Entry { Title = HobbyLog.Books[i].title, By = "by you", Text = HobbyLog.Books[i].text });
+                if (!MessageBottle.IsMine(HobbyLog.Books[i].title, HobbyLog.Books[i].text))
+                    list.Add(new Entry { Title = HobbyLog.Books[i].title, By = "by you", Text = HobbyLog.Books[i].text });
             var notes = Load(ShoreKey).list;
             for (int i = notes.Count - 1; i >= 0; i--) list.Add(new Entry { Title = notes[i].title, By = "a note from " + notes[i].from, Text = notes[i].text });
             foreach (var s in StoryText.IslandStories) list.Add(new Entry { Title = s.title, By = "by " + s.by, Text = s.text });
@@ -182,6 +221,19 @@ namespace CapyIsland.Game
             Save(ShoreKey, notes);
             if (Instance != null) Instance.Refresh();
             Hints.Show(who.name + " left a message bottle on your beach!");
+        }
+
+        /// <summary>A bottle written on a friend's shore: a note for them, kept on their beach.</summary>
+        public static void LeaveNoteForHost(string title, string text)
+        {
+            if (!Visit.Active) return;
+            var left = Load(LeftKey);
+            left.list.Add(new Note { who = Visit.Host.id, from = "you", title = title, text = text });
+            Save(LeftKey, left);
+            Hints.Show($"Your bottle is on {Visit.Host.name}'s beach. They'll find it!");
+            HobbyLog.AddXp(Hobby.Writing, Mathf.Clamp(text.Length / 20, 10, 40));
+            Motes.Trigger("hobby_book");
+            if (Instance != null) Instance.Refresh();
         }
 
         /// <summary>You wrote something: on your beach it's your story; on a friend's, a note for them.</summary>
@@ -252,7 +304,7 @@ namespace CapyIsland.Game
             }
         }
 
-        /// <summary>Skipper Nori: a bottle for a gold coin.</summary>
+        /// <summary>Skipper Nori: his wares are on the sand; tap him for a bottle (a gold coin).</summary>
         class Sailor : MonoBehaviour, ITappable
         {
             SeaLibrary _library;
@@ -275,16 +327,13 @@ namespace CapyIsland.Game
                 var store = ResourceStore.Instance;
                 bool afford = store != null && store.Get(ResourceKind.Gold) >= 1;
                 string line = Visit.Active
-                    ? $"Ahoy! Leave {Visit.Host.name} a message in a bottle? One gold coin, and I'll set it on the sand for 'em."
-                    : "Ahoy! Fancy a message bottle? One gold coin. Write what you like and I'll set it on the shore for anyone passing by.";
+                    ? $"Ahoy! Leave {Visit.Host.name} a message in a bottle? One gold coin, and I'll set it on the sand for 'em. My bait's laid out right here, for the fish."
+                    : "Ahoy! The fish are biting. My rod and bait are laid out on the sand, take your pick. And I've empty bottles, if you've a message for the sea.";
                 UI.SpeechDialog.ShowChoices(_sr.sprite, Skipper, new[] { line }, null, new List<UI.SpeechDialog.Choice>
                 {
                     new("Buy a bottle (1 gold)", () =>
                     {
-                        var s = ResourceStore.Instance;
-                        if (s == null || !s.TrySpend(0, 1, 0)) return;
-                        Sfx.Play(SfxKind.Buy, 0.6f);
-                        UI.LibraryScreen.WriteBottle(_library.Written);
+                        BuyBottle();
                     }, afford),
                     new("Not now", null),
                 });

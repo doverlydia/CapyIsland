@@ -65,6 +65,7 @@ namespace CapyIsland.Game
             pieces = list;
             _grid = null;
             _component = null;
+            _walk = null;
         }
 
         // ---------------------------------------------------------------- coordinates
@@ -216,6 +217,40 @@ namespace CapyIsland.Game
             return WorldToUnity(rect.center);
         }
 
+        /// <summary>
+        /// The middle of an island (its land circles, weighted by area), or the nearest spot to it
+        /// where a circle of <paramref name="worldRadius"/> fits on the island and
+        /// <paramref name="fits"/> agrees (say, nothing already standing there).
+        /// </summary>
+        public Vector2 SpotNearIslandMiddle(int island, float worldRadius, Func<Vector2, bool> fits = null)
+        {
+            var piece = Island(island);
+            if (piece == null || piece.circles.Count == 0) return RandomSpotOnIsland(island, worldRadius);
+            Vector2 sum = Vector2.zero;
+            float weight = 0f;
+            foreach (var c in piece.circles) { float a = c.z * c.z; sum += new Vector2(c.x, c.y) * a; weight += a; }
+            var middle = sum / Mathf.Max(0.0001f, weight);
+            bool Ok(Vector2 w)
+            {
+                var u = WorldToUnity(w);
+                return IslandAt(u) == island && BunniSpace.CircleOnMap(u, worldRadius) && (fits == null || fits(u));
+            }
+            if (Ok(middle)) return WorldToUnity(middle);
+            // Rings outward from the middle: the first spot that fits is the closest one.
+            float step = Mathf.Max(8f, worldRadius * 0.3f);
+            for (float r = step; r < 3000f; r += step)
+            {
+                int around = Mathf.Max(8, Mathf.RoundToInt(2f * Mathf.PI * r / step));
+                for (int i = 0; i < around; i++)
+                {
+                    float a = i * Mathf.PI * 2f / around;
+                    var w = middle + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * r;
+                    if (Ok(w)) return WorldToUnity(w);
+                }
+            }
+            return RandomSpotOnIsland(island, worldRadius);
+        }
+
         // ---------------------------------------------------------------- bridges
 
         /// <summary>
@@ -229,6 +264,7 @@ namespace CapyIsland.Game
             if (b == null || b.open) return;
             b.open = true;
             _component = null;
+            _walk = null;
 
             foreach (var layer in b.layers)
             {
@@ -271,6 +307,126 @@ namespace CapyIsland.Game
 
         int[] _component;
 
+        // ---------------------------------------------------------------- paths
+
+        const float PathCell = 0.5f;   // Unity units per grid cell
+        bool[] _walk;
+        Vector2 _walkOrigin;
+        int _walkW, _walkH;
+
+        /// <summary>
+        /// A walking route over land from one Unity position to another — around bays, over open
+        /// bridges — as a short list of waypoints ending at <paramref name="to"/> (or the nearest
+        /// land to it). Null when there is no way there on foot.
+        /// </summary>
+        public List<Vector2> FindPath(Vector2 from, Vector2 to)
+        {
+            if (IsOnLand(to) && SegmentOnLand(from, to)) return new List<Vector2> { to };
+            if (_walk == null) BuildWalk();
+            int start = NearestWalkable(from), goal = NearestWalkable(to);
+            if (start < 0 || goal < 0) return null;
+
+            // A* over the grid, eight ways, no cutting corners past the water
+            int n = _walk.Length;
+            var cost = new float[n];
+            var came = new int[n];
+            for (int i = 0; i < n; i++) { cost[i] = float.MaxValue; came[i] = -1; }
+            var open = new SortedSet<(float f, int i)>();
+            cost[start] = 0f;
+            open.Add((Heuristic(start, goal), start));
+            var closed = new bool[n];
+            while (open.Count > 0)
+            {
+                var (_, cur) = open.Min;
+                open.Remove(open.Min);
+                if (cur == goal) break;
+                if (closed[cur]) continue;
+                closed[cur] = true;
+                int cx = cur % _walkW, cy = cur / _walkW;
+                for (int dy = -1; dy <= 1; dy++)
+                for (int dx = -1; dx <= 1; dx++)
+                {
+                    if (dx == 0 && dy == 0) continue;
+                    int nx = cx + dx, ny = cy + dy;
+                    if (nx < 0 || ny < 0 || nx >= _walkW || ny >= _walkH) continue;
+                    int ni = ny * _walkW + nx;
+                    if (!_walk[ni] || closed[ni]) continue;
+                    if (dx != 0 && dy != 0 && (!_walk[cy * _walkW + nx] || !_walk[ny * _walkW + cx])) continue;
+                    float c = cost[cur] + (dx != 0 && dy != 0 ? 1.4142f : 1f);
+                    if (c >= cost[ni]) continue;
+                    if (cost[ni] < float.MaxValue) open.Remove((cost[ni] + Heuristic(ni, goal), ni));
+                    cost[ni] = c; came[ni] = cur;
+                    open.Add((c + Heuristic(ni, goal), ni));
+                }
+            }
+            if (start != goal && came[goal] < 0) return null;
+
+            var cells = new List<Vector2>();
+            for (int c = goal; c >= 0; c = came[c]) { cells.Add(CellCentre(c)); if (c == start) break; }
+            cells.Reverse();
+            cells[cells.Count - 1] = IsOnLand(to) ? to : CellCentre(goal);
+
+            // Pull the string tight: from each point, head for the farthest one in a straight line.
+            var path = new List<Vector2>();
+            Vector2 at = from;
+            int k = 0;
+            while (k < cells.Count)
+            {
+                int far = k;
+                for (int j = cells.Count - 1; j > k; j--) if (SegmentOnLand(at, cells[j])) { far = j; break; }
+                path.Add(cells[far]);
+                at = cells[far];
+                k = far + 1;
+            }
+            return path;
+        }
+
+        float Heuristic(int a, int b)
+        {
+            int dx = Mathf.Abs(a % _walkW - b % _walkW), dy = Mathf.Abs(a / _walkW - b / _walkW);
+            return Mathf.Max(dx, dy) + 0.4142f * Mathf.Min(dx, dy);
+        }
+
+        Vector2 CellCentre(int i) => _walkOrigin + new Vector2((i % _walkW + 0.5f) * PathCell, (i / _walkW + 0.5f) * PathCell);
+
+        int NearestWalkable(Vector2 p)
+        {
+            int cx = Mathf.FloorToInt((p.x - _walkOrigin.x) / PathCell), cy = Mathf.FloorToInt((p.y - _walkOrigin.y) / PathCell);
+            for (int r = 0; r <= 12; r++)
+            {
+                int best = -1; float bestD = float.MaxValue;
+                for (int y = cy - r; y <= cy + r; y++)
+                for (int x = cx - r; x <= cx + r; x++)
+                {
+                    if (Mathf.Max(Mathf.Abs(x - cx), Mathf.Abs(y - cy)) != r) continue;
+                    if (x < 0 || y < 0 || x >= _walkW || y >= _walkH || !_walk[y * _walkW + x]) continue;
+                    float d = (CellCentre(y * _walkW + x) - p).sqrMagnitude;
+                    if (d < bestD) { bestD = d; best = y * _walkW + x; }
+                }
+                if (best >= 0) return best;
+            }
+            return -1;
+        }
+
+        void BuildWalk()
+        {
+            float minX = float.MaxValue, minY = float.MaxValue, maxX = float.MinValue, maxY = float.MinValue;
+            foreach (var piece in pieces)
+            foreach (var c in piece.circles)
+            {
+                var u = WorldToUnity(new Vector2(c.x, c.y));
+                var r = BunniSpace.ToUnity(new Vector2(c.z, c.z));
+                minX = Mathf.Min(minX, u.x - r.x); maxX = Mathf.Max(maxX, u.x + r.x);
+                minY = Mathf.Min(minY, u.y - Mathf.Abs(r.y)); maxY = Mathf.Max(maxY, u.y + Mathf.Abs(r.y));
+            }
+            if (minX > maxX) { _walkW = _walkH = 1; _walk = new bool[1]; _walkOrigin = Vector2.zero; return; }
+            _walkOrigin = new Vector2(minX, minY);
+            _walkW = Mathf.CeilToInt((maxX - minX) / PathCell) + 1;
+            _walkH = Mathf.CeilToInt((maxY - minY) / PathCell) + 1;
+            _walk = new bool[_walkW * _walkH];
+            for (int i = 0; i < _walk.Length; i++) _walk[i] = IsOnLand(CellCentre(i));
+        }
+
         /// <summary>
         /// True if you can walk from one Unity position to the other: both on the same island, or
         /// on islands joined by open bridges. Workers skip targets across the water, as the
@@ -305,6 +461,44 @@ namespace CapyIsland.Game
                 }
             }
             for (int i = 0; i < count; i++) _component[i] = Find(i);
+        }
+
+        /// <summary>
+        /// The closed bridges on the shortest way from the first island to <paramref name="island"/>,
+        /// or none if it is already reachable (or can't be reached by any bridge).
+        /// </summary>
+        public List<string> BridgesToReach(int island)
+        {
+            var result = new List<string>();
+            int count = 0;
+            foreach (var p in pieces) if (!p.isBridge) count++;
+            if (island <= 0 || island >= count) return result;
+
+            // islands joined by any bridge, open or not, remembering which bridge
+            var via = new (int from, string bridge)[count];
+            for (int i = 0; i < count; i++) via[i] = (-1, null);
+            var seen = new bool[count];
+            var queue = new Queue<int>();
+            queue.Enqueue(0); seen[0] = true;
+            while (queue.Count > 0)
+            {
+                int cur = queue.Dequeue();
+                if (cur == island) break;
+                foreach (var bridge in pieces)
+                {
+                    if (!bridge.isBridge || !Touches(bridge, Island(cur))) continue;
+                    for (int next = 0; next < count; next++)
+                    {
+                        if (seen[next] || !Touches(bridge, Island(next))) continue;
+                        seen[next] = true; via[next] = (cur, bridge.name); queue.Enqueue(next);
+                    }
+                }
+            }
+            if (!seen[island]) return result;
+            for (int at = island; at > 0 && via[at].from >= 0; at = via[at].from)
+                if (!IsBridgeOpen(via[at].bridge)) result.Add(via[at].bridge);
+            result.Reverse();
+            return result;
         }
 
         static bool Touches(Piece a, Piece b)

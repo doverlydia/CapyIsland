@@ -61,27 +61,97 @@ namespace CapyIsland.UI
 
             _root = UiKit.Rect("Root", transform);
             UiKit.Stretch(_root);
-            var dark = UiKit.Image(_root, "Dark", null, UiKit.Hex("1E1712"), true);   // catches the skip tap
+            var dark = UiKit.Image(_root, "Dark", null, InBubbles ? UiKit.Hex("07060A") : UiKit.Hex("1E1712"), true);   // catches the skip tap
             UiKit.Stretch(dark.rectTransform);
 
-            // The stage keeps a 3:2 picture and fits inside the screen, whichever way the phone is held.
-            Stage = UiKit.Rect("Stage", _root);
-            Stage.anchorMin = Stage.anchorMax = Stage.pivot = new Vector2(0.5f, 0.5f);
-            Stage.gameObject.AddComponent<RectMask2D>();
+            if (InBubbles) BuildBubble();
+            else
+            {
+                // The stage keeps a 3:2 picture and fits inside the screen, whichever way the phone is held.
+                Stage = UiKit.Rect("Stage", _root);
+                Stage.anchorMin = Stage.anchorMax = Stage.pivot = new Vector2(0.5f, 0.5f);
+                Stage.gameObject.AddComponent<RectMask2D>();
+            }
+            // Narration sits on its own layer, so nothing on stage (a capy leaping into the water,
+            // a spray of bubbles) ever passes in front of the words.
+            _captions = UiKit.Rect("Captions", _root);
+            _captions.anchorMin = _captions.anchorMax = _captions.pivot = new Vector2(0.5f, 0.5f);
             Fit();
             Core.ScreenMetrics.Changed += Fit;
 
-            _barTop = Bar("BarTop", 1f);
-            _barBottom = Bar("BarBottom", 0f);
-            _flash = UiKit.Image(_root, "Flash", null, Color.white);
-            UiKit.Stretch(_flash.rectTransform);
-            _flash.raycastTarget = false;
+            if (!InBubbles)
+            {
+                _barTop = Bar("BarTop", 1f);
+                _barBottom = Bar("BarBottom", 0f);
+                _flash = UiKit.Image(_root, "Flash", null, Edge);
+                UiKit.Stretch(_flash.rectTransform);
+                _flash.raycastTarget = false;
+            }
 
-            var hint = UiKit.Text(_root, "Skip", "tap to skip", 26f, new Color(1f, 1f, 1f, 0.55f), false, TextAlignmentOptions.BottomRight);
+            // A movie you read at your own pace has a tap meaning "next", so skipping is its own button.
+            var hint = UiKit.Text(_root, "Skip", ReaderPaced ? "Skip" : "tap to skip", ReaderPaced ? 30f : 26f,
+                new Color(1f, 1f, 1f, ReaderPaced ? 0.7f : 0.55f), ReaderPaced, TextAlignmentOptions.BottomRight);
             hint.rectTransform.anchorMin = hint.rectTransform.anchorMax = hint.rectTransform.pivot = new Vector2(1f, 0f);
             hint.rectTransform.anchoredPosition = new Vector2(-28f, 24f);
-            hint.rectTransform.sizeDelta = new Vector2(300f, 40f);
-            hint.raycastTarget = false;
+            hint.rectTransform.sizeDelta = new Vector2(300f, 48f);
+            hint.raycastTarget = ReaderPaced;
+            if (ReaderPaced)
+            {
+                var skip = hint.gameObject.AddComponent<Button>();
+                skip.transition = Selectable.Transition.None;
+                skip.onClick.AddListener(Skip);
+            }
+        }
+
+        /// <summary>
+        /// True for a movie that waits for you to read each line (<see cref="Next"/>): a tap anywhere
+        /// moves on instead of skipping, and a Skip button in the corner ends it.
+        /// </summary>
+        protected virtual bool ReaderPaced => false;
+
+        bool _waiting, _advance;
+
+        /// <summary>
+        /// Holds the story until the line on screen has been read: a Next button bobs beside the
+        /// caption, and a tap on it (or anywhere on the picture) carries on. The scene keeps living
+        /// meanwhile — steam, snow and bobbing go on.
+        /// </summary>
+        protected IEnumerator Next()
+        {
+            if (_ending) yield break;
+            float h = Stage.rect.height;
+            var button = UiKit.Button(_captions, "Next", "Next", UiKit.ButtonStyle.Primary, () => _advance = true, 34f);
+            var r = (RectTransform)button.transform.parent;   // the Button sits on the face; move the whole thing
+            r.sizeDelta = new Vector2(230f, 88f);
+            if (InBubbles)
+            {
+                // under the words, in the middle, where a thumb finds it
+                r.anchorMin = r.anchorMax = r.pivot = new Vector2(0.5f, 0f);
+                r.anchoredPosition = Vector2.zero;
+            }
+            else
+            {
+                r.anchorMin = r.anchorMax = r.pivot = new Vector2(1f, 0f);
+                r.anchoredPosition = new Vector2(-h * 0.04f, h * 0.17f + 14f);
+            }
+            var group = button.gameObject.AddComponent<CanvasGroup>();
+            group.alpha = 0f;
+            Track(group.DOFade(1f, 0.35f).SetUpdate(true));
+            Track(r.DOAnchorPosY(r.anchoredPosition.y + 10f, 0.7f).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine).SetUpdate(true));
+            _advance = false;
+            _waiting = true;
+            while (!_advance && !_ending) yield return null;
+            _waiting = false;
+            if (r != null) { DOTween.Kill(r); DOTween.Kill(group); Destroy(r.gameObject); }
+            if (!_ending) Sfx.Play(SfxKind.Tap, 0.5f);
+        }
+
+        void Skip()
+        {
+            if (_skipped || _ending) return;
+            _skipped = true;
+            StopAllCoroutines();
+            StartCoroutine(End());
         }
 
         Vector2 _fittedTo;
@@ -98,9 +168,250 @@ namespace CapyIsland.UI
             var size = ((RectTransform)transform).rect.size;
             _fittedTo = size;
             if (size.x <= 0f) size = new Vector2(1080f, 1920f);
+            if (InBubbles) { FitBubble(size); return; }
             float w = size.x, h = w / 1.5f;
             if (h > size.y * 0.86f) { h = size.y * 0.86f; w = h * 1.5f; }
             Stage.sizeDelta = new Vector2(w, h);
+            _captions.sizeDelta = Stage.sizeDelta;
+        }
+
+        // ---------------------------------------------------------------- memories in bubbles
+
+        /// <summary>
+        /// True for a movie told as memories in bubbles: each scene plays inside a round bubble of
+        /// glass floating in the dark; a change of scene pops it, and the next drifts in from far
+        /// away. The words sit beside it, under it in portrait and to its right in landscape.
+        /// </summary>
+        protected virtual bool InBubbles => true;
+
+        /// <summary>
+        /// Where a movie's bubble looks when it opens: the centre (x, y, in stage fractions) and the
+        /// zoom (z). A script can move it as it goes with <see cref="Aim"/>.
+        /// </summary>
+        protected virtual Vector3 BubbleView => new(0.5f, 0.5f, 1f);
+
+        /// <summary>The square the bubble fills; stays put while the bubble pops and floats (for a narrator beside it).</summary>
+        protected RectTransform Frame => _holder;
+
+        RectTransform _holder, _bubble;
+        CanvasGroup _bubbleGroup;
+        float _aimX = 0.5f, _aimY = 0.5f, _zoom = 1f;
+        static Sprite _glassArt, _softArt;
+
+        void BuildBubble()
+        {
+            _holder = UiKit.Rect("Memory", _root);
+            _holder.anchorMin = _holder.anchorMax = _holder.pivot = new Vector2(0.5f, 0.5f);
+            _bubble = UiKit.Rect("Bubble", _holder);
+            UiKit.Stretch(_bubble);
+            _bubbleGroup = _bubble.gameObject.AddComponent<CanvasGroup>();
+            _bubbleGroup.blocksRaycasts = false;
+            // The picture shows through a round window...
+            var window = UiKit.Image(_bubble, "Window", UiKit.Circle, Color.white);
+            window.raycastTarget = false;
+            UiKit.Stretch(window.rectTransform);
+            window.gameObject.AddComponent<Mask>().showMaskGraphic = false;
+            Stage = UiKit.Rect("Stage", window.rectTransform);
+            Stage.anchorMin = Stage.anchorMax = Stage.pivot = new Vector2(0.5f, 0.5f);
+            _flash = UiKit.Image(window.rectTransform, "Flash", null, Color.clear);
+            UiKit.Stretch(_flash.rectTransform);
+            _flash.raycastTarget = false;
+            // ...under a skin of glass: a bright rim and a curved highlight.
+            var glass = UiKit.Image(_bubble, "Glass", GlassArt(), Color.white);
+            glass.raycastTarget = false;
+            UiKit.Stretch(glass.rectTransform);
+            glass.rectTransform.localScale = Vector3.one * 1.03f;
+            // It breathes, the way a bubble wobbles on the air.
+            Track(_holder.DOScale(1.012f, 2.4f).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine).SetUpdate(true));
+            StartCoroutine(Motes());
+        }
+
+        void FitBubble(Vector2 size)
+        {
+            const float gap = 40f;
+            float d;
+            Vector2 bubbleAt, wordsAt, words;
+            if (size.y >= size.x)
+            {
+                // Portrait: bubble above, words and Next under it.
+                d = Mathf.Min(size.x * 0.92f, (size.y * 0.9f - gap) / 1.34f);
+                words = new Vector2(Mathf.Min(size.x * 0.9f, d * 1.05f), d * 0.34f);
+                float total = d + gap + words.y;
+                bubbleAt = new Vector2(0f, total / 2f - d / 2f);
+                wordsAt = new Vector2(0f, total / 2f - d - gap - words.y / 2f);
+            }
+            else
+            {
+                // Landscape: bubble on the left, words and Next on the right.
+                d = Mathf.Min(size.y * 0.86f, size.x * 0.55f);
+                words = new Vector2(Mathf.Min(size.x - d - gap * 3f, d * 1.1f), d * 0.7f);
+                float total = d + gap + words.x;
+                bubbleAt = new Vector2(-total / 2f + d / 2f, 0f);
+                wordsAt = new Vector2(total / 2f - words.x / 2f, 0f);
+            }
+            _holder.sizeDelta = new Vector2(d, d);
+            _holder.anchoredPosition = bubbleAt;
+            Stage.sizeDelta = new Vector2(d * 1.5f, d);
+            _captions.sizeDelta = words;
+            _captions.anchoredPosition = wordsAt;
+            Stage.localScale = Vector3.one * _zoom;
+            Stage.anchoredPosition = AimOffset(_aimX, _aimY, _zoom);
+        }
+
+        /// <summary>
+        /// Points the bubble at part of the picture: (<paramref name="fx"/>, <paramref name="fy"/>) in
+        /// stage fractions at its centre, magnified by <paramref name="zoom"/> (1 shows the whole
+        /// height), moving there over <paramref name="seconds"/>. The picture always fills the
+        /// bubble, so the aim stops at its edges. Does nothing for a movie that is not in bubbles.
+        /// </summary>
+        protected Tween Aim(float fx, float fy, float zoom = 1f, float seconds = 0f)
+        {
+            if (!InBubbles) return null;
+            _aimX = fx; _aimY = fy; _zoom = Mathf.Max(1f, zoom);
+            var to = AimOffset(fx, fy, _zoom);
+            DOTween.Kill(Stage);
+            if (seconds <= 0f)
+            {
+                Stage.anchoredPosition = to;
+                Stage.localScale = Vector3.one * _zoom;
+                return null;
+            }
+            var seq = DOTween.Sequence().SetUpdate(true).SetTarget(Stage);
+            seq.Join(Stage.DOAnchorPos(to, seconds).SetEase(Ease.InOutSine));
+            seq.Join(Stage.DOScale(_zoom, seconds).SetEase(Ease.InOutSine));
+            return Track(seq);
+        }
+
+        Vector2 AimOffset(float fx, float fy, float zoom)
+        {
+            float d = _holder.sizeDelta.x;
+            float maxX = 0.75f * d * zoom - 0.5f * d, maxY = 0.5f * d * zoom - 0.5f * d;
+            return new Vector2(Mathf.Clamp(-(fx - 0.5f) * 1.5f * d * zoom, -maxX, maxX),
+                               Mathf.Clamp(-(fy - 0.5f) * d * zoom, -maxY, maxY));
+        }
+
+        /// <summary>The next memory drifts up out of the dark, small and far at first.</summary>
+        IEnumerator FloatIn()
+        {
+            float d = _holder.sizeDelta.x;
+            _bubble.DOKill();
+            _bubbleGroup.DOKill();
+            _bubble.localScale = Vector3.one * 0.25f;
+            _bubble.anchoredPosition = new Vector2(0f, d * 0.2f);
+            _bubbleGroup.alpha = 0f;
+            Track(_bubbleGroup.DOFade(1f, 0.7f).SetUpdate(true));
+            Track(_bubble.DOScale(1f, 1.6f).SetEase(Ease.OutSine).SetUpdate(true));
+            Track(_bubble.DOAnchorPos(Vector2.zero, 1.6f).SetEase(Ease.OutSine).SetUpdate(true));
+            yield return Wait(1.2f);
+        }
+
+        /// <summary>Pop: the bubble swells a touch, bursts into droplets, and is gone.</summary>
+        IEnumerator PopBubble()
+        {
+            float d = _holder.sizeDelta.x;
+            Sfx.Play(SfxKind.Pop, 0.9f);
+            Track(_bubble.DOScale(1.08f, 0.12f).SetEase(Ease.OutQuad).SetUpdate(true));
+            yield return Wait(0.1f);
+            Track(_bubbleGroup.DOFade(0f, 0.15f).SetUpdate(true));
+            for (int i = 0; i < 22; i++)
+            {
+                var drop = UiKit.Image(_root, "Drop", UiKit.Circle, new Color(0.82f, 0.97f, 1f, 0.9f));
+                drop.raycastTarget = false;
+                var r = drop.rectTransform;
+                r.anchorMin = r.anchorMax = new Vector2(0.5f, 0.5f);
+                float s = UnityEngine.Random.Range(10f, 26f);
+                r.sizeDelta = new Vector2(s, s);
+                float a = i / 22f * Mathf.PI * 2f + UnityEngine.Random.Range(-0.15f, 0.15f);
+                var dir = new Vector2(Mathf.Cos(a), Mathf.Sin(a));
+                var from = _holder.anchoredPosition + dir * d * 0.52f;
+                r.anchoredPosition = from;
+                Track(r.DOAnchorPos(from + dir * UnityEngine.Random.Range(60f, 160f), 0.6f).SetEase(Ease.OutQuad).SetUpdate(true));
+                Track(drop.DOFade(0f, 0.6f).SetEase(Ease.InQuad).SetUpdate(true).OnComplete(() => { if (r != null) Destroy(r.gameObject); }));
+            }
+            yield return Wait(0.45f);
+        }
+
+        /// <summary>Glimmers drifting in the dark around the memories.</summary>
+        IEnumerator Motes()
+        {
+            while (true)
+            {
+                var size = ((RectTransform)transform).rect.size;
+                bool warm = UnityEngine.Random.value < 0.35f;
+                var m = UiKit.Image(_root, "Mote", SoftArt(), warm ? new Color(1f, 0.82f, 0.55f, 0f) : new Color(0.7f, 1f, 0.95f, 0f));
+                m.raycastTarget = false;
+                var r = m.rectTransform;
+                r.SetSiblingIndex(_holder.GetSiblingIndex());   // behind the bubble and the words
+                r.anchorMin = r.anchorMax = new Vector2(0.5f, 0.5f);
+                float s = UnityEngine.Random.Range(10f, 28f);
+                r.sizeDelta = new Vector2(s, s);
+                var from = new Vector2(UnityEngine.Random.Range(-0.5f, 0.5f) * size.x, UnityEngine.Random.Range(-0.5f, 0.4f) * size.y);
+                r.anchoredPosition = from;
+                float life = UnityEngine.Random.Range(3.5f, 6f), peak = UnityEngine.Random.Range(0.3f, 0.75f);
+                Track(r.DOAnchorPos(from + new Vector2(UnityEngine.Random.Range(-40f, 40f), UnityEngine.Random.Range(80f, 200f)), life).SetEase(Ease.Linear).SetUpdate(true));
+                var seq = DOTween.Sequence().SetUpdate(true);
+                seq.Append(m.DOFade(peak, life * 0.3f).SetEase(Ease.OutSine));
+                seq.AppendInterval(life * 0.4f);
+                seq.Append(m.DOFade(0f, life * 0.3f).SetEase(Ease.InSine));
+                seq.OnComplete(() => { if (r != null) Destroy(r.gameObject); });
+                Track(seq);
+                yield return Wait(UnityEngine.Random.Range(0.18f, 0.4f));
+            }
+        }
+
+        /// <summary>
+        /// The bubble's glass, painted: clear in the middle so the memory shows true, a soft pale
+        /// rim that thickens toward the edge with a bright line on it, and a curved shine at the
+        /// top-left with a fainter one opposite.
+        /// </summary>
+        static Sprite GlassArt()
+        {
+            if (_glassArt != null) return _glassArt;
+            const int n = 256;
+            var tex = new Texture2D(n, n, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp };
+            var px = new Color32[n * n];
+            for (int y = 0; y < n; y++)
+                for (int x = 0; x < n; x++)
+                {
+                    float u = (x + 0.5f) / n * 2f - 1f, v = (y + 0.5f) / n * 2f - 1f, d = Mathf.Sqrt(u * u + v * v);
+                    if (d > 1f) { px[y * n + x] = new Color32(255, 255, 255, 0); continue; }
+                    float ang = Mathf.Atan2(v, u);
+                    float rim = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.78f, 0.99f, d)) * 0.42f;
+                    float line = Mathf.Exp(-Mathf.Pow((d - 0.965f) / 0.014f, 2f)) * 0.75f;
+                    float shine = Mathf.Pow(Mathf.Max(0f, Mathf.Cos(ang - 2.36f)), 5f) * Mathf.Exp(-Mathf.Pow((d - 0.83f) / 0.05f, 2f)) * 0.7f;
+                    float back = Mathf.Pow(Mathf.Max(0f, Mathf.Cos(ang + 0.79f)), 6f) * Mathf.Exp(-Mathf.Pow((d - 0.88f) / 0.04f, 2f)) * 0.3f;
+                    float dot = Mathf.Exp(-(Mathf.Pow(u + 0.52f, 2f) + Mathf.Pow(v - 0.5f, 2f)) / 0.0025f) * 0.85f;
+                    float edge = Mathf.Clamp01((1f - d) * n * 0.5f);   // smooth outer edge
+                    float a = Mathf.Clamp01(rim + line + shine + back + dot) * edge;
+                    // tinted mint at the rim, white where it shines
+                    float white = Mathf.Clamp01((line + shine + dot) * 1.5f);
+                    var c = Color.Lerp(new Color(0.78f, 0.97f, 0.93f), Color.white, white);
+                    px[y * n + x] = new Color(c.r, c.g, c.b, a);
+                }
+            tex.SetPixels32(px);
+            tex.Apply(false, true);
+            return _glassArt = Sprite.Create(tex, new Rect(0, 0, n, n), new Vector2(0.5f, 0.5f), 100f);
+        }
+
+        /// <summary>A soft round light, bright in the middle and fading to nothing (glows, motes).</summary>
+        protected static Sprite SoftLight => SoftArt();
+
+        static Sprite SoftArt()
+        {
+            if (_softArt != null) return _softArt;
+            const int n = 48;
+            var tex = new Texture2D(n, n, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp };
+            var px = new Color32[n * n];
+            for (int y = 0; y < n; y++)
+                for (int x = 0; x < n; x++)
+                {
+                    float d = new Vector2(x + 0.5f - n / 2f, y + 0.5f - n / 2f).magnitude / (n / 2f);
+                    float a = Mathf.SmoothStep(0f, 1f, 1f - Mathf.Clamp01(d));
+                    px[y * n + x] = new Color32(255, 255, 255, (byte)(a * a * 255f));
+                }
+            tex.SetPixels32(px);
+            tex.Apply(false, true);
+            return _softArt = Sprite.Create(tex, new Rect(0, 0, n, n), new Vector2(0.5f, 0.5f), 100f);
         }
 
         RectTransform Bar(string name, float edge)
@@ -120,32 +431,52 @@ namespace CapyIsland.UI
             yield return null;
             Canvas.ForceUpdateCanvases();
             Fit();
-            _flash.color = Color.white;
-            Track(_flash.DOFade(0f, 0.6f).SetUpdate(true));
-            Track(_barTop.DOSizeDelta(new Vector2(0f, 90f), 0.6f).SetUpdate(true));
-            Track(_barBottom.DOSizeDelta(new Vector2(0f, 90f), 0.6f).SetUpdate(true));
+            if (InBubbles)
+            {
+                _flash.color = Color.clear;
+                Aim(BubbleView.x, BubbleView.y, BubbleView.z);
+                yield return FloatIn();
+            }
+            else
+            {
+                _flash.color = Edge;
+                Track(_flash.DOFade(0f, 0.6f).SetUpdate(true));
+                Track(_barTop.DOSizeDelta(new Vector2(0f, 90f), 0.6f).SetUpdate(true));
+                Track(_barBottom.DOSizeDelta(new Vector2(0f, 90f), 0.6f).SetUpdate(true));
+            }
             yield return Script();
             yield return End();
         }
+
+        /// <summary>The colour the movie opens out of and closes into: a white flash by default.</summary>
+        protected virtual Color Edge => Color.white;
 
         /// <summary>The movie itself.</summary>
         protected abstract IEnumerator Script();
 
         public void OnPointerClick(PointerEventData e)
         {
-            if (_skipped || _ending) return;
-            _skipped = true;
-            StopAllCoroutines();
-            StartCoroutine(End());
+            if (ReaderPaced) { if (_waiting) _advance = true; return; }
+            Skip();
         }
 
         IEnumerator End()
         {
             if (_ending) yield break;
             _ending = true;
-            _flash.DOKill();
-            Track(_flash.DOFade(1f, 0.45f).SetUpdate(true));
-            yield return new WaitForSecondsRealtime(0.5f);
+            if (InBubbles)
+            {
+                foreach (var g in _captions.GetComponentsInChildren<Graphic>()) Track(g.DOFade(0f, 0.3f).SetUpdate(true));
+                yield return PopBubble();
+                yield return new WaitForSecondsRealtime(0.5f);
+            }
+            else
+            {
+                _flash.DOKill();
+                _flash.color = new Color(Edge.r, Edge.g, Edge.b, _flash.color.a);
+                Track(_flash.DOFade(1f, 0.45f).SetUpdate(true));
+                yield return new WaitForSecondsRealtime(0.5f);
+            }
             foreach (var t in _tweens) t?.Kill();
             Core.ScreenMetrics.Changed -= Fit;
             Time.timeScale = _timeScaleBefore <= 0f ? 1f : _timeScaleBefore;
@@ -191,6 +522,110 @@ namespace CapyIsland.UI
             pic.preserveAspect = false;
             return pic;
         }
+
+        /// <summary>
+        /// A change of scene: the picture fades out through <paramref name="through"/>, the stage is
+        /// cleared and <paramref name="build"/> sets the next one up, and it fades back in.
+        /// </summary>
+        protected IEnumerator Change(Color through, float seconds, Action build)
+        {
+            if (InBubbles)
+            {
+                // This memory's bubble pops; the next drifts in out of the dark.
+                yield return PopBubble();
+                ClearStage();
+                Aim(0.5f, 0.5f, 1f);
+                build?.Invoke();
+                yield return null;
+                yield return FloatIn();
+                yield break;
+            }
+            _flash.DOKill();
+            _flash.color = new Color(through.r, through.g, through.b, 0f);
+            Track(_flash.DOFade(1f, seconds * 0.5f).SetUpdate(true));
+            yield return Wait(seconds * 0.5f);
+            ClearStage();
+            build?.Invoke();
+            yield return null;
+            Track(_flash.DOFade(0f, seconds * 0.5f).SetUpdate(true));
+        }
+
+        void ClearStage()
+        {
+            foreach (var layer in new[] { Stage, _captions })
+                for (int i = layer.childCount - 1; i >= 0; i--)
+                {
+                    var child = layer.GetChild(i);
+                    foreach (var t in child.GetComponentsInChildren<Transform>(true)) DOTween.Kill(t);
+                    foreach (var g in child.GetComponentsInChildren<Graphic>(true)) DOTween.Kill(g);
+                    Destroy(child.gameObject);
+                }
+            _caption = null;
+        }
+
+        /// <summary>A quick flash of colour over the stage (a gust of cold, a burst of magic).</summary>
+        protected void Flash(Color colour, float seconds)
+        {
+            _flash.DOKill();
+            _flash.color = colour;
+            Track(_flash.DOFade(0f, seconds).SetUpdate(true));
+        }
+
+        TextMeshProUGUI _caption;
+        RectTransform _captions;
+
+        /// <summary>
+        /// A line of narration along the bottom of the picture, on a soft dark band. A new line
+        /// replaces the last one.
+        /// </summary>
+        protected void Caption(string text)
+        {
+            if (_caption != null)
+            {
+                var old = _caption;
+                Track(old.DOFade(0f, 0.3f).SetUpdate(true).OnComplete(() => { if (old != null) Destroy(old.transform.parent.gameObject); }));
+            }
+            float h = Stage.rect.height;
+            var band = UiKit.Image(_captions, "CaptionBand", null, new Color(0.08f, 0.06f, 0.05f, 0.5f));
+            band.raycastTarget = false;
+            var br = band.rectTransform;
+            float bandAlpha = 0.5f, size = h * 0.05f;
+            if (InBubbles)
+            {
+                // the words above, room for Next below; on the dark, no band is needed
+                br.anchorMin = Vector2.zero; br.anchorMax = Vector2.one;
+                br.offsetMin = new Vector2(0f, 100f); br.offsetMax = Vector2.zero;
+                bandAlpha = 0f;
+                size = Mathf.Clamp(h * 0.055f, 30f, 50f);
+            }
+            else
+            {
+                br.anchorMin = new Vector2(0f, 0f); br.anchorMax = new Vector2(1f, 0f);
+                br.pivot = new Vector2(0.5f, 0f);
+                br.sizeDelta = new Vector2(0f, h * 0.17f);
+                br.anchoredPosition = Vector2.zero;
+            }
+            var t = UiKit.Text(br, "Caption", text, size, Color.white, true, TextAlignmentOptions.Center);
+            t.raycastTarget = false;
+            t.textWrappingMode = TextWrappingModes.Normal;
+            if (InBubbles)
+            {
+                t.enableAutoSizing = true;
+                t.fontSizeMin = size * 0.6f;
+                t.fontSizeMax = size;
+                UiKit.Stretch(t.rectTransform, 8f, 4f, 8f, 4f);
+            }
+            else UiKit.Stretch(t.rectTransform, h * 0.04f, h * 0.01f, h * 0.04f, h * 0.01f);
+            t.alpha = 0f;
+            band.color = new Color(band.color.r, band.color.g, band.color.b, 0f);
+            Track(t.DOFade(1f, 0.5f).SetUpdate(true));
+            Track(band.DOFade(bandAlpha, 0.5f).SetUpdate(true));
+            _caption = t;
+            Narrating();
+        }
+
+        /// <summary>Called as each line of narration appears (a narrator can bob along).</summary>
+        protected virtual void Narrating() { }
 
         /// <summary>A prop or picture placed by its centre.</summary>
         protected RectTransform Prop(Sprite art, Vector2 at, float height, Color? tint = null)
@@ -307,15 +742,23 @@ namespace CapyIsland.UI
         /// <summary>Big text sliding up over the stage, such as a title.</summary>
         protected TextMeshProUGUI Title(string text, string sub, Vector2 at)
         {
-            var t = UiKit.Text(Stage, "Title", text + (string.IsNullOrEmpty(sub) ? "" : "\n<size=55%>" + sub + "</size>"),
-                Stage.rect.height * 0.1f, Color.white, true, TextAlignmentOptions.Center);
+            // In a bubble the title takes the narration's place, under the picture.
+            if (InBubbles && _caption != null)
+            {
+                var old = _caption;
+                _caption = null;
+                Track(old.DOFade(0f, 0.3f).SetUpdate(true).OnComplete(() => { if (old != null) Destroy(old.transform.parent.gameObject); }));
+            }
+            var t = UiKit.Text(InBubbles ? _captions : Stage, "Title", text + (string.IsNullOrEmpty(sub) ? "" : "\n<size=55%>" + sub + "</size>"),
+                Stage.rect.height * (InBubbles ? 0.085f : 0.1f), Color.white, true, TextAlignmentOptions.Center);
+            if (InBubbles) at = new Vector2(0.5f, 0.62f);
             t.raycastTarget = false;
             t.outlineWidth = 0.22f;
             t.outlineColor = new Color32(120, 60, 70, 255);
             var r = t.rectTransform;
             r.anchorMin = r.anchorMax = at;
             r.pivot = new Vector2(0.5f, 0.5f);
-            r.sizeDelta = new Vector2(Stage.rect.width * 0.9f, Stage.rect.height * 0.3f);
+            r.sizeDelta = InBubbles ? new Vector2(_captions.rect.width, Stage.rect.height * 0.3f) : new Vector2(Stage.rect.width * 0.9f, Stage.rect.height * 0.3f);
             r.localScale = Vector3.one * 0.6f;
             t.alpha = 0f;
             Track(t.DOFade(1f, 0.35f).SetUpdate(true));
@@ -378,6 +821,7 @@ namespace CapyIsland.UI
             public RectTransform Root { get; }
             public RectTransform Body { get; }
             bool _right;
+            float _restY;   // where the body sits: lower once sunk into water
 
             public Actor(Cutscene scene, RectTransform root, RectTransform body)
             {
@@ -443,9 +887,10 @@ namespace CapyIsland.UI
                 img.type = Image.Type.Filled;
                 img.fillMethod = Image.FillMethod.Vertical;
                 img.fillOrigin = (int)Image.OriginVertical.Top;
+                _restY = -fraction * Root.sizeDelta.y;
                 var seq = DOTween.Sequence().SetUpdate(true);
                 seq.Join(img.DOFillAmount(1f - fraction, seconds));
-                seq.Join(Body.DOAnchorPosY(-fraction * Root.sizeDelta.y, seconds));
+                seq.Join(Body.DOAnchorPosY(_restY, seconds));
                 return _scene.Track(seq);
             }
 
@@ -456,8 +901,14 @@ namespace CapyIsland.UI
                 _scene.Track(Body.GetComponent<Image>().DOFade(alpha, seconds).SetUpdate(true));
 
             /// <summary>A gentle up-and-down float, for ghosts.</summary>
+            /// <summary>
+            /// A gentle up-and-down around where the body rests — after a Sink, around the sunk
+            /// spot, so a bather bobs in the water instead of rising out of it.
+            /// </summary>
             public Tween Bob(float height = 0.06f, float period = 1.4f) =>
-                _scene.Track(Body.DOAnchorPosY(Root.sizeDelta.y * height, period * 0.5f).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine).SetUpdate(true));
+                _scene.Track(DOTween.To(() => 0f, v => Body.anchoredPosition = new Vector2(Body.anchoredPosition.x, _restY + v),
+                        Root.sizeDelta.y * height, period * 0.5f)
+                    .SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine).SetTarget(Body).SetUpdate(true));
 
             public Tween Nudge(float fracX, float seconds = 0.4f) =>
                 _scene.Track(Root.DOAnchorPosX(Root.anchoredPosition.x + fracX * _scene.Stage.rect.width, seconds).SetEase(Ease.OutQuad).SetUpdate(true));

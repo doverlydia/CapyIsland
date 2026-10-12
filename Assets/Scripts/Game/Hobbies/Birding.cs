@@ -32,6 +32,7 @@ namespace CapyIsland.Game
             int level = HobbyLog.Level(Hobby.Birding);
             bool wader = Random.value < 0.25f;
             var kind = HobbyData.RollBird(level, wader);
+            if (kind == null) return;   // nobody about at this hour
 
             Vector2? perch = null;
             int order = 0;
