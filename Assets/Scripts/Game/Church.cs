@@ -4,9 +4,10 @@ using UnityEngine;
 namespace CapyIsland.Game
 {
     /// <summary>
-    /// The Church on Wedding Isle (Building/CastleItem) and its Priest (MapItems/Priest), who stands
-    /// 50 east and 100 south of it. Once Coriander has said yes, the Priest will marry you for
-    /// 50 wood and 50 gold — and renew your vows, for the same, as often as you like.
+    /// The Blossom Chapel (Building/CastleItem) and the spot beside it where the words are said
+    /// (MapItems/Priest), 50 east and 100 south of it. Nobody stands there until Old Yuzu is
+    /// alive again (YuzuHeart); then she does, and once Miso has said yes she marries you two
+    /// for 50 wood and 50 gold, and renews your vows, for the same, as often as you like.
     /// </summary>
     public class Church : MonoBehaviour
     {
@@ -45,8 +46,8 @@ namespace CapyIsland.Game
             var body = new GameObject("Sprite");
             body.transform.SetParent(go.transform, false);
             var sr = body.AddComponent<SpriteRenderer>();
-            sr.sprite = art != null ? art.priest : null;
-            if (sr.sprite != null) body.transform.localScale = Vector3.one * (1.25f / Mathf.Max(0.01f, sr.sprite.bounds.size.y));
+            sr.sprite = Resources.Load<Sprite>("Cutscenes/Cutscene_IntroYuzu");   // Old Yuzu, alive
+            if (sr.sprite != null) body.transform.localScale = Vector3.one * (1.55f / Mathf.Max(0.01f, sr.sprite.bounds.size.y));
 
             go.AddComponent<YSorter>();
             var priest = go.AddComponent<Priest>();
@@ -57,9 +58,18 @@ namespace CapyIsland.Game
         void OnEnable() => TapTargets.Register(this);
         void OnDisable() => TapTargets.Unregister(this);
 
+        /// <summary>Only once she is back: until then there is nobody here to say the words.</summary>
+        void Update()
+        {
+            bool here = YuzuHeart.Alive;
+            if (_body != null && _body.enabled != here) _body.enabled = here;
+            var shadow = transform.Find("Shadow");
+            if (shadow != null && shadow.gameObject.activeSelf != here) shadow.gameObject.SetActive(here);
+        }
+
         public float TapDistance(Vector2 worldPoint)
         {
-            if (_body == null) return -1f;
+            if (_body == null || !_body.enabled) return -1f;
             float d = Vector2.Distance(_body.bounds.center, worldPoint);
             return d < 1f ? d : -1f;
         }
@@ -69,9 +79,9 @@ namespace CapyIsland.Game
             var face = _body != null ? _body.sprite : null;
             if (!Motes.Has("Madly in Love"))
             {
-                UI.SpeechDialog.Show(face, StoryText.Elder, new[]
+                UI.SpeechDialog.Show(face, StoryText.Guide, new[]
                 {
-                    "Welcome to the Blossom Chapel. I'm Elder Matcha. I'd be delighted to hold a wedding here, once two hearts have found each other. Keep at it, young one.",
+                    "The Blossom Chapel! I said my own vows under this very blossom. If two hearts ever find each other here, I'd be honoured to say the words.",
                 });
                 return;
             }
@@ -80,14 +90,14 @@ namespace CapyIsland.Game
             var store = ResourceStore.Instance;
             bool afford = store != null && store.CanAfford(WeddingWood, WeddingGold, 0);
             string line = married
-                ? "You two are already married! Shall we renew your vows under the blossom?"
-                : "Shall we hold the wedding? The ceremony costs 50 wood and 50 gold, for the lanterns and the cake.";
+                ? "Back again, you two? Shall we renew your vows under the blossom?"
+                : "My granddaughter, and the little one who woke me... Shall we hold the wedding? The ceremony costs 50 wood and 50 gold, for the lanterns and the cake.";
             var choices = new System.Collections.Generic.List<UI.SpeechDialog.Choice>
             {
                 new(married ? "Renew Vows" : "Wedding Ceremony", Wed, afford),
                 new("Cancel", null),
             };
-            UI.SpeechDialog.ShowChoices(face, StoryText.Elder, new[] { line }, null, choices);
+            UI.SpeechDialog.ShowChoices(face, StoryText.Guide, new[] { line }, null, choices);
         }
 
         void Wed()

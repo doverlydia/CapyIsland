@@ -233,7 +233,8 @@ namespace CapyIsland.Game
             bool Ok(Vector2 w)
             {
                 var u = WorldToUnity(w);
-                return IslandAt(u) == island && BunniSpace.CircleOnMap(u, worldRadius) && (fits == null || fits(u));
+                // fits, when given, is the whole test (an item checks its own room, ignoring itself)
+                return IslandAt(u) == island && (fits != null ? fits(u) : BunniSpace.CircleOnMap(u, worldRadius));
             }
             if (Ok(middle)) return WorldToUnity(middle);
             // Rings outward from the middle: the first spot that fits is the closest one.

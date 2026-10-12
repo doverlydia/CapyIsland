@@ -146,12 +146,26 @@ namespace CapyIsland.Game
 
         // ---------------------------------------------------------------- talking
 
+        /// <summary>
+        /// Miso's small talk: her usual chatter; once her grandmother is back, that (and no more
+        /// talk of "Grandma's ghost"); once everyone is home, that too.
+        /// </summary>
+        static string[] MisoComments()
+        {
+            if (!YuzuHeart.Alive) return StoryText.MisoChat;
+            var list = new System.Collections.Generic.List<string>();
+            foreach (var line in StoryText.MisoChat) if (!line.Contains("ghost")) list.Add(line);
+            list.AddRange(StoryText.MisoGrandmaBack);
+            if (YuzuHeart.FinaleSeen) list.AddRange(StoryText.MisoHome);
+            return list.ToArray();
+        }
+
         /// <summary>What the giver says now: the pages for its current stage.</summary>
         public string[] PagesFor(Progress q, QuestGiver.Kind kind)
         {
             if (q == null)
             {
-                var comments = kind == QuestGiver.Kind.Peach ? StoryText.WasabiChat : StoryText.MisoChat;
+                var comments = kind == QuestGiver.Kind.Peach ? StoryText.WasabiChat : MisoComments();
                 if (comments.Length == 0) return new[] { "..." };
                 return new[] { comments[Random.Range(0, comments.Length)] };
             }

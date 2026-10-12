@@ -50,8 +50,8 @@
 
 # ---------------------------------------------------------------- TutorialDirector: Old Yuzu's lines
 
-@ Hello, little one! I'm Old Yuzu, or what's left of me. Welcome to my chilly island. Without a home, nothing here will ever warm up again.
-= שלום, קטנטן! אני סבתא יוזו, או מה שנשאר ממני. ברוך הבא לאי הקריר שלי. בלי בית, שום דבר כאן לא יתחמם לעולם.
+@ Hello, little one! I'm Old Yuzu, or what's left of me. The snow is gone, but my island is so empty. Let's start with a home.
+= שלום, קטנטן! אני סבתא יוזו, או מה שנשאר ממני. השלג נעלם, אבל האי שלי כל כך ריק. בוא נתחיל בבית.
 
 @ Tap the bubble to collect the pine forest inside it.
 = הקש על הבועה כדי לאסוף את יער האורנים שבתוכה.
@@ -374,14 +374,14 @@
 
 # ---------------------------------------------------------------- Elder Matcha (Church)
 
-@ Welcome to the Blossom Chapel. I'm Elder Matcha. I'd be delighted to hold a wedding here, once two hearts have found each other. Keep at it, young one.
-= ברוך הבא לקפלת הפריחה. אני הזקן מאצ'ה. אשמח מאוד לערוך כאן חתונה, ברגע ששני לבבות ימצאו זה את זה. תמשיך כך, צעיר שלי.
+@ The Blossom Chapel! I said my own vows under this very blossom. If two hearts ever find each other here, I'd be honoured to say the words.
+= קפלת הפריחה! אני נדרתי את הנדרים שלי תחת הפריחה הזאת ממש. אם שני לבבות ימצאו כאן זה את זה, יהיה לי לכבוד לומר את המילים.
 
-@ You two are already married! Shall we renew your vows under the blossom?
-= אתם כבר נשואים! שנחדש את הנדרים שלכם תחת הפריחה?
+@ Back again, you two? Shall we renew your vows under the blossom?
+= שוב כאן, שניכם? שנחדש את הנדרים שלכם תחת הפריחה?
 
-@ Shall we hold the wedding? The ceremony costs 50 wood and 50 gold, for the lanterns and the cake.
-= שנערוך את החתונה? הטקס עולה 50 עץ ו-50 זהב, בשביל הפנסים והעוגה.
+@ My granddaughter, and the little one who woke me... Shall we hold the wedding? The ceremony costs 50 wood and 50 gold, for the lanterns and the cake.
+= הנכדה שלי, והקטנטן שהעיר אותי... שנערוך את החתונה? הטקס עולה 50 עץ ו-50 זהב, בשביל הפנסים והעוגה.
 
 @ Renew Vows
 = חידוש נדרים
@@ -414,8 +414,8 @@
 @ <b>{0}.</b> {1}% of its warmth has returned. {2}
 = <b>{0}.</b> {1}% מהחום שלו כבר חזר. {2}
 
-@ The island is still cold and quiet
-= האי עדיין קר ושקט
+@ The island is still empty and quiet
+= האי עדיין ריק ושקט
 
 @ Little sparks of life are popping up
 = ניצוצות קטנים של חיים מתחילים לצוץ

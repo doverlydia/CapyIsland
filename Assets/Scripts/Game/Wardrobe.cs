@@ -57,6 +57,7 @@ namespace CapyIsland.Game
             new() { Id = "Hat_Straw",       Name = "Straw Hat",       Slot = WearSlot.Hat,  Unlock = "built_church",  Anchor = new(0.46f, 0.87f), Width = 0.46f },
             new() { Id = "Hat_Party",       Name = "Party Hat",       Slot = WearSlot.Hat,  Unlock = "daily",         Anchor = new(0.44f, 0.87f), Width = 0.28f },
             new() { Id = "Hat_Towel",       Name = "Hot Spring Towel", Slot = WearSlot.Hat, Unlock = "daily",         Anchor = new(0.46f, 0.82f), Width = 0.38f },
+            new() { Id = "Hat_Lantern",     Name = "Yuzu's Lantern",  Slot = WearSlot.Hat,  Unlock = "finale",        Anchor = new(0.45f, 0.9f), Width = 0.24f },
             new() { Id = "Neck_Bandana",    Name = "Bandana",         Slot = WearSlot.Neck, Unlock = "fox1",          Anchor = new(0.47f, 0.325f), Width = 0.26f },
             new() { Id = "Neck_BowTie",     Name = "Bow Tie",         Slot = WearSlot.Neck, Unlock = "wedding_mote",  Anchor = new(0.47f, 0.37f), Width = 0.22f },
             new() { Id = "Neck_Scarf",      Name = "Red Scarf",       Slot = WearSlot.Neck, Unlock = "daily",         Anchor = new(0.48f, 0.36f), Width = 0.28f },
@@ -175,6 +176,7 @@ namespace CapyIsland.Game
             if (item.Unlock == "start") return "Yours from the start";
             if (item.Unlock == "cat_gift") return "A present from a cat";
             if (item.Unlock == "sewn") return "You sewed this!";
+            if (item.Unlock == "finale") return "Bring every warm heart home";
             if (item.Unlock.StartsWith("contest_")) return "First place in a contest";
             if (item.Unlock == "journal_Fishing") return "Complete the fish journal";
             if (item.Unlock == "journal_Birding") return "Complete the bird journal";

@@ -54,7 +54,10 @@ namespace CapyIsland.Game
         {
             var land = LandMap.Instance;
             if (land == null) return;
-            var island = land.Island(0);
+            // At home the beach is on the Heart of the Isles, the hot spring's island: reached only
+            // after the first warm heart opens the bridge, so a bottle can't bring a heart before it.
+            // A friend's island has just the one.
+            var island = (!Visit.Active ? land.Island(1) : null) ?? land.Island(0);
             if (island == null) return;
             Vector2 middle = island.rects.Count > 0 ? island.rects[0].center : island.circles.Count > 0 ? (Vector2)island.circles[0] : Vector2.zero;
             var centre = LandMap.WorldToUnity(middle);

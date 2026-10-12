@@ -283,7 +283,7 @@ namespace CapyIsland.UI
             _sleeper.DOKill();
             _sleeper.rectTransform.DOKill();
             _sleeper.DOFade(0f, 0.3f).SetUpdate(true);
-            var face = GhostDialogue.Instance != null ? GhostDialogue.Instance.Face : null;
+            var face = GhostDialogue.Instance != null ? GhostDialogue.Instance.GhostFace : null;
             _ghost = UiKit.Image(_bubble, "Yuzu", face, new Color(1f, 1f, 1f, 0f));
             _ghost.preserveAspect = true;
             _ghost.raycastTarget = false;
@@ -302,6 +302,7 @@ namespace CapyIsland.UI
         /// <summary>What she asks, and where you answer.</summary>
         void ShowQuestion()
         {
+            IntroCutscene.Preload();   // the movie loads while you answer
             var panel = UiKit.Rect("Panel", _root);
             panel.anchorMin = new Vector2(0.06f, 0.06f);
             panel.anchorMax = new Vector2(0.94f, 0.5f);

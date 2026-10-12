@@ -51,10 +51,28 @@ namespace CapyIsland.Game
         {
             if (_body == null || !Wardrobe.Ready) return;
             _body.sprite = Wardrobe.BaseSprite;
-            Dress(_body, _pieces, Wardrobe.Worn);
+            Dress(_body, _pieces, WornNow);
         }
 
-        void LateUpdate() => SortPieces(_body, _pieces, Wardrobe.Worn);
+        void LateUpdate() => SortPieces(_body, _pieces, WornNow);
+
+        static string _hatOverride;
+
+        /// <summary>
+        /// For a moment, a different hat than the one chosen (the towel in the hot spring); null puts
+        /// the real one back. Never saved: the wardrobe itself is untouched.
+        /// </summary>
+        public static void OverrideHat(string id)
+        {
+            _hatOverride = id;
+            foreach (var outfit in FindObjectsByType<CapyOutfit>(FindObjectsSortMode.None)) outfit.Apply();
+        }
+
+        static WearItem WornNow(WearSlot slot) =>
+            slot == WearSlot.Hat && _hatOverride != null ? Wardrobe.Find(_hatOverride) : Wardrobe.Worn(slot);
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetSession() => _hatOverride = null;
 
         // ---------------------------------------------------------------- shared dressing
 

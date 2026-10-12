@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using DG.Tweening;
 using UnityEngine;
 
@@ -24,10 +25,35 @@ namespace CapyIsland.Game
         FrameClock _clock;
         int _rewardCounter;
 
+        HotSpring _spring;
+
         void Awake()
         {
             var body = transform.Find("Sprite");
             _bodyRenderer = body != null ? body.GetComponent<SpriteRenderer>() : null;
+            _spring = gameObject.AddComponent<HotSpring>();   // the old hot spring at its foot
+        }
+
+        const string CentredKey = "CapyIsland.TowerCentred";
+
+        /// <summary>
+        /// The tower belongs in the middle of its island. Once per game it moves to the nearest
+        /// clear spot to the middle (older games planted it wherever there was room).
+        /// </summary>
+        IEnumerator Start()
+        {
+            yield return null;
+            yield return null;   // the save puts things back first
+            if (PlayerPrefs.GetInt(CentredKey, 0) == 1) yield break;
+            var placeable = GetComponent<Placeable>();
+            var land = LandMap.Instance;
+            if (placeable == null || !placeable.Placed || land == null) yield break;
+            int island = land.IslandAt(transform.position);
+            if (island < 0) yield break;
+            var spot = land.SpotNearIslandMiddle(island, 83f, placeable.CanPlaceAt);
+            transform.position = new Vector3(spot.x, spot.y, transform.position.z);
+            PlayerPrefs.SetInt(CentredKey, 1);
+            PlayerPrefs.Save();
         }
 
         void OnEnable()
@@ -99,6 +125,7 @@ namespace CapyIsland.Game
         public float TapDistance(Vector2 worldPoint)
         {
             if (_bodyRenderer == null) return -1f;
+            if (_spring != null && _spring.PoolContains(worldPoint)) return Vector2.Distance(_spring.PoolBounds.center, worldPoint);
             var b = _bodyRenderer.bounds;
             if (!b.Contains(new Vector3(worldPoint.x, worldPoint.y, b.center.z))) return -1f;
             return Vector2.Distance(b.center, worldPoint);
@@ -109,7 +136,7 @@ namespace CapyIsland.Game
         {
             int total = Motes.Total, clicked = Motes.ClickedCount;
             int percent = total > 0 ? Mathf.RoundToInt(100f * clicked / total) : 0;
-            string mood = percent < 20 ? "The island is still cold and quiet"
+            string mood = percent < 20 ? "The island is still empty and quiet"
                         : percent < 40 ? "Little sparks of life are popping up"
                         : percent < 60 ? "The island is waking up"
                         : percent < 80 ? "The island is busy, bright and humming"
@@ -117,9 +144,13 @@ namespace CapyIsland.Game
             string left = total - clicked == 0 ? "Every heart is home."
                         : total - clicked == 1 ? "One heart still to bring home."
                         : $"{total - clicked} hearts still to bring home.";
-            UI.ObjectivesScreen.Show(UI.ObjectivesScreen.Tab.Achievements,
-                $"<b>{mood}.</b> {percent}% of its warmth has returned. {left}",
-                () => DiaryClosed?.Invoke());
+            string banner = $"<b>{mood}.</b> {percent}% of its warmth has returned. {left}";
+            // A soak in the spring first; the page opens while the capybara relaxes in the water,
+            // and closing it sends the capybara climbing back out.
+            void Open(Action climbOut) => UI.ObjectivesScreen.Show(UI.ObjectivesScreen.Tab.Achievements, banner,
+                () => { DiaryClosed?.Invoke(); climbOut?.Invoke(); });
+            if (_spring != null) _spring.Visit(Open);
+            else Open(null);
         }
     }
 }

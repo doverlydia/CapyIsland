@@ -572,6 +572,8 @@ namespace CapyIsland.UI
     {
         public void OnPointerDown(PointerEventData e)
         {
+            // A button that can't do anything right now doesn't pretend to be pressed.
+            if (TryGetComponent<Selectable>(out var button) && !button.IsInteractable()) return;
             transform.DOKill();
             transform.DOScale(new Vector3(0.94f, 0.92f, 1f), 0.08f).SetUpdate(true);
         }

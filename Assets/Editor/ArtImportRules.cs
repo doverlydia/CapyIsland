@@ -20,7 +20,8 @@ namespace CapyIsland.EditorTools
             bool hobbies = assetPath.StartsWith("Assets/Resources/Hobbies/");
             bool cutscene = assetPath.StartsWith("Assets/Resources/Cutscenes/")    // full-stage paintings
                             || assetPath.StartsWith("Assets/Resources/Events/");   // and the event banners
-            if (!assetPath.StartsWith("Assets/Art/") && !wardrobe && !hobbies && !cutscene) return;
+            bool world = assetPath.StartsWith("Assets/Resources/World/");      // runtime-built world pieces (the hot spring)
+            if (!assetPath.StartsWith("Assets/Art/") && !wardrobe && !hobbies && !cutscene && !world) return;
             if (assetPath.StartsWith("Assets/Art/Icon/")) return;   // app icons: full size, uncompressed, set by the App Icon menu
             if (!assetImporter.importSettingsMissing) return;
 
@@ -35,7 +36,7 @@ namespace CapyIsland.EditorTools
 
             // Outfit pieces sit centred on their anchor; the bare capybara stands on its feet like the king.
             bool centred = assetPath.StartsWith("Assets/Art/FX/") || assetPath.StartsWith("Assets/Art/UI/")
-                           || (hobbies && !assetPath.EndsWith("/Monster_Happy.png") && !assetPath.Contains("/Sleep_") && !assetPath.EndsWith("/Sailor.png") && !assetPath.Contains("/Miso_Dress")) || cutscene || (wardrobe && !assetPath.EndsWith("/Capy_Player.png"));
+                           || (hobbies && !assetPath.EndsWith("/Monster_Happy.png") && !assetPath.Contains("/Sleep_") && !assetPath.EndsWith("/Sailor.png") && !assetPath.Contains("/Miso_Dress")) || cutscene || world || (wardrobe && !assetPath.EndsWith("/Capy_Player.png"));
             var settings = new TextureImporterSettings();
             importer.ReadTextureSettings(settings);
             settings.spriteAlignment = (int)(centred ? SpriteAlignment.Center : SpriteAlignment.BottomCenter);
@@ -44,7 +45,7 @@ namespace CapyIsland.EditorTools
 
             var web = importer.GetPlatformTextureSettings("WebGL");
             web.overridden = true;
-            web.maxTextureSize = cutscene ? 1024 : 256;
+            web.maxTextureSize = cutscene ? 1024 : world ? 512 : 256;
             web.crunchedCompression = true;
             web.compressionQuality = 60;
             web.format = TextureImporterFormat.Automatic;

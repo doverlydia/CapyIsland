@@ -110,7 +110,10 @@ namespace CapyIsland.Game
             // A brand-new game opens with the story of the Big Chill; Old Yuzu says hello once it ends.
             if (!UI.IntroCutscene.Seen) { UI.IntroCurtain.Drop(); UI.AwakeningScreen.Show(() => UI.IntroCutscene.Show()); }
             _greetTimer = greetSeconds;
-            Say("Hello, little one! I'm Old Yuzu, or what's left of me. Welcome to my chilly island. Without a home, nothing here will ever warm up again.");
+            // Her hello is a story line, not an instruction: the first "tap the bubble" waits for
+            // it to be read instead of replacing it.
+            if (!Guidance.Off && dialogue != null)
+                dialogue.Say("Hello, little one! I'm Old Yuzu, or what's left of me. The snow is gone, but my island is so empty. Let's start with a home.");
         }
 
         void Update()
@@ -278,7 +281,7 @@ namespace CapyIsland.Game
             var land = LandMap.Instance;
             var catalog = ItemCatalog.Instance;
             if (land != null && catalog != null)
-                catalog.MakeItem("Tower Of Love", land.RandomSpotOnIsland(1, 83f));
+                catalog.MakeItem("Tower Of Love", land.SpotNearIslandMiddle(1, 83f));   // the middle of its island
             Say("Oh! A warm heart! All your building is waking the island up. The spirits can feel it.");
             _stepTimer = 6f;
             Advance(Step.ClickMote);

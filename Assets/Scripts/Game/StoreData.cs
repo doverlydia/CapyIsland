@@ -88,6 +88,9 @@ namespace CapyIsland.Game
             AddTo("bronze_store", "Bug Net");
             AddTo("silver_store", "Binoculars");
             AddTo("steel_store", "Sewing Machine");
+            // The woolly capybara's home: the data has it, but no shop sold it, so the only woolly was
+            // Captain Wasabi's. The Gold Store comes around the time she introduces them.
+            AddTo("gold_store", "Panda House");
         }
 
         public static bool TryGet(string name, out StoreItemDef def)

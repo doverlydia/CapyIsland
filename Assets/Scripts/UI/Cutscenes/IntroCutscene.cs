@@ -75,6 +75,25 @@ namespace CapyIsland.UI
 
         static Sprite Art(string path) => Resources.Load<Sprite>(path);
 
+        static readonly string[] Pictures =
+        {
+            "IntroWarm", "IntroYuzu", "IntroFrozen", "IntroSea", "IntroTubSleeper", "Shore", "IntroTub", "YuzuOlder", "YuzuOldest",
+            "YuzuRest", "Log", "Firewood", "Campfire", "CampfireOut", "GhostSleep",
+        };
+        static readonly string[] Cues = { "intro_warm", "intro_chill", "intro_magic", "intro_keeper", "intro_awaken", "intro_sea", "intro_dawn" };
+        static readonly List<ResourceRequest> _preload = new();
+
+        /// <summary>
+        /// Starts loading the movie's pictures and music in the background (while you choose a
+        /// language and a name), so its first scenes don't stutter in.
+        /// </summary>
+        public static void Preload()
+        {
+            if (_preload.Count > 0) return;
+            foreach (var p in Pictures) _preload.Add(Resources.LoadAsync<Sprite>("Cutscenes/Cutscene_" + p));
+            foreach (var c in Cues) _preload.Add(Resources.LoadAsync<AudioClip>("Music/Intro/" + c));
+        }
+
         static Sprite Capy(string name)
         {
             var catalog = ItemCatalog.Instance;
@@ -98,11 +117,12 @@ namespace CapyIsland.UI
         protected override IEnumerator Script()
         {
             var lines = (string[])StoryText.Intro.Clone();
-            var you = PlayerProfile.Name;
+            // Your name stands out wherever the story says it.
+            var you = string.IsNullOrEmpty(PlayerProfile.Name) ? PlayerProfile.Name : "<color=#8EE07A>" + PlayerProfile.Name + "</color>";
             var idle = Wardrobe.Ready ? Wardrobe.BaseSprite : Capy("Capybara");
             var miso = Capy("Coriander");
             var yuzuAlive = Art("Cutscenes/Cutscene_IntroYuzu");
-            var ghost = GhostDialogue.Instance != null ? GhostDialogue.Instance.Face : null;   // the ghost you will meet
+            var ghost = GhostDialogue.Instance != null ? GhostDialogue.Instance.GhostFace : null;   // the ghost you will meet
             var glass = BubbleGlass();
 
             // Each memory is framed inside its bubble (Aim): the bubble is round and the pictures
@@ -253,6 +273,15 @@ namespace CapyIsland.UI
                 UiKit.Stretch(thaw.rectTransform);
                 _loops.Add(StartCoroutine(Snow(0.1f)));
                 drifting = SleepingBubble(glass, ghost, new Vector2(0.28f, 0.58f), 0.16f);
+                // Where she lay down: still frozen, and she stays so while everything else thaws.
+                var restArt = Art("Cutscenes/Cutscene_YuzuRest");
+                if (restArt != null)
+                {
+                    var keeperSpot = new Vector2(0.4f, 0.15f);
+                    Cast(restArt, keeperSpot, 0.3f * restArt.rect.height / restArt.rect.width, tint: new Color(0.6f, 0.76f, 0.95f));
+                    var ice = IceOver(keeperSpot, 0.3f);
+                    ice.GetComponent<Image>().color = new Color(1f, 1f, 1f, 0.6f);
+                }
             });
             Caption(lines[14]);
             if (drifting != null)
@@ -561,6 +590,10 @@ namespace CapyIsland.UI
             StopLoops();
             Track(night.DOFade(0.9f, 3.5f).SetEase(Ease.InOutSine).SetUpdate(true));
             keeper.Tint(new Color(0.55f, 0.6f, 0.75f), 3.5f);
+            // Frost creeps over her, and she freezes where she lies.
+            var frost = IceOver(spot, 0.3f);
+            frost.SetSiblingIndex(night.rectTransform.GetSiblingIndex());
+            Track(frost.GetComponent<Image>().DOFade(0.6f, 3.5f).SetEase(Ease.InSine).SetUpdate(true));
             IntroAudio.Air("Amb_Wind", 0f, 3.5f);
             if (_narrator != null)
             {
@@ -690,6 +723,17 @@ namespace CapyIsland.UI
             skin.raycastTarget = false;
             UiKit.Stretch(skin.rectTransform);
             return orb;
+        }
+
+        /// <summary>
+        /// A dome of ice over someone lying at <paramref name="at"/> (feet), <paramref name="width"/>
+        /// stage heights wide; starts invisible.
+        /// </summary>
+        RectTransform IceOver(Vector2 at, float width)
+        {
+            var shell = Art("Cutscenes/Cutscene_IceShell");
+            float high = shell != null ? width * 1.3f * shell.rect.height / shell.rect.width : width * 0.6f;
+            return Prop(shell, new Vector2(at.x, at.y + high * 0.5f - 0.012f), high, new Color(1f, 1f, 1f, 0f));
         }
 
         /// <summary>Crossfades someone into a new picture of themselves, standing where they were.</summary>

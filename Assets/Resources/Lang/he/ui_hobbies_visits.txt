@@ -956,3 +956,12 @@
 
 @ {0} fed {1} workers, bombed {2} pests, planted {3} flower gardens before heading home.
 = {0} בדרך הביתה. בזמן הביקור {1} פועלים קיבלו אוכל, {2} מזיקים גורשו ו-{3} ערוגות פרחים נשתלו.
+
+@ Write a few words first.
+= כתוב קודם כמה מילים.
+
+@ Tap your bottle any time to write your note.
+= הקש על הבקבוק שלך מתי שתרצה כדי לכתוב את הפתק.
+
+@ You need a fishing rod first. Nori sells one right here.
+= קודם צריך חכה. נורי מוכר אחת ממש כאן.

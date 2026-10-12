@@ -68,8 +68,11 @@ namespace CapyIsland.UI
             SetPrice(gemLabel, price.z, store != null ? store.Get(ResourceKind.Gem) : 0);
 
             bool soldOut = item.SoldOut;
+            string locked = item.Locked;
             bool affordable = store != null && store.CanAfford(price.x, price.y, price.z);
-            string feedback = soldOut ? "<b>Sold out.</b>" : affordable ? "" : Shortfall(price, store);
+            string feedback = soldOut ? "<b>Sold out.</b>"
+                            : locked != null ? "<color=#b0413e>" + locked + "</color>"
+                            : affordable ? "" : Shortfall(price, store);
             if (blurbLabel != null)
             {
                 blurbLabel.text = item.Description + (feedback.Length > 0 ? "\n\n" + feedback : "");
@@ -79,7 +82,7 @@ namespace CapyIsland.UI
             if (purchaseButton != null)
             {
                 purchaseButton.gameObject.SetActive(!soldOut);
-                purchaseButton.interactable = affordable;
+                purchaseButton.interactable = affordable && locked == null;
             }
             if (panel != null) panel.SetActive(true);
         }

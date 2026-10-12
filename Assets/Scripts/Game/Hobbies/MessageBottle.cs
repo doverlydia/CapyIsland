@@ -135,7 +135,15 @@ namespace CapyIsland.Game
                 _follower.PickUpIntoInventory();
                 return;
             }
+            // Planted where you dropped it, like a building: it stays there whether you write your
+            // note now or later (tap it to write).
             _follower.PlaceInWorld();
+            if (!Visit.Active)   // on a friend's shore it is only a note for them, never planted
+            {
+                _data.placed = true;
+                _data.x = transform.position.x; _data.y = transform.position.y;
+                Persist();
+            }
             Settle();
             Write();
         }
@@ -198,13 +206,15 @@ namespace CapyIsland.Game
         void Cancelled()
         {
             _writing = false;
-            if (_data.placed) return;   // editing an old note: nothing changes
-            _follower.PickUpIntoInventory();
+            if (Visit.Active && !_data.placed) { _follower.PickUpIntoInventory(); return; }   // still yours to carry home
+            if (string.IsNullOrEmpty(_data.text)) Hints.Show("Tap your bottle any time to write your note.");
         }
 
         void Edit()
         {
             _writing = true;
+            // Still empty (the page was closed before): writing it now is its first note.
+            if (string.IsNullOrEmpty(_data.text)) { UI.LibraryScreen.WriteBottle(Written, null, null, Cancelled); return; }
             UI.LibraryScreen.WriteBottle(Edited, _data.title, _data.text, () => _writing = false);
         }
 
@@ -225,11 +235,7 @@ namespace CapyIsland.Game
             // The page was closed some other way (the back button): same as Cancel.
             if (!_writing) return;
             var page = UI.LibraryScreen.Instance;
-            if (page == null || !page.IsOpen)
-            {
-                if (_data.placed) _writing = false;
-                else Cancelled();
-            }
+            if (page == null || !page.IsOpen) Cancelled();
         }
     }
 }

@@ -1070,3 +1070,90 @@
 
 @ Digs bronze, silver and gold 4 times quicker.
 = חופר ארד, כסף וזהב מהר פי 4.
+
+@ That's... me, from before. Don't be sad, little one. I'm right here.
+= זאת... אני, מפעם. אל תהיה עצוב, קטנטן. אני ממש כאן.
+
+@ I lay down here on the coldest night. The snow melted long ago... but the ice never did.
+= נשכבתי כאן בלילה הכי קר. השלג נמס מזמן... אבל הקרח אף פעם לא.
+
+@ Sometimes I come and sit beside myself. Is that strange? It feels a little less lonely.
+= לפעמים אני באה ויושבת ליד עצמי. זה מוזר? ככה קצת פחות בודד.
+
+@ Funny... I haven't felt warm in so many years.
+= מצחיק... לא הרגשתי חמימות כל כך הרבה שנים.
+
+@ Every time a warm heart comes home, I feel it. Here. Could it be...? No. Let's not hope too hard.
+= בכל פעם שלב חם חוזר הביתה, אני מרגישה אותו. כאן. האם ייתכן...? לא. בוא לא נקווה יותר מדי.
+
+@ I'm warm! I still can't get over it. Thank you, little one.
+= חם לי! אני עדיין לא מאמינה. תודה לך, קטנטן.
+
+@ My old knees are complaining again. I'd forgotten how much I missed them.
+= הברכיים הזקנות שלי שוב מתלוננות. שכחתי כמה התגעגעתי אליהן.
+
+@ Seeing you two together... it was worth every frozen year.
+= לראות את שניכם יחד... זה היה שווה כל שנה קפואה.
+
+@ Miso told me everything! The Blossom Chapel is waiting, whenever you're ready.
+= מיסו סיפרה לי הכול! קפלת הפריחה מחכה, מתי שתהיו מוכנים.
+
+@ Did... did you see that?
+= ראית... ראית את זה?
+
+@ No, no. Silly old ghost, seeing things.
+= לא, לא. רוח רפאים זקנה ומבולבלת, רואה דברים.
+
+@ Little one... every time a warm heart comes home, I feel it. Here.
+= קטנטן... בכל פעם שלב חם חוזר הביתה, אני מרגישה אותו. כאן.
+
+@ Could it be...? No. Let's not hope too hard. Keep going.
+= האם ייתכן...? לא. בוא לא נקווה יותר מדי. תמשיך.
+
+@ I'm... warm.
+= חם... לי.
+
+@ I'm warm! I'm alive! Little {0}... you did this. Every warm heart you brought home.
+= חם לי! אני חיה! {0} הקטן... אתה עשית את זה. כל לב חם שהבאת הביתה.
+
+@ And now... I believe my granddaughter has a wedding to plan. I wouldn't miss it for anything!
+= ועכשיו... נדמה לי שלנכדה שלי יש חתונה לתכנן. לא הייתי מפספסת את זה בשום אופן!
+
+@ Bring every warm heart home
+= החזר כל לב חם הביתה
+
+@ When the cold came, I saved what I could in my bubbles, and I thought that was all I had left.
+= כשהקור הגיע, הצלתי מה שיכולתי בבועות שלי, וחשבתי שזה כל מה שנשאר לי.
+
+@ Then you washed up on my shore. Thank you for bringing everyone home, little {0}.
+= ואז נסחפת אל החוף שלי. תודה שהחזרת את כולם הביתה, {0} הקטן.
+
+@ Home Again
+= שוב בבית
+
+@ Every warm heart is home, and the Capy Isles are alive again. Old Yuzu gave you her lantern, to remember the night everyone came home.
+= כל הלבבות החמים בבית, ואיי הקאפי חיים שוב. סבתא יוזו נתנה לך את הפנס שלה, לזכור את הלילה שבו כולם חזרו הביתה.
+
+@ Look at it, little one. Steam in the spring, lanterns on the path... and everyone home.
+= תראה, קטנטן. אדים במעיין, פנסים על השביל... וכולם בבית.
+
+@ I've decided I'm going to live to be very, very old. Again.
+= החלטתי שאני הולכת לחיות עד גיל מאוד, מאוד מבוגר. שוב.
+
+@ Some evenings I still sit by the spring where I lay all those years. Now I just put my feet in.
+= בחלק מהערבים אני עדיין יושבת ליד המעיין, איפה ששכבתי כל השנים האלה. עכשיו אני רק טובלת בו את הרגליים.
+
+@ Grandma's back. GRANDMA'S BACK. I still say it out loud every morning, just to hear it.
+= סבתא חזרה. סבתא חזרה!!! אני עדיין אומרת את זה בקול כל בוקר, רק כדי לשמוע את זה.
+
+@ Grandma says you can have a free soak in the spring any time. Forever. She made it official.
+= סבתא אומרת שמותר לך לטבול במעיין בחינם מתי שתרצה. לתמיד. היא עשתה את זה רשמי.
+
+@ The spring is steaming, the lanterns are lit, and everyone's home. I keep pinching myself.
+= המעיין מעלה אדים, הפנסים דולקים, וכולם בבית. אני כל הזמן צובטת את עצמי.
+
+@ Remember the list of everything we built together? I ran out of paper.
+= זוכר את הרשימה של כל מה שבנינו יחד? נגמר לי הנייר.
+
+@ Yuzu's Lantern
+= הפנס של יוזו

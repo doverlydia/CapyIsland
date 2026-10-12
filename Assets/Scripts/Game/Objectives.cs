@@ -171,6 +171,8 @@ namespace CapyIsland.Game
                             return bubble.transform.position;
                     return null;
                 case "wedding_mote":
+                    // Nobody can marry you until Old Yuzu is back: the hearts go to the tower.
+                    if (!YuzuHeart.Alive) return TowerOfLove.Instance != null ? TowerOfLove.Instance.transform.position : null;
                     var church = UnityEngine.Object.FindFirstObjectByType<Church>();
                     return church != null ? church.transform.position : null;
                 case "peach_dance":
@@ -311,7 +313,7 @@ namespace CapyIsland.Game
             "girl_quest_8" => "Chase every guinea pig off the island",
             "girl_quest_10" => "Keep helping Miso",
             "girl_crown" => "Buy the Tiara",
-            "wedding_mote" => "Hold the wedding at the Blossom Chapel",
+            "wedding_mote" => YuzuHeart.Alive ? "Hold the wedding at the Blossom Chapel" : "Bring every warm heart home",
             "panda_sawmill" => "Put a woolly capybara to work at a sawmill",
             "5_plum" => "Grow five Legendary Plum Trees",
             "monster_tame" => "Warm up five zombie capybaras",

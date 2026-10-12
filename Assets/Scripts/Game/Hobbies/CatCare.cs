@@ -339,6 +339,7 @@ namespace CapyIsland.Game
             {
                 var king = FindFirstObjectByType<PlayerAvatar>();
                 Vector2 at = king != null ? (Vector2)king.transform.position : (Vector2)transform.position;
+                if (HotSpring.Poolside.HasValue) at = HotSpring.Poolside.Value;   // off a capybara in the water: onto the grass, not into it
                 Vector2 land = at;
                 float side = UnityEngine.Random.value < 0.5f ? -1f : 1f;
                 for (int tries = 0; tries < 2; tries++, side = -side)

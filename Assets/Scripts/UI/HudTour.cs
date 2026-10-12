@@ -31,7 +31,7 @@ namespace CapyIsland.UI
         /// <summary>Has this page been shown (as a tip or in a tour)?</summary>
         public static bool Seen(string id) => PlayerPrefs.GetInt(SeenKey, 0) == 1 || PlayerPrefs.GetInt(TipKey + id, 0) == 1;
 
-        static readonly string[] AllIds = { "welcome", "treasure", "goals", "you", "arrows", "placing", "yuzu", "menu", "map", "gifts", "friends", "events", "profile", "clock", "hello", "help" };
+        static readonly string[] AllIds = { "welcome", "goals", "arrows", "placing", "menu", "map", "gifts", "friends", "events", "profile", "clock", "hello", "help" };
 
         /// <summary>
         /// Forgets every tip and the tour, and switches the tutorial back on (Start over): a fresh
@@ -44,6 +44,7 @@ namespace CapyIsland.UI
             _tips.Clear();
             Guidance.Off = false;
             IntroCutscene.Forget();   // a fresh island opens with the story
+            Game.YuzuHeart.Forget();  // and Old Yuzu frozen again
             PlayerPrefs.Save();
         }
 
@@ -71,7 +72,11 @@ namespace CapyIsland.UI
         public static bool Quiet =>
             !IsOpen && !UiScreen.AnyOpen && !SpeechDialog.IsOpen && !CardPopup.IsShowing && !PurchaseDialog.IsOpen
             && !Cutscene.Playing && !TextReader.IsOpen && !Visit.Active && !Visit.Travelling
-            && !AwakeningScreen.IsOpen && !IntroAudio.Active;   // never during the opening, start to finish
+            && !AwakeningScreen.IsOpen && !IntroAudio.Active   // never during the opening, start to finish
+            && !YuzuTalking;
+
+        /// <summary>Old Yuzu is mid-sentence: a tip waits for her to finish rather than cut her off.</summary>
+        static bool YuzuTalking => GhostDialogue.Instance != null && GhostDialogue.Instance.MidLine;
 
         /// <summary>Shows the next waiting tip, if the moment is right. Called by TipTriggers.</summary>
         public static void Pump()
@@ -82,7 +87,14 @@ namespace CapyIsland.UI
             _tips.RemoveAt(0);
             // Drop pages that were seen while this tip waited (the full tour, say).
             var fresh = new List<string>();
-            foreach (var id in next) if (!Seen(id)) fresh.Add(id);
+            foreach (var id in next)
+            {
+                if (Seen(id)) continue;
+                // The arrows page is about an arrow you can see: if the one that queued it has gone,
+                // it waits for the next (TipTriggers queues it again whenever one is on screen).
+                if (id == "arrows" && EdgeIndicators.FirstShown == null) continue;
+                fresh.Add(id);
+            }
             if (fresh.Count > 0) Begin(fresh.ToArray());
         }
 
@@ -136,7 +148,7 @@ namespace CapyIsland.UI
         /// <summary>Called once the HUD is built: the two first-launch pages, if never seen.</summary>
         public static void BeginIfFirstTime(MonoBehaviour host)
         {
-            if (Guidance.Off || (Seen("welcome") && Seen("you")) || Visit.Active || Visit.Travelling) return;
+            if (Guidance.Off || Seen("welcome") || Visit.Active || Visit.Travelling) return;
             host.StartCoroutine(WaitThenBegin());
         }
 
@@ -144,10 +156,11 @@ namespace CapyIsland.UI
         {
             // Let the island settle and Old Yuzu say hello, then wait for anything else on screen.
             yield return new WaitForSecondsRealtime(0.8f);
-            while (UiScreen.AnyOpen || SpeechDialog.IsOpen || CardPopup.IsShowing || PurchaseDialog.IsOpen || Cutscene.Playing || AwakeningScreen.IsOpen || IntroAudio.Active || TextReader.IsOpen)
+            while (UiScreen.AnyOpen || SpeechDialog.IsOpen || CardPopup.IsShowing || PurchaseDialog.IsOpen || Cutscene.Playing || AwakeningScreen.IsOpen || IntroAudio.Active || TextReader.IsOpen
+                   || YuzuTalking)   // and let her finish her hello
                 yield return new WaitForSecondsRealtime(0.5f);
             var first = new List<string>();
-            foreach (var id in new[] { "welcome", "you" }) if (!Seen(id)) first.Add(id);
+            foreach (var id in new[] { "welcome" }) if (!Seen(id)) first.Add(id);
             if (first.Count == 0) yield break;
             Begin(first.ToArray());
         }
@@ -180,8 +193,10 @@ namespace CapyIsland.UI
         {
             _open = false;
             if (GhostDialogue.Instance != null) GhostDialogue.Instance.Hidden = false;   // back to her corner
-            // Every page in this run counts as seen, so its tip never comes back.
-            foreach (var st in _steps) PlayerPrefs.SetInt(TipKey + st.Id, 1);
+            // Every page actually shown counts as seen, so its tip never comes back. A page skipped
+            // because its subject wasn't on screen stays unseen, to turn up as a tip when it is.
+            foreach (var id in _shown) PlayerPrefs.SetInt(TipKey + id, 1);
+            _shown.Clear();
             PlayerPrefs.Save();
             _restUntil = Time.unscaledTime + RestBetweenTips;
             if (_root != null) _root.gameObject.SetActive(false);
@@ -246,13 +261,6 @@ namespace CapyIsland.UI
             });
             _steps.Add(new Step
             {
-                Id = "treasure",
-                Title = "Your treasure",
-                Body = "Wood, gold and gems. Your capybaras gather wood and gold; you spend them in the shops.",
-                Target = Hud("ResourceBar"), Optional = true,
-            });
-            _steps.Add(new Step
-            {
                 Id = "goals",
                 Title = "What to do next",
                 Body = "Your next goal is always here. Tap it to see every goal and quest.",
@@ -260,17 +268,12 @@ namespace CapyIsland.UI
             });
             _steps.Add(new Step
             {
-                Id = "you",
-                Title = "You",
-                Body = "This is your capybara. Hold your finger on the ground and it walks toward your finger. Let go to stop.",
-                Target = KingRect, Optional = true,
-            });
-            _steps.Add(new Step
-            {
                 Id = "arrows",
                 Title = "Arrows at the edge",
                 Body = "An arrow at the edge of the screen points at something you can't see yet. The picture inside shows what it is. Tap the arrow and your capybara walks there.",
-                Target = () => ScreenRect(EdgeIndicators.FirstShown) ?? ScreenRect(_demoArrow),
+                // Only ever about a real arrow on screen: in the full tour too, it is skipped until one shows.
+                Target = () => ScreenRect(EdgeIndicators.FirstShown),
+                Optional = true,
                 Extra = BuildArrowLegend,
             });
             _steps.Add(new Step
@@ -279,13 +282,6 @@ namespace CapyIsland.UI
                 Title = "Placing things",
                 Body = "Things you collect follow you in a line. Drag one onto the ground to place it.\nWhile you drag, a circle shows the space it needs:",
                 Extra = BuildPlacingDiagram,
-            });
-            _steps.Add(new Step
-            {
-                Id = "yuzu",
-                Title = "Old Yuzu",
-                Body = "Old Yuzu talks to you here, and her words tell you what to try next. When she goes quiet, tap her picture to hear her again.",
-                Target = Hud("GhostDialogueRoot/Panel"), Optional = true,
             });
             _steps.Add(new Step
             {
@@ -350,20 +346,6 @@ namespace CapyIsland.UI
                 Body = "Bigger text, tap-to-read and the language are in Menu → Settings. You can watch this tour again there too.",
                 Target = Hud("SideButtons/Menu"), Optional = true,
             });
-        }
-
-        static Rect? KingRect()
-        {
-            var king = FindFirstObjectByType<PlayerAvatar>();
-            var cam = Camera.main;
-            if (king == null || cam == null) return null;
-            var sr = king.GetComponentInChildren<SpriteRenderer>();
-            var b = sr != null ? sr.bounds : new Bounds(king.transform.position + Vector3.up, new Vector3(2f, 2f, 0f));
-            var min = cam.WorldToScreenPoint(b.min);
-            var max = cam.WorldToScreenPoint(b.max);
-            var r = Rect.MinMaxRect(min.x, min.y, max.x, max.y);
-            if (r.xMax < 0 || r.yMax < 0 || r.xMin > Screen.width || r.yMin > Screen.height) return null;
-            return r;
         }
 
         static Rect? ScreenRect(Transform t)
@@ -693,11 +675,14 @@ namespace CapyIsland.UI
 
         // ---------------------------------------------------------------- showing a page
 
+        readonly HashSet<string> _shown = new();
+
         void Show(Step s)
         {
+            _shown.Add(s.Id);
             _title.text = s.Title;
-            // She is in the popup, so her corner is empty — except on the page about that corner.
-            if (GhostDialogue.Instance != null) GhostDialogue.Instance.Hidden = s.Id != "yuzu";
+            // She is in the popup, so her corner is empty.
+            if (GhostDialogue.Instance != null) GhostDialogue.Instance.Hidden = true;
             _body.text = s.Body;
             for (int i = _extra.childCount - 1; i >= 0; i--) Destroy(_extra.GetChild(i).gameObject);
             _extra.gameObject.SetActive(s.Extra != null);

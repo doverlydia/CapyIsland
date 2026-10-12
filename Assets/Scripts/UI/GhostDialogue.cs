@@ -55,6 +55,34 @@ namespace CapyIsland.UI
         /// <summary>Her picture, for the tip popup to show her in.</summary>
         public Sprite Face => portrait != null ? portrait.sprite : null;
 
+        /// <summary>Her ghost, always (the opening, the story, her frozen body's lines), even once she is alive again.</summary>
+        public Sprite GhostFace { get; private set; }
+
+        /// <summary>Alive again (YuzuHeart): her corner shows her as she is now.</summary>
+        void ShowAsShe()
+        {
+            if (portrait == null || !Game.YuzuHeart.Alive) return;
+            var alive = Resources.Load<Sprite>("Cutscenes/Cutscene_IntroYuzu");
+            if (alive != null) portrait.sprite = alive;
+            WarmDisc();
+        }
+
+        bool _discWarmed;
+
+        /// <summary>The disc behind her picture: ghostly mint while she is a ghost, warm apricot once she is alive.</summary>
+        void WarmDisc()
+        {
+            if (_discWarmed || portrait == null || portrait.transform.parent == null) return;
+            var disc = portrait.transform.parent.Find("PortraitDisc");   // added when the HUD is styled
+            if (disc == null || !disc.TryGetComponent<Image>(out var image)) return;
+            image.color = UiKit.Hex("F6C89A");
+            _discWarmed = true;
+        }
+
+        void OnYuzuStage(Game.YuzuHeart.Stage s) => ShowAsShe();
+
+        void OnDestroy() => Game.YuzuHeart.Changed -= OnYuzuStage;
+
         /// <summary>
         /// A tip is speaking for her: the corner (picture and bubble) is hidden and nothing advances
         /// until it is shown again, when the current line comes straight back.
@@ -79,6 +107,13 @@ namespace CapyIsland.UI
         float _holdTimer;
 
         public bool IsSpeaking => panel != null && panel.activeSelf;
+
+        /// <summary>
+        /// In the middle of saying something: a line still typing, or still up to be read, or more
+        /// waiting. Her bubble tucks away once it has been read. Tips wait for this, so a card never
+        /// cuts her off mid-sentence.
+        /// </summary>
+        public bool MidLine => IsSpeaking && !_hidden && (!_collapsed || _queue.Count > 0);
 
         /// <summary>
         /// During the tutorial each line is an instruction, so it stays up twice as long before
@@ -141,6 +176,9 @@ namespace CapyIsland.UI
         void Awake()
         {
             Instance = this;
+            GhostFace = portrait != null ? portrait.sprite : null;
+            ShowAsShe();
+            Game.YuzuHeart.Changed += OnYuzuStage;
             if (panel != null && panel.transform is RectTransform pr) pr.anchoredPosition += new Vector2(CornerGap, 0f);
             if (panel != null) panel.SetActive(false);
             if (portrait != null)
@@ -297,7 +335,10 @@ namespace CapyIsland.UI
             _current = _queue.Dequeue();
             _currentIsInstruction = _instructions.Contains(_current);
             _revealed = 0f;
-            _holdTimer = holdSeconds * (Accessibility.InstantText ? 2.5f : 1f);
+            // After the typing finishes, time to finish reading before the next line: she types far
+            // faster than anyone reads, so long lines get longer (half a second, plus a bit a letter).
+            // With Easy Reading (whole sentences at once) there was no typing, so it waits longer still.
+            _holdTimer = Typing ? 0.5f + 0.03f * _current.Length : Mathf.Max(holdSeconds, 1f + 0.045f * _current.Length) * 2.5f;
             _readTimer = ReadSeconds(_current);
             if (_history.Count == 0 || _history[_history.Count - 1] != _current) _history.Add(_current);
             if (_history.Count > HistoryLength) _history.RemoveAt(0);
@@ -313,6 +354,7 @@ namespace CapyIsland.UI
 
         void Update()
         {
+            if (!_discWarmed && Game.YuzuHeart.Alive) WarmDisc();
             if (_hidden || PopupOpen || !IsSpeaking || label == null) return;
             if (!_collapsed && !Game.Hints.StillTrue(_current)) { Advance(); return; }   // overtaken by events
             if (_collapsed)

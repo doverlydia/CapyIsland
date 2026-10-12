@@ -78,7 +78,7 @@ namespace CapyIsland.Game
             { "Coriander", Sweetheart },
             { "Pirate Peach", Captain },
             { "Pirate Pete", Sailor },
-            { "Priest", Elder },
+            { "Priest", Guide },   // the chapel's officiant: Old Yuzu, once she is back
             { "Ghost", Spirit },
 
             { "Panda", "Woolly Capybara" },
@@ -428,9 +428,9 @@ namespace CapyIsland.Game
                 "There's a tiara in the Gold Store window. Some lucky capybara is going to be very happy one day.",
                 "A tiara... for me?[br]I don't know what to say. My heart is doing somersaults.[br]Can you give me a little while to think? I want to say this right.") },
             { (QuestSource.Coriander, 7), new(
-                "There you are! I didn't sleep a wink last night. I kept practising this.[br]Okay. Deep breath.[br]When you washed up here, everything was cold and grey. Then you started building, and planting, and smiling at me, and...[br]I love you. There. I said it.[br]Would you... would you marry me?",
+                "There you are! I didn't sleep a wink last night. I kept practising this.[br]Okay. Deep breath.[br]When you washed up here, everything was so quiet and empty. Then you started building, and planting, and smiling at me, and...[br]I love you. There. I said it.[br]Would you... would you marry me?",
                 "Well? Don't leave me standing here like a frozen puddle!",
-                "You said yes! You said YES![br]Go and find Elder Matcha at the Blossom Chapel! I've saved a few gems for the celebration.") },
+                "You said yes! You said YES![br]Oh, if only Grandma could marry us herself... We'll wait for the perfect moment. I've saved a few gems for the celebration.") },
 
             // Captain Wasabi.
             { (QuestSource.Peach, 5), new(
@@ -461,6 +461,68 @@ namespace CapyIsland.Game
 
         public static QuestLines Quest(QuestSource giver, int id) =>
             Quests.TryGetValue((giver, id), out var q) ? q : new QuestLines("...", "...", "...");
+
+        // ---------------------------------------------------------------- Old Yuzu's heart (YuzuHeart)
+
+        /// <summary>
+        /// Old Yuzu, frozen beside her spring, thawing as warm hearts come home; then alive again;
+        /// then the finale, once every heart is home.
+        /// </summary>
+        public static class Yuzu
+        {
+            /// <summary>Her ghost, by her frozen body, before she has noticed anything.</summary>
+            public static readonly string[] AtHerBody =
+            {
+                "That's... me, from before. Don't be sad, little one. I'm right here.",
+                "I lay down here on the coldest night. The snow melted long ago... but the ice never did.",
+                "Sometimes I come and sit beside myself. Is that strange? It feels a little less lonely.",
+            };
+            public const string Warmer = "Funny... I haven't felt warm in so many years.";
+            public const string Wondering = "Every time a warm heart comes home, I feel it. Here. Could it be...? No. Let's not hope too hard.";
+
+            // The movies.
+            public const string Twitch = "Did... did you see that?";
+            public const string Seeing = "No, no. Silly old ghost, seeing things.";
+            public const string Glow = "Little one... every time a warm heart comes home, I feel it. Here.";
+            public const string Hope = "Could it be...? No. Let's not hope too hard. Keep going.";
+            public const string Warm = "I'm... warm.";
+            public const string Alive = "I'm warm! I'm alive! Little {0}... you did this. Every warm heart you brought home.";
+            public const string Wedding = "And now... I believe my granddaughter has a wedding to plan. I wouldn't miss it for anything!";
+
+            /// <summary>Alive, in person.</summary>
+            public static readonly string[] Back =
+            {
+                "I'm warm! I still can't get over it. Thank you, little one.",
+                "My old knees are complaining again. I'd forgotten how much I missed them.",
+            };
+            public const string Engaged = "Miso told me everything! The Blossom Chapel is waiting, whenever you're ready.";
+            public const string Married = "Seeing you two together... it was worth every frozen year.";
+
+            /// <summary>Every heart home: the finale, and her everyday words after it.</summary>
+            public const string Finale1 = "When the cold came, I saved what I could in my bubbles, and I thought that was all I had left.";
+            public const string Finale2 = "Then you washed up on my shore. Thank you for bringing everyone home, little {0}.";
+            public const string FinaleSubtitle = "Home Again";
+            public const string FinaleCardTitle = "Home Again";
+            public const string FinaleCardBody = "Every warm heart is home, and the Capy Isles are alive again. Old Yuzu gave you her lantern, to remember the night everyone came home.";
+            public static readonly string[] Home =
+            {
+                "Look at it, little one. Steam in the spring, lanterns on the path... and everyone home.",
+                "I've decided I'm going to live to be very, very old. Again.",
+                "Some evenings I still sit by the spring where I lay all those years. Now I just put my feet in.",
+            };
+        }
+
+        /// <summary>Miso, once her grandmother is back, and once everyone is home.</summary>
+        public static readonly string[] MisoGrandmaBack =
+        {
+            "Grandma's back. GRANDMA'S BACK. I still say it out loud every morning, just to hear it.",
+            "Grandma says you can have a free soak in the spring any time. Forever. She made it official.",
+        };
+        public static readonly string[] MisoHome =
+        {
+            "The spring is steaming, the lanterns are lit, and everyone's home. I keep pinching myself.",
+            "Remember the list of everything we built together? I ran out of paper.",
+        };
 
         // ---------------------------------------------------------------- small talk
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using CapyIsland.Game;
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -618,14 +619,26 @@ namespace CapyIsland.UI
                 Close();
                 cancelled();
             }, 30f);
+            // What is missing, said right here (Old Yuzu keeps quiet while a page is open).
+            var problem = UiKit.Text(_list, "Problem", "", 28f, new Color(0.78f, 0.25f, 0.22f), true, TMPro.TextAlignmentOptions.Center);
+            problem.gameObject.AddComponent<LayoutElement>().preferredHeight = 44f;
+            problem.gameObject.SetActive(false);
             UiKit.Button(row, "Save", written != null ? "Put it in the bottle" : "Put it on my shelf", UiKit.ButtonStyle.Primary, () =>
             {
                 string t = title.text.Trim(), s = text.text.Trim();
-                if (t.Length == 0 || s.Length < 20)
+                // A bottle note can be short and needs no title; a story for the shelf wants both.
+                string missing = written != null
+                    ? (s.Length == 0 ? "Write a few words first." : null)
+                    : (t.Length == 0 || s.Length < 20 ? "A story needs a title and at least a few sentences." : null);
+                if (missing != null)
                 {
-                    Hints.Show("A story needs a title and at least a few sentences.");
+                    problem.text = missing;
+                    problem.gameObject.SetActive(true);
+                    problem.transform.DOKill(true);
+                    problem.transform.DOPunchScale(Vector3.one * 0.08f, 0.3f, 6).SetUpdate(true);
                     return;
                 }
+                if (t.Length == 0) t = "Message in a Bottle";
                 if (written != null)
                 {
                     Close();

@@ -11,6 +11,9 @@ namespace CapyIsland.Game
         Vector3Int Price { get; }
         bool SoldOut { get; }
         bool Buy();
+
+        /// <summary>Why it can't be bought yet (shown instead of a working Buy), or null.</summary>
+        string Locked => null;
     }
 
     /// <summary>

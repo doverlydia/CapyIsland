@@ -9,7 +9,7 @@ namespace CapyIsland.UI
 {
     /// <summary>
     /// The wedding, as a little movie (the original played one too). You and Miso meet under the
-    /// blossom arch, Elder Matcha says the words, the two of you kiss, and the guests — your workers
+    /// blossom arch, Old Yuzu (alive again, and Miso's grandmother) says the words, the two of you kiss, and the guests — your workers
     /// and Captain Wasabi — cheer. The Captain has rather a soft spot for you, so she sulks under a
     /// little rain cloud first… then gives in and cheers loudest of all.
     /// </summary>
@@ -37,9 +37,9 @@ namespace CapyIsland.UI
         {
             Backdrop(Resources.Load<Sprite>("Cutscenes/Cutscene_Wedding"), UiKit.Hex("F6C9A8"), UiKit.Hex("A7C46A"));
 
-            // Elder Matcha under the arch; the couple will meet in front of it.
-            var priestArt = GameArt.Instance != null ? GameArt.Instance.priest : null;
-            var elder = priestArt != null ? Cast(priestArt, new Vector2(0.5f, 0.35f), 0.2f) : null;
+            // Old Yuzu under the arch, marrying her granddaughter; the couple will meet in front of it.
+            var yuzuArt = Resources.Load<Sprite>("Cutscenes/Cutscene_IntroYuzu");
+            var elder = yuzuArt != null ? Cast(yuzuArt, new Vector2(0.5f, 0.35f), 0.24f) : null;
 
             // The couple first, so the guests in the front row stand in front of them.
             var you = CastPlayer(new Vector2(-0.12f, 0.2f), 0.28f, faceRight: true);
@@ -69,7 +69,7 @@ namespace CapyIsland.UI
             you.Face(true);
             miso?.Face(false);
 
-            // The Elder says the words: a pair of rings.
+            // Grandma says the words: a pair of rings.
             if (elder != null)
             {
                 elder.Squash(0.08f);

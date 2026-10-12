@@ -97,14 +97,17 @@ namespace CapyIsland.Game
                 return;
             }
 
-            // 15 world units a frame.
-            Vector2 from = transform.position, to = tower.TopOfTower;
+            // 15 world units a frame. Once Old Yuzu has started to feel them, they fly to her heart.
+            var yuzu = FrozenYuzu.Instance;
+            bool toHer = yuzu != null && YuzuHeart.Shown >= YuzuHeart.Stage.Glow && !YuzuHeart.Alive;
+            Vector2 from = transform.position, to = toHer ? yuzu.HeartPoint : tower.TopOfTower;
             float seconds = Mathf.Clamp(BunniSpace.WorldDistance(from, to) / (15f * 30f), 0.6f, 6f);
             CameraRig.CameraFocus.Show(to, seconds + 0.8f);
             transform.DOMove(new Vector3(to.x, to.y, transform.position.z), seconds).SetEase(Ease.InOutSine)
                 .OnComplete(() =>
                 {
                     tower.MoteFound(_mote);
+                    if (toHer && yuzu != null) yuzu.Warmed();
                     Destroy(gameObject);
                 });
         }

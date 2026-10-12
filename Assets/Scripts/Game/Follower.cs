@@ -48,10 +48,9 @@ namespace CapyIsland.Game
             if (!Carried) return;
             if (_drag != null && _drag.IsHeld) return;   // under the finger, not in the queue
 
-            var leader = LeaderTransform();
-            if (leader == null) return;
+            if (!LeaderPosition(out var leader)) return;
 
-            Vector3 to = leader.position - transform.position;
+            Vector3 to = leader - transform.position;
             float distance = to.magnitude;
             if (distance <= spacing) return;
 
@@ -66,32 +65,34 @@ namespace CapyIsland.Game
         }
 
         /// <summary>
-        /// The king, or whichever carried follower sits between us and him. Choosing the nearest
+        /// Where to follow: the king, or whichever carried follower sits between us and him. Choosing the nearest
         /// follower that is *closer to the king than we are* gives the queue a direction, so two
         /// items can never end up following each other in a loop.
         /// </summary>
-        Transform LeaderTransform()
+        bool LeaderPosition(out Vector3 leader)
         {
+            leader = default;
             var king = FindFirstObjectByType<PlayerAvatar>();
-            if (king == null) return null;
+            if (king == null) return false;
+            var head = king.transform.position;
 
-            float myDistanceToKing = Vector3.Distance(transform.position, king.transform.position);
-            Transform best = king.transform;
+            float myDistanceToKing = Vector3.Distance(transform.position, head);
+            leader = head;
             float bestGap = myDistanceToKing;
 
             foreach (var other in FindObjectsByType<Follower>(FindObjectsSortMode.None))
             {
                 if (other == this || !other.Carried) continue;
 
-                float theirDistanceToKing = Vector3.Distance(other.transform.position, king.transform.position);
+                float theirDistanceToKing = Vector3.Distance(other.transform.position, head);
                 if (theirDistanceToKing >= myDistanceToKing) continue;
 
                 float gap = Vector3.Distance(other.transform.position, transform.position);
                 if (gap >= bestGap) continue;
-                best = other.transform;
+                leader = other.transform.position;
                 bestGap = gap;
             }
-            return best;
+            return true;
         }
 
         void Face(float dx)

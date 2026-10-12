@@ -267,8 +267,8 @@
 @ Okay. Deep breath.
 = טוב. נשימה עמוקה.
 
-@ When you washed up here, everything was cold and grey. Then you started building, and planting, and smiling at me, and...
-= כשנסחפת לכאן, הכול היה קר ואפור. ואז התחלת לבנות, ולשתול, ולחייך אליי, ו...
+@ When you washed up here, everything was so quiet and empty. Then you started building, and planting, and smiling at me, and...
+= כשנסחפת לכאן, הכול היה כל כך שקט וריק. ואז התחלת לבנות, ולשתול, ולחייך אליי, ו...
 
 @ I love you. There. I said it.
 = אני אוהבת אותך. זהו. אמרתי את זה.
@@ -282,8 +282,8 @@
 @ You said yes! You said YES!
 = אמרת כן! אמרת כן!!!
 
-@ Go and find Elder Matcha at the Blossom Chapel! I've saved a few gems for the celebration.
-= לך למצוא את הזקן מאצ'ה בקפלת הפריחה! שמרתי כמה יהלומים לחגיגה.
+@ Oh, if only Grandma could marry us herself... We'll wait for the perfect moment. I've saved a few gems for the celebration.
+= אוי, לו רק סבתא הייתה יכולה לחתן אותנו בעצמה... נחכה לרגע המושלם. שמרתי כמה יהלומים לחגיגה.
 
 @ Ahoy! Captain Wasabi of the good ship Hot Pepper, at your service! Phew, that bubble was a tight squeeze.
 = אהוי! קפטן וואסאבי מהספינה הטובה "הפלפל החריף", לשירותך! פיו, הבועה הזאת הייתה צפופה.

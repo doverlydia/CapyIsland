@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 namespace CapyIsland.Game
@@ -16,12 +17,41 @@ namespace CapyIsland.Game
 
         SpriteRenderer _body;
         Placeable _placeable;
+        TextMeshPro _marker;
 
         void Awake()
         {
             var body = transform.Find("Sprite");
             _body = body != null ? body.GetComponent<SpriteRenderer>() : null;
             _placeable = GetComponent<Placeable>();
+
+            // The same "!" Miso wears: he has a story to tell, so tap him.
+            var markerGo = new GameObject("QuestMarker");
+            markerGo.transform.SetParent(transform, false);
+            _marker = markerGo.AddComponent<TextMeshPro>();
+            _marker.text = "!";
+            if (UI.UiKit.HeadingFont != null) _marker.font = UI.UiKit.HeadingFont;
+            _marker.fontSize = 9f;
+            _marker.fontStyle = FontStyles.Bold;
+            _marker.alignment = TextAlignmentOptions.Center;
+            _marker.color = new Color(1f, 0.86f, 0.3f);
+            _marker.outlineWidth = 0.3f;
+            _marker.outlineColor = new Color32(90, 50, 20, 255);
+            _marker.rectTransform.sizeDelta = new Vector2(2f, 2f);
+            _marker.sortingOrder = 31500;
+            _marker.enabled = false;
+        }
+
+        /// <summary>Placed, and his story not yet heard.</summary>
+        bool HasNews => InWorld && !Motes.Has("Priate Tales");
+
+        void Update()
+        {
+            if (_marker == null) return;
+            _marker.enabled = HasNews;
+            if (!_marker.enabled) return;
+            float top = _body != null ? _body.bounds.max.y - transform.position.y : 1.4f;
+            _marker.transform.localPosition = new Vector3(0f, (top + 0.45f + Mathf.Abs(Mathf.Sin(Time.time * 3f)) * 0.2f) / Mathf.Max(0.01f, transform.lossyScale.y), 0f);
         }
 
         void OnEnable() => TapTargets.Register(this);

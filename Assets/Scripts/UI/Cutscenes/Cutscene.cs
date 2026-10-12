@@ -435,7 +435,9 @@ namespace CapyIsland.UI
             {
                 _flash.color = Color.clear;
                 Aim(BubbleView.x, BubbleView.y, BubbleView.z);
-                yield return FloatIn();
+                // The first memory is set up as its bubble drifts in, like every later one, so it
+                // grows in with the bubble rather than appearing in it all at once.
+                StartCoroutine(FloatIn());
             }
             else
             {
