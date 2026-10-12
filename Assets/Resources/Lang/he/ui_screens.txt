@@ -332,3 +332,50 @@
 
 @ Fonts: Fredoka and Nunito, under the SIL Open Font License.
 = גופנים: Fredoka ו-Nunito, ברישיון SIL Open Font License.
+
+# ---------------------------------------------------------------- Goals: every task (ObjectivesScreen)
+
+@ Story
+= עלילה
+
+@ Food orders
+= הזמנות אוכל
+
+@ Hobbies and daily
+= תחביבים ויומיות
+
+@ {0} would like {1}
+= {0} רוצה {1}
+
+@ It's in your bag. Tap them to serve it.
+= זה בתיק שלך. הקש עליהם כדי להגיש.
+
+@ Cook it at your stove: {0}
+= בשל את זה בכיריים: {0}
+
+@ Ready to serve
+= מוכן להגשה
+
+@ To cook
+= לבשל
+
+@ Today: {0}
+= היום: {0}
+
+@ You're number {0}. {1} left.
+= אתה במקום {0}. נשארו {1}.
+
+@ Open
+= פתח
+
+@ Claim
+= קבל
+
+@ Done
+= הושלם
+
+@ Daily gift
+= מתנה יומית
+
+@ Today's present is waiting for you.
+= המתנה של היום מחכה לך.

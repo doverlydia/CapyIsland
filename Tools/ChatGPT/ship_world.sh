@@ -14,7 +14,7 @@ ship () {  # ship <master name> <folder> <size>
 for n in Tree_Maple Tree_Ironwood Garden_Tulip Garden_Rose Hill_Black Hill_Gold; do ship $n Terrain 256; done
 for n in Flower_Tulip Flower_Rose; do ship $n Terrain 128; done
 for n in Store_General Store_Bronze Store_Silver Store_Steel Store_Gold Store_Gem Store_Bank Store_Fancy \
-         Build_LegendMill Build_LegendMine Build_FoxHouse Build_MonsterHouse Build_Church Build_Tower; do ship $n Buildings 256; done
+         Build_LegendMill Build_LegendMine Build_FoxHouse Build_MonsterHouse Build_PandaHouse Build_Church Build_Tower; do ship $n Buildings 256; done
 for n in Animal_Fox Animal_Panda Animal_Monster Animal_Deer Capy_Pirate Capy_Coriander Capy_Peach Capy_Pete Capy_Priest; do ship $n Capybaras 256; done
 for n in Item_Bomb Item_DeerBomb Item_Dress Item_Pearls Item_Tiara Prop_Mote Deco_TinyBush Deco_LittleGreeny; do ship $n Props 128; done
 for n in Deco_WhiteFlowerTree Deco_PinkFlowerTree Deco_HolyStatue Deco_GemStatue Deco_BushyTree Deco_FallTree Deco_Fountain Deco_MonsterDen; do ship $n Props 256; done

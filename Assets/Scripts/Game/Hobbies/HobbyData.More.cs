@@ -75,7 +75,7 @@ namespace CapyIsland.Game
             new() { Id = "Snail",        Name = "Garden Snail",   Stars = 1, MinLevel = 1, Home = BugHome.Ground, Times = DayParts.Night | DayParts.Dawn },
             new() { Id = "Bee",          Name = "Bumblebee",      Stars = 2, MinLevel = 2, Home = BugHome.Flower, Flies = true, Times = DayParts.Day },
             new() { Id = "Beetle",       Name = "Jewel Beetle",   Stars = 2, MinLevel = 2, Home = BugHome.Tree, Times = DayParts.Day | DayParts.Dusk },
-            new() { Id = "Silkworm",     Name = "Silkworm",       Stars = 2, MinLevel = 2, Home = BugHome.Tree },   // spins silk for capes
+            new() { Id = "Silkworm",     Name = "Silkworm",       Stars = 2, MinLevel = 2, Home = BugHome.Tree },   // spins silk for fedoras and sun hats
             new() { Id = "Dragonfly",    Name = "Dragonfly",      Stars = 2, MinLevel = 3, Home = BugHome.Ground, Flies = true, Times = DayParts.Day | DayParts.Dusk },
             new() { Id = "BlueButterfly",Name = "Sky Blue Butterfly", Stars = 3, MinLevel = 4, Home = BugHome.Flower, Flies = true, Times = DayParts.Day },
             new() { Id = "Firefly",      Name = "Firefly",        Stars = 3, MinLevel = 5, Home = BugHome.Tree, Flies = true, Glows = true, Times = DayParts.Night },

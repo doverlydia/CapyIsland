@@ -4,7 +4,7 @@ namespace CapyIsland.Game
 {
     /// <summary>
     /// The sewing machine from the Steel Store. Once it stands somewhere, tap it to sew: pick a
-    /// pattern (a hat needs cotton from your garden, a cape needs silk from silkworms), decorate
+    /// a hat (it needs cotton from your garden), decorate
     /// it, and it goes into your wardrobe to wear.
     /// </summary>
     public class SewingStation : MonoBehaviour, ITappable

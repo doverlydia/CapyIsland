@@ -36,6 +36,7 @@ namespace CapyIsland.Game
 
             // Our own items (the Garden Shop and its hobby kit), built in code.
             HobbyCatalog.RegisterInto(this);
+            HomeCatalog.RegisterInto(this);   // the burrow door and the Furniture Shop
         }
 
         /// <summary>Adds a template built at runtime rather than by the island builder.</summary>

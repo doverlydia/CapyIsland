@@ -169,8 +169,8 @@
 @ Pearl Necklace
 = מחרוזת פנינים
 
-@ Zombie Den
-= מאורת זומבים
+@ Burrow Door
+= דלת המחילה
 
 @ Sprout
 = נבט
@@ -476,8 +476,8 @@
 @ Take up birdwatching: spot the birds that visit your island.
 = התחל בצפרות: גלה את הציפורים שמבקרות באי שלך.
 
-@ Take up sewing: stitch your own hats and capes.
-= התחל לתפור: תפור כובעים וגלימות משלך.
+@ Take up sewing: stitch and paint your own hats.
+= התחל לתפור: תפור וצבע כובעים משלך.
 
 @ A hutch for guinea pigs. Are you sure about this?
 = כלוב לשרקנים. אתה בטוח בזה?
@@ -587,8 +587,8 @@
 @ A fountain that bubbles like a little hot spring.
 = מזרקה שמבעבעת כמו מעיין חם קטן.
 
-@ A muddy den where zombie capybaras like to nap.
-= מאורה בוצית שבה קפיברות זומבי אוהבות לנמנם.
+@ The front door of your home under the ground. Tap it to slide down and decorate!
+= דלת הכניסה לבית שלך מתחת לאדמה. הקש עליה כדי להחליק למטה ולקשט!
 
 @ A friendly spirit with an errand for you.
 = רוח ידידותית עם שליחות בשבילך.
@@ -817,8 +817,8 @@
 @ Fashion Designer
 = מעצב אופנה
 
-@ You sewed your first T-shirt design. Very stylish.
-= תפרת את עיצוב החולצה הראשון שלך. ממש אופנתי.
+@ You sewed your first hat. Very stylish.
+= תפרת את הכובע הראשון שלך. ממש אופנתי.
 
 @ Green Thumb
 = יד ירוקה
@@ -1157,3 +1157,9 @@
 
 @ Yuzu's Lantern
 = הפנס של יוזו
+
+@ Furniture Shop
+= חנות רהיטים
+
+@ Cosy things for your burrow: five new pieces every day, and the burrow door itself.
+= דברים נעימים למחילה שלך: חמישה פריטים חדשים כל יום, ואפילו דלת המחילה עצמה.

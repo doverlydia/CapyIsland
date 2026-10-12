@@ -11,6 +11,7 @@ namespace CapyIsland.Game
         Plot, Stove,   // the hobby kit from the Garden Shop (built in code, see HobbyCatalog)
         Tool,          // hobby gear you carry (rod, net, binoculars): buying it unlocks the hobby
         Sewing,        // the sewing machine, a placed station
+        FurnitureShop, // sells the burrow door and the day's furniture for your home (Game/Home)
     }
 
     /// <summary>One store item. <see cref="Name"/> is its id; the player sees <see cref="Title"/>.</summary>
@@ -58,6 +59,7 @@ namespace CapyIsland.Game
             new StoreItemDef("Bug Net", 204, 100, 150, 0, 30f, 0f, 1, StoreItemKind.Tool),
             new StoreItemDef("Binoculars", 205, 400, 400, 0, 30f, 0f, 1, StoreItemKind.Tool),
             new StoreItemDef("Sewing Machine", 206, 1500, 1500, 0, 40f, 0f, 1, StoreItemKind.Sewing),
+            new StoreItemDef("Furniture Shop", 207, 2000, 1500, 0, 41f, 0f, 1, StoreItemKind.FurnitureShop),
         };
 
         /// <summary>The hobby a piece of gear (or a station) opens up, if it is one.</summary>
@@ -91,6 +93,18 @@ namespace CapyIsland.Game
             // The woolly capybara's home: the data has it, but no shop sold it, so the only woolly was
             // Captain Wasabi's. The Gold Store comes around the time she introduces them.
             AddTo("gold_store", "Panda House");
+            // Your home under the ground: the Fancy Store sells the Furniture Shop, and the
+            // Furniture Shop sells the den (your front door) and everything to put inside.
+            AddTo("fancy_store", "Furniture Shop");
+            RemoveFrom("fancy_store", "Monster Den");
+        }
+
+        static void RemoveFrom(string list, string item)
+        {
+            if (!Lists.TryGetValue(list, out var items) || System.Array.IndexOf(items, item) < 0) return;
+            var fewer = new List<string>(items);
+            fewer.Remove(item);
+            Lists[list] = fewer.ToArray();
         }
 
         public static bool TryGet(string name, out StoreItemDef def)

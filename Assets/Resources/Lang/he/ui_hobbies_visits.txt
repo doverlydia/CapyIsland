@@ -389,8 +389,8 @@
 @ {0} pieces sewn
 = נתפרו {0} פריטים
 
-@ At your sewing machine: a hat needs cotton from your garden, a cape needs silk from silkworms. Then decorate it and wear it!
-= ליד מכונת התפירה: לכובע צריך כותנה מהגינה, ולגלימה צריך משי מתולעי משי. אחר כך מקשטים ולובשים!
+@ At your sewing machine: a hat needs cotton from your garden. Then decorate it and wear it!
+= ליד מכונת התפירה: לכובע צריך כותנה מהגינה. אחר כך מקשטים ולובשים!
 
 @ Put your sewing machine down somewhere first.
 = קודם הנח את מכונת התפירה איפשהו.
@@ -598,8 +598,8 @@
 @ Sewn! It's in your wardrobe.
 = נתפר! זה מחכה בארון הבגדים שלך.
 
-@ That's one of your old shirts. Shirts can't be changed any more.
-= זאת אחת החולצות הישנות שלך. אי אפשר לשנות חולצות יותר.
+@ That's one of your older pieces. You can still wear it, but it can't be changed any more.
+= זה אחד הפריטים הישנים שלך. אפשר עדיין ללבוש אותו, אבל אי אפשר לשנות אותו יותר.
 
 # ---------------------------------------------------------------- UI/Hobbies/FishingButton.cs
 
@@ -612,17 +612,11 @@
 @ Stop fishing
 = הפסק לדוג
 
-@ Hold to aim
-= החזק כדי לכוון
+@ Tap to cast
+= הקש כדי להטיל
 
-@ Hold anywhere, let go to cast
-= החזק בכל מקום, שחרר כדי להטיל
-
-@ Let go to cast!
-= שחרר כדי להטיל!
-
-@ The ring is where your bobber will land
-= הטבעת מראה איפה המצוף ינחת
+@ Your bobber lands by the nearest fish
+= המצוף ינחת ליד הדג הקרוב
 
 @ Wait…
 = חכה…
@@ -728,14 +722,14 @@
 @ Tap the spatula when it appears, to stir and cool it down!
 = הקש על המרית כשהיא מופיעה, כדי לערבב ולקרר!
 
-@ <color=#3E9C4F><b>Perfect stir!</b></color>
-= <color=#3E9C4F><b>ערבוב מושלם!</b></color>
+@ <color=#8EE59A><b>Perfect stir!</b></color>
+= <color=#8EE59A><b>ערבוב מושלם!</b></color>
 
 @ Good stir!
 = ערבוב טוב!
 
-@ <color=#D9534F><b>Too slow! It's getting hot…</b></color>
-= <color=#D9534F><b>לאט מדי! זה מתחמם…</b></color>
+@ <color=#FF9A8A><b>Too slow! It's getting hot…</b></color>
+= <color=#FF9A8A><b>לאט מדי! זה מתחמם…</b></color>
 
 @ Bizarre Food…
 = אוכל מוזר…
@@ -823,8 +817,8 @@
 @ Walk to the water's edge where fish shadows swim and tap Start fishing.
 = לך לשפת המים, איפה שצללי דגים שוחים, והקש על "התחל לדוג".
 
-@ Hold to aim, let go to cast. When it bites, hold to reel and let go when the line turns red!
-= החזק כדי לכוון, שחרר כדי להטיל. כשדג נתפס, החזק כדי לגלגל ושחרר כשהחוט נהיה אדום!
+@ Your bobber goes straight in by the nearest fish. When it bites, hold to reel and let go when the line turns red!
+= המצוף נוחת מיד ליד הדג הקרוב. כשדג נתפס, החזק כדי לגלגל ושחרר כשהחוט נהיה אדום!
 
 @ How to catch bugs
 = איך תופסים חרקים
@@ -850,8 +844,8 @@
 @ Put your sewing machine down, then tap it.
 = הנח את מכונת התפירה, ואז הקש עליה.
 
-@ A hat needs cotton from your garden, a cape needs silk from silkworms. Decorate it, and it goes in your wardrobe!
-= לכובע צריך כותנה מהגינה, ולגלימה צריך משי מתולעי משי. קשט אותם, והם נכנסים לארון הבגדים שלך!
+@ A hat needs cotton from your garden. Decorate it, and it goes in your wardrobe!
+= לכובע צריך כותנה מהגינה. קשט אותו, והוא נכנס לארון הבגדים שלך!
 
 @ How to garden
 = איך מגדלים גינה
@@ -965,3 +959,139 @@
 
 @ You need a fishing rod first. Nori sells one right here.
 = קודם צריך חכה. נורי מוכר אחת ממש כאן.
+
+# ---------------------------------------------------------------- the kitchen's recipe book (CookingScreen)
+
+@ Recipe Book
+= ספר מתכונים
+
+@ Cooking level {0}
+= בישול רמה {0}
+
+@ Put in pot
+= לשים בסיר
+
+# ---------------------------------------------------------------- sewing tools (SewingScreen)
+
+@ Brush
+= מכחול
+
+@ Fill
+= מילוי
+
+@ Undo
+= ביטול
+
+@ Stickers
+= מדבקות
+
+@ Nothing to undo.
+= אין מה לבטל.
+
+@ Tap the hat to stick it on.
+= הקש על הכובע כדי להדביק.
+
+@ Tap an area to fill it with your colour.
+= הקש על אזור כדי למלא אותו בצבע שלך.
+
+@ Tap an area to clear it.
+= הקש על אזור כדי לנקות אותו.
+
+# ---------------------------------------------------------------- hat patterns (SewingScreen)
+
+@ Beanie
+= כובע צמר
+
+@ Fedora
+= פדורה
+
+@ Sun Hat
+= כובע שמש
+
+@ Paint your beanie!
+= צבע את כובע הצמר שלך!
+
+@ Paint your fedora!
+= צבע את הפדורה שלך!
+
+@ Paint your sun hat!
+= צבע את כובע השמש שלך!
+
+@ Grow cotton in your garden (gardening level 2).
+= גדל כותנה בגינה שלך (גינון רמה 2).
+
+@ Catch silkworms for their silk (bug catching level 2).
+= תפוס תולעי משי בשביל המשי שלהן (תפיסת חרקים רמה 2).
+
+@ Grow cotton in your garden and catch silkworms for their silk.
+= גדל כותנה בגינה ותפוס תולעי משי בשביל המשי שלהן.
+
+@ A {0} needs {1}. {2}
+= ל{0} צריך {1}. {2}
+
+# ---------------------------------------------------------------- the vegetable journal
+
+@ Vegetable Journal
+= יומן ירקות
+
+@ Go to my plots
+= לערוגות שלי
+
+@ ×{0} harvested
+= נקטפו ×{0}
+
+@ Grows in {0} min
+= גדל תוך {0} דק'
+
+@ Gardening level {0}
+= גינון רמה {0}
+
+@ {0} of {1} vegetables grown
+= גודלו {0} מתוך {1} ירקות
+
+@ New in your vegetable journal: {0}!
+= חדש ביומן הירקות שלך: {0}!
+
+# ---------------------------------------------------------------- the collection's tabs (CollectionScreen)
+
+@ Discoveries
+= תגליות
+
+@ Clothing
+= בגדים
+
+@ Furniture
+= רהיטים
+
+@ Fish
+= דגים
+
+@ Birds
+= ציפורים
+
+@ Bugs
+= חרקים
+
+@ Vegetables
+= ירקות
+
+@ {0} of {1} found
+= נמצאו {0} מתוך {1}
+
+@ From the Furniture Shop
+= מחנות הרהיטים
+
+@ Trust {0}/{1}
+= אמון {0}/{1}
+
+@ ×{0} · best {1} cm
+= ×{0} · הכי גדול {1} ס"מ
+
+@ Drag to move around. Zoom in to see the details.
+= גרור כדי לזוז. התקרב כדי לראות את הפרטים.
+
+@ Fit
+= התאם
+
+@ Move
+= הזזה

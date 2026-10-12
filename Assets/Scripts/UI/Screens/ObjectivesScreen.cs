@@ -70,8 +70,17 @@ namespace CapyIsland.UI
 
         // ---------------------------------------------------------------- quests
 
+        /// <summary>The colour strip down each task's edge: what kind of task it is.</summary>
+        static readonly Color StoryColour = UiKit.Primary, OrderColour = UiKit.Leaf, HobbyColour = UiKit.Spring;
+
+        /// <summary>
+        /// Everything you could be doing, story first (the tutorial, each character's request,
+        /// the next achievement), then the side things: food orders, today's hobby goal, the
+        /// contest and the daily gift. Each kind has its own colour down the card's edge.
+        /// </summary>
         void BuildQuests()
         {
+            _stripe = StoryColour;
             var tutorial = TutorialDirector.Instance;
             if (tutorial != null && !tutorial.Finished && !string.IsNullOrEmpty(tutorial.CurrentGoal))
             {
@@ -80,7 +89,7 @@ namespace CapyIsland.UI
             }
 
             var quests = Objectives.ActiveQuests();
-            SectionLabel(_list, "Quests");
+            SectionLabel(_list, "Story");
             if (quests.Count == 0)
             {
                 Empty("Nobody needs a hand right now. Keep building, and new friends will turn up with requests.");
@@ -114,6 +123,59 @@ namespace CapyIsland.UI
                 Row(IconPainter.Heart, UiKit.Danger, a.Def.Title, a.Goal, null, default, null);
                 break;
             }
+
+            BuildOrders();
+            BuildHobbies();
+            _stripe = null;
+        }
+
+        /// <summary>Who would like which dish, and whether it is already in your bag.</summary>
+        void BuildOrders()
+        {
+            var orders = DishOrders.Open();
+            if (orders.Count == 0) return;
+            _stripe = OrderColour;
+            SectionLabel(_list, "Food orders");
+            foreach (var (who, dish, where) in orders)
+            {
+                bool have = HobbyLog.Count("dish:" + dish.Id) > 0;
+                string line = have
+                    ? "It's in your bag. Tap them to serve it."
+                    : "Cook it at your stove: " + DishOrders.RecipeOf(dish);
+                Row(HobbyData.ItemArt("dish:" + dish.Id), UiKit.SurfaceSunk, Loc.F("{0} would like {1}", who, Loc.T(dish.Name)), line,
+                    have ? "Ready to serve" : "To cook", have ? UiKit.Leaf : UiKit.Primary, where, portrait: true);
+            }
+        }
+
+        /// <summary>Today's hobby goal, the running contest, and the daily gift.</summary>
+        void BuildHobbies()
+        {
+            var goal = GameEvents.TodaysGoal;
+            bool contest = GameEvents.CanJoin;
+            bool gift = DailyGifts.CanClaim;
+            if (goal == null && !contest && !gift) return;
+            _stripe = HobbyColour;
+            SectionLabel(_list, "Hobbies and daily");
+
+            if (goal != null)
+            {
+                int got = Mathf.Min(GameEvents.GoalProgress, goal.Need);
+                string status = GameEvents.GoalClaimed ? "Done" : GameEvents.RewardWaiting ? "Reward ready" : $"{got} / {goal.Need}";
+                Color chip = GameEvents.GoalClaimed ? UiKit.Leaf : GameEvents.RewardWaiting ? UiKit.Sun : UiKit.Spring;
+                string line = Loc.T(goal.Text) + "\n<color=#C2577F>" + Loc.F("Reward: {0}", GameEvents.RewardText(goal)) + "</color>";
+                Row(IconPainter.Star, UiKit.Sun, Loc.F("Today: {0}", Loc.T(goal.Title)), line, status, chip, null,
+                    open: () => EventsScreen.Instance?.Open(), openLabel: GameEvents.RewardWaiting ? "Claim" : "Open", faded: GameEvents.GoalClaimed);
+            }
+            if (contest)
+            {
+                string name = EventsScreen.ContestName(GameEvents.CurrentKind);
+                string line = Loc.F("You're number {0}. {1} left.", GameEvents.Rank(), GameEvents.Left(GameEvents.ContestLeft));
+                Row(IconPainter.Trophy, UiKit.Sun, name, line, null, default, null,
+                    open: () => EventsScreen.Instance?.Open(), openLabel: "Open");
+            }
+            if (gift)
+                Row(IconPainter.Gift, UiKit.Primary, "Daily gift", "Today's present is waiting for you.", "New", UiKit.Primary, null,
+                    open: () => DailyGiftScreen.Instance?.Open(), openLabel: "Open");
         }
 
         // ---------------------------------------------------------------- achievements
@@ -152,7 +214,10 @@ namespace CapyIsland.UI
 
         // ---------------------------------------------------------------- rows
 
-        RectTransform Card(float minHeight, Color? colour = null)
+        /// <summary>The kind colour for the rows being built now (story, orders, hobbies), or none.</summary>
+        Color? _stripe;
+
+        RectTransform Card(float minHeight, Color? colour = null, Color? stripe = null)
         {
             var root = UiKit.Rect("Card", _list);
             var le = root.gameObject.AddComponent<LayoutElement>();
@@ -161,8 +226,17 @@ namespace CapyIsland.UI
             UiKit.Stretch(lip.rectTransform);
             var face = UiKit.Image(root, "Face", UiKit.Rounded(30), colour ?? Color.white);
             UiKit.Stretch(face.rectTransform, 0f, 5f, 0f, 0f);
+            if (stripe.HasValue)
+            {
+                var band = UiKit.Image(root, "Kind", UiKit.Rounded(8), stripe.Value);
+                band.rectTransform.anchorMin = Vector2.zero;
+                band.rectTransform.anchorMax = new Vector2(0f, 1f);
+                band.rectTransform.offsetMin = new Vector2(10f, 22f);
+                band.rectTransform.offsetMax = new Vector2(22f, -18f);
+                band.gameObject.AddComponent<LayoutElement>().ignoreLayout = true;
+            }
             var h = root.gameObject.AddComponent<HorizontalLayoutGroup>();
-            h.padding = new RectOffset(22, 22, 20, 26);
+            h.padding = new RectOffset(stripe.HasValue ? 38 : 22, 22, 20, 26);
             h.spacing = 22f;
             h.childAlignment = TextAnchor.MiddleLeft;
             h.childControlWidth = h.childControlHeight = true;
@@ -186,12 +260,13 @@ namespace CapyIsland.UI
         }
 
         void Row(Sprite icon, Color iconBack, string title, string line, string status, Color statusColour,
-            Vector2? where, bool portrait = false, Color? iconTint = null, bool faded = false, WearItem reward = null)
+            Vector2? where, bool portrait = false, Color? iconTint = null, bool faded = false, WearItem reward = null,
+            System.Action open = null, string openLabel = null)
         {
             var rewardArt = Wardrobe.Art(reward);
             if (rewardArt != null)
                 line += "\n<color=#C2577F>Reward: " + reward.Name + "</color>";
-            var card = Card(132f);
+            var card = Card(132f, null, _stripe);
 
             // Icon disc.
             var disc = UiKit.Image(card, "Disc", UiKit.Circle, portrait ? UiKit.SurfaceSunk : iconBack);
@@ -246,6 +321,13 @@ namespace CapyIsland.UI
                     Close();
                     PlayerAvatar.GoTo(spot);   // walk there: a camera peek that snaps back reads as nothing happening
                 }, 26f);
+                var le = go.transform.parent.gameObject.AddComponent<LayoutElement>();
+                le.preferredWidth = 170f;
+                le.preferredHeight = 64f;
+            }
+            else if (open != null)
+            {
+                var go = UiKit.Button(right, "Open", openLabel ?? "Open", UiKit.ButtonStyle.Secondary, () => { Close(); open(); }, 26f);
                 var le = go.transform.parent.gameObject.AddComponent<LayoutElement>();
                 le.preferredWidth = 170f;
                 le.preferredHeight = 64f;

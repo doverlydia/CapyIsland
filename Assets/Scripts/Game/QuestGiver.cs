@@ -225,6 +225,7 @@ namespace CapyIsland.Game
 
         public void Tap()
         {
+            if (DishOrders.TryServe(transform)) return;   // the dish they wanted, if it's in your bag, comes first
             var qs = QuestSystem.Instance;
             if (qs == null) return;
             var q = Progress;

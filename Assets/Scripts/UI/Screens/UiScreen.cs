@@ -41,6 +41,12 @@ namespace CapyIsland.UI
         /// <summary>Widest the sheet gets, in canvas units.</summary>
         protected virtual float MaxWidth => 980f;
 
+        /// <summary>
+        /// A place rather than a page (the kitchen): no card and no header, the body is the whole
+        /// screen, and the subclass draws its own way out (it calls <see cref="Close"/>).
+        /// </summary>
+        protected virtual bool FullBleed => false;
+
         public bool IsOpen => _root != null && _root.activeSelf;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -104,6 +110,15 @@ namespace CapyIsland.UI
             var scrim = UiKit.Image(_root.transform, "Scrim", null, UiKit.Scrim, true);
             UiKit.Stretch(scrim.rectTransform, -400f, -400f, -400f, -400f);
 
+            if (FullBleed)
+            {
+                Sheet = Body = UiKit.Rect("Place", _root.transform);
+                UiKit.Stretch(Body);
+                Build(Body);
+                _root.SetActive(false);
+                return;
+            }
+
             var card = UiKit.Card(_root.transform, "Sheet", UiKit.Surface, 44);
             Sheet = card.rectTransform;
             Sheet.anchorMin = Sheet.anchorMax = Sheet.pivot = new Vector2(0.5f, 0.5f);
@@ -155,7 +170,7 @@ namespace CapyIsland.UI
         /// <summary>Sizes the sheet to the safe area: full height on a phone, capped width on a tablet.</summary>
         protected virtual void Fit()
         {
-            if (Sheet == null) return;
+            if (Sheet == null || FullBleed) return;
             var area = ((RectTransform)transform).rect;
             float w = Mathf.Min(MaxWidth, area.width - 32f);
             float h = area.height - 48f;

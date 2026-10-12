@@ -24,7 +24,53 @@ namespace CapyIsland.Game
         /// <summary>Someone who can order: an id for the save, their name, and where they stand.</summary>
         struct Customer { public string Id, Name; public Transform At; public SpriteRenderer Body; }
 
-        void Awake() => Load();
+        public static DishOrders Instance { get; private set; }
+
+        void Awake()
+        {
+            Instance = this;
+            Load();
+        }
+
+        void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
+        }
+
+        /// <summary>What each islander would like right now, for the goals list.</summary>
+        public static List<(string who, DishKind dish, Vector2 where)> Open()
+        {
+            var list = new List<(string, DishKind, Vector2)>();
+            if (Instance == null || Visit.Active || CookingStove.Placed() == null) return list;
+            foreach (var c in Customers())
+            {
+                var o = Instance._data.orders.Find(x => x.who == c.Id);
+                var dish = o != null && !string.IsNullOrEmpty(o.dish) ? HobbyData.Dish(o.dish) : null;
+                if (dish != null) list.Add((c.Name, dish, c.At.position));
+            }
+            return list;
+        }
+
+        /// <summary>
+        /// Tapping someone who wants a dish you have: it is handed straight over (before any chat).
+        /// True if it was served.
+        /// </summary>
+        public static bool TryServe(Transform who)
+        {
+            if (Instance == null || Visit.Active || who == null) return false;
+            foreach (var c in Customers())
+            {
+                if (c.At != who) continue;
+                var o = Instance._data.orders.Find(x => x.who == c.Id);
+                if (o == null || string.IsNullOrEmpty(o.dish) || HobbyLog.Count("dish:" + o.dish) <= 0) return false;
+                Instance.Serve(c);
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>"2 Carrot, 1 Any Fish": what a dish takes.</summary>
+        public static string RecipeOf(DishKind dish) => Recipe(dish);
 
         void Update()
         {

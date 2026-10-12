@@ -334,3 +334,36 @@ write("Intro_Crown", make(1.6, (t) =>
     for (const [at, a, d] of pops) { const u = t - at; if (u >= 0 && u < 0.12) c += a * Math.exp(-u / d); }
     return roar(300 + 160 * breath) * breath * 0.6 + snap(1700) * c * 0.9;
   }), "Assets/Resources/Sfx", 0.4); }
+
+// ---------------------------------------------------------------- the kitchen and the burrow
+// Appended last, so every earlier file stays byte-identical. Soft and round, mastered quiet.
+
+// A pot simmering: little round bloops (low sine glides) rising out of a quiet warm bed.
+// Looped by UI/Hobbies/CookingScreen.cs, louder as the heat climbs.
+{ const bed = softNoise(3, 140);
+  const L = 6, bloops = [];
+  for (let t = 0.05; t < L; t += 0.07 + 0.3 * Math.abs(rnd())) bloops.push([t, 160 + 140 * Math.abs(rnd()), 0.35 + 0.65 * Math.abs(rnd())]);
+  write("Amb_Simmer", loop(L, 1, (t) => {
+    let s = bed(260) * 0.35;
+    for (const [at, f, a] of bloops) {
+      const u = t - at; if (u < 0 || u > 0.14) continue;
+      const g = f * (1 + 1.4 * u / 0.14);
+      s += Math.sin(2 * Math.PI * g * u) * Math.sin(Math.PI * u / 0.14) * a * 0.5;
+    }
+    return s;
+  }), "Assets/Resources/Sfx", 0.4); }
+
+// A stir with a wooden spoon: a soft swish round the pot and a gentle knock on its side.
+{ const swish = softNoise(3, 300);
+  write("Sfx_Stir", make(0.45, (t) => {
+    const k = t / 0.45, sweep = Math.pow(Math.sin(Math.PI * Math.min(1, k * 1.2)), 2);
+    const knock = Math.sin(2 * Math.PI * (210 - 80 * t) * t) * env(Math.max(0, t - 0.3), 0.002, 0.04) * (t > 0.3 ? 1 : 0);
+    return swish(500 + 900 * sweep) * sweep * 0.8 + knock * 0.5;
+  }), "Assets/Resources/Sfx", 0.5); }
+
+// Sliding down the tunnel into your burrow: a long soft whoosh, quickening, with a low earthy rumble.
+{ const air = softNoise(4, 200), rumble = softNoise(3, 90);
+  write("Sfx_Slide", make(2.8, (t) => {
+    const k = t / 2.8, rise = Math.pow(k, 1.3) * Math.pow(Math.sin(Math.PI * Math.min(1, k * 1.05)), 0.6);
+    return air(420 + 900 * rise) * rise + rumble(140) * (0.3 + 0.4 * rise) * 0.6;
+  }), "Assets/Resources/Sfx", 0.45); }

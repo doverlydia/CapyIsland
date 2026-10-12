@@ -133,7 +133,7 @@ namespace CapyIsland.Game
                 }, () =>
                 {
                     bool first = HobbyLog.LogBug(_kind.Id);
-                    if (_kind.Id == "Silkworm") HobbyLog.AddToBag("mat:Silk", 1);   // for sewing capes
+                    if (_kind.Id == "Silkworm") HobbyLog.AddToBag("mat:Silk", 1);   // for sewing fedoras and sun hats
                     int xp = 5 * _kind.Stars + (first ? 12 : 0);
                     HobbyLog.AddXp(Hobby.Bugs, xp);
                     Motes.Trigger("hobby_bug");

@@ -19,7 +19,7 @@ namespace CapyIsland.UI
     {
         public static HobbiesScreen Instance { get; private set; }
 
-        public enum Page { Hub, Fish, Birds, Bugs, Cats, Bag, Kitchen }
+        public enum Page { Hub, Fish, Birds, Bugs, Cats, Bag, Kitchen, Veg }
 
         protected override string Title => "Hobbies";
         protected override Sprite TitleIcon => IconPainter.Rod;
@@ -62,7 +62,7 @@ namespace CapyIsland.UI
             ClearChildren(_list);
             TitleLabel.text = _page switch
             {
-                Page.Fish => "Fish Journal", Page.Birds => "Bird Journal", Page.Bugs => "Bug Journal",
+                Page.Fish => "Fish Journal", Page.Birds => "Bird Journal", Page.Bugs => "Bug Journal", Page.Veg => "Vegetable Journal",
                 Page.Cats => "Cats", Page.Bag => "Bag", Page.Kitchen => "Kitchen", _ => "Hobbies",
             };
             switch (_page)
@@ -73,6 +73,7 @@ namespace CapyIsland.UI
                 case Page.Cats: CatsPage(); break;
                 case Page.Bag: BagPage(); break;
                 case Page.Kitchen: KitchenPage(); break;
+                case Page.Veg: VegPage(); break;
                 default: Hub(); break;
             }
             _scroll.verticalNormalizedPosition = 1f;
@@ -108,9 +109,9 @@ namespace CapyIsland.UI
                     "Bugs settle on flowers, trees and grass near you. Tap one to net it, gently.",
                     "Journal", () => Go(Page.Bugs))),
                 (Hobby.Gardening, "Gardening", IconPainter.Sparkle, UiKit.Hex("8A5A32"), () => HobbyCard(Hobby.Gardening, "Gardening", IconPainter.Sparkle, UiKit.Hex("8A5A32"),
-                    $"{HobbyLog.Plots.Count} of {Game.Gardening.MaxPlots} plots",
+                    $"{HobbyLog.Crops.Count} of {HobbyData.Crops.Length} vegetables grown",
                     "Buy vegetable plots at the Garden Shop and put them anywhere. Tap one to plant seeds, come back when it's grown.",
-                    "Show me", () => ShowInWorld(FindPlaced("Vegetable Plot") ?? FindPlaced("Garden Shop"), "Buy a vegetable plot at the Garden Shop, then put it down anywhere."))),
+                    "Journal", () => Go(Page.Veg))),
                 (Hobby.Cooking, "Cooking", IconPainter.Flame, UiKit.Primary, () => HobbyCard(Hobby.Cooking, "Cooking", IconPainter.Flame, UiKit.Primary,
                     $"{CountDishes()} dish{(CountDishes() == 1 ? "" : "es")} in your bag",
                     "Tap your stove and drag ingredients into the pot. Islanders with a dish in a bubble over their head will pay for it.",
@@ -123,49 +124,217 @@ namespace CapyIsland.UI
                     $"{HobbyLog.Books.Count} stor{(HobbyLog.Books.Count == 1 ? "y" : "ies")} written",
                     "Message bottles wash up on your beach. Read them, and buy a bottle from the sailor to leave a story of your own.",
                     "Show me", () => ShowInWorld(SeaLibrary.Spot, "The bottles are on your beach."))),
-                (Hobby.Sewing, "Sewing", IconPainter.Shirt, UiKit.Hex("C2577F"), () => HobbyCard(Hobby.Sewing, "Sewing", IconPainter.Shirt, UiKit.Hex("C2577F"),
+                (Hobby.Sewing, "Sewing", IconPainter.Hat, UiKit.Hex("C2577F"), () => HobbyCard(Hobby.Sewing, "Sewing", IconPainter.Hat, UiKit.Hex("C2577F"),
                     $"{HobbyLog.Designs.Count} piece{(HobbyLog.Designs.Count == 1 ? "" : "s")} sewn",
-                    "At your sewing machine: a hat needs cotton from your garden, a cape needs silk from silkworms. Then decorate it and wear it!",
+                    "At your sewing machine: a hat needs cotton from your garden. Then decorate it and wear it!",
                     "Show me", () => ShowInWorld(SewingStation.Placed() != null ? SewingStation.Placed().transform : null, "Put your sewing machine down somewhere first."))),
             };
-            foreach (var c in all) if (HobbyLog.IsUnlocked(c.hobby)) c.card();
-            bool header = false;
-            foreach (var c in all)
+            // A carousel, one big picture card per hobby: yours first, then the ones still to take up.
+            var order = new List<(Hobby hobby, string name, Sprite icon, Color colour, System.Action card)>();
+            foreach (var c in all) if (HobbyLog.IsUnlocked(c.hobby)) order.Add(c);
+            foreach (var c in all) if (!HobbyLog.IsUnlocked(c.hobby)) order.Add(c);
+            Carousel(order.Count, i =>
             {
-                if (HobbyLog.IsUnlocked(c.hobby)) continue;
-                if (!header) { SectionLabel(_list, "Still to discover"); header = true; }
-                LockedCard(c.hobby, c.name, c.icon);
+                var c = order[i];
+                if (HobbyLog.IsUnlocked(c.hobby)) c.card();
+                else LockedCard(c.hobby, c.name, c.icon);
+            });
+        }
+
+        // ---------------------------------------------------------------- the carousel
+
+        RectTransform _cardSlot;    // the card being built goes in here
+        ScrollRect _carousel;
+        int _carouselIndex;
+        readonly List<Image> _dots = new();
+
+        /// <summary>
+        /// A row of full-width pages you swipe through, snapping to each; arrows at the sides and
+        /// dots underneath. <paramref name="build"/> fills page i (its cards go into <see cref="_cardSlot"/>).
+        /// </summary>
+        void Carousel(int count, Action<int> build)
+        {
+            float width = Sheet.sizeDelta.x - 64f - 8f;
+            float height = Mathf.Max(760f, Sheet.sizeDelta.y - 128f - 64f - 96f - 16f - 70f);
+            var holder = UiKit.Rect("Carousel", _list);
+            holder.gameObject.AddComponent<LayoutElement>().preferredHeight = height;
+
+            var view = UiKit.Rect("View", holder);
+            UiKit.Stretch(view);
+            view.gameObject.AddComponent<RectMask2D>();
+            var hit = view.gameObject.AddComponent<Image>();
+            hit.color = new Color(0f, 0f, 0f, 0f);
+            var strip = UiKit.Rect("Pages", view);
+            strip.anchorMin = new Vector2(0f, 0f);
+            strip.anchorMax = new Vector2(0f, 1f);
+            strip.pivot = new Vector2(0f, 0.5f);
+            strip.sizeDelta = new Vector2(width * count, 0f);
+            strip.anchoredPosition = Vector2.zero;
+            _carousel = view.gameObject.AddComponent<ScrollRect>();
+            _carousel.content = strip;
+            _carousel.viewport = view;
+            _carousel.horizontal = true;
+            _carousel.vertical = false;
+            _carousel.movementType = ScrollRect.MovementType.Elastic;
+            _carousel.inertia = false;
+            view.gameObject.AddComponent<Snap>().Init(this, count);
+
+            for (int i = 0; i < count; i++)
+            {
+                var page = UiKit.Rect("Page" + i, strip);
+                page.anchorMin = new Vector2(0f, 0f);
+                page.anchorMax = new Vector2(0f, 1f);
+                page.pivot = new Vector2(0f, 0.5f);
+                page.sizeDelta = new Vector2(width, 0f);
+                page.anchoredPosition = new Vector2(i * width, 0f);
+                var v = page.gameObject.AddComponent<VerticalLayoutGroup>();
+                v.padding = new RectOffset(10, 10, 4, 4);
+                v.childControlWidth = v.childControlHeight = true;
+                v.childForceExpandWidth = v.childForceExpandHeight = true;
+                _cardSlot = page;
+                build(i);
             }
+            _cardSlot = null;
+
+            // Arrows at the sides.
+            Arrow(holder, -1, count);
+            Arrow(holder, 1, count);
+
+            // Dots.
+            _dots.Clear();
+            var dots = UiKit.Rect("Dots", _list);
+            var dh = dots.gameObject.AddComponent<HorizontalLayoutGroup>();
+            dh.spacing = 14f;
+            dh.childAlignment = TextAnchor.MiddleCenter;
+            dh.childControlWidth = dh.childControlHeight = false;
+            dh.childForceExpandWidth = dh.childForceExpandHeight = false;
+            dots.gameObject.AddComponent<LayoutElement>().preferredHeight = 40f;
+            for (int i = 0; i < count; i++)
+            {
+                var d = UiKit.Image(dots, "Dot" + i, UiKit.Circle, UiKit.SurfaceSunk);
+                d.rectTransform.sizeDelta = new Vector2(20f, 20f);
+                _dots.Add(d);
+            }
+            ShowPage(Mathf.Clamp(_carouselIndex, 0, count - 1), false);
+        }
+
+        void Arrow(RectTransform holder, int dir, int count)
+        {
+            var a = UiKit.Image(holder, dir < 0 ? "Prev" : "Next", UiKit.Circle, new Color(1f, 1f, 1f, 0.92f), true).rectTransform;
+            a.anchorMin = a.anchorMax = a.pivot = new Vector2(dir < 0 ? 0f : 1f, 0.68f);
+            a.anchoredPosition = new Vector2(dir < 0 ? 18f : -18f, 0f);
+            a.sizeDelta = new Vector2(76f, 76f);
+            UiKit.AddShadow(a, 10f, 4f, 0.22f);
+            var ic = UiKit.Image(a, "Arrow", IconPainter.Arrow, UiKit.Ink);
+            ic.preserveAspect = true;
+            UiKit.Stretch(ic.rectTransform, 20f, 20f, 20f, 20f);
+            if (dir < 0) ic.rectTransform.localScale = new Vector3(-1f, 1f, 1f);
+            var b = a.gameObject.AddComponent<Button>();
+            b.transition = Selectable.Transition.None;
+            b.onClick.AddListener(() => ShowPage(Mathf.Clamp(_carouselIndex + dir, 0, count - 1), true));
+            a.gameObject.AddComponent<PressSquash>();
+        }
+
+        void ShowPage(int index, bool animate)
+        {
+            if (_carousel == null) return;
+            _carouselIndex = index;
+            int count = _dots.Count;
+            float target = count > 1 ? index / (float)(count - 1) : 0f;
+            _carousel.StopMovement();
+            DOTween.Kill(_carousel);
+            if (animate) DOTween.To(() => _carousel.horizontalNormalizedPosition, x => _carousel.horizontalNormalizedPosition = x, target, 0.3f).SetEase(Ease.OutCubic).SetUpdate(true).SetTarget(_carousel);
+            else { Canvas.ForceUpdateCanvases(); _carousel.horizontalNormalizedPosition = target; }
+            for (int i = 0; i < _dots.Count; i++)
+            {
+                _dots[i].color = i == index ? AccentColour : UiKit.SurfaceSunk;
+                _dots[i].rectTransform.sizeDelta = Vector2.one * (i == index ? 26f : 20f);
+            }
+        }
+
+        /// <summary>Lets go of a swipe on the nearest page (or the next one, for a flick).</summary>
+        class Snap : MonoBehaviour, IBeginDragHandler, IEndDragHandler
+        {
+            HobbiesScreen _screen;
+            int _count;
+            float _from;
+
+            public void Init(HobbiesScreen s, int count) { _screen = s; _count = count; }
+
+            public void OnBeginDrag(PointerEventData e)
+            {
+                DOTween.Kill(_screen._carousel);
+                _from = _screen._carousel.horizontalNormalizedPosition;
+            }
+
+            public void OnEndDrag(PointerEventData e)
+            {
+                if (_count <= 1) return;
+                float pos = _screen._carousel.horizontalNormalizedPosition * (_count - 1);
+                float moved = (_screen._carousel.horizontalNormalizedPosition - _from) * (_count - 1);
+                int index = Mathf.Abs(moved) > 0.15f && Mathf.Abs(moved) < 0.5f
+                    ? Mathf.RoundToInt(_from * (_count - 1)) + (moved > 0 ? 1 : -1)
+                    : Mathf.RoundToInt(pos);
+                _screen.ShowPage(Mathf.Clamp(index, 0, _count - 1), true);
+            }
+        }
+
+        /// <summary>The picture of the capybara at a hobby, for its card.</summary>
+        static Sprite Vignette(Hobby hobby) => HobbyData.Art("Vignette_" + hobby);
+
+        /// <summary>
+        /// A page of the carousel: the capybara at it, big, with its level, how you're getting on,
+        /// a tip and a button. A hobby not taken up yet is greyed, locked, and says how to start.
+        /// </summary>
+        RectTransform PictureCard(Hobby hobby, Color colour, bool locked, out RectTransform text)
+        {
+            var card = UiKit.Image(_cardSlot != null ? (Transform)_cardSlot : _list, hobby.ToString(), UiKit.Rounded(40), locked ? UiKit.Hex("F1ECE4") : Color.white).rectTransform;
+            UiKit.AddShadow(card, 16f, 6f, 0.18f);
+
+            // The picture, on a soft disc in the hobby's colour.
+            var art = UiKit.Rect("Art", card);
+            art.anchorMin = new Vector2(0f, 0.42f);
+            art.anchorMax = Vector2.one;
+            art.offsetMin = new Vector2(24f, 0f);
+            art.offsetMax = new Vector2(-24f, -24f);
+            var disc = UiKit.Image(art, "Disc", IconPainter.Glow, new Color(colour.r, colour.g, colour.b, locked ? 0.12f : 0.3f));
+            disc.preserveAspect = true;
+            UiKit.Stretch(disc.rectTransform, -40f, -40f, -40f, -40f);
+            var pic = UiKit.Image(art, "Picture", Vignette(hobby), locked ? new Color(0.55f, 0.5f, 0.47f, 0.55f) : Color.white);
+            pic.preserveAspect = true;
+            UiKit.Stretch(pic.rectTransform);
+            if (locked)
+            {
+                var lk = UiKit.Image(art, "Lock", UiKit.Circle, UiKit.Hex("8A7563"));
+                UiKit.Place(lk.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(110f, 110f));
+                lk.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+                var li = UiKit.Image(lk.transform, "Icon", IconPainter.Lock, Color.white);
+                UiKit.Stretch(li.rectTransform, 26f, 26f, 26f, 26f);
+            }
+
+            // The words, under it.
+            text = UiKit.Rect("Words", card);
+            text.anchorMin = Vector2.zero;
+            text.anchorMax = new Vector2(1f, 0.42f);
+            text.offsetMin = new Vector2(30f, 24f);
+            text.offsetMax = new Vector2(-30f, 0f);
+            var v = text.gameObject.AddComponent<VerticalLayoutGroup>();
+            v.spacing = 10f;
+            v.childAlignment = TextAnchor.MiddleCenter;
+            v.childControlWidth = v.childControlHeight = true;
+            v.childForceExpandWidth = true;
+            v.childForceExpandHeight = false;
+            return card;
         }
 
         /// <summary>A hobby you have not taken up yet: greyed out, with what to buy and where.</summary>
         void LockedCard(Hobby hobby, string name, Sprite icon)
         {
-            var card = UiKit.Image(_list, name, UiKit.Rounded(32), new Color(1f, 1f, 1f, 0.6f)).rectTransform;
-            var h = card.gameObject.AddComponent<HorizontalLayoutGroup>();
-            h.padding = new RectOffset(24, 24, 18, 18);
-            h.spacing = 18f;
-            h.childAlignment = TextAnchor.MiddleLeft;
-            h.childControlWidth = h.childControlHeight = true;
-            h.childForceExpandWidth = h.childForceExpandHeight = false;
-            var disc = UiKit.Image(card, "Disc", UiKit.Circle, UiKit.Hex("CFC7BE"));
-            var dle = disc.gameObject.AddComponent<LayoutElement>();
-            dle.preferredWidth = dle.preferredHeight = 80f;
-            var ic = UiKit.Image(disc.transform, "Icon", icon, Color.white);
-            ic.preserveAspect = true;
-            UiKit.Stretch(ic.rectTransform, 18f, 18f, 18f, 18f);
-            var lk = UiKit.Image(disc.transform, "Lock", IconPainter.Lock, UiKit.Hex("8A7563"));
-            UiKit.Place(lk.rectTransform, new Vector2(1f, 0f), new Vector2(4f, -4f), new Vector2(32f, 32f));
-            var col = UiKit.Rect("Column", card);
-            var cv = col.gameObject.AddComponent<VerticalLayoutGroup>();
-            cv.spacing = 4f;
-            cv.childControlWidth = cv.childControlHeight = true;
-            cv.childForceExpandWidth = true;
-            cv.childForceExpandHeight = false;
-            col.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1f;
-            var title = UiKit.Text(col, "Name", name, 34f, UiKit.InkSoft, true);
+            PictureCard(hobby, UiKit.InkSoft, true, out var text);
+            var title = UiKit.Text(text, "Name", name, 46f, UiKit.InkSoft, true, TextAlignmentOptions.Center);
             title.textWrappingMode = TextWrappingModes.NoWrap;
-            UiKit.Text(col, "How", HobbyLog.HowToUnlock(hobby), 26f, UiKit.InkSoft);
+            var how = UiKit.Text(text, "How", HobbyLog.HowToUnlock(hobby), 28f, UiKit.InkSoft, false, TextAlignmentOptions.Center);
+            how.overflowMode = TextOverflowModes.Overflow;
         }
 
         static int CountDishes()
@@ -184,47 +353,17 @@ namespace CapyIsland.UI
 
         void HobbyCard(Hobby hobby, string name, Sprite icon, Color colour, string stat, string tip, string action, Action open)
         {
-            var card = UiKit.Image(_list, name, UiKit.Rounded(32), Color.white).rectTransform;
-            var v = card.gameObject.AddComponent<VerticalLayoutGroup>();
-            v.padding = new RectOffset(24, 24, 22, 24);
-            v.spacing = 12f;
-            v.childControlWidth = v.childControlHeight = true;
-            v.childForceExpandWidth = true;
-            v.childForceExpandHeight = false;
-
-            var top = UiKit.Rect("Top", card);
-            var h = top.gameObject.AddComponent<HorizontalLayoutGroup>();
-            h.spacing = 18f;
-            h.childAlignment = TextAnchor.MiddleLeft;
-            h.childControlWidth = h.childControlHeight = true;
-            h.childForceExpandWidth = h.childForceExpandHeight = false;
-
-            var disc = UiKit.Image(top, "Disc", UiKit.Circle, colour);
-            var dle = disc.gameObject.AddComponent<LayoutElement>();
-            dle.preferredWidth = dle.preferredHeight = 96f;
-            var ic = UiKit.Image(disc.transform, "Icon", icon, Color.white);
-            ic.preserveAspect = true;
-            UiKit.Stretch(ic.rectTransform, 20f, 20f, 20f, 20f);
-
-            var col = UiKit.Rect("Column", top);
-            var cv = col.gameObject.AddComponent<VerticalLayoutGroup>();
-            cv.spacing = 6f;
-            cv.childControlWidth = cv.childControlHeight = true;
-            cv.childForceExpandWidth = true;
-            cv.childForceExpandHeight = false;
-            col.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1f;
-            var title = UiKit.Text(col, "Name", $"{name}  <size=75%><color=#{ColorUtility.ToHtmlStringRGB(colour)}>Level {HobbyLog.Level(hobby)}</color></size>", 38f, UiKit.Ink, true);
+            PictureCard(hobby, colour, false, out var text);
+            var title = UiKit.Text(text, "Name", $"{name}  <size=70%><color=#{ColorUtility.ToHtmlStringRGB(colour)}>Level {HobbyLog.Level(hobby)}</color></size>", 46f, UiKit.Ink, true, TextAlignmentOptions.Center);
             title.textWrappingMode = TextWrappingModes.NoWrap;
-            var fill = UiKit.ProgressBar(col, "Progress", colour, 18f);
+            var fill = UiKit.ProgressBar(text, "Progress", colour, 18f);
             UiKit.SetProgress(fill, HobbyLog.LevelProgress(hobby));
-            UiKit.Text(col, "Stat", stat, 26f, UiKit.InkSoft);
-
-            var go = UiKit.Button(top, "Open", action, UiKit.ButtonStyle.Primary, open, 28f);
-            var ble = go.transform.parent.gameObject.AddComponent<LayoutElement>();
-            ble.preferredWidth = 170f; ble.preferredHeight = 72f;
-
-            var t = UiKit.Text(card, "Tip", tip, 26f, UiKit.InkSoft);
+            UiKit.Text(text, "Stat", stat, 28f, UiKit.Ink, true, TextAlignmentOptions.Center);
+            var t = UiKit.Text(text, "Tip", tip, 25f, UiKit.InkSoft, false, TextAlignmentOptions.Center);
             t.overflowMode = TextOverflowModes.Overflow;
+            var go = UiKit.Button(text, "Open", action, UiKit.ButtonStyle.Primary, open, 32f);
+            var ble = go.transform.parent.gameObject.AddComponent<LayoutElement>();
+            ble.preferredHeight = 88f;
         }
 
         void Back()
@@ -316,6 +455,31 @@ namespace CapyIsland.UI
             d.enableAutoSizing = true;
             d.fontSizeMin = 14f;
             d.fontSizeMax = 20f;
+        }
+
+        /// <summary>
+        /// Every vegetable you can grow: the ones you have harvested (and how many), the rest still
+        /// a mystery, with the gardening level that brings their seeds.
+        /// </summary>
+        void VegPage()
+        {
+            Back();
+            var plots = UiKit.Button(_list, "Plots", "Go to my plots", UiKit.ButtonStyle.Spring,
+                () => ShowInWorld(FindPlaced("Vegetable Plot") ?? FindPlaced("Garden Shop"), "Buy a vegetable plot at the Garden Shop, then put it down anywhere."), 30f, IconPainter.Sparkle);
+            plots.transform.parent.gameObject.AddComponent<LayoutElement>().preferredHeight = 90f;
+            JournalHeader(Hobby.Gardening);
+            var grid = Grid(HobbyData.Crops.Length);
+            foreach (var crop in HobbyData.Crops)
+            {
+                var entry = HobbyLog.CropEntry(crop.Id);
+                bool known = entry != null;
+                var tile = UiKit.Image(grid.transform, crop.Name, UiKit.Rounded(26), known ? Color.white : UiKit.SurfaceSunk);
+                Picture(tile.transform, HobbyData.ItemArt("crop:" + crop.Id), known);
+                Label(tile.transform, known ? crop.Name : "???", known);
+                Detail(tile.transform, known
+                    ? Loc.F("×{0} harvested", entry.count) + "\n" + Loc.F("Grows in {0} min", crop.Minutes)
+                    : Loc.F("Gardening level {0}", crop.MinLevel));
+            }
         }
 
         void CatsPage()
@@ -656,15 +820,15 @@ namespace CapyIsland.UI
     }
 
     /// <summary>
-    /// The sewing machine: pick a pattern — a hat (3 cotton from your garden) or a cape (3 silk
-    /// from silkworms) — paint it pixel by pixel from a little palette, and save it. Every piece
-    /// you sew goes into your wardrobe (hats with the hats, capes on the back) to wear.
+    /// The sewing machine: a hat (3 cotton from your garden), painted pixel by pixel from a little
+    /// palette and saved. Every hat you sew goes into your wardrobe, with the hats, to wear.
     /// </summary>
     public class SewingScreen : UiScreen
     {
         public static SewingScreen Instance { get; private set; }
 
-        public const int Size = 16;
+        /// <summary>The canvas, in stitches each way (hats sewn before were 16 or 32: they are scaled up to open).</summary>
+        public const int Size = 64;
         public static readonly Color[] Palette =
         {
             UiKit.Hex("FFFFFF"), UiKit.Hex("2B2B2B"), UiKit.Hex("E8553E"), UiKit.Hex("FF8A3D"), UiKit.Hex("FFC93C"), UiKit.Hex("5DBB63"),
@@ -672,14 +836,33 @@ namespace CapyIsland.UI
         };
 
         /// <summary>What can be sewn, and what it takes.</summary>
-        public static readonly (string kind, string name, string material, int count, string where)[] Patterns =
+        public static readonly (string kind, string name, (string material, int count)[] needs, string where)[] Patterns =
         {
-            ("hat", "Hat", "crop:Cotton", 3, "Grow cotton in your garden (gardening level 2)."),
-            ("cape", "Cape", "mat:Silk", 3, "Catch silkworms for their silk (bug catching level 2)."),
+            ("hat", "Beanie", new[] { ("crop:Cotton", 3) }, "Grow cotton in your garden (gardening level 2)."),
+            ("fedora", "Fedora", new[] { ("mat:Silk", 3) }, "Catch silkworms for their silk (bug catching level 2)."),
+            ("sunhat", "Sun Hat", new[] { ("crop:Cotton", 2), ("mat:Silk", 2) }, "Grow cotton in your garden and catch silkworms for their silk."),
+            // Capes were dropped: they hang behind the capybara, so the painting never showed.
+            // Old ones still wear (Wardrobe), and still draw ("cape" in Shape below).
         };
 
+        /// <summary>Everything a pattern needs is in your bag.</summary>
+        static bool HaveFor(int pattern)
+        {
+            foreach (var (m, n) in Patterns[pattern].needs) if (HobbyLog.Count(m) < n) return false;
+            return true;
+        }
+
+        /// <summary>"2/3 cotton · 0/2 silk": what a pattern takes, and what you have of it.</summary>
+        static string NeedsLine(int pattern)
+        {
+            var parts = new List<string>();
+            foreach (var (m, n) in Patterns[pattern].needs)
+                parts.Add($"{Mathf.Min(HobbyLog.Count(m), n)}/{n} {Loc.T(HobbyData.ItemName(m)).ToLower()}");
+            return string.Join(" · ", parts);
+        }
+
         protected override string Title => "Sewing";
-        protected override Sprite TitleIcon => IconPainter.Shirt;
+        protected override Sprite TitleIcon => IconPainter.Hat;
         protected override Color AccentColour => UiKit.Hex("E58FB0");
 
         Texture2D _texture;
@@ -703,19 +886,43 @@ namespace CapyIsland.UI
 
         string Kind => Patterns[_pattern].kind;
 
-        /// <summary>The outline of a pattern, as a signed distance (negative inside). Shirts are the old designs.</summary>
-        public static float Shape(string kind, float u, float v)
+        // ---------------------------------------------------------------- the shapes
+
+        /// <summary>
+        /// A pattern's parts (crown, brim, band, bobble…), each as a signed distance at (u, v):
+        /// negative inside. Later parts lie on top of earlier ones. Fills the first
+        /// <paramref name="d"/> slots and returns how many parts there are.
+        /// </summary>
+        static int Parts(string kind, float u, float v, float[] d)
         {
             switch (kind)
             {
                 case "hat":
                 {
                     // A beanie: a round crown on a turned-up brim, and a bobble on top.
-                    float crown = IconPainter.Disc(u, v, 0f, -0.05f, 0.62f);
-                    crown = Mathf.Max(crown, -0.2f - v);   // flat at the bottom, where the brim goes
-                    float brim = IconPainter.Box(u, v, 0f, -0.33f, 0.8f, 0.16f, 0.1f);
-                    float bobble = IconPainter.Disc(u, v, 0f, 0.66f, 0.17f);
-                    return Mathf.Min(Mathf.Min(crown, brim), bobble);
+                    d[0] = Mathf.Max(IconPainter.Disc(u, v, 0f, -0.05f, 0.62f), -0.2f - v);
+                    d[1] = IconPainter.Box(u, v, 0f, -0.33f, 0.8f, 0.16f, 0.1f);
+                    d[2] = IconPainter.Disc(u, v, 0f, 0.66f, 0.17f);
+                    return 3;
+                }
+                case "fedora":
+                {
+                    // A smart felt fedora: a tall crown pinched in at the top, a band, a wide brim.
+                    float crown = Mathf.Max(IconPainter.Box(u, v, 0f, 0.08f, 0.44f, 0.4f, 0.18f), -IconPainter.Disc(u, v, 0f, 0.62f, 0.16f));
+                    d[0] = crown;
+                    d[1] = Mathf.Max(crown, Mathf.Abs(v + 0.13f) - 0.08f);   // the band round the crown
+                    d[2] = IconPainter.Box(u, v, 0f, -0.36f, 0.9f, 0.1f, 0.09f);
+                    return 3;
+                }
+                case "sunhat":
+                {
+                    // A straw sun hat: a round crown with a ribbon, a very wide brim, a bow at the side.
+                    float crown = Mathf.Max(IconPainter.Disc(u, v, 0f, -0.12f, 0.5f), -0.2f - v);
+                    d[0] = crown;
+                    d[1] = Mathf.Max(crown, Mathf.Abs(v + 0.08f) - 0.07f);   // the ribbon
+                    d[2] = IconPainter.Box(u, v, 0f, -0.3f, 0.96f, 0.12f, 0.12f);
+                    d[3] = Mathf.Min(IconPainter.Disc(u, v, 0.5f, -0.05f, 0.14f), IconPainter.Disc(u, v, 0.7f, 0.02f, 0.12f));
+                    return 4;
                 }
                 case "cape":
                 {
@@ -724,14 +931,44 @@ namespace CapyIsland.UI
                     float half = Mathf.Lerp(0.36f, 0.86f, t);
                     float side = Mathf.Abs(u) - half;
                     float top = v - 0.7f, bottom = -0.85f + Mathf.Sin(u * 9f) * 0.04f - v;
-                    float body = Mathf.Max(side, Mathf.Max(top, bottom));
-                    float collar = IconPainter.Box(u, v, 0f, 0.74f, 0.42f, 0.09f, 0.08f);
-                    return Mathf.Min(body, collar);
+                    d[0] = Mathf.Max(side, Mathf.Max(top, bottom));
+                    d[1] = IconPainter.Box(u, v, 0f, 0.74f, 0.42f, 0.09f, 0.08f);
+                    return 2;
                 }
                 default:
-                    return IconPainter.ShirtShape(u, v);
+                    d[0] = IconPainter.ShirtShape(u, v);
+                    return 1;
             }
         }
+
+        [System.ThreadStatic] static float[] _parts;
+
+        /// <summary>The outline of a pattern, as a signed distance (negative inside). Shirts are the old designs.</summary>
+        public static float Shape(string kind, float u, float v)
+        {
+            var d = _parts ??= new float[4];
+            int n = Parts(kind, u, v, d);
+            float s = d[0];
+            for (int i = 1; i < n; i++) s = Mathf.Min(s, d[i]);
+            return s;
+        }
+
+        /// <summary>
+        /// Which part of the pattern a point is on (the topmost one there), or -1 off it, and how
+        /// far inside that part's own edge it is (for the seams between parts).
+        /// </summary>
+        static int Region(string kind, float u, float v, out float edge)
+        {
+            var d = _parts ??= new float[4];
+            int n = Parts(kind, u, v, d);
+            for (int i = n - 1; i >= 0; i--)
+                if (d[i] < 0f) { edge = d[i]; return i; }
+            edge = 1f;
+            return -1;
+        }
+
+        static int RegionAt(string kind, int x, int y) =>
+            Region(kind, (x + 0.5f) / Size * 2f - 1f, (y + 0.5f) / Size * 2f - 1f, out _);
 
         static bool Inside(string kind, int x, int y)
         {
@@ -739,10 +976,86 @@ namespace CapyIsland.UI
             return Shape(kind, u, v) < 0f;
         }
 
+        protected override bool FullBleed => true;
+
+        /// <summary>Where, up the painting, the mannequin stands: on the rug, in front of the wall (which meets the floor at 0.38).</summary>
+        const float PaintedFloor = 0.3f;
+
+        RectTransform _body, _painting, _figure, _hat, _panel, _zoomBar;
+        Vector2 _figureHome;
+        bool _wide;
+
+        bool IsWide() => _body.rect.width > _body.rect.height * 1.1f;
+
+        /// <summary>
+        /// A little tailor's corner: the painted room, a capybara mannequin standing on the rug
+        /// with the hat you are making on its head (you paint it right there, zooming in as close
+        /// as you like), and a workbench of colours, tools and stickers along the bottom (or down
+        /// the right when the phone is turned).
+        /// </summary>
         protected override void Build(RectTransform body)
         {
-            var scroll = UiKit.ScrollList(body, "List", out var list, 16f, new RectOffset(4, 4, 8, 32));
-            UiKit.Stretch((RectTransform)scroll.transform);
+            _body = body;
+
+            // The room.
+            var wash = UiKit.Image(body, "Room", null, UiKit.Hex("E9C9B8"), true);
+            UiKit.Stretch(wash.rectTransform, -400f, -400f, -400f, -400f);
+            var wall = UiKit.Rect("Wall", body);
+            UiKit.Stretch(wall, -60f, -60f, -60f, -60f);
+            wall.gameObject.AddComponent<RectMask2D>();
+            var art = HobbyData.Art("Sew_Room");
+            if (art != null)
+            {
+                var pic = UiKit.Image(wall, "Painting", art, Color.white);
+                _painting = pic.rectTransform;
+                _painting.pivot = new Vector2(0.5f, PaintedFloor);
+            }
+
+            // The stage: the mannequin, and on its head the hat, together in a window you can
+            // zoom into (pinch, the mouse wheel, or + and −) and move about with two fingers.
+            var stage = UiKit.Image(body, "Stage", null, new Color(0f, 0f, 0f, 0f), true);
+            stage.gameObject.AddComponent<PanSurface>().Owner = this;   // the hand tool drags anywhere on the stage
+            stage.gameObject.AddComponent<RectMask2D>();
+            _window = stage.rectTransform;
+            _figure = UiKit.Rect("Figure", _window);
+            _figure.anchorMin = _figure.anchorMax = _figure.pivot = new Vector2(0.5f, 0.5f);
+            _zoomRoot = _figure;
+            var mannequin = UiKit.Image(_figure, "Mannequin", HobbyData.Art("Sew_Mannequin"), Color.white);
+            mannequin.preserveAspect = true;
+            UiKit.Stretch(mannequin.rectTransform);
+            _hat = UiKit.Rect("Hat", _figure);
+            _hat.anchorMin = _hat.anchorMax = HatOnHead;
+            _hat.pivot = new Vector2(0.5f, 0.5f);
+            _silhouette = UiKit.Image(_hat, "Silhouette", null, Color.white);
+            _silhouette.preserveAspect = true;
+            UiKit.Stretch(_silhouette.rectTransform);
+            _texture = new Texture2D(View, View, TextureFormat.RGBA32, false) { filterMode = FilterMode.Point, wrapMode = TextureWrapMode.Clamp };
+            var raw = UiKit.Rect("Paint", _hat);
+            UiKit.Stretch(raw);
+            _canvas = raw.gameObject.AddComponent<RawImage>();
+            _canvas.texture = _texture;
+            raw.gameObject.AddComponent<PaintSurface>().Owner = this;
+            _seamOverlay = UiKit.Image(_hat, "Seams", null, Color.white);
+            _seamOverlay.preserveAspect = true;
+            UiKit.Stretch(_seamOverlay.rectTransform);
+
+            _zoomBar = UiKit.Rect("ZoomBar", body);
+            _zoomBar.pivot = new Vector2(1f, 1f);
+            _zoomBar.sizeDelta = new Vector2(84f, 272f);
+            var zv = _zoomBar.gameObject.AddComponent<VerticalLayoutGroup>();
+            zv.spacing = 10f;
+            zv.childControlWidth = zv.childControlHeight = true;
+            zv.childForceExpandWidth = zv.childForceExpandHeight = true;
+            ZoomButton(_zoomBar, "+", () => ZoomBy(1.6f, HatCentre()));
+            ZoomButton(_zoomBar, "−", () => ZoomBy(1f / 1.6f, HatCentre()));
+            ZoomButton(_zoomBar, "Fit", Recentre);
+
+            TopBar(body);
+
+            // The workbench: everything else, scrolling.
+            _panel = UiKit.Card(body, "Workbench", UiKit.Surface, 40, true, true).rectTransform;
+            var scroll = UiKit.ScrollList(_panel, "List", out var list, 16f, new RectOffset(4, 4, 8, 32));
+            UiKit.Stretch((RectTransform)scroll.transform, 24f, 16f, 24f, 20f);
 
             // Which pattern.
             _patternRow = UiKit.Rect("Patterns", list);
@@ -750,24 +1063,7 @@ namespace CapyIsland.UI
             ph.spacing = 14f;
             ph.childControlWidth = ph.childControlHeight = true;
             ph.childForceExpandWidth = true;
-            _patternRow.gameObject.AddComponent<LayoutElement>().preferredHeight = 96f;
-
-            // The canvas: the pattern's silhouette under a painted 16×16 texture.
-            var frame = UiKit.Rect("Canvas", list);
-            frame.gameObject.AddComponent<LayoutElement>().preferredHeight = 520f;
-            var mat = UiKit.Image(frame, "Mat", UiKit.Rounded(36), UiKit.Hex("CFE3E0"));
-            UiKit.Place(mat.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(540f, 520f));
-            mat.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            _silhouette = UiKit.Image(frame, "Silhouette", null, Color.white);
-            _silhouette.preserveAspect = true;
-            UiKit.Place(_silhouette.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(500f, 500f));
-            _silhouette.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            _texture = new Texture2D(Size, Size, TextureFormat.RGBA32, false) { filterMode = FilterMode.Point, wrapMode = TextureWrapMode.Clamp };
-            var raw = UiKit.Rect("Paint", _silhouette.transform);
-            UiKit.Stretch(raw);
-            _canvas = raw.gameObject.AddComponent<RawImage>();
-            _canvas.texture = _texture;
-            raw.gameObject.AddComponent<PaintSurface>().Owner = this;
+            _patternRow.gameObject.AddComponent<LayoutElement>().preferredHeight = 112f;
 
             _status = UiKit.Text(list, "Status", "Tap or drag to paint.", 26f, UiKit.InkSoft, false, TextAlignmentOptions.Center);
 
@@ -784,9 +1080,12 @@ namespace CapyIsland.UI
             {
                 int index = i;
                 var sw = UiKit.Image(pal, "Swatch" + i, UiKit.Circle, Palette[i], true);
+                // A thin ring round every swatch, so the white one shows on the white bench.
+                var ring = UiKit.Image(sw.transform, "Ring", IconPainter.Ring, new Color(0.23f, 0.16f, 0.12f, 0.45f));
+                UiKit.Stretch(ring.rectTransform);
                 var b = sw.gameObject.AddComponent<Button>();
                 b.transition = Selectable.Transition.None;
-                b.onClick.AddListener(() => { _colour = index; _erase = false; Swatches(); });
+                b.onClick.AddListener(() => { _colour = index; _erase = false; if (_tool == Tool.Sticker) Pick(Tool.Brush); Swatches(); });
                 _swatches.Add(sw);
             }
             var eraser = UiKit.Image(pal, "Eraser", UiKit.Circle, UiKit.SurfaceSunk, true);
@@ -794,8 +1093,65 @@ namespace CapyIsland.UI
             UiKit.Stretch(x.rectTransform, 16f, 16f, 16f, 16f);
             var eb = eraser.gameObject.AddComponent<Button>();
             eb.transition = Selectable.Transition.None;
-            eb.onClick.AddListener(() => { _erase = true; Swatches(); });
+            eb.onClick.AddListener(() => { _erase = true; if (_tool == Tool.Sticker) Pick(Tool.Brush); Swatches(); });
             _swatches.Add(eraser);
+
+            // Tools: paint pixel by pixel, fill a whole area, or take back the last change.
+            var tools = UiKit.Rect("Tools", list);
+            var th = tools.gameObject.AddComponent<HorizontalLayoutGroup>();
+            th.spacing = 14f;
+            th.childControlWidth = th.childControlHeight = true;
+            th.childForceExpandWidth = true;
+            tools.gameObject.AddComponent<LayoutElement>().preferredHeight = 84f;
+            _brushButton = UiKit.Button(tools, "Brush", "Brush", UiKit.ButtonStyle.Secondary, () => Pick(Tool.Brush), 26f, IconPainter.Brush);
+            // The brush's size: three dots, small to large, beside it.
+            var sizes = UiKit.Rect("Sizes", tools);
+            var sh = sizes.gameObject.AddComponent<HorizontalLayoutGroup>();
+            sh.spacing = 6f;
+            sh.childAlignment = TextAnchor.MiddleCenter;
+            sh.childControlWidth = sh.childControlHeight = false;
+            sh.childForceExpandWidth = sh.childForceExpandHeight = false;
+            for (int i = 0; i < BrushSizes.Length; i++)
+            {
+                int index = i;
+                var back = UiKit.Image(sizes, "Size" + i, UiKit.Circle, UiKit.SurfaceSunk, true);
+                back.rectTransform.sizeDelta = new Vector2(64f, 64f);
+                var dot = UiKit.Image(back.transform, "Dot", UiKit.Circle, UiKit.Ink);
+                float r = 12f + i * 9f;
+                UiKit.Place(dot.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(r, r));
+                dot.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+                var bb = back.gameObject.AddComponent<Button>();
+                bb.transition = Selectable.Transition.None;
+                bb.onClick.AddListener(() => { _brush = index; if (_tool != Tool.Brush) Pick(Tool.Brush); BrushDots(); });
+                _sizeDots.Add(back);
+            }
+            _fillButton = UiKit.Button(tools, "Fill", "Fill", UiKit.ButtonStyle.Secondary, () => Pick(Tool.Fill), 26f, IconPainter.Bucket);
+            _handButton = UiKit.Button(tools, "Hand", "Move", UiKit.ButtonStyle.Secondary, () => Pick(Tool.Hand), 26f, TutorialPointer.HandSprite);
+            UiKit.Button(tools, "Undo", "Undo", UiKit.ButtonStyle.Secondary, Undo, 26f, IconPainter.Undo);
+
+            // Stickers: little ready-made pictures to stamp on, for when you don't want to paint it all.
+            SectionLabel(list, "Stickers");
+            var stickers = UiKit.Rect("Stickers", list);
+            var sg = stickers.gameObject.AddComponent<GridLayoutGroup>();
+            sg.cellSize = new Vector2(84f, 84f);
+            sg.spacing = new Vector2(12f, 12f);
+            sg.childAlignment = TextAnchor.MiddleCenter;
+            sg.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            sg.constraintCount = Stickers.Length;
+            stickers.gameObject.AddComponent<LayoutElement>().preferredHeight = 96f;
+            for (int i = 0; i < Stickers.Length; i++)
+            {
+                int index = i;
+                var back = UiKit.Image(stickers, Stickers[i].name, UiKit.Rounded(20), Color.white, true);
+                var stickerArt = UiKit.Image(back.transform, "Art", StickerSprite(i), Color.white);
+                stickerArt.preserveAspect = true;
+                UiKit.Stretch(stickerArt.rectTransform, 12f, 12f, 12f, 12f);
+                var sb = back.gameObject.AddComponent<Button>();
+                sb.transition = Selectable.Transition.None;
+                sb.onClick.AddListener(() => { _sticker = index; Pick(Tool.Sticker); });
+                back.gameObject.AddComponent<PressSquash>();
+                _stickerTiles.Add(back);
+            }
 
             var row = UiKit.Rect("Buttons", list);
             var h = row.gameObject.AddComponent<HorizontalLayoutGroup>();
@@ -819,9 +1175,117 @@ namespace CapyIsland.UI
             Clear();
         }
 
+        /// <summary>Where the hat sits on the mannequin, as a share of the mannequin's picture, and how wide it is.</summary>
+        static readonly Vector2 HatOnHead = new(0.5f, 0.84f);
+        const float HatWidth = 0.55f;
+
+        /// <summary>How high the top of the hat comes, over the mannequin's feet, as a share of its picture (the bobble pokes above it).</summary>
+        const float HatTop = 0.84f + HatWidth * 0.5f - 0.04f;
+
+        void TopBar(RectTransform body)
+        {
+            var chip = UiKit.Image(body, "TitleChip", UiKit.Rounded(40), UiKit.HudGlass).rectTransform;
+            chip.anchorMin = chip.anchorMax = chip.pivot = new Vector2(0f, 1f);
+            chip.anchoredPosition = new Vector2(28f, -28f);
+            chip.sizeDelta = new Vector2(300f, 88f);
+            var icon = UiKit.Image(chip, "Icon", IconPainter.Hat, UiKit.Hex("FFC2D6"));
+            icon.preserveAspect = true;
+            UiKit.Place(icon.rectTransform, new Vector2(0f, 0.5f), new Vector2(22f, 0f), new Vector2(54f, 54f));
+            var t = UiKit.Text(chip, "Title", Title, 44f, Color.white, true, TextAlignmentOptions.MidlineLeft);
+            UiKit.Stretch(t.rectTransform, 88f, 0f, 16f, 0f);
+            t.textWrappingMode = TextWrappingModes.NoWrap;
+
+            var close = UiKit.Image(body, "Close", UiKit.Circle, UiKit.HudGlass, true).rectTransform;
+            close.anchorMin = close.anchorMax = close.pivot = new Vector2(1f, 1f);
+            close.anchoredPosition = new Vector2(-28f, -28f);
+            close.sizeDelta = new Vector2(96f, 96f);
+            var x = UiKit.Image(close, "X", IconPainter.Close, Color.white);
+            UiKit.Stretch(x.rectTransform, 28f, 28f, 28f, 28f);
+            var b = close.gameObject.AddComponent<Button>();
+            b.transition = Selectable.Transition.None;
+            b.onClick.AddListener(Close);
+            close.gameObject.AddComponent<PressSquash>();
+        }
+
+        /// <summary>The hat's middle, in the window's own coordinates (from its centre): where the zoom buttons zoom to.</summary>
+        Vector2 HatCentre()
+        {
+            var world = _hat.TransformPoint(_hat.rect.center);
+            var local = (Vector2)_window.InverseTransformPoint(world);
+            return local - _window.rect.center;
+        }
+
+        /// <summary>Lays the room out for the screen as it is: upright, workbench along the bottom; turned, down the right.</summary>
+        void Arrange()
+        {
+            if (_body == null) return;
+            _wide = IsWide();
+            float w = _body.rect.width, h = _body.rect.height;
+            const float top = 140f;   // under the title and close button
+
+            float floorY, standX, size;
+            if (_wide)
+            {
+                _panel.anchorMin = new Vector2(0.55f, 0f);
+                _panel.anchorMax = new Vector2(1f, 1f);
+                _panel.offsetMin = new Vector2(0f, 24f);
+                _panel.offsetMax = new Vector2(-24f, -top);
+                _window.anchorMin = Vector2.zero;
+                _window.anchorMax = new Vector2(0.55f, 1f);
+                _window.offsetMin = Vector2.zero;
+                _window.offsetMax = new Vector2(0f, -top);
+                floorY = Mathf.Max(60f, h * 0.08f);
+                standX = w * 0.275f;
+                size = Mathf.Min(w * 0.5f, (h - top - floorY - 20f) / HatTop);
+            }
+            else
+            {
+                float panelH = Mathf.Min(h * 0.5f, 1150f);
+                _panel.anchorMin = Vector2.zero;
+                _panel.anchorMax = new Vector2(1f, 0f);
+                _panel.pivot = new Vector2(0.5f, 0f);
+                _panel.sizeDelta = new Vector2(-48f, panelH);
+                _panel.anchoredPosition = new Vector2(0f, 24f);
+                _window.anchorMin = Vector2.zero;
+                _window.anchorMax = Vector2.one;
+                _window.offsetMin = new Vector2(0f, panelH + 24f);
+                _window.offsetMax = new Vector2(0f, -top);
+                floorY = panelH + 36f;
+                standX = w * 0.5f;
+                size = Mathf.Min(w * 0.92f, (h - top - floorY - 20f) / HatTop);
+            }
+
+            // The mannequin stands on the rug: its feet (a little up from the bottom of its picture) on the floor.
+            _figure.sizeDelta = new Vector2(size, size);
+            var win = _window.rect;
+            float windowBottom = _wide ? 0f : floorY - 12f;   // the stage starts just above the workbench
+            _figureHome = new Vector2(0f, floorY - windowBottom - win.height * 0.5f + size * 0.46f);
+            _zoom = 1f;
+            _figure.localScale = Vector3.one;
+            _figure.anchoredPosition = _figureHome;
+            _hat.sizeDelta = Vector2.one * size * HatWidth;
+
+            // The painting, lined up so its rug is under the mannequin's feet.
+            if (_painting != null && _painting.GetComponent<Image>().sprite is Sprite art)
+            {
+                float aspect = art.rect.width / art.rect.height;
+                float bw = w + 120f, bh = h + 120f, y = floorY + 60f;
+                float tall = Mathf.Max(bh, bw / aspect, y / PaintedFloor, (bh - y) / (1f - PaintedFloor));
+                _painting.anchorMin = _painting.anchorMax = new Vector2(standX / w, 0f);
+                _painting.sizeDelta = new Vector2(tall * aspect, tall);
+                _painting.anchoredPosition = new Vector2(0f, y);
+            }
+
+            // Zoom buttons at the top corner of the stage.
+            _zoomBar.anchorMin = _zoomBar.anchorMax = new Vector2(_wide ? 0.55f : 1f, 1f);
+            _zoomBar.anchoredPosition = new Vector2(-24f, -top - 10f);
+        }
+
         protected override void OnOpen()
         {
+            Arrange();
             Swatches();
+            Pick(_tool);
             Patterns_();
             Designs();
             Silhouette();
@@ -834,8 +1298,7 @@ namespace CapyIsland.UI
             {
                 int index = i;
                 var p = Patterns[i];
-                int have = HobbyLog.Count(p.material);
-                string label = $"{p.name}  <size=75%>{have}/{p.count} {HobbyData.ItemName(p.material).ToLower()}</size>";
+                string label = $"{p.name}\n<size=65%>{NeedsLine(i)}</size>";
                 var b = UiKit.Button(_patternRow, p.name, label, index == _pattern ? UiKit.ButtonStyle.Primary : UiKit.ButtonStyle.Secondary, () =>
                 {
                     if (_pattern == index) return;
@@ -844,12 +1307,16 @@ namespace CapyIsland.UI
                     Clear();
                     Patterns_();
                     Silhouette();
-                    Status(HobbyLog.Count(Patterns[index].material) >= Patterns[index].count ? "Paint your " + Patterns[index].name.ToLower() + "!" : Patterns[index].where);
+                    Status(HaveFor(index) ? "Paint your " + Patterns[index].name.ToLower() + "!" : Patterns[index].where);
                 }, 28f);
             }
         }
 
-        void Silhouette() => _silhouette.sprite = DesignSprite(null, Kind);
+        void Silhouette()
+        {
+            _silhouette.sprite = DesignSprite(null, Kind);
+            _seamOverlay.sprite = SeamSprite(Kind);
+        }
 
         void Swatches()
         {
@@ -862,26 +1329,379 @@ namespace CapyIsland.UI
 
         void Clear()
         {
+            _undo.Clear();
             for (int i = 0; i < _pixels.Length; i++) _pixels[i] = '.';
             Redraw();
         }
 
-        internal void PaintAt(Vector2 normalised)
+        // ---------------------------------------------------------------- tools
+
+        enum Tool { Brush, Fill, Sticker, Hand }
+        Tool _tool;
+        int _sticker;
+
+        /// <summary>Brush widths in stitches: fine, medium, broad.</summary>
+        static readonly int[] BrushSizes = { 1, 3, 6 };
+        int _brush;
+        readonly List<Image> _sizeDots = new();
+        int _lastX = -1, _lastY = -1;
+
+        Image _seamOverlay;
+        RectTransform _window, _zoomRoot;
+        float _zoom = 1f;
+        const float MaxZoom = 4f;
+
+        void BrushDots()
         {
-            int x = Mathf.FloorToInt(normalised.x * Size), y = Mathf.FloorToInt(normalised.y * Size);
-            if (x < 0 || y < 0 || x >= Size || y >= Size || !Inside(Kind, x, y)) return;
-            char c = _erase ? '.' : (char)('a' + _colour);
-            if (_pixels[y * Size + x] == c) return;
-            _pixels[y * Size + x] = c;
+            for (int i = 0; i < _sizeDots.Count; i++)
+            {
+                bool on = _tool == Tool.Brush && i == _brush;
+                _sizeDots[i].color = on ? UiKit.Hex("FFE7B8") : UiKit.SurfaceSunk;
+                _sizeDots[i].transform.localScale = Vector3.one * (on ? 1.12f : 1f);
+            }
+        }
+
+        // ---------------------------------------------------------------- zoom
+
+        static void ZoomButton(Transform parent, string label, System.Action act)
+        {
+            var b = UiKit.Image(parent, "Zoom" + label, UiKit.Circle, new Color(1f, 1f, 1f, 0.92f), true);
+            var t = UiKit.Text(b.transform, "Label", label, label.Length > 1 ? 26f : 48f, UiKit.Ink, true, TextAlignmentOptions.Center);
+            UiKit.Stretch(t.rectTransform);
+            var button = b.gameObject.AddComponent<Button>();
+            button.transition = Selectable.Transition.None;
+            button.onClick.AddListener(() => act());
+            b.gameObject.AddComponent<PressSquash>();
+        }
+
+        /// <summary>Zooms by a factor, keeping <paramref name="about"/> (a point in the window, from its centre) still.</summary>
+        void ZoomBy(float factor, Vector2 about)
+        {
+            float before = _zoom;
+            _zoom = Mathf.Clamp(_zoom * factor, 1f, MaxZoom);
+            float k = _zoom / before;
+            Pan(_zoomRoot.anchoredPosition * k + about * (1f - k) - _zoomRoot.anchoredPosition);
+        }
+
+        /// <summary>All the way back out, the mannequin in the middle again.</summary>
+        void Recentre()
+        {
+            _zoom = 1f;
+            _zoomRoot.localScale = Vector3.one;
+            _zoomRoot.anchoredPosition = _figureHome;
+        }
+
+        /// <summary>The hand tool: a drag moves the zoomed mannequin about (in screen pixels).</summary>
+        internal void Drag(Vector2 screenDelta)
+        {
+            var canvas = _window.GetComponentInParent<Canvas>();
+            Pan(screenDelta / (canvas != null ? canvas.scaleFactor : 1f));
+        }
+
+        internal bool HandTool => _tool == Tool.Hand;
+
+        /// <summary>The stage around the mannequin: with the hand tool, dragging here moves it about too.</summary>
+        class PanSurface : MonoBehaviour, IDragHandler
+        {
+            public SewingScreen Owner;
+            public void OnDrag(PointerEventData e)
+            {
+                if (Owner.HandTool && Input.touchCount < 2) Owner.Drag(e.delta);
+            }
+        }
+
+        /// <summary>Moves the zoomed mannequin about; the further in, the further it may go (back home at no zoom).</summary>
+        void Pan(Vector2 delta)
+        {
+            _zoomRoot.localScale = Vector3.one * _zoom;
+            var reach = _figure.sizeDelta * (_zoom - 1f) * 0.6f;
+            var off = _zoomRoot.anchoredPosition + delta - _figureHome;
+            _zoomRoot.anchoredPosition = _figureHome + new Vector2(Mathf.Clamp(off.x, -reach.x, reach.x), Mathf.Clamp(off.y, -reach.y, reach.y));
+        }
+
+        bool _pinching;
+        float _pinchStarted;
+
+        protected override void Update()
+        {
+            base.Update();
+            if (!IsOpen || _window == null) return;
+            if (IsWide() != _wide) Arrange();   // the phone was turned
+
+            // The mouse wheel, over the window: zoom in towards the pointer.
+            float wheel = Input.mouseScrollDelta.y;
+            if (Mathf.Abs(wheel) > 0.01f && RectTransformUtility.ScreenPointToLocalPointInRectangle(_window, Input.mousePosition, null, out var at) && _window.rect.Contains(at))
+                ZoomBy(Mathf.Pow(1.15f, wheel), at);
+
+            // Two fingers: pinch to zoom, drag to move about. The first finger's dab is taken back.
+            if (Input.touchCount >= 2)
+            {
+                var a = Input.GetTouch(0); var b = Input.GetTouch(1);
+                if (!_pinching)
+                {
+                    _pinching = true;
+                    if (Time.unscaledTime - _pinchStarted < 0.35f) Undo();
+                }
+                var prevA = a.position - a.deltaPosition; var prevB = b.position - b.deltaPosition;
+                float before = Vector2.Distance(prevA, prevB), now = Vector2.Distance(a.position, b.position);
+                var canvas = _window.GetComponentInParent<Canvas>();
+                float scale = canvas != null ? canvas.scaleFactor : 1f;
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(_window, (a.position + b.position) * 0.5f, null, out var mid);
+                if (before > 1f) ZoomBy(now / before, mid);
+                Pan(((a.deltaPosition + b.deltaPosition) * 0.5f) / scale);
+            }
+            else if (Input.touchCount == 0) _pinching = false;
+        }
+        Button _brushButton, _fillButton, _handButton;
+        readonly List<Image> _stickerTiles = new();
+        readonly List<string> _undo = new();
+
+        /// <summary>
+        /// Stickers: little drawn pictures, each a shape (signed distance on -1…1, negative inside)
+        /// and the palette colour at each point of it (a white, b black, c red, d orange,
+        /// e yellow, f green, g teal, h blue, i purple, j pink, k brown, l grey). Drawn at whatever
+        /// size they are stuck on, with a thin dark outline, like a real sticker.
+        /// </summary>
+        static readonly (string name, Func<float, float, float> shape, Func<float, float, char> colour)[] Stickers =
+        {
+            ("Heart", (u, v) => Mathf.Min(Mathf.Min(IconPainter.Disc(u, v, -0.36f, 0.25f, 0.44f), IconPainter.Disc(u, v, 0.36f, 0.25f, 0.44f)),
+                                          IconPainter.Triangle(u, v, new Vector2(-0.78f, 0.1f), new Vector2(0.78f, 0.1f), new Vector2(0f, -0.85f), 0.06f)),
+                      (u, v) => IconPainter.Disc(u, v, -0.42f, 0.38f, 0.14f) < 0f ? 'a' : 'c'),
+            ("Star", (u, v) => StarShape(u, v),
+                     (u, v) => 'e'),
+            ("Smile", (u, v) => IconPainter.Disc(u, v, 0f, 0f, 0.86f),
+                      (u, v) => IconPainter.Disc(u, v, -0.3f, 0.22f, 0.12f) < 0f || IconPainter.Disc(u, v, 0.3f, 0.22f, 0.12f) < 0f
+                                || (Mathf.Abs(IconPainter.Disc(u, v, 0f, 0.05f, 0.48f)) < 0.07f && v < -0.12f) ? 'b' : 'e'),
+            ("Flower", (u, v) => FlowerShape(u, v),
+                       (u, v) => IconPainter.Disc(u, v, 0f, 0f, 0.28f) < 0f ? 'e' : 'j'),
+            ("Leaf", (u, v) => LeafShape(u, v),
+                     (u, v) => Mathf.Abs(u - v) < 0.06f && u + v < 1.1f ? 'g' : 'f'),
+            ("Paw", (u, v) => Mathf.Min(IconPainter.Disc(u, v, 0f, -0.3f, 0.48f), Mathf.Min(
+                                Mathf.Min(IconPainter.Disc(u, v, -0.62f, 0.2f, 0.2f), IconPainter.Disc(u, v, -0.24f, 0.55f, 0.2f)),
+                                Mathf.Min(IconPainter.Disc(u, v, 0.24f, 0.55f, 0.2f), IconPainter.Disc(u, v, 0.62f, 0.2f, 0.2f)))),
+                    (u, v) => 'k'),
+            ("Fish", (u, v) => Mathf.Min(IconPainter.Box(u, v, -0.15f, 0f, 0.6f, 0.38f, 0.38f),
+                                         IconPainter.Triangle(u, v, new Vector2(0.38f, 0f), new Vector2(0.9f, 0.4f), new Vector2(0.9f, -0.4f), 0.04f)),
+                     (u, v) => IconPainter.Disc(u, v, -0.45f, 0.08f, 0.09f) < 0f ? 'b' : 'h'),
+            ("Mushroom", (u, v) => Mathf.Min(Mathf.Max(IconPainter.Disc(u, v, 0f, -0.05f, 0.82f), -0.05f - v), IconPainter.Box(u, v, 0f, -0.42f, 0.26f, 0.38f, 0.1f)),
+                         (u, v) => v < -0.05f ? 'a'
+                                   : IconPainter.Disc(u, v, -0.36f, 0.3f, 0.14f) < 0f || IconPainter.Disc(u, v, 0.2f, 0.52f, 0.12f) < 0f || IconPainter.Disc(u, v, 0.46f, 0.14f, 0.1f) < 0f ? 'a' : 'c'),
+        };
+
+        static float StarShape(float u, float v)
+        {
+            // Five points: the edge swings between an outer and an inner radius every 36°.
+            float a = Mathf.Atan2(u, v), r = Mathf.Sqrt(u * u + v * v);
+            float seg = 2f * Mathf.PI / 5f;
+            float t = Mathf.Abs(Mathf.Repeat(a, seg) - seg * 0.5f) / (seg * 0.5f);   // 1 at a point, 0 between
+            return (r - Mathf.Lerp(0.42f, 0.95f, t)) * 0.8f;
+        }
+
+        static float FlowerShape(float u, float v)
+        {
+            float d = IconPainter.Disc(u, v, 0f, 0f, 0.3f);
+            for (int i = 0; i < 5; i++)
+            {
+                float ang = Mathf.PI / 2f + i * 2f * Mathf.PI / 5f;
+                d = Mathf.Min(d, IconPainter.Disc(u, v, Mathf.Cos(ang) * 0.48f, Mathf.Sin(ang) * 0.48f, 0.34f));
+            }
+            return d;
+        }
+
+        static float LeafShape(float u, float v)
+        {
+            // A pointed oval, tipped corner to corner.
+            float a = (u + v) * 0.7071f, b = (v - u) * 0.7071f;
+            return Mathf.Max(IconPainter.Disc(a, b, 0f, -0.5f, 0.85f), IconPainter.Disc(a, b, 0f, 0.5f, 0.85f));
+        }
+
+        /// <summary>What a sticker puts at (u, v): its colour inside, black on its rim, nothing outside.</summary>
+        static char StickerAt(int index, float u, float v)
+        {
+            float d = Stickers[index].shape(u, v);
+            if (d > 0.1f) return '.';
+            return d > -0.02f ? 'b' : Stickers[index].colour(u, v);
+        }
+
+        static readonly Dictionary<int, Sprite> _stickerArt = new();
+
+        /// <summary>A sticker's picture for its button.</summary>
+        static Sprite StickerSprite(int index)
+        {
+            if (_stickerArt.TryGetValue(index, out var s) && s != null) return s;
+            const int n = 48;
+            var tex = new Texture2D(n, n, TextureFormat.RGBA32, false) { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp, hideFlags = HideFlags.DontSave };
+            var px = new Color32[n * n];
+            for (int j = 0; j < n; j++)
+            for (int i = 0; i < n; i++)
+            {
+                char ch = StickerAt(index, (i + 0.5f) / n * 2f - 1f, (j + 0.5f) / n * 2f - 1f);
+                if (ch != '.') px[j * n + i] = Palette[ch - 'a'];
+            }
+            tex.SetPixels32(px);
+            tex.Apply(false, true);
+            return _stickerArt[index] = Sprite.Create(tex, new Rect(0, 0, n, n), new Vector2(0.5f, 0.5f), 100f);
+        }
+
+        /// <summary>How many stitches across a sticker is stuck on.</summary>
+        const int StickerSize = 20;
+
+        void Pick(Tool tool)
+        {
+            _tool = tool;
+            void Shade(Button b, bool on)
+            {
+                if (b == null) return;
+                b.GetComponent<Image>().color = on ? UiKit.Primary : UiKit.SurfaceSunk;
+                foreach (var g in b.GetComponentsInChildren<Graphic>())
+                    if (g != b.targetGraphic) g.color = on ? Color.white : UiKit.Ink;
+            }
+            Shade(_brushButton, tool == Tool.Brush);
+            Shade(_fillButton, tool == Tool.Fill);
+            Shade(_handButton, tool == Tool.Hand);
+            BrushDots();
+            for (int i = 0; i < _stickerTiles.Count; i++)
+            {
+                bool on = tool == Tool.Sticker && i == _sticker;
+                _stickerTiles[i].color = on ? UiKit.Hex("FFE7B8") : Color.white;
+                _stickerTiles[i].transform.localScale = Vector3.one * (on ? 1.12f : 1f);
+            }
+            if (_status != null)
+                Status(tool switch
+                {
+                    Tool.Fill => _erase ? "Tap an area to clear it." : "Tap an area to fill it with your colour.",
+                    Tool.Sticker => "Tap the hat to stick it on.",
+                    Tool.Hand => "Drag to move around. Zoom in to see the details.",
+                    _ => "Tap or drag to paint.",
+                });
+        }
+
+        /// <summary>Takes back the last change (a stroke, a fill, a sticker).</summary>
+        void Undo()
+        {
+            if (_undo.Count == 0) { Status("Nothing to undo."); return; }
+            var last = _undo[_undo.Count - 1];
+            _undo.RemoveAt(_undo.Count - 1);
+            for (int i = 0; i < _pixels.Length && i < last.Length; i++) _pixels[i] = last[i];
             Redraw();
+        }
+
+        /// <summary>A touch on the canvas: the start of a stroke (<paramref name="first"/>) or a drag along it.</summary>
+        internal void Touch(Vector2 normalised, bool first)
+        {
+            if (_pinching || Input.touchCount >= 2) return;   // two fingers move the hat about
+            int x = Mathf.FloorToInt(normalised.x * Size), y = Mathf.FloorToInt(normalised.y * Size);
+            if (x < 0 || y < 0 || x >= Size || y >= Size) return;
+            if (first)
+            {
+                _pinchStarted = Time.unscaledTime;
+                _undo.Add(new string(_pixels));
+                if (_undo.Count > 30) _undo.RemoveAt(0);
+            }
+            switch (_tool)
+            {
+                case Tool.Fill:
+                    if (first) Fill(x, y);
+                    break;
+                case Tool.Sticker:
+                    if (first) Stamp(x, y);
+                    break;
+                default:
+                    // A quick drag skips stitches: fill in the line between this touch and the last.
+                    if (first || _lastX < 0) Dab(x, y);
+                    else
+                    {
+                        int steps = Mathf.Max(Mathf.Abs(x - _lastX), Mathf.Abs(y - _lastY));
+                        for (int s = 1; s <= steps; s++)
+                            Dab(_lastX + Mathf.RoundToInt((x - _lastX) * s / (float)steps), _lastY + Mathf.RoundToInt((y - _lastY) * s / (float)steps));
+                    }
+                    Redraw();
+                    break;
+            }
+            _lastX = x; _lastY = y;
+        }
+
+        /// <summary>One touch of the brush: a little square as wide as the brush size.</summary>
+        void Dab(int cx, int cy)
+        {
+            int w = BrushSizes[_brush], from = -(w - 1) / 2;
+            char c = _erase ? '.' : (char)('a' + _colour);
+            for (int dy = 0; dy < w; dy++)
+            for (int dx = 0; dx < w; dx++)
+            {
+                int x = cx + from + dx, y = cy + from + dy;
+                if (x < 0 || y < 0 || x >= Size || y >= Size || !Inside(Kind, x, y)) continue;
+                _pixels[y * Size + x] = c;
+            }
+        }
+
+        /// <summary>The paint bucket: everything joined to this pixel in the same colour takes the new one.</summary>
+        void Fill(int x, int y)
+        {
+            if (!Inside(Kind, x, y)) return;
+            char from = _pixels[y * Size + x], to = _erase ? '.' : (char)('a' + _colour);
+            if (from == to) return;
+            int part = RegionAt(Kind, x, y);   // the seams between parts stop the paint
+            var open = new Stack<(int, int)>();
+            open.Push((x, y));
+            while (open.Count > 0)
+            {
+                var (px, py) = open.Pop();
+                if (px < 0 || py < 0 || px >= Size || py >= Size) continue;
+                int i = py * Size + px;
+                if (_pixels[i] != from || !Inside(Kind, px, py) || RegionAt(Kind, px, py) != part) continue;
+                _pixels[i] = to;
+                open.Push((px + 1, py)); open.Push((px - 1, py)); open.Push((px, py + 1)); open.Push((px, py - 1));
+            }
+            Sfx.Play(SfxKind.Plop, 0.5f);
+            Redraw();
+        }
+
+        /// <summary>Sticks the chosen sticker on, centred where you tapped (only the part on the hat).</summary>
+        void Stamp(int cx, int cy)
+        {
+            int n = StickerSize, from = -n / 2;
+            for (int sy = 0; sy < n; sy++)
+            for (int sx = 0; sx < n; sx++)
+            {
+                char ch = StickerAt(_sticker, (sx + 0.5f) / n * 2f - 1f, (sy + 0.5f) / n * 2f - 1f);
+                if (ch == '.') continue;
+                int x = cx + from + sx, y = cy + from + sy;
+                if (x < 0 || y < 0 || x >= Size || y >= Size || !Inside(Kind, x, y)) continue;
+                _pixels[y * Size + x] = ch;
+            }
+            Sfx.Play(SfxKind.Pop, 0.5f);
+            Redraw();
+        }
+
+
+        /// <summary>The painted canvas is drawn finer than the stitches, so the paint can stop exactly at the hat's edge.</summary>
+        const int View = 128;
+        static readonly Dictionary<string, bool[]> _masks = new();
+        Color32[] _view;
+
+        /// <summary>Which of the canvas's fine pixels are on the hat (for clipping the paint to its outline).</summary>
+        static bool[] Mask(string kind)
+        {
+            if (_masks.TryGetValue(kind, out var m)) return m;
+            m = new bool[View * View];
+            for (int j = 0; j < View; j++)
+            for (int i = 0; i < View; i++)
+                m[j * View + i] = Shape(kind, (i + 0.5f) / View * 2f - 1f, (j + 0.5f) / View * 2f - 1f) < 0f;
+            return _masks[kind] = m;
         }
 
         void Redraw()
         {
-            var px = new Color32[Size * Size];
-            for (int i = 0; i < px.Length; i++)
-                px[i] = _pixels[i] == '.' ? new Color32(0, 0, 0, 0) : (Color32)Palette[_pixels[i] - 'a'];
-            _texture.SetPixels32(px);
+            var mask = Mask(Kind);
+            _view ??= new Color32[View * View];
+            for (int j = 0; j < View; j++)
+            for (int i = 0; i < View; i++)
+            {
+                char c = _pixels[(j * Size / View) * Size + i * Size / View];
+                _view[j * View + i] = c == '.' || !mask[j * View + i] ? new Color32(0, 0, 0, 0) : (Color32)Palette[c - 'a'];
+            }
+            _texture.SetPixels32(_view);
             _texture.Apply();
         }
 
@@ -890,10 +1710,14 @@ namespace CapyIsland.UI
         {
             var p = Patterns[_pattern];
             bool fresh = _editing < 0;
-            if (fresh && !HobbyLog.Take(p.material, p.count))
+            if (fresh)
             {
-                Status($"A {p.name.ToLower()} needs {p.count} {HobbyData.ItemName(p.material).ToLower()}. {p.where}");
-                return;
+                if (!HaveFor(_pattern))
+                {
+                    Status(Loc.F("A {0} needs {1}. {2}", Loc.T(p.name).ToLower(), NeedsLine(_pattern), Loc.T(p.where)));
+                    return;
+                }
+                foreach (var (m, n) in p.needs) HobbyLog.Take(m, n);
             }
             string data = new string(_pixels);
             string name = fresh ? $"My {p.name} {CountOf(p.kind) + 1}" : HobbyLog.Designs[_editing].name;
@@ -937,10 +1761,18 @@ namespace CapyIsland.UI
                 {
                     var design = HobbyLog.Designs[index];
                     int pattern = System.Array.FindIndex(Patterns, x => x.kind == design.kind);
-                    if (pattern < 0) { Status("That's one of your old shirts. Shirts can't be changed any more."); return; }
+                    if (pattern < 0) { Status("That's one of your older pieces. You can still wear it, but it can't be changed any more."); return; }
                     _pattern = pattern;
                     _editing = index;
-                    for (int k = 0; k < _pixels.Length && k < design.pixels.Length; k++) _pixels[k] = design.pixels[k];
+                    _undo.Clear();
+                    // Older hats were sewn on a coarser canvas: each of their stitches becomes a little block.
+                    int n = SideOf(design.pixels);
+                    for (int py = 0; py < Size; py++)
+                    for (int px = 0; px < Size; px++)
+                    {
+                        int k = (py * n / Size) * n + px * n / Size;
+                        _pixels[py * Size + px] = k < design.pixels.Length ? design.pixels[k] : '.';
+                    }
                     Redraw();
                     Patterns_();
                     Silhouette();
@@ -950,8 +1782,40 @@ namespace CapyIsland.UI
         }
 
         /// <summary>A sewn piece as a finished picture: fabric where unpainted, seamed, pixels crisp.</summary>
-        public static Sprite DesignSprite(string pixels, string kind = "", int res = 64)
+        static readonly Dictionary<string, Sprite> _seams = new();
+
+        /// <summary>Just the seams of a pattern (outline and the lines between its parts), to lie over the paint.</summary>
+        static Sprite SeamSprite(string kind, int res = 256)
         {
+            if (_seams.TryGetValue(kind, out var s) && s != null) return s;
+            var tex = new Texture2D(res, res, TextureFormat.RGBA32, false) { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp, hideFlags = HideFlags.DontSave };
+            var px = new Color32[res * res];
+            Color32 seam = UiKit.Hex("8A6A52");
+            for (int j = 0; j < res; j++)
+            for (int i = 0; i < res; i++)
+            {
+                float u = (i + 0.5f) / res * 2f - 1f, v = (j + 0.5f) / res * 2f - 1f;
+                float d = Shape(kind, u, v);
+                if (d > 0.02f) continue;
+                Region(kind, u, v, out float edge);
+                if (d > -0.025f || edge > -0.025f) px[j * res + i] = seam;
+            }
+            tex.SetPixels32(px);
+            tex.Apply(false, true);
+            return _seams[kind] = Sprite.Create(tex, new Rect(0, 0, res, res), new Vector2(0.5f, 0.5f), 100f);
+        }
+
+        /// <summary>How many stitches across a saved piece is (older ones are 16, newer 32).</summary>
+        static int SideOf(string pixels)
+        {
+            if (string.IsNullOrEmpty(pixels)) return Size;
+            int n = Mathf.RoundToInt(Mathf.Sqrt(pixels.Length));
+            return n * n == pixels.Length ? n : 16;
+        }
+
+        public static Sprite DesignSprite(string pixels, string kind = "", int res = 128)
+        {
+            int side = SideOf(pixels);
             var tex = new Texture2D(res, res, TextureFormat.RGBA32, false) { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp, hideFlags = HideFlags.DontSave };
             var px = new Color32[res * res];
             var fabric = UiKit.Hex("F4EBDD");
@@ -962,9 +1826,10 @@ namespace CapyIsland.UI
                 float u = (i + 0.5f) / res * 2f - 1f, v = (j + 0.5f) / res * 2f - 1f;
                 float d = Shape(kind, u, v);
                 if (d > 0.02f) { px[j * res + i] = new Color32(0, 0, 0, 0); continue; }
-                if (d > -0.03f) { px[j * res + i] = seam; continue; }
-                int x = Mathf.Clamp(i * Size / res, 0, Size - 1), y = Mathf.Clamp(j * Size / res, 0, Size - 1);
-                char c = pixels != null && y * Size + x < pixels.Length ? pixels[y * Size + x] : '.';
+                Region(kind, u, v, out float edge);   // the seams between the parts, too
+                if (d > -0.03f || edge > -0.03f) { px[j * res + i] = seam; continue; }
+                int x = Mathf.Clamp(i * side / res, 0, side - 1), y = Mathf.Clamp(j * side / res, 0, side - 1);
+                char c = pixels != null && y * side + x < pixels.Length ? pixels[y * side + x] : '.';
                 px[j * res + i] = c == '.' || c - 'a' >= Palette.Length ? fabric : Palette[c - 'a'];
             }
             tex.SetPixels32(px);
@@ -976,15 +1841,19 @@ namespace CapyIsland.UI
         class PaintSurface : MonoBehaviour, IPointerDownHandler, IDragHandler
         {
             public SewingScreen Owner;
-            public void OnPointerDown(PointerEventData e) => Paint(e);
-            public void OnDrag(PointerEventData e) => Paint(e);
+            public void OnPointerDown(PointerEventData e) { if (!Owner.HandTool) Paint(e, true); }
+            public void OnDrag(PointerEventData e)
+            {
+                if (Owner.HandTool) { if (Input.touchCount < 2) Owner.Drag(e.delta); }
+                else Paint(e, false);
+            }
 
-            void Paint(PointerEventData e)
+            void Paint(PointerEventData e, bool first)
             {
                 var r = (RectTransform)transform;
                 if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(r, e.position, e.pressEventCamera, out var local)) return;
                 var size = r.rect.size;
-                Owner.PaintAt(new Vector2(local.x / size.x + 0.5f, local.y / size.y + 0.5f));
+                Owner.Touch(new Vector2(local.x / size.x + 0.5f, local.y / size.y + 0.5f), first);
             }
         }
     }

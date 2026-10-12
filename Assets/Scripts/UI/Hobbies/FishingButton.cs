@@ -9,8 +9,9 @@ namespace CapyIsland.UI
 {
     /// <summary>
     /// Fishing mode. At the water's edge a "Start fishing" button appears at the bottom of the
-    /// screen; tap it and the whole screen becomes your rod: hold anywhere to aim, let go to cast;
-    /// once a fish is on, hold to reel and let go to give it slack. What to do is written large
+    /// screen; tap it and the bobber goes straight in, by the nearest fish, and the whole screen
+    /// becomes your rod: once a fish is on, hold to reel and let go to give it slack; after a
+    /// catch, a tap anywhere casts again. What to do is written large
     /// at the top of the screen — where your thumb isn't — in the colour of the line, with the
     /// catch bar under it. "Stop fishing" puts the rod away and lets you walk again.
     ///
@@ -70,7 +71,7 @@ namespace CapyIsland.UI
             _sayRect.anchorMin = _sayRect.anchorMax = _sayRect.pivot = new Vector2(0.5f, 1f);
             _sayRect.anchoredPosition = new Vector2(0f, -250f);
             _sayRect.sizeDelta = new Vector2(620f, 170f);
-            _say = UiKit.Text(panel.transform, "Text", "Hold to aim", 56f, Color.white, true, TextAlignmentOptions.Center);
+            _say = UiKit.Text(panel.transform, "Text", "Wait…", 56f, Color.white, true, TextAlignmentOptions.Center);
             _say.raycastTarget = false;
             _say.rectTransform.anchorMin = new Vector2(0f, 0.42f);
             _say.rectTransform.anchorMax = Vector2.one;
@@ -181,11 +182,6 @@ namespace CapyIsland.UI
             patience = 1.2f;
             switch (f.Now)
             {
-                case Fishing.State.Idle:
-                    return f.Holding ? Gesture.None : Gesture.Hold;
-                case Fishing.State.Aiming:
-                    patience = 2.5f;   // the ring is sliding out: give them time to watch it
-                    return Gesture.Release;
                 case Fishing.State.Fight:
                     if (f.Tension >= Fishing.RedAt && f.Holding) { patience = 0.35f; return Gesture.Release; }
                     if (!f.Holding && f.Tension < Fishing.YellowAt) { patience = 0.8f; return Gesture.Hold; }
@@ -258,6 +254,7 @@ namespace CapyIsland.UI
             Sfx.Play(SfxKind.Tap, 0.5f);
             _sayRect.localScale = Vector3.one * 0.8f;
             _sayRect.DOScale(1f, 0.25f).SetEase(Ease.OutBack).SetUpdate(true);
+            f.CastNow();   // straight into the water: no aiming
         }
 
         void Exit()
@@ -338,7 +335,6 @@ namespace CapyIsland.UI
             Color colour = Color.white;
             switch (f.Now)
             {
-                case Fishing.State.Aiming: say = "Let go to cast!"; hint = "The ring is where your bobber will land"; break;
                 case Fishing.State.Waiting: say = "Wait…"; hint = "A fish is coming to look"; break;
                 case Fishing.State.Nibbling: say = "Wait for it…"; hint = "Nibble, nibble… wait for the big splash"; break;
                 case Fishing.State.Fight:
@@ -350,7 +346,7 @@ namespace CapyIsland.UI
                     UiKit.SetProgress(_progress, f.Progress);
                     _progress.color = colour;
                     break;
-                default: say = "Hold to aim"; hint = "Hold anywhere, let go to cast"; break;
+                default: say = "Tap to cast"; hint = "Your bobber lands by the nearest fish"; break;
             }
             if (Time.time < _flashUntil) { say = "Hooked!"; colour = UiKit.Sun; }
             _say.text = say;

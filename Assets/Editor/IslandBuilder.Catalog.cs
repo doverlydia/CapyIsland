@@ -60,6 +60,7 @@ namespace CapyIsland.EditorTools
                 case "Capy House": return new Look(Buildings + "Build_CapyHouse.png", 1.7f, 0.85f);
                 case "Fox House": return new Look(Buildings + "Build_FoxHouse.png", 1.7f, 0.85f);
                 case "Monster House": return new Look(Buildings + "Build_MonsterHouse.png", 1.7f, 0.85f);
+                case "Panda House": return new Look(Buildings + "Build_PandaHouse.png", 1.7f, 0.85f);
                 case "Church": return new Look(Buildings + "Build_Church.png", 2.6f, 1.2f);
                 case "Tower Of Love": return new Look(Buildings + "Build_Tower.png", 2.4f, 0.9f);
 
@@ -107,6 +108,7 @@ namespace CapyIsland.EditorTools
         static readonly Dictionary<string, string> HouseAnimals = new()
         {
             { "Capy House", "Capybara" }, { "Fox House", "Fox" }, { "Monster House", "Monster" },
+            { "Panda House", "Panda" },
         };
 
         /// <summary>

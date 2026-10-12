@@ -300,6 +300,9 @@ namespace CapyIsland.UI
             return Union(Union(head, body), plus);
         });
 
+        /// <summary>A soft round glow: bright in the middle, fading right out to the edge (firelight, lamplight).</summary>
+        public static Sprite Glow => CachedSoft("Glow", (x, y) => Disc(x, y, 0f, 0f, 0.45f), 0.55f, 128);
+
         /// <summary>A soft white cloud: a heap of discs with feathered edges.</summary>
         public static Sprite Cloud => CachedSoft("Cloud", (x, y) =>
         {
@@ -400,6 +403,38 @@ namespace CapyIsland.UI
         });
 
         public static Sprite Shirt => Cached("Shirt", (x, y) => ShirtShape(x, y));
+
+        /// <summary>A paintbrush, handle up and to the right, the bristles down at the bottom left.</summary>
+        public static Sprite Brush => Cached("Brush", (x, y) =>
+        {
+            float handle = Capsule(x, y, 0.72f, 0.72f, -0.05f, -0.05f, 0.1f);
+            float ferrule = Capsule(x, y, -0.08f, -0.08f, -0.26f, -0.26f, 0.15f);
+            float tip = Triangle(x, y, new Vector2(-0.18f, -0.42f), new Vector2(-0.42f, -0.18f), new Vector2(-0.78f, -0.78f), 0.05f);
+            return Union(Union(handle, ferrule), tip);
+        });
+
+        /// <summary>A paint bucket tipping out a drop: the fill tool.</summary>
+        public static Sprite Bucket => Cached("Bucket", (x, y) =>
+        {
+            float pail = Triangle(x, y, new Vector2(-0.5f, 0.2f), new Vector2(0.5f, 0.2f), new Vector2(0f, -1.6f), 0.06f);
+            pail = Mathf.Max(pail, -0.68f - y);                 // cut flat at the bottom
+            float rim = Box(x, y, 0f, 0.22f, 0.56f, 0.08f, 0.05f);
+            float handle = Mathf.Max(Mathf.Abs(Disc(x, y, 0f, 0.22f, 0.44f)) - 0.05f, 0.22f - y);
+            float drop = Union(Disc(x, y, 0.7f, -0.5f, 0.13f), Triangle(x, y, new Vector2(0.58f, -0.45f), new Vector2(0.82f, -0.45f), new Vector2(0.7f, -0.2f), 0.02f));
+            return Union(Union(Union(pail, rim), handle), drop);
+        });
+
+        /// <summary>A curved arrow turning back on itself: undo.</summary>
+        public static Sprite Undo => Cached("Undo", (x, y) =>
+        {
+            float ring = Mathf.Abs(Disc(x, y, 0.1f, -0.1f, 0.5f)) - 0.1f;
+            float arc = Mathf.Max(ring, Mathf.Min(-0.1f - y, 0.1f - x));   // all but the bottom-left quarter
+            float head = Triangle(x, y, new Vector2(-0.7f, -0.1f), new Vector2(-0.1f, -0.1f), new Vector2(-0.4f, -0.5f), 0.03f);
+            return Union(arc, head);
+        });
+
+        /// <summary>A knitted beanie with a bobble: sewing's icon, the same shape as the hat pattern.</summary>
+        public static Sprite Hat => Cached("Hat", (x, y) => SewingScreen.Shape("hat", x, y));
 
         /// <summary>The T-shirt silhouette, shared by the icon and the sewing canvas.</summary>
         public static float ShirtShape(float x, float y)

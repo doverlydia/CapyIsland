@@ -25,10 +25,10 @@ namespace CapyIsland.UI
         {
             var (title, body) = hobby switch
             {
-                Hobby.Fishing => ("How to fish", "Walk to the water's edge where fish shadows swim and tap Start fishing.\nHold to aim, let go to cast. When it bites, hold to reel and let go when the line turns red!"),
+                Hobby.Fishing => ("How to fish", "Walk to the water's edge where fish shadows swim and tap Start fishing.\nYour bobber goes straight in by the nearest fish. When it bites, hold to reel and let go when the line turns red!"),
                 Hobby.Bugs => ("How to catch bugs", "Bugs settle on flowers, trees and grass. Walk close and tap one to swing your net.\nSome are shy, so don't run straight at them!"),
                 Hobby.Birding => ("How to watch birds", "Birds land in trees and on the shore. Tap one from a few steps away to spot it through your binoculars.\nGet too close and it flies off!"),
-                Hobby.Sewing => ("How to sew", "Put your sewing machine down, then tap it.\nA hat needs cotton from your garden, a cape needs silk from silkworms. Decorate it, and it goes in your wardrobe!"),
+                Hobby.Sewing => ("How to sew", "Put your sewing machine down, then tap it.\nA hat needs cotton from your garden. Decorate it, and it goes in your wardrobe!"),
                 Hobby.Gardening => ("How to garden", "Put a vegetable plot down anywhere and tap it to plant seeds.\nThey grow while you're away. Tap again to harvest!"),
                 Hobby.Cooking => ("How to cook", "Put your stove down and tap it. Drag ingredients into the pot, press Cook, and tap the spatula in time to keep the heat down.\nIslanders with a dish in a bubble will pay for it!"),
                 _ => ("New hobby!", "Find it in Hobbies, in the menu."),
@@ -49,7 +49,7 @@ namespace CapyIsland.UI
             return hobby switch
             {
                 Hobby.Fishing => IconPainter.Rod, Hobby.Birding => IconPainter.Bird, Hobby.Writing => IconPainter.Book,
-                Hobby.Sewing => IconPainter.Shirt, Hobby.Cats => IconPainter.Heart, Hobby.Cooking => IconPainter.Flame, _ => IconPainter.Star,
+                Hobby.Sewing => IconPainter.Hat, Hobby.Cats => IconPainter.Heart, Hobby.Cooking => IconPainter.Flame, _ => IconPainter.Star,
             };
         }
 
@@ -131,7 +131,7 @@ namespace CapyIsland.UI
                     you.Shake(0.5f);
                     yield return Wait(0.8f);
                     you.Hop(2, 0.2f, 0.3f);
-                    Bubble(you, IconPainter.Shirt, UiKit.Hex("C2577F"), 1f);
+                    Bubble(you, IconPainter.Hat, UiKit.Hex("C2577F"), 1f);
                     break;
                 case Hobby.Gardening:
                 {

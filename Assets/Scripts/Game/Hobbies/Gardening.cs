@@ -254,13 +254,14 @@ namespace CapyIsland.Game
                 var d = Data;
                 d.crop = null;
                 HobbyLog.AddToBag("crop:" + kind.Id, kind.Yield, save: false);
-                HobbyLog.Save();
+                bool first = HobbyLog.LogCrop(kind.Id, kind.Yield);   // the vegetable journal (and saves)
                 HobbyLog.AddXp(Hobby.Gardening, 8 + kind.SeedGold / 2);
                 Motes.Trigger("hobby_garden");
                 var fx = HarvestEffects.Instance;
                 if (fx != null) fx.Twinkle(transform.position + Vector3.up * 0.4f, 8);
                 Sfx.PlayAt(SfxKind.Rustle, transform.position);
                 Hints.Show($"You harvested {kind.Yield} {kind.Name.ToLower()}{(kind.Yield > 1 ? "s" : "")}! They're in your bag.");
+                if (first) Hints.Show(UI.Loc.F("New in your vegetable journal: {0}!", UI.Loc.T(kind.Name)));
                 Refresh();
             }
         }

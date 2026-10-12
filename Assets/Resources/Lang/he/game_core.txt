@@ -252,8 +252,8 @@
 @ Write a book in the Library
 = כתוב ספר בספרייה
 
-@ Sew your own T-shirt design
-= תפור עיצוב חולצה משלך
+@ Sew your own hat
+= תפור כובע משלך
 
 @ Grow and harvest a vegetable
 = גדל ירק וקטוף אותו
@@ -411,8 +411,8 @@
 
 # ---------------------------------------------------------------- Steam Tower (TowerOfLove)
 
-@ <b>{0}.</b> {1}% of its warmth has returned. {2}
-= <b>{0}.</b> {1}% מהחום שלו כבר חזר. {2}
+@ <b>{0}.</b> {1}
+= <b>{0}.</b> {1}
 
 @ The island is still empty and quiet
 = האי עדיין ריק ושקט

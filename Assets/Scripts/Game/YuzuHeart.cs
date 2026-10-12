@@ -40,7 +40,7 @@ namespace CapyIsland.Game
         public static bool FinaleSeen => PlayerPrefs.GetInt(FinaleKey, 0) == 1;
 
         /// <summary>Everything is home: time for the finale, if it hasn't played.</summary>
-        public static bool FinaleDue => Alive && !FinaleSeen && Motes.Total > 0 && Motes.ClickedCount >= Motes.Total;
+        public static bool FinaleDue => Alive && !FinaleSeen && Motes.Total > 0 && Motes.CollectedCount >= Motes.Total;
 
         public static void MarkFinale()
         {
@@ -54,7 +54,10 @@ namespace CapyIsland.Game
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void ResetSession() => Changed = null;
 
-        /// <summary>How much of the ice has melted: every heart brought home except the wedding's.</summary>
+        /// <summary>
+        /// How much of the ice has melted: every heart earned except the wedding's — the same count
+        /// as the achievements list, whether or not its heart has been tapped home yet.
+        /// </summary>
         public static float Thaw
         {
             get
@@ -64,7 +67,7 @@ namespace CapyIsland.Game
                 {
                     if (m.Name == WeddingHeart) continue;
                     total++;
-                    if (Motes.IsClicked(m.Name)) home++;
+                    if (Motes.Has(m.Name)) home++;
                 }
                 return total > 0 ? (float)home / total : 0f;
             }

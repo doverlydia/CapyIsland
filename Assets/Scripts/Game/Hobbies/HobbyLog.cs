@@ -19,7 +19,7 @@ namespace CapyIsland.Game
 
         [Serializable] public class Entry { public string id; public int count; public float best; }
         [Serializable] public class Book { public string title; public string text; public long writtenTicks; }
-        /// <summary>A sewn piece: <c>kind</c> is "hat" or "cape" (empty for the old shirts).</summary>
+        /// <summary>A sewn piece: <c>kind</c> is "hat" ("cape" for older ones, empty for the oldest shirts).</summary>
         [Serializable] public class Design { public string name; public string pixels; public int size; public string kind; }
         /// <summary>An adopted cat lives around <c>home</c>; <c>unplaced</c> while it waits in a bubble or your trail for one.</summary>
         [Serializable] public class Cat { public string id; public int bond; public bool adopted; public long lastFussTicks; public Vector2 home; public bool unplaced; public long giftDueTicks; public int gifts; public int fed;
@@ -33,6 +33,7 @@ namespace CapyIsland.Game
         {
             public int[] xp = new int[8];
             public List<Entry> fish = new(), birds = new(), bugs = new(), bag = new();
+            public List<Entry> crops;   // the vegetable journal: what you have harvested, and how much
             public List<Book> books = new();
             public List<Design> designs = new();
             public List<Cat> cats = new();
@@ -67,6 +68,13 @@ namespace CapyIsland.Game
                 if (_data.xp.Length < HobbyCount) Array.Resize(ref _data.xp, HobbyCount);
                 _data.fish ??= new(); _data.birds ??= new(); _data.bugs ??= new(); _data.bag ??= new();
                 _data.books ??= new(); _data.designs ??= new(); _data.cats ??= new(); _data.plots ??= new();
+                if (_data.crops == null)
+                {
+                    // Saves from before the vegetable journal: whatever is in the bag was grown.
+                    _data.crops = new();
+                    foreach (var e in _data.bag)
+                        if (e.id.StartsWith("crop:") && e.count > 0) _data.crops.Add(new Entry { id = e.id.Substring(5), count = e.count });
+                }
                 return _data;
             }
         }
@@ -154,6 +162,20 @@ namespace CapyIsland.Game
         public static Entry FishEntry(string id) => D.fish.Find(e => e.id == id);
         public static Entry BirdEntry(string id) => D.birds.Find(e => e.id == id);
         public static Entry BugEntry(string id) => D.bugs.Find(e => e.id == id);
+        public static IReadOnlyList<Entry> Crops => D.crops;
+        public static Entry CropEntry(string id) => D.crops.Find(e => e.id == id);
+
+        /// <summary>A harvest, for the vegetable journal: <paramref name="amount"/> of a crop. True the first time.</summary>
+        public static bool LogCrop(string id, int amount)
+        {
+            var e = CropEntry(id);
+            bool first = e == null;
+            if (first) D.crops.Add(e = new Entry { id = id });
+            e.count += amount;
+            Save();
+            if (first) JournalRewards.Check(Hobby.Gardening);
+            return first;
+        }
 
         /// <summary>Logs a catch. Returns (first of its kind, a new record size).</summary>
         public static (bool first, bool record) LogFish(string id, float size)

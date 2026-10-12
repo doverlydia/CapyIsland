@@ -69,6 +69,7 @@ namespace CapyIsland.Game
 
         public void Tap()
         {
+            if (DishOrders.TryServe(transform)) return;   // the dish he wanted, if it's in your bag, comes first
             string line = Motes.Has("Priate Tales")
                 ? "Arr, back again? If you've spare goods, drag 'em onto me and I'll make you an offer."
                 : "*Salty Kombu leans in and tells you about the time he arm-wrestled a sea serpent for a barrel of pickles. It goes on for quite a while.*";

@@ -125,6 +125,8 @@ namespace CapyIsland.Game
             return d.kind switch
             {
                 "hat" => new WearItem { Id = id, Name = d.name, Slot = WearSlot.Hat, Unlock = "sewn", Anchor = new(0.46f, 0.87f), Width = 0.37f },
+                "fedora" => new WearItem { Id = id, Name = d.name, Slot = WearSlot.Hat, Unlock = "sewn", Anchor = new(0.46f, 0.89f), Width = 0.42f },
+                "sunhat" => new WearItem { Id = id, Name = d.name, Slot = WearSlot.Hat, Unlock = "sewn", Anchor = new(0.46f, 0.88f), Width = 0.46f },
                 "cape" => new WearItem { Id = id, Name = d.name, Slot = WearSlot.Back, Unlock = "sewn", Anchor = new(0.6f, 0.45f), Width = 0.76f, Behind = true },
                 _ => null,
             };
@@ -154,7 +156,8 @@ namespace CapyIsland.Game
             if (id.StartsWith(DesignPrefix))
             {
                 var sewn = Sewn(id);
-                s = sewn != null ? UI.SewingScreen.DesignSprite(HobbyLog.Designs[int.Parse(id.Substring(DesignPrefix.Length))].pixels, sewn.Slot == WearSlot.Hat ? "hat" : "cape") : null;
+                var design = HobbyLog.Designs[int.Parse(id.Substring(DesignPrefix.Length))];
+                s = sewn != null ? UI.SewingScreen.DesignSprite(design.pixels, design.kind) : null;
                 _art[id] = s;
                 return s;
             }

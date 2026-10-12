@@ -9,8 +9,8 @@ namespace CapyIsland.UI
 {
     /// <summary>
     /// The welcome-back popup: seven gift tiles for the week's streak, today's glowing, the ones
-    /// already collected ticked off, and one big button to collect. It opens by itself the first
-    /// time you play each day.
+    /// already collected ticked off, and one big button to collect (or tap today's tile). It opens
+    /// by itself the first time you play each day.
     /// </summary>
     public class DailyGiftScreen : UiScreen
     {
@@ -67,7 +67,11 @@ namespace CapyIsland.UI
         RectTransform Tile(int index)
         {
             var gift = DailyGifts.Week[index];
-            var tile = UiKit.Image(_gridRect, "Day" + (index + 1), UiKit.Rounded(28), Color.white).rectTransform;
+            var tile = UiKit.Image(_gridRect, "Day" + (index + 1), UiKit.Rounded(28), Color.white, true).rectTransform;
+            // Today's glowing tile collects too, just like the button under them.
+            var tap = tile.gameObject.AddComponent<Button>();
+            tap.transition = Selectable.Transition.None;
+            tap.onClick.AddListener(() => { if (DailyGifts.CanClaim && DailyGifts.CurrentDay == index + 1) Claim(); });
 
             var day = UiKit.Text(tile, "Day", "Day " + (index + 1), 26f, UiKit.InkSoft, true, TextAlignmentOptions.Center);
             day.rectTransform.anchorMin = new Vector2(0f, 1f);

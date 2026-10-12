@@ -324,7 +324,7 @@ namespace CapyIsland.Game
             "hobby_fish" => "Catch a fish (walk to the shore)",
             "hobby_bird" => "Spot a bird in the trees",
             "hobby_book" => "Write a book in the Library",
-            "hobby_sew" => "Sew your own T-shirt design",
+            "hobby_sew" => "Sew your own hat",
             "hobby_garden" => "Grow and harvest a vegetable",
             "hobby_cook" => "Cook a dish from your bag",
             "hobby_bug" => "Catch a bug with your net",

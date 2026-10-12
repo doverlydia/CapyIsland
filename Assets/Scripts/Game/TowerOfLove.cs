@@ -82,7 +82,7 @@ namespace CapyIsland.Game
         public Vector2 MarkerPosition => transform.position;
         public Sprite MarkerIcon => _bodyRenderer != null ? _bodyRenderer.sprite : null;
 
-        public bool IslandSaved => Motes.ClickedCount >= Motes.Total;
+        public bool IslandSaved => Motes.CollectedCount >= Motes.Total;
 
         void Update()
         {
@@ -134,17 +134,18 @@ namespace CapyIsland.Game
         /// <summary>Opens the goals list on its achievements, with how the island is feeling on top.</summary>
         public void Tap()
         {
-            int total = Motes.Total, clicked = Motes.ClickedCount;
-            int percent = total > 0 ? Mathf.RoundToInt(100f * clicked / total) : 0;
+            // The same count as the achievements list below it: one number, never two.
+            int total = Motes.Total, found = Motes.CollectedCount;
+            int percent = total > 0 ? Mathf.RoundToInt(100f * found / total) : 0;
             string mood = percent < 20 ? "The island is still empty and quiet"
                         : percent < 40 ? "Little sparks of life are popping up"
                         : percent < 60 ? "The island is waking up"
                         : percent < 80 ? "The island is busy, bright and humming"
                         : "The whole island is glowing";
-            string left = total - clicked == 0 ? "Every heart is home."
-                        : total - clicked == 1 ? "One heart still to bring home."
-                        : $"{total - clicked} hearts still to bring home.";
-            string banner = $"<b>{mood}.</b> {percent}% of its warmth has returned. {left}";
+            string left = total - found == 0 ? "Every heart is home."
+                        : total - found == 1 ? "One heart still to bring home."
+                        : $"{total - found} hearts still to bring home.";
+            string banner = $"<b>{mood}.</b> {left}";
             // A soak in the spring first; the page opens while the capybara relaxes in the water,
             // and closing it sends the capybara climbing back out.
             void Open(Action climbOut) => UI.ObjectivesScreen.Show(UI.ObjectivesScreen.Tab.Achievements, banner,

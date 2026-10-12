@@ -207,6 +207,8 @@ namespace CapyIsland.UI
             MakeScreen<LibraryScreen>(screens, "LibraryScreen");
             MakeScreen<SewingScreen>(screens, "SewingScreen");
             MakeScreen<CookingScreen>(screens, "CookingScreen");
+            MakeScreen<BurrowScreen>(screens, "BurrowScreen");
+            MakeScreen<FurnitureShopScreen>(screens, "FurnitureShopScreen");
             MakeScreen<BaitShopScreen>(screens, "BaitShopScreen");
             var events = MakeScreen<EventsScreen>(screens, "EventsScreen");
             var menu = MakeScreen<MenuScreen>(screens, "MenuScreen");

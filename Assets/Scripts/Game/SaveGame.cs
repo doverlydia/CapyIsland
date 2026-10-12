@@ -309,6 +309,7 @@ namespace CapyIsland.Game
                 SkipTutorial();
                 ApplyProgress(d);
                 ApplyWorld(d, d);
+                MoteHeart.RestoreUnclaimed();
             }
             finally { Restoring = false; }
 

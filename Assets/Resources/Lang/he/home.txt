@@ -1,0 +1,107 @@
+# Your burrow under the ground, the Furniture Shop and its furniture (Game/Home, UI/Home).
+# Format: see UI/Lang/Loc.cs.
+
+# ---------------------------------------------------------------- the burrow (BurrowScreen)
+
+@ Your Burrow
+= המחילה שלך
+
+@ Go outside
+= לצאת החוצה
+
+@ Storage
+= מחסן
+
+@ Flip
+= הפוך
+
+@ Put away
+= לאחסן
+
+@ Your burrow is bare! Buy something cosy at the Furniture Shop on your island.
+= המחילה שלך ריקה! קנה משהו נעים בחנות הרהיטים שבאי שלך.
+
+@ Nothing in storage. Pieces you buy wait here.
+= המחסן ריק. רהיטים שתקנה יחכו כאן.
+
+@ That's your friend's burrow. Pop down into your own when you're home!
+= זו המחילה של החבר שלך. תרד למחילה שלך כשתחזור הביתה!
+
+# ---------------------------------------------------------------- the shop (FurnitureShopScreen)
+
+@ First things first
+= קודם כל
+
+@ Today's pieces
+= הרהיטים של היום
+
+@ Get your burrow door first, and then your furniture has a home to go to!
+= קנה קודם את דלת המחילה, ואז לרהיטים שלך יהיה בית!
+
+@ New pieces in {0}h {1}m. Each piece can be bought once a day.
+= רהיטים חדשים בעוד {0} ש' {1} ד'. אפשר לקנות כל רהיט פעם ביום.
+
+@ <color=#9C5B8E>Today's special</color>
+= <color=#9C5B8E>המיוחד של היום</color>
+
+@ Buy
+= קנה
+
+@ Sold
+= נמכר
+
+@ The {0} is waiting in your burrow's storage.
+= ה{0} מחכה לך במחסן של המחילה.
+
+@ Your burrow door is with you. Put it down somewhere cosy, then tap it to go inside!
+= דלת המחילה איתך. הנח אותה במקום נעים, ואז הקש עליה כדי להיכנס!
+
+# ---------------------------------------------------------------- the furniture (Furniture.cs)
+
+@ Woven Rug
+= שטיח קלוע
+
+@ Hay Bed
+= מיטת חציר
+
+@ Comfy Armchair
+= כורסה נוחה
+
+@ Round Table
+= שולחן עגול
+
+@ Mushroom Stool
+= שרפרף פטרייה
+
+@ Bookshelf
+= כוננית ספרים
+
+@ Floor Lamp
+= מנורה עומדת
+
+@ Potted Fern
+= שרך בעציץ
+
+@ Chest of Drawers
+= שידת מגירות
+
+@ Sea Painting
+= ציור ים
+
+@ Toy Chest
+= תיבת צעצועים
+
+@ Old Radio
+= רדיו ישן
+
+@ Fish Tank
+= אקווריום
+
+@ Little Hot Tub
+= ג'קוזי קטן
+
+@ Tiny Piano
+= פסנתר קטנטן
+
+@ Stone Fireplace
+= אח אבן

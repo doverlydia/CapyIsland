@@ -22,6 +22,7 @@ namespace CapyIsland.Game
             Hobby.Fishing => HobbyData.Fish.Length,
             Hobby.Birding => HobbyData.Birds.Length,
             Hobby.Bugs => HobbyData.Bugs.Length,
+            Hobby.Gardening => HobbyData.Crops.Length,
             _ => 0,
         };
 
@@ -30,6 +31,7 @@ namespace CapyIsland.Game
             Hobby.Fishing => HobbyLog.Fish.Count,
             Hobby.Birding => HobbyLog.Birds.Count,
             Hobby.Bugs => HobbyLog.Bugs.Count,
+            Hobby.Gardening => HobbyLog.Crops.Count,
             _ => 0,
         };
 

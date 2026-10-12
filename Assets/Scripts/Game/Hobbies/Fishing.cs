@@ -9,8 +9,8 @@ namespace CapyIsland.Game
     /// Fishing, played the way Heartopia plays it. Fish shadows swim in the shallows around whichever
     /// shore you are near — the bigger the shadow, the bigger the fish.
     ///
-    /// 1. <b>Cast.</b> Hold the button: a ring slides out over the water. Let go to cast there —
-    ///    just in front of a shadow is best. (A quick tap casts at the nearest fish for you.)
+    /// 1. <b>Cast.</b> Starting to fish casts straight away, just in front of the nearest shadow
+    ///    (or out to sea if none is near). After a catch, a tap anywhere casts again.
     /// 2. <b>Wait.</b> The fish comes over, nibbles, then bites with a big splash. It is hooked.
     /// 3. <b>Reel.</b> Hold to reel the fish in; let go to give it slack. The line shows the strain:
     ///    green is perfect, yellow is getting tight, red means let go now or it snaps. Every so
@@ -25,7 +25,7 @@ namespace CapyIsland.Game
     /// </summary>
     public class Fishing : MonoBehaviour
     {
-        public enum State { Idle, Aiming, Waiting, Nibbling, Fight }
+        public enum State { Idle, Waiting, Nibbling, Fight }
 
         public static Fishing Instance { get; private set; }
 
@@ -83,11 +83,11 @@ namespace CapyIsland.Game
         float _overload;
 
         Shadow _hooked;
-        GameObject _bobber, _aimRing;
+        GameObject _bobber;
         Transform _bobberBody;
         LineRenderer _line;
         Vector2 _castFrom, _bobberAt, _aimDir;
-        float _stateUntil, _giveUpAt, _pressedAt, _aimDistance;
+        float _stateUntil, _giveUpAt;
         int _nibblesLeft;
         bool _warnedEarly;
 
@@ -248,10 +248,9 @@ namespace CapyIsland.Game
         {
             if (_king == null) return;
             Holding = true;
-            _pressedAt = Time.time;
             switch (Now)
             {
-                case State.Idle: BeginAim(); break;
+                case State.Idle: CastNow(); break;
                 case State.Waiting:
                 case State.Nibbling:
                     if (!_warnedEarly) { _warnedEarly = true; Say("Wait for the big splash — then hold to reel."); }
@@ -263,17 +262,12 @@ namespace CapyIsland.Game
         public void StopFishing()
         {
             Holding = false;
-            if (Now == State.Aiming) { CancelAim(); return; }
             if (Now == State.Fight) Flee(_hooked);
             if (Now != State.Idle) EndLine();
         }
 
         /// <summary>Finger up.</summary>
-        public void Release()
-        {
-            Holding = false;
-            if (Now == State.Aiming) Cast(quick: Time.time - _pressedAt < 0.2f);
-        }
+        public void Release() => Holding = false;
 
         // ---------------------------------------------------------------- casting
 
@@ -329,40 +323,19 @@ namespace CapyIsland.Game
             _rod.transform.localRotation = Quaternion.Euler(0f, 0f, bend);
         }
 
-        /// <summary>Holding to cast: the ring slides out over the water and back.</summary>
-        void BeginAim()
+        /// <summary>
+        /// Casts at once: towards the nearest fish if there is one in reach, otherwise straight out
+        /// to sea. Starting to fish calls this, and so does a tap while the line is in.
+        /// </summary>
+        public void CastNow()
         {
+            if (_king == null || Now != State.Idle) return;
             Vector2 you = _king.transform.position;
             var water = NearestWater(you, 2.6f);
             if (!water.HasValue) { Holding = false; Say("Walk right up to the water's edge to fish."); return; }
-
-            // Aim towards the nearest fish if there is one in reach, otherwise straight out to sea.
             var target = NearestShadow(you, 7f);
             _aimDir = ((target != null ? (Vector2)target.Go.transform.position : water.Value) - you).normalized;
-            HoldRod(_aimDir);
-            Now = State.Aiming;
-            _castFrom = you;
-            _aimRing = new GameObject("CastAim");
-            var sr = _aimRing.AddComponent<SpriteRenderer>();
-            sr.sprite = UI.IconPainter.Ring;
-            sr.color = new Color(1f, 1f, 1f, 0.9f);
-            sr.sortingOrder = ShadowOrder + 420;
-            _aimRing.transform.localScale = new Vector3(0.7f, 0.42f, 1f);
-            Aim();
-        }
-
-        void Aim()
-        {
-            // Slides out and back while held, so letting go at the right moment picks the distance.
-            float t = Mathf.PingPong((Time.time - _pressedAt) * 0.55f, 1f);
-            _aimDistance = Mathf.Lerp(1.4f, 6.5f, t);
-            var p = CastPoint(_aimDistance);
-            _aimRing.transform.position = p;
-            var sr = _aimRing.GetComponent<SpriteRenderer>();
-            bool fishNear = NearestShadow(p, 1.6f) != null;
-            sr.color = fishNear ? new Color(1f, 0.92f, 0.4f, 0.95f) : new Color(1f, 1f, 1f, 0.85f);
-            float pulse = 1f + Mathf.Sin(Time.time * 10f) * 0.06f;
-            _aimRing.transform.localScale = new Vector3(0.7f, 0.42f, 1f) * pulse;
+            Cast();
         }
 
         /// <summary>
@@ -403,22 +376,20 @@ namespace CapyIsland.Game
             return best;
         }
 
-        void Cast(bool quick)
+        void Cast()
         {
-            if (_aimRing != null) Destroy(_aimRing);
-            _aimRing = null;
             Vector2 you = _king.transform.position;
 
+            // Just in front of the nearest fish, or a comfortable way out to sea.
             Vector2 spot;
-            var fish = quick ? NearestShadow(you, 6.5f) : null;
+            var fish = NearestShadow(you, 6.5f);
             if (fish != null)
             {
-                // A quick tap: just in front of the nearest fish, as a helping hand.
                 Vector2 at = fish.Go.transform.position;
                 spot = at + (you - at).normalized * 0.9f;
                 if (!OpenWater(spot, BobberMargin)) spot = at;
             }
-            else spot = CastPoint(quick ? 3.2f : _aimDistance);
+            else spot = CastPoint(3.2f);
 
             _castFrom = you;
             _bobberAt = spot;
@@ -441,12 +412,6 @@ namespace CapyIsland.Game
         void Tick(Vector2 you)
         {
             if (Now == State.Idle) return;
-            if (Now == State.Aiming)
-            {
-                if (_aimRing == null || Vector2.Distance(you, _castFrom) > 0.8f) { CancelAim(); return; }
-                Aim();
-                return;
-            }
 
             DrawLine();
 
@@ -501,15 +466,6 @@ namespace CapyIsland.Game
                     Fight(you);
                     break;
             }
-        }
-
-        void CancelAim()
-        {
-            if (_aimRing != null) Destroy(_aimRing);
-            _aimRing = null;
-            Now = State.Idle;
-            Holding = false;
-            PutRodAway();
         }
 
         void Nibble()

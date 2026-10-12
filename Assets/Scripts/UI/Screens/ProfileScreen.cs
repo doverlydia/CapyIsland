@@ -183,7 +183,7 @@ namespace CapyIsland.UI
                 (Hobby.Fishing, "Fishing", IconPainter.Rod), (Hobby.Birding, "Birdwatching", IconPainter.Bird),
                 (Hobby.Bugs, "Bug catching", IconPainter.Sparkle), (Hobby.Gardening, "Gardening", IconPainter.Sparkle),
                 (Hobby.Cooking, "Cooking", IconPainter.Star), (Hobby.Cats, "Cat care", IconPainter.Heart),
-                (Hobby.Writing, "Writing", IconPainter.Book), (Hobby.Sewing, "Sewing", IconPainter.Shirt),
+                (Hobby.Writing, "Writing", IconPainter.Book), (Hobby.Sewing, "Sewing", IconPainter.Hat),
             };
             var grid = UiKit.Rect("Hobbies", _list);
             var g = grid.gameObject.AddComponent<GridLayoutGroup>();

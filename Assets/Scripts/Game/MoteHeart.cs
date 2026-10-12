@@ -30,7 +30,24 @@ namespace CapyIsland.Game
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void ResetSession() => _sprite = null;
 
-        static void OnMote(MoteDef def)
+        static void OnMote(MoteDef def) => Spawn(def, quiet: false);
+
+        /// <summary>
+        /// After loading: a heart earned but never brought home (it was still in the trail when
+        /// the game closed, or was tapped before there was a Tower to fly to) joins the trail
+        /// again, so its card can still be read and its 50 points reach the Tower. (Progress counts
+        /// the heart the moment it is earned; this is only the delivery.)
+        /// </summary>
+        public static void RestoreUnclaimed()
+        {
+            var present = new System.Collections.Generic.HashSet<string>();
+            foreach (var h in FindObjectsByType<MoteHeart>(FindObjectsSortMode.None)) present.Add(h._mote);
+            foreach (var def in Motes.All)
+                if (Motes.Has(def.Name) && !Motes.IsClicked(def.Name) && !present.Contains(def.Name))
+                    Spawn(def, quiet: true);
+        }
+
+        static void Spawn(MoteDef def, bool quiet)
         {
             var king = FindFirstObjectByType<PlayerAvatar>();
             if (king == null) return;
@@ -53,6 +70,7 @@ namespace CapyIsland.Game
             heart._follower = go.AddComponent<Follower>();
             heart._follower.PickUpIntoInventory();
             go.AddComponent<YSorter>();
+            if (quiet) return;
 
             // A 32-frame appear: swell up from nothing.
             go.transform.localScale = Vector3.zero;
@@ -93,6 +111,7 @@ namespace CapyIsland.Game
             var tower = TowerOfLove.Instance;
             if (tower == null)
             {
+                Motes.MarkClicked(_mote);   // read and seen off: it doesn't come back on the next load
                 transform.DOScale(0f, 0.6f).SetEase(Ease.InBack).OnComplete(() => Destroy(gameObject));
                 return;
             }

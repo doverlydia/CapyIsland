@@ -254,6 +254,21 @@ namespace CapyIsland.UI
         /// <summary>Most of the screen's height the bubble may take before the reader is the answer.</summary>
         const float MaxBubbleHeight = 760f;
 
+        /// <summary>The bubble's widest, and the clear space it always keeps from the screen's right edge.</summary>
+        const float MaxBubbleWidth = 660f, RightGap = 24f;
+
+        /// <summary>
+        /// As wide as there is room for: a narrow phone (or a turn to portrait) gives it less,
+        /// and it always stops short of the right edge so no word runs off the screen.
+        /// </summary>
+        void FitWidth()
+        {
+            if (_bubble.parent is not RectTransform panelRect || panelRect.parent is not RectTransform screen) return;
+            float left = panelRect.anchoredPosition.x + _bubble.anchoredPosition.x;
+            float want = Mathf.Clamp(screen.rect.width - left - RightGap, 240f, MaxBubbleWidth);
+            if (Mathf.Abs(_bubble.sizeDelta.x - want) > 1f) _bubble.sizeDelta = new Vector2(want, _bubble.sizeDelta.y);
+        }
+
         void LateUpdate()
         {
             if (_bubble == null || !IsSpeaking || _collapsed) return;
@@ -262,6 +277,7 @@ namespace CapyIsland.UI
             bool anything = !PopupOpen && label != null && !string.IsNullOrEmpty(label.text) && (!Typing || label.maxVisibleCharacters > 0);
             if (_bubble.gameObject.activeSelf != anything) _bubble.gameObject.SetActive(anything);
             if (!anything) return;
+            FitWidth();
             var margins = -label.rectTransform.sizeDelta.y;   // the label is inset inside the bubble
             float want = Mathf.Clamp(label.preferredHeight + margins, _bubbleHeight, MaxBubbleHeight);
             if (Mathf.Abs(_bubble.sizeDelta.y - want) > 1f) _bubble.sizeDelta = new Vector2(_bubble.sizeDelta.x, want);
