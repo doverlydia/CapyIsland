@@ -23,7 +23,7 @@ namespace CapyIsland.EditorTools
             bool world = assetPath.StartsWith("Assets/Resources/World/");      // runtime-built world pieces (the hot spring)
             bool home = assetPath.StartsWith("Assets/Resources/Home/");        // your burrow, its furniture and shop
             // Full-screen paintings drawn big in the UI: the kitchen, the burrow, the tunnel.
-            bool painting = assetPath.EndsWith("/Ema_Rack.png") || assetPath.EndsWith("/Cook_Kitchen.png") || assetPath.EndsWith("/Burrow_Cave.png") || assetPath.EndsWith("/Tunnel.png") || assetPath.EndsWith("/Sew_Room.png");
+            bool painting = assetPath.EndsWith("/Ema_Rack.png") || assetPath.EndsWith("/Shrine_Backdrop.png") || assetPath.EndsWith("/Cook_Kitchen.png") || assetPath.EndsWith("/Burrow_Cave.png") || assetPath.EndsWith("/Tunnel.png") || assetPath.EndsWith("/Sew_Room.png");
             bool big = assetPath.EndsWith("/Cook_Stove.png") || assetPath.EndsWith("/Cook_Pot.png") || assetPath.EndsWith("/Store_Furniture.png")
                        || assetPath.Contains("/Vignette_") || assetPath.EndsWith("/Sew_Mannequin.png") || assetPath.EndsWith("/Shrine.png");   // drawn big in the hobby carousel and sewing room
             if (!assetPath.StartsWith("Assets/Art/") && !wardrobe && !hobbies && !cutscene && !world && !home) return;

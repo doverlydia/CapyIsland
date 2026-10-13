@@ -656,6 +656,16 @@ namespace CapyIsland.UI
 
         protected override void Build(RectTransform body)
         {
+            // A soft painted garden behind it all, filling the page whatever its shape.
+            var clip = UiKit.Rect("Backdrop", body);
+            UiKit.Stretch(clip, -32f, -32f, -32f, -8f);
+            clip.gameObject.AddComponent<RectMask2D>();
+            var back = UiKit.Image(clip, "Garden", HobbyData.Art("Shrine_Backdrop"), Color.white);
+            UiKit.Stretch(back.rectTransform);
+            var fit = back.gameObject.AddComponent<AspectRatioFitter>();
+            fit.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
+            fit.aspectRatio = 1024f / 1536f;
+
             _scroll = UiKit.ScrollList(body, "List", out _list, 16f, new RectOffset(4, 4, 8, 32));
             UiKit.Stretch((RectTransform)_scroll.transform);
         }
@@ -683,9 +693,7 @@ namespace CapyIsland.UI
             var hang = UiKit.Button(_list, "Hang", "Hang a new ema (1 gold)", UiKit.ButtonStyle.Primary, Shrine.WriteNew, 32f, HobbyData.Art("Ema"));
             hang.transform.parent.gameObject.AddComponent<LayoutElement>().preferredHeight = 96f;
 
-            var shown = all.GetRange(_page * perPage, Mathf.Min(perPage, all.Count - _page * perPage));
-            Rack(shown);
-
+            // Which rack, right at the top: never below the fold where it could be missed.
             if (pages > 1)
             {
                 var row = UiKit.Rect("Pages", _list);
@@ -701,6 +709,13 @@ namespace CapyIsland.UI
                 label.gameObject.AddComponent<LayoutElement>().preferredWidth = 260f;
                 PageButton(row, +1, _page < pages - 1);
             }
+
+            // The rack, as big as fits in what is left of the page (no scrolling to find its bottom).
+            Canvas.ForceUpdateCanvases();
+            float used = 96f + 16f + (pages > 1 ? 84f + 16f : 0f) + 48f;
+            float room = Body != null && Body.rect.height > 200f ? Body.rect.height - used : float.MaxValue;
+            var shown = all.GetRange(_page * perPage, Mathf.Min(perPage, all.Count - _page * perPage));
+            Rack(shown, room);
         }
 
         void PageButton(RectTransform row, int dir, bool enabled)
@@ -723,11 +738,16 @@ namespace CapyIsland.UI
         /// One rack: the painting (Hobbies/Ema_Rack), with the ema hung from its pegs — three on
         /// each of its two bars. Peg places are measured on the painting, as fractions of its size.
         /// </summary>
-        void Rack(List<Shrine.Ema> ema)
+        void Rack(List<Shrine.Ema> ema, float room)
         {
             float width = Sheet != null ? Sheet.sizeDelta.x - 72f : 900f;
-            var rack = UiKit.Rect("Rack", _list);
-            rack.gameObject.AddComponent<LayoutElement>().preferredHeight = width * RackAspect;
+            float height = Mathf.Min(width * RackAspect, room);
+            width = height / RackAspect;
+            var holder = UiKit.Rect("RackHolder", _list);
+            holder.gameObject.AddComponent<LayoutElement>().preferredHeight = height;
+            var rack = UiKit.Rect("Rack", holder);
+            rack.anchorMin = rack.anchorMax = rack.pivot = new Vector2(0.5f, 0.5f);
+            rack.sizeDelta = new Vector2(width, height);
 
             var art = UiKit.Image(rack, "Painting", HobbyData.Art("Ema_Rack"), Color.white);
             art.preserveAspect = true;
