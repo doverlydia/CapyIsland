@@ -2,7 +2,7 @@
 // everything else. On top of the flat blue it adds three soft things, all in world space so
 // they stay put as the camera moves:
 //   * colour drifting between a touch lighter and a touch deeper (two slow layers of noise)
-//   * pale streaks of light on small waves, fading in and out
+//   * caustics: the shifting web of sunlight you see through clear shallow water
 //   * foam at the shore: a soft rim, and thin lines rolling in toward the beach
 // The shore comes from _ShoreTex, a small map of distance to the nearest island baked at
 // start (Sea.cs). Kept gentle on purpose: a cozy painted sea, not a realistic ocean.
@@ -17,7 +17,9 @@ Shader "CapyIsland/Sea"
         _ShoreRect("Shore rect (x, y, w, h)", Vector) = (0, 0, 1, 1)
         _Depth("Deeper blue offshore", Range(0, 1)) = 0.8
         _Tone("Light and deep drift", Range(0, 0.3)) = 0.08
-        _Glints("Wave highlights", Range(0, 1)) = 0.6
+        _Glints("Caustic light", Range(0, 1)) = 0.7
+        _CausticScale("Caustic size", Range(0.1, 2)) = 0.28
+        _CausticSharp("Caustic sharpness", Range(1, 10)) = 3.2
         _Foam("Shore foam", Range(0, 1)) = 0.75
         _Speed("Speed", Range(0, 3)) = 1
 
@@ -69,7 +71,7 @@ Shader "CapyIsland/Sea"
             CBUFFER_START(UnityPerMaterial)
                 half4 _Color;
                 float4 _ShoreRect;
-                half _Depth, _Tone, _Glints, _Foam, _Speed;
+                half _Depth, _Tone, _Glints, _CausticScale, _CausticSharp, _Foam, _Speed;
             CBUFFER_END
 
             // Value noise: smooth, cheap, no textures.
@@ -123,26 +125,22 @@ Shader "CapyIsland/Sea"
                 float b = Fbm(p * 0.11 + float2(-t * 0.014, t * 0.019) + 5.3);
                 col *= 1.0 + (a - b) * _Tone * 2.0;
 
-                // Little wave marks, the way a painted map draws the sea: a sparse scatter of small
-                // white squiggles (one wave, up then down), each on its own clock — fading in,
-                // drifting a touch with the current, fading out. About half the cells have one.
-                const float2 cellSize = float2(3.4, 2.1);
-                float2 cell = floor(p / cellSize);
-                float r1 = Hash(cell), r2 = Hash(cell + 17.3), r3 = Hash(cell + 41.9);
-                float life = frac(t / 7.0 + r1);
-                float2 centre = (cell + 0.5 + (float2(r2, r3) - 0.5) * 0.45) * cellSize + float2(life * 0.45, 0.0);
-                float2 l = p - centre;
-                const float w = 0.42, h = 0.085;
-                float x = clamp(l.x, -w, w);
-                float slope = h * PI / w * cos(x / w * PI);
-                float gap = length(float2(l.x - x, (l.y - h * sin(x / w * PI)) / sqrt(1.0 + slope * slope)));
-                float thick = 0.04 * (1.0 - 0.55 * abs(x / w));            // tapering to the ends
-                float aa = fwidth(p.x) * 1.2;
-                float stroke = 1.0 - smoothstep(thick, thick + aa, gap);
-                float fade = smoothstep(0.0, 0.25, life) * (1.0 - smoothstep(0.6, 1.0, life));
-                float offshore = smoothstep(0.35, 0.7, d);                  // not in the surf
-                float mark = stroke * fade * step(0.5, r2) * offshore;
-                col = lerp(col, half3(1, 1, 1), mark * _Glints * 0.85);
+                // Caustics: three lattices of cells, each the last one turned and stretched through
+                // space-and-time, so their edges cross into a moving web. The nearest of the three
+                // cell centres, sharpened hard, leaves bright thin lines where none is close.
+                // Brightest in the shallows (sunlight on a sandy bottom), softer over deep water.
+                const float3x3 Turn = float3x3( 0.95, -0.71,  0.28,
+                                                0.62,  0.88, -0.47,
+                                               -0.31,  0.52,  0.83) * 1.18;
+                float3 k = float3(p * _CausticScale, t * 0.45);
+                float nearest = 1.0;
+                [unroll] for (int i = 0; i < 3; i++)
+                {
+                    k = mul(Turn, k);
+                    nearest = min(nearest, length(0.5 - frac(k)));
+                }
+                float caustic = pow(nearest, _CausticSharp) * 2.6;
+                col += caustic * lerp(1.0, 0.45, deep) * _Glints * half3(0.85, 0.97, 1.0);
 
                 // Foam (d: 0 at the shore, 1 a few units out).
                 float breakup = smoothstep(0.25, 0.65, Noise(p * 0.9 + float2(t * 0.15, 0)));
@@ -173,7 +171,7 @@ Shader "CapyIsland/Sea"
             CBUFFER_START(UnityPerMaterial)
                 half4 _Color;
                 float4 _ShoreRect;
-                half _Depth, _Tone, _Glints, _Foam, _Speed;
+                half _Depth, _Tone, _Glints, _CausticScale, _CausticSharp, _Foam, _Speed;
             CBUFFER_END
 
             Varyings V(Attributes input)
