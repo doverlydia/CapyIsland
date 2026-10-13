@@ -41,7 +41,7 @@ namespace CapyIsland.Game
         }
 
         /// <summary>0 by day … 1 deep in the night, easing through dusk and dawn.</summary>
-        static float Darkness()
+        public static float Darkness()
         {
             float h = GameClock.Hour;
             if (h >= 19.5f || h < 4.6f) return 1f;

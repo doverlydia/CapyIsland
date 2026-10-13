@@ -34,6 +34,7 @@ namespace CapyIsland.Game
             var land = LandMap.Instance != null ? LandMap.Instance : FindFirstObjectByType<LandMap>();
             var water = land != null ? land.transform.Find("Water") : null;
             if (water != null && water.GetComponent<Sea>() == null) water.gameObject.AddComponent<Sea>();
+            if (water != null && water.GetComponent<SeaLanterns>() == null) water.gameObject.AddComponent<SeaLanterns>();
         }
 
         Texture2D _shore;
