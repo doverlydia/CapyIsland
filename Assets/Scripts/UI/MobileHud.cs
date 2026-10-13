@@ -81,13 +81,18 @@ namespace CapyIsland.UI
         /// <summary>A new outfit waits its turn (never during the opening).</summary>
         static void AnnounceOutfit(WearItem item) =>
             Attention.Ask("outfit:" + item.Id, () =>
-                CardPopup.Show("New outfit!", "<b>" + item.Name + "</b> is waiting for you in the Wardrobe.", Wardrobe.Art(item)));
+            {
+                // The very first one also says where the wardrobe is (there's no menu to find it in).
+                string where = "";
+                if (!HudTour.Seen("wardrobe"))
+                {
+                    HudTour.MarkSeen("wardrobe");
+                    where = " To try it on, tap your picture at the top left, then Change outfit.";
+                }
+                CardPopup.Show("New outfit!", "<b>" + item.Name + "</b> is waiting for you in the Wardrobe." + where, Wardrobe.Art(item));
+            });
 
         GameObject _giftDot, _eventsDot;
-
-        /// <summary>Something new behind one of the menu's tiles (each lights its own dot too).</summary>
-        static bool MenuNews() =>
-            NewStuff.Any("goals/") || NewStuff.Any("map/") || NewStuff.Any("wardrobe/") || NewStuff.Any("hobbies/") || CollectionScreen.AnyNews();
 
         /// <summary>
         /// A contest that ended while you were away: how you did, once, when the screen is free.
@@ -199,17 +204,21 @@ namespace CapyIsland.UI
         /// <summary>Keeps the pill just under the last button (the column changes on a visit).</summary>
         void PlaceTuck()
         {
-            float y = _side.anchoredPosition.y;
+            float height = 0f;
             int shown = 0;
             foreach (RectTransform child in _side)
             {
                 if (!child.gameObject.activeSelf) continue;
-                y -= child.sizeDelta.y;
+                height += child.sizeDelta.y;
                 shown++;
             }
-            y -= Mathf.Max(0, shown - 1) * SideSpacing + 8f + 18f;   // the last caption hangs a little lower
-            float lowest = -(((RectTransform)_safe).rect.height - _tuck.sizeDelta.y - 24f);
-            _tuck.anchoredPosition = new Vector2(_tuck.anchoredPosition.x, Mathf.Max(y, lowest));
+            height += Mathf.Max(0, shown - 1) * SideSpacing + 8f;   // the last caption hangs a little lower
+            // A short screen (a phone on its side): the column shrinks to fit, pill and all.
+            float top = -_side.anchoredPosition.y;
+            float room = ((RectTransform)_safe).rect.height - top - _tuck.sizeDelta.y - 40f;
+            float scale = height > 0f ? Mathf.Clamp(room / height, 0.55f, 1f) : 1f;
+            _side.localScale = new Vector3(scale, scale, 1f);
+            _tuck.anchoredPosition = new Vector2(_tuck.anchoredPosition.x, -(top + height * scale + 18f));
         }
 
         /// <summary>Is any button in the column showing a red dot right now?</summary>
@@ -271,7 +280,10 @@ namespace CapyIsland.UI
 
             var tracker = ObjectiveTracker.Create(_safe);
             tracker.transform.SetSiblingIndex(afterBar + 1);
-            ProfileBadge.Create(_safe).transform.SetSiblingIndex(afterBar + 1);
+            NewDot.Live(tracker.transform, () => !Attention.TutorialRunning && NewStuff.Any("goals/"));   // a goal just reached
+            var badge = ProfileBadge.Create(_safe);
+            badge.transform.SetSiblingIndex(afterBar + 1);
+            NewDot.Live(badge.transform, () => !Attention.TutorialRunning && NewStuff.Any("wardrobe/"));   // a new piece to try on
             ClockPill.Create(_safe).transform.SetSiblingIndex(afterBar + 1);
             VisitorsColumn.Create(_safe).transform.SetSiblingIndex(afterBar + 1);
 
@@ -299,11 +311,11 @@ namespace CapyIsland.UI
             var collection = MakeScreen<CollectionScreen>(screens, "CollectionScreen");
             var settings = MakeScreen<SettingsScreen>(screens, "SettingsScreen");
             var gifts = MakeScreen<DailyGiftScreen>(screens, "DailyGiftScreen");
-            var wardrobe = MakeScreen<WardrobeScreen>(screens, "WardrobeScreen");
-            var profile = MakeScreen<ProfileScreen>(screens, "ProfileScreen");
+            MakeScreen<WardrobeScreen>(screens, "WardrobeScreen");
+            MakeScreen<ProfileScreen>(screens, "ProfileScreen");
             var friends = MakeScreen<FriendsScreen>(screens, "FriendsScreen");
             MakeScreen<PromptScreen>(screens, "PromptScreen");
-            var hobbies = MakeScreen<HobbiesScreen>(screens, "HobbiesScreen");
+            MakeScreen<HobbiesScreen>(screens, "HobbiesScreen");
             MakeScreen<LibraryScreen>(screens, "LibraryScreen");
             MakeScreen<SewingScreen>(screens, "SewingScreen");
             MakeScreen<CookingScreen>(screens, "CookingScreen");
@@ -311,25 +323,16 @@ namespace CapyIsland.UI
             MakeScreen<FurnitureShopScreen>(screens, "FurnitureShopScreen");
             MakeScreen<BaitShopScreen>(screens, "BaitShopScreen");
             var events = MakeScreen<EventsScreen>(screens, "EventsScreen");
-            var menu = MakeScreen<MenuScreen>(screens, "MenuScreen");
-
-            menu.AddEntry("Profile", IconPainter.FaceSmile, UiKit.Hex("E58FB0"), () => profile.Open());
-            // A red dot on a tile when something new is in there (NewStuff). Daily Gifts, Events,
-            // Friends and Settings have their own buttons on the right, so they aren't in here.
-            menu.AddEntry("Goals", IconPainter.Goals, UiKit.Primary,
-                () => ObjectivesScreen.Show(NewStuff.Any("goals/") ? ObjectivesScreen.Tab.Achievements : ObjectivesScreen.Tab.Quests),
-                news: () => NewStuff.Any("goals/"));
-            menu.AddEntry("Map", IconPainter.Map, UiKit.Spring, () => map.Open(), news: () => NewStuff.Any("map/"));
-            menu.AddEntry("Collection", IconPainter.Cards, UiKit.Hex("A77BD6"), () => collection.Open(), news: CollectionScreen.AnyNews);
-            menu.AddEntry("Wardrobe", IconPainter.Hanger, UiKit.Hex("E58FB0"), () => wardrobe.Open(), () => Wardrobe.Ready, () => NewStuff.Any("wardrobe/"));
-            menu.AddEntry("Hobbies", IconPainter.Rod, UiKit.Hex("3E9C8F"), () => HobbiesScreen.Show(), news: () => NewStuff.Any("hobbies/"));
-
-            // Settings first, at the top of the column.
+            // No menu: everything has its own way in. The column on the right (Settings first,
+            // then what you visit most), your picture for the profile and wardrobe, the goal card
+            // for goals. Red dots (NewStuff) on each say when something new is waiting there.
             UiKit.RoundButton(side, "Settings", IconPainter.Gear, "Settings", UiKit.Hex("6B8FA8"), () => settings.Open());
-            var menuButton = UiKit.RoundButton(side, "Menu", IconPainter.Menu, "Menu", UiKit.Primary, () => menu.Open());
-            // Something new somewhere inside: a dot here, then on the tile, and on down to the thing.
-            NewDot.Live(menuButton.transform, () => !Attention.TutorialRunning && MenuNews());
-            UiKit.RoundButton(side, "Map", IconPainter.Map, "Map", UiKit.Spring, () => map.Open());
+            var mapButton = UiKit.RoundButton(side, "Map", IconPainter.Map, "Map", UiKit.Spring, () => map.Open());
+            NewDot.Live(mapButton.transform, () => !Attention.TutorialRunning && NewStuff.Any("map/"));
+            var hobbiesButton = UiKit.RoundButton(side, "Hobbies", IconPainter.Rod, "Hobbies", UiKit.Hex("3E9C8F"), () => HobbiesScreen.Show());
+            NewDot.Live(hobbiesButton.transform, () => !Attention.TutorialRunning && NewStuff.Any("hobbies/"));
+            var collectionButton = UiKit.RoundButton(side, "Collection", IconPainter.Cards, "Collection", UiKit.Hex("A77BD6"), () => collection.Open());
+            NewDot.Live(collectionButton.transform, () => !Attention.TutorialRunning && CollectionScreen.AnyNews());
             if (Visit.Active)
             {
                 // Away from home: the way back, and a way to keep this island.

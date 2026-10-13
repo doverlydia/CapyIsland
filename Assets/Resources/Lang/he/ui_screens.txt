@@ -390,3 +390,6 @@
 
 @ Show all {0} goals
 = הצג את כל {0} המטרות
+
+@ <b>{0}</b> is waiting for you in the Wardrobe. To try it on, tap your picture at the top left, then Change outfit.
+= <b>{0}</b> מחכה לך בארון הבגדים. כדי למדוד, הקש על התמונה שלך למעלה משמאל, ואז על "החלף בגדים".

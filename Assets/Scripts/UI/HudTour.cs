@@ -38,7 +38,7 @@ namespace CapyIsland.UI
             PlayerPrefs.Save();
         }
 
-        static readonly string[] AllIds = { "welcome", "goals", "arrows", "menu", "map", "gifts", "friends", "events", "profile", "clock", "hello", "help", "walk" };
+        static readonly string[] AllIds = { "welcome", "goals", "arrows", "map", "gifts", "friends", "events", "profile", "clock", "hello", "help", "walk" };
 
         /// <summary>
         /// Forgets every tip and the tour, and switches the tutorial back on (Start over): a fresh
@@ -285,13 +285,6 @@ namespace CapyIsland.UI
                 Target = () => ScreenRect(EdgeIndicators.FirstShown),
                 Optional = true,
                 Extra = BuildArrowLegend,
-            });
-            _steps.Add(new Step
-            {
-                Id = "menu",
-                Title = "Menu",
-                Body = "Everything else lives here: your goals, the map, your collection, the wardrobe and your hobbies.",
-                Target = Hud("SideButtons/Menu"), Optional = true,
             });
             _steps.Add(new Step
             {

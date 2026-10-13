@@ -209,7 +209,7 @@ namespace CapyIsland.UI
         {
             if (_collapsed) { SetCollapsed(false); return; }
             var goal = Objectives.Current();
-            ObjectivesScreen.Show(goal.Source == Objectives.Source.Achievement || goal.Source == Objectives.Source.Done
+            ObjectivesScreen.Show(goal.Source == Objectives.Source.Achievement || goal.Source == Objectives.Source.Done || NewStuff.Any("goals/")
                 ? ObjectivesScreen.Tab.Achievements
                 : ObjectivesScreen.Tab.Quests);
         }

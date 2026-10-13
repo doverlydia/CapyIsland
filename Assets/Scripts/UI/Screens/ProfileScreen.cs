@@ -53,6 +53,7 @@ namespace CapyIsland.UI
                     if (WardrobeScreen.Instance != null) WardrobeScreen.Instance.Open();
                 }, 32f, IconPainter.Hanger);
                 dress.transform.parent.gameObject.AddComponent<LayoutElement>().preferredHeight = 96f;
+                if (NewStuff.Any("wardrobe/")) NewDot.Fixed(dress.transform, 30f);   // a new piece to try on
             }
 
             SectionLabel(_list, "Your island life");
