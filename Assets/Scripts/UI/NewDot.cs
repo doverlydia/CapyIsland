@@ -30,6 +30,8 @@ namespace CapyIsland.UI
         {
             var dot = UiKit.Image(on, "NewDot", UiKit.Circle, UiKit.Danger);
             UiKit.Place(dot.rectTransform, new Vector2(1f, 1f), new Vector2(2f, 2f), new Vector2(size, size));
+            // On a card with a layout group the dot would otherwise be laid out (and stretched) as one more item.
+            dot.gameObject.AddComponent<UnityEngine.UI.LayoutElement>().ignoreLayout = true;
             dot.transform.SetAsLastSibling();
             return dot.gameObject;
         }

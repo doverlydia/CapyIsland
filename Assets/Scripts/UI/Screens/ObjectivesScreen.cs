@@ -222,7 +222,6 @@ namespace CapyIsland.UI
             {
                 if (!a.Done) continue;
                 Row(IconPainter.Check, UiKit.Leaf, a.Def.Title, a.Def.Description, null, default, null, faded: true, reward: RewardOf(a.Def));
-                if (NewStuff.Has("goals/" + a.Def.Name)) NewDot.Fixed(_list.GetChild(_list.childCount - 1), 30f);
             }
             NewStuff.Clear("goals/");   // seen
         }
