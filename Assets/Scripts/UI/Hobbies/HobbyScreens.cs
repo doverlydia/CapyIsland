@@ -672,8 +672,18 @@ namespace CapyIsland.UI
 
         protected override void OnOpen() => Refresh();
 
+        bool _onRack;   // the rack is showing (not a wish being read or written)
+
+        /// <summary>The window changed shape (a phone turned, an editor layout): the rack is redrawn to fit it.</summary>
+        protected override void Fit()
+        {
+            base.Fit();
+            if (IsOpen && _onRack) Refresh();
+        }
+
         void Refresh()
         {
+            _onRack = false;
             ClearChildren(_list);
             if (_pendingWrite != null) Write(_pendingWrite);
             else RackPage();
@@ -684,6 +694,7 @@ namespace CapyIsland.UI
 
         void RackPage()
         {
+            _onRack = true;
             NewStuff.Clear("hobbies/Writing/");   // the ema friends left: seen
             var all = Shrine.Rack();
             int perPage = PegsX.Length * BarsY.Length;
@@ -804,6 +815,7 @@ namespace CapyIsland.UI
 
         void Read(Shrine.Ema e)
         {
+            _onRack = false;
             ClearChildren(_list);
             var back = UiKit.Button(_list, "Back", "Back to the rack", UiKit.ButtonStyle.Secondary, Refresh, 28f);
             back.transform.parent.gameObject.AddComponent<LayoutElement>().preferredHeight = 76f;
