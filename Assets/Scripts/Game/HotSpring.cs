@@ -7,7 +7,8 @@ using UnityEngine;
 namespace CapyIsland.Game
 {
     /// <summary>
-    /// The old hot spring at the foot of the Steam Tower: a big stone-ringed pool in front of the
+    /// The old hot spring at the foot of the Steam Tower: an onsen ringed with river stones, a straw
+    /// rope with paper streamers along its back and a bamboo spout pouring in, in front of the
     /// tower (which stands a little grander for it), steaming away all day.
     ///
     /// Tap the tower or the pool and your capybara walks over, hops in and soaks: sunk to its middle
@@ -19,6 +20,11 @@ namespace CapyIsland.Game
     {
         const float PoolWidth = 4.4f;     // world units across
         const float TowerGrow = 1.25f;
+        /// <summary>
+        /// Where the water's middle sits, from the middle of the picture, as a share of its height:
+        /// the onsen's rope and bamboo spout stand up behind the pool, so the water is a little low.
+        /// </summary>
+        const float Water = -0.07f;
         const string Towel = "Hat_Towel";
 
         public static HotSpring Instance { get; private set; }
@@ -85,7 +91,7 @@ namespace CapyIsland.Game
                 _nextPuff = Time.time + UnityEngine.Random.Range(0.22f, 0.4f);
                 var p = _pool.bounds;
                 var inWater = UnityEngine.Random.insideUnitCircle;
-                Puff(new Vector2(p.center.x + inWater.x * p.extents.x * 0.62f, p.center.y + 0.05f * p.size.y + inWater.y * p.extents.y * 0.45f),
+                Puff(new Vector2(p.center.x + inWater.x * p.extents.x * 0.62f, p.center.y + (Water + 0.01f) * p.size.y + inWater.y * p.extents.y * 0.45f),
                      UnityEngine.Random.Range(0.45f, 0.75f), UnityEngine.Random.Range(1.4f, 2.2f));
             }
         }
@@ -160,7 +166,7 @@ namespace CapyIsland.Game
             body.localPosition = Vector3.zero;
             float height = bodyRenderer.bounds.size.y;
             float feet = king.transform.position.y - bodyRenderer.bounds.min.y;   // root above its feet
-            float waterY = pool.center.y + 0.04f * pool.size.y;
+            float waterY = pool.center.y + Water * pool.size.y;
             var seat = new Vector3(pool.center.x + 0.08f * pool.size.x, waterY - 0.52f * height + feet, king.transform.position.z);
             var fx = HarvestEffects.Instance;
             Sfx.Play(SfxKind.Rustle, 0.4f);
