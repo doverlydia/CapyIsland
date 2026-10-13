@@ -291,3 +291,23 @@
 
 @ And coming home.
 = ועל החזרה הביתה.
+
+# ---------------------------------------------------------------- Yuzu's lantern (LanternCutscene)
+
+@ Ah, you found the lanterns. And this one in my paws... this is Yuzu's.
+= אה, מצאת את הפנסים. והפנס הזה שבכפות שלי... הוא של יוזו.
+
+@ On our wedding night we floated it out together, to tell the spirits we'd look after these islands.
+= בליל החתונה שלנו שלחנו אותו יחד אל המים, כדי לספר לרוחות שנשמור על האיים האלה.
+
+@ Every year after, I lit it again for her. Then the Big Chill came, and the candle went out. Let's light it once more.
+= כל שנה אחרי זה הדלקתי אותו שוב בשבילה. ואז הגיע הקור הגדול, והנר כבה. בוא נדליק אותו עוד פעם.
+
+@ Every warm heart you bring home sets another one adrift. Look at them all. Maybe one night she'll see them too.
+= כל לב חם שאתה מחזיר הביתה שולח עוד פנס אל המים. תסתכל על כולם. אולי לילה אחד גם היא תראה אותם.
+
+@ Yuzu's wedding lantern, still burning. Old Mochi lights it every night.
+= פנס החתונה של יוזו, עדיין דולק. סבא מוצ'י מדליק אותו כל לילה.
+
+@ You went up to the shrine? Then you met my Mochi. Fifty years he swept those steps, and he still thinks I never noticed. Tell him... no. I'll tell him myself, when the spring is warm.
+= עלית למקדש? אז פגשת את המוצ'י שלי. חמישים שנה הוא טאטא את המדרגות האלה, והוא עדיין חושב שלא שמתי לב. תגיד לו... לא. אני אגיד לו בעצמי, כשהמעיין יהיה חם.

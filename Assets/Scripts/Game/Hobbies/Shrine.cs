@@ -163,18 +163,21 @@ namespace CapyIsland.Game
             if (Attention.TutorialRunning) { UI.SpeechDialog.Show(face, StoryText.Keeper, new[] { StoryText.Mochi.Busy }, null); return; }
 
             string[] lines;
+            Action closed = null;
             if (Visit.Active) lines = new[] { StoryText.Mochi.Visit(Visit.Host.name) };
             else if (PlayerPrefs.GetInt(MetKey, 0) == 0)
             {
                 PlayerPrefs.SetInt(MetKey, 1);
                 PlayerPrefs.Save();
                 lines = StoryText.Mochi.Meet;
+                // Old Yuzu has something to say about him, once you've met (when the screen is free).
+                closed = () => Attention.Ask("yuzu-met-mochi", () => Hints.Show(StoryText.Yuzu.MetMochi));
             }
             else lines = new[] { StoryText.Mochi.Hello[UnityEngine.Random.Range(0, StoryText.Mochi.Hello.Length)] };
 
             var store = ResourceStore.Instance;
             bool afford = store != null && store.Get(ResourceKind.Gold) >= 1;
-            UI.SpeechDialog.ShowChoices(face, StoryText.Keeper, lines, null, new List<UI.SpeechDialog.Choice>
+            UI.SpeechDialog.ShowChoices(face, StoryText.Keeper, lines, closed, new List<UI.SpeechDialog.Choice>
             {
                 new("Hang an ema (1 gold)", WriteNew, afford),
                 new("Look at the rack", OpenRack),

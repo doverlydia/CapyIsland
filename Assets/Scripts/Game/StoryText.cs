@@ -102,6 +102,15 @@ namespace CapyIsland.Game
                 "Miso came by yesterday and left a wish. I didn't read it. ...I read it. It was very sweet.",
             };
 
+            /// <summary>The lantern story (UI.LanternCutscene), the first time you tap a lantern on the sea.</summary>
+            public const string Lantern1 = "Ah, you found the lanterns. And this one in my paws... this is Yuzu's.";
+            public const string Lantern2 = "On our wedding night we floated it out together, to tell the spirits we'd look after these islands.";
+            public const string Lantern3 = "Every year after, I lit it again for her. Then the Big Chill came, and the candle went out. Let's light it once more.";
+            public const string Lantern4 = "Every warm heart you bring home sets another one adrift. Look at them all. Maybe one night she'll see them too.";
+
+            /// <summary>Tapping Yuzu's lantern again, later.</summary>
+            public const string LanternAgain = "Yuzu's wedding lantern, still burning. Old Mochi lights it every night.";
+
             public static string Visit(string host) =>
                 $"Ah, a visitor from another island! You may hang an ema here for {host}. They'll find it on their rack.";
         }
@@ -515,6 +524,9 @@ namespace CapyIsland.Game
         /// </summary>
         public static class Yuzu
         {
+            /// <summary>Once, after you first talk to Old Mochi at his shrine: she knows exactly who he is.</summary>
+            public const string MetMochi = "You went up to the shrine? Then you met my Mochi. Fifty years he swept those steps, and he still thinks I never noticed. Tell him... no. I'll tell him myself, when the spring is warm.";
+
             /// <summary>Her ghost, by her frozen body, before she has noticed anything.</summary>
             public static readonly string[] AtHerBody =
             {

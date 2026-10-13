@@ -35,7 +35,7 @@ namespace CapyIsland.UI
         /// <summary>Starts a cutscene of type <typeparamref name="T"/>; <paramref name="done"/> runs after it fades out.</summary>
         protected static T Play<T>(Action done) where T : Cutscene
         {
-            if (_running != null) { done?.Invoke(); return null; }
+            if (_running != null || !Application.isPlaying) { done?.Invoke(); return null; }   // never built into the edited scene
             var go = new GameObject("[Cutscene] " + typeof(T).Name, typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
             var canvas = go.GetComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
@@ -165,6 +165,7 @@ namespace CapyIsland.UI
         {
             var size = ((RectTransform)transform).rect.size;
             _fittedTo = size;
+            if (Stage == null || _captions == null) return;   // not built yet
             if (size.x <= 0f) size = new Vector2(1080f, 1920f);
             if (InBubbles) { FitBubble(size); return; }
             float w = size.x, h = w / 1.5f;
@@ -582,6 +583,11 @@ namespace CapyIsland.UI
         /// </summary>
         protected void Caption(string text)
         {
+            // Anything older than the line now fading out goes at once, so lines never pile up
+            // (pages turned quickly, or a fade that never got to finish).
+            foreach (Transform older in _captions)
+                if (older.name == "CaptionBand" && (_caption == null || older != _caption.transform.parent))
+                    Destroy(older.gameObject);
             if (_caption != null)
             {
                 var old = _caption;

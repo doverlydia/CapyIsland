@@ -11,6 +11,9 @@ namespace CapyIsland.Game
     /// They float off the coasts (never in the surf, never under a bridge), the first ones nearest
     /// the start island, and each idles in a slow loop around its own spot, bobbing. They fade in
     /// with dusk and out with dawn, and glow by themselves (unlit), so night doesn't dim them.
+    ///
+    /// The first is Old Yuzu's wedding lantern, a little bigger and rosier, that Old Mochi lights
+    /// every night. Tap any lantern the first time and he tells its story (UI.LanternCutscene).
     /// </summary>
     public class SeaLanterns : MonoBehaviour
     {
@@ -23,6 +26,7 @@ namespace CapyIsland.Game
             public SpriteRenderer body, glow, shine;
             public Vector2 anchor;
             public float phase, alpha;
+            public bool grandmas;
         }
 
         readonly List<Vector2> _spots = new();
@@ -119,8 +123,37 @@ namespace CapyIsland.Game
                 l.body.transform.localPosition = new Vector3(0f, bob * 0.03f, 0f);
                 float flicker = 0.85f + 0.15f * Mathf.PerlinNoise(t * 3f, l.phase * 10f);
                 l.body.color = new Color(1f, 1f, 1f, l.alpha);
-                l.glow.color = new Color(1f, 0.72f, 0.35f, 0.6f * l.alpha * flicker);
-                l.shine.color = new Color(1f, 0.78f, 0.45f, 0.3f * l.alpha * flicker);
+                l.glow.color = l.grandmas ? new Color(1f, 0.6f, 0.62f, 0.75f * l.alpha * flicker) : new Color(1f, 0.72f, 0.35f, 0.6f * l.alpha * flicker);
+                l.shine.color = l.grandmas ? new Color(1f, 0.68f, 0.7f, 0.36f * l.alpha * flicker) : new Color(1f, 0.78f, 0.45f, 0.3f * l.alpha * flicker);
+                if (l.grandmas) l.body.color = new Color(1f, 0.9f, 0.92f, l.alpha);
+            }
+        }
+
+        /// <summary>A lantern you can tap: the first time, the story of Yuzu's lantern.</summary>
+        class Tappable : MonoBehaviour, ITappable
+        {
+            SpriteRenderer _sr;
+            bool _grandmas;
+
+            public void Init(SpriteRenderer sr, bool grandmas) { _sr = sr; _grandmas = grandmas; }
+
+            void OnEnable() => TapTargets.Register(this);
+            void OnDisable() => TapTargets.Unregister(this);
+
+            public float TapDistance(Vector2 worldPoint)
+            {
+                if (_sr == null || _sr.color.a < 0.3f) return -1f;
+                float d = Vector2.Distance(_sr.bounds.center, worldPoint);
+                return d < 0.9f ? d : -1f;
+            }
+
+            public void Tap()
+            {
+                Sfx.Play(SfxKind.Heart, 0.35f);
+                var fx = HarvestEffects.Instance;
+                if (fx != null) fx.Twinkle(_sr.bounds.center, 6);
+                if (!UI.LanternCutscene.Seen && !Attention.TutorialRunning) { UI.LanternCutscene.Show(); return; }
+                if (_grandmas) Hints.Show(StoryText.Mochi.LanternAgain);
             }
         }
 
@@ -155,6 +188,12 @@ namespace CapyIsland.Game
                 shine = Layer("Reflection", glowSprite, WaterOrder - 1, new Vector3(0.7f * g, 2.4f * g, 1f), new Vector3(0f, -0.9f, 0f)),
                 body = Layer("Lantern", _art, WaterOrder, Vector3.one * (0.9f / Mathf.Max(0.01f, _art.bounds.size.x)), Vector3.zero),
             };
+            if (index == 0)
+            {
+                l.grandmas = true;
+                root.localScale = Vector3.one * 1.3f;
+            }
+            root.gameObject.AddComponent<Tappable>().Init(l.body, index == 0);
             root.gameObject.SetActive(false);
             return l;
         }
