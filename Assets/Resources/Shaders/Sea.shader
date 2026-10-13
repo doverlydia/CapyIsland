@@ -22,6 +22,8 @@ Shader "CapyIsland/Sea"
         _CausticSharp("Caustic sharpness", Range(1, 10)) = 3.2
         _Foam("Shore foam", Range(0, 1)) = 0.75
         _Speed("Speed", Range(0, 3)) = 1
+        _SkyTint("Time-of-day tint (set by Sea.cs)", Color) = (1,1,1,1)
+        _Daylight("Daylight (set by Sea.cs)", Range(0, 1)) = 1
 
         [HideInInspector] _Color("Tint", Color) = (1,1,1,1)
         [HideInInspector] _RendererColor("RendererColor", Color) = (1,1,1,1)
@@ -72,6 +74,8 @@ Shader "CapyIsland/Sea"
                 half4 _Color;
                 float4 _ShoreRect;
                 half _Depth, _Tone, _Glints, _CausticScale, _CausticSharp, _Foam, _Speed;
+                half4 _SkyTint;
+                half _Daylight;
             CBUFFER_END
 
             // Value noise: smooth, cheap, no textures.
@@ -140,7 +144,8 @@ Shader "CapyIsland/Sea"
                     nearest = min(nearest, length(0.5 - frac(k)));
                 }
                 float caustic = pow(nearest, _CausticSharp) * 2.6;
-                col += caustic * lerp(1.0, 0.45, deep) * _Glints * half3(0.85, 0.97, 1.0);
+                // By moonlight the web of light is only a faint shimmer.
+                col += caustic * lerp(1.0, 0.45, deep) * _Glints * lerp(0.3, 1.0, _Daylight) * half3(0.85, 0.97, 1.0);
 
                 // Foam (d: 0 at the shore, 1 a few units out).
                 float breakup = smoothstep(0.25, 0.65, Noise(p * 0.9 + float2(t * 0.15, 0)));
@@ -149,6 +154,9 @@ Shader "CapyIsland/Sea"
                 float line_ = smoothstep(0.0, 0.05, roll) * (1.0 - smoothstep(0.05, 0.14, roll));
                 line_ *= (1.0 - smoothstep(0.08, 0.55, d)) * breakup;        // fading as they come
                 col = lerp(col, half3(1, 1, 1), saturate(rim * 0.8 + line_ * 0.6) * _Foam);
+
+                // The sky in the water: peach at dawn, rose at dusk, purple at night (Sea.cs).
+                col *= _SkyTint.rgb;
 
                 return CommonLitFragment(input, half4(col, input.color.a));
             }
@@ -172,6 +180,8 @@ Shader "CapyIsland/Sea"
                 half4 _Color;
                 float4 _ShoreRect;
                 half _Depth, _Tone, _Glints, _CausticScale, _CausticSharp, _Foam, _Speed;
+                half4 _SkyTint;
+                half _Daylight;
             CBUFFER_END
 
             Varyings V(Attributes input)

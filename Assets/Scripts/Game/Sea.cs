@@ -127,6 +127,47 @@ namespace CapyIsland.Game
             return tex;
         }
 
+        // ---------------------------------------------------------------- the sky in the water
+
+        /// <summary>
+        /// The sea takes on the sky's colours, at the same hours as the island's light (DayNight):
+        /// purple through the night, a peach blush at dawn, clear by day, rosy at dusk. On top of
+        /// the night light itself, the purple makes a deep violet-blue sea.
+        /// </summary>
+        /// <summary>More red than blue on purpose: the night light is blue already, and only this way does the sea read violet.</summary>
+        static readonly Color Night = new(1.30f, 0.70f, 1.05f);
+
+        static readonly (float hour, Color tint, float daylight)[] Sky =
+        {
+            (0f,    Night, 0f),
+            (4.6f,  Night, 0f),
+            (6f,    new Color(1.10f, 0.86f, 0.86f), 0.6f),
+            (8f,    Color.white,                    1f),
+            (16f,   Color.white,                    1f),
+            (18f,   new Color(1.12f, 0.76f, 0.92f), 0.6f),
+            (19.6f, Night, 0f),
+            (24f,   Night, 0f),
+        };
+
+        float _nextSky;
+
+        void Update()
+        {
+            if (_material == null || Time.unscaledTime < _nextSky) return;
+            _nextSky = Time.unscaledTime + 0.5f;   // a day lasts 24 minutes: twice a second is plenty
+            float hour = GameClock.Hour;
+            for (int i = 0; i < Sky.Length - 1; i++)
+            {
+                var (h0, c0, d0) = Sky[i];
+                var (h1, c1, d1) = Sky[i + 1];
+                if (hour < h0 || hour > h1) continue;
+                float f = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(h0, h1, hour));
+                _material.SetColor("_SkyTint", Color.Lerp(c0, c1, f));
+                _material.SetFloat("_Daylight", Mathf.Lerp(d0, d1, f));
+                return;
+            }
+        }
+
         void OnDestroy()
         {
             if (_shore != null) Destroy(_shore);
