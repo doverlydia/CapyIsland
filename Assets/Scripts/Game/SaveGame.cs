@@ -33,12 +33,14 @@ namespace CapyIsland.Game
         public List<BubbleSave> bubbles = new();
         public List<AnimalSave> animals = new();
         public List<GhostSave> questGhosts = new(), bridgeGhosts = new();
+        /// <summary>The tutorial step a game was saved on; empty once the tutorial is over (and in older saves).</summary>
+        public string tutorial = "";
     }
 
     /// <summary>
-    /// Saves the island and brings it back next time. Saving starts once the tutorial is over; the
-    /// game saves every 30 seconds and whenever the app is paused or closed — there is no save
-    /// button to forget.
+    /// Saves the island and brings it back next time, from the very first minute: the game saves
+    /// every 30 seconds and whenever the app is paused or closed — there is no save button to
+    /// forget. A game closed mid-tutorial picks the tutorial up again at the same step.
     ///
     /// Stored as JSON in PlayerPrefs, which is IndexedDB on WebGL and app storage on Android.
     ///
@@ -117,14 +119,13 @@ namespace CapyIsland.Game
         {
             get
             {
-                var tutorial = FindFirstObjectByType<TutorialDirector>();
                 if (_loaded && !_session)
                 {
                     if (!_warnedReload) Debug.LogWarning("[SaveGame] Scripts reloaded during Play: saving is off until you restart Play, so the save isn't damaged.");
                     _warnedReload = true;
                     return false;
                 }
-                return _loaded && !Suspended && (tutorial == null || tutorial.Finished);
+                return _loaded && !Suspended;
             }
         }
 
@@ -202,6 +203,8 @@ namespace CapyIsland.Game
                 d.gems = store.Get(ResourceKind.Gem);
             }
             d.score = TowerOfLove.Score;
+            var tutorial = TutorialDirector.Instance;
+            d.tutorial = tutorial != null ? tutorial.SavedStep : "";
             d.motes.Clear(); d.motes.AddRange(Motes.Collected);
             d.motesClicked.Clear(); d.motesClicked.AddRange(Motes.Clicked);
             d.cards.Clear(); d.cards.AddRange(Cards.Collected);
@@ -306,10 +309,12 @@ namespace CapyIsland.Game
             Restoring = true;
             try
             {
-                SkipTutorial();
                 ApplyProgress(d);
                 ApplyWorld(d, d);
                 MoteHeart.RestoreUnclaimed();
+                // Mid-tutorial saves carry on at their step; it looks for what the world just restored.
+                var tutorial = FindFirstObjectByType<TutorialDirector>();
+                if (tutorial != null) tutorial.Resume(d.tutorial);
             }
             finally { Restoring = false; }
 

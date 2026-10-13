@@ -91,6 +91,57 @@ namespace CapyIsland.Game
             _step = Step.Done;
             if (pointer != null) pointer.Hide();
         }
+
+        /// <summary>The step to keep in the save ("" once it is over), so closing the app mid-tutorial loses nothing.</summary>
+        public string SavedStep => _step == Step.Done ? "" : _step.ToString();
+
+        /// <summary>
+        /// Back from a save made mid-tutorial: carry on from that step. An empty or unknown step
+        /// (every save from before steps were kept) means the tutorial is over.
+        /// </summary>
+        public void Resume(string step)
+        {
+            if (string.IsNullOrEmpty(step) || !System.Enum.TryParse(step, out Step saved) || saved == Step.Done)
+            {
+                SkipForReturningPlayer();
+                return;
+            }
+            Advance(saved);
+            if (saved == Step.CollectGarden || saved == Step.PlantGarden) FindSavedGarden();
+            if (saved == Step.OpenTower) WaitForDiary();
+        }
+
+        /// <summary>
+        /// The save brought the garden back as a copy (in its bubble, or in the trail), not as the
+        /// scene's stashed one the steps were watching: watch the copy instead.
+        /// </summary>
+        void FindSavedGarden()
+        {
+            foreach (var b in FindObjectsByType<Bubble>(FindObjectsSortMode.None))
+                if (!b.Taken && b.Contents != null && b.Contents.TryGetComponent<Placeable>(out var inBubble) && inBubble.DisplayName.Contains("Garden"))
+                {
+                    _gardenBubble = b;
+                    gardenItem = inBubble;
+                    return;
+                }
+            Placeable planted = null;
+            foreach (var p in FindObjectsByType<Placeable>(FindObjectsSortMode.None))
+            {
+                if (!p.DisplayName.Contains("Garden")) continue;
+                if (!p.Placed) { gardenItem = p; return; }
+                planted = p;
+            }
+            // Already in the ground: the step is as good as done.
+            if (planted != null) gardenItem = planted;
+            else AwakenSpirits();
+        }
+
+        void WaitForDiary()
+        {
+            _towerOpened = false;
+            TowerOfLove.DiaryClosed -= OnDiaryClosed;
+            TowerOfLove.DiaryClosed += OnDiaryClosed;
+        }
         float _greetTimer;
 
         void OnEnable() => Hints.Shown += SayHint;
@@ -328,9 +379,7 @@ namespace CapyIsland.Game
             {
                 Say("Ah... this is the heart of the Capy Isles. The old hot spring is here somewhere.");
                 _stepTimer = 10f;
-                _towerOpened = false;
-                TowerOfLove.DiaryClosed -= OnDiaryClosed;
-                TowerOfLove.DiaryClosed += OnDiaryClosed;
+                WaitForDiary();
                 Advance(Step.OpenTower);
                 return;
             }
