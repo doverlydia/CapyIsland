@@ -77,16 +77,12 @@ namespace CapyIsland.UI
             if (Instance == this) Instance = null;
         }
 
-        /// <summary>
-        /// A new outfit waits its turn (never during the opening), and the first one is followed by
-        /// a word about the menu, where the wardrobe lives.
-        /// </summary>
+        /// <summary>A new outfit waits its turn (never during the opening).</summary>
         static void AnnounceOutfit(WearItem item) =>
             Attention.Ask("outfit:" + item.Id, () =>
-                CardPopup.Show("New outfit!", "<b>" + item.Name + "</b> is waiting for you in the Wardrobe.", Wardrobe.Art(item),
-                    () => HudTour.Tip("menu")));
+                CardPopup.Show("New outfit!", "<b>" + item.Name + "</b> is waiting for you in the Wardrobe.", Wardrobe.Art(item)));
 
-        GameObject _giftDot, _eventsDot, _menuDot;
+        GameObject _giftDot, _eventsDot;
 
         /// <summary>
         /// A contest that ended while you were away: how you did, once, when the screen is free.
@@ -124,7 +120,6 @@ namespace CapyIsland.UI
             bool gift = calm && DailyGifts.CanClaim;
             if (_giftDot != null && _giftDot.activeSelf != gift) _giftDot.SetActive(gift);
             if (_eventsDot != null && Time.frameCount % 30 == 0) _eventsDot.SetActive(calm && GameEvents.NeedsAttention);
-            if (_menuDot != null && Time.frameCount % 15 == 0) _menuDot.SetActive(calm && HudTour.Wants("menu"));
             if (_addFriend != null && _addFriend.activeSelf != (Visit.Active && !Visit.HostIsFriend))
                 _addFriend.SetActive(Visit.Active && !Visit.HostIsFriend);
         }
@@ -231,12 +226,7 @@ namespace CapyIsland.UI
             menu.AddEntry("Friends", IconPainter.Plane, UiKit.Hex("5B9BD5"), () => friends.Open());
             menu.AddEntry("Settings", IconPainter.Gear, UiKit.Hex("6B8FA8"), () => settings.Open());
 
-            var menuButton = UiKit.RoundButton(side, "Menu", IconPainter.Menu, "Menu", UiKit.Primary, () => menu.Open());
-            // Something in the menu still to be shown to you: a dot until you look.
-            var mdot = UiKit.Image(menuButton.transform, "Dot", UiKit.Circle, UiKit.Danger);
-            UiKit.Place(mdot.rectTransform, new Vector2(1f, 1f), new Vector2(2f, 2f), new Vector2(34f, 34f));
-            _menuDot = mdot.gameObject;
-            _menuDot.SetActive(false);
+            UiKit.RoundButton(side, "Menu", IconPainter.Menu, "Menu", UiKit.Primary, () => menu.Open());
             UiKit.RoundButton(side, "Map", IconPainter.Map, "Map", UiKit.Spring, () => map.Open());
             if (Visit.Active)
             {

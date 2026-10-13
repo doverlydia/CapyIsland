@@ -109,13 +109,6 @@ namespace CapyIsland.UI
                 if (group == null) group = button.gameObject.AddComponent<CanvasGroup>();
                 group.alpha = ok ? 1f : 0.55f;
             }
-            // The menu's own tip (the red dot on its button) is told here, over the menu itself,
-            // rather than waiting for it to close.
-            if (HudTour.Wants("menu"))
-            {
-                HudTour.Withdraw("menu");
-                CardPopup.Show("Menu", "Everything else lives here: your goals, the wardrobe, hobbies, friends, and Settings (bigger text, language, sound).", IconPainter.Menu);
-            }
         }
 
         protected override void Fit()

@@ -8,7 +8,6 @@ namespace CapyIsland.UI
     /// for that one tip. The game teaches by doing, so there are few, and none during the opening:
     ///
     ///  * the opening is done → the goal card (your next goal is always there)
-    ///  * the first outfit card closes → the Menu, where the wardrobe lives (from MobileHud)
     ///  * the map is first opened → how to travel on it (from MapScreen)
     ///  * the first hobby is unlocked → Events, and the clock (creatures keep hours)
     ///  * the first visitor lands → Friends and the emoji button

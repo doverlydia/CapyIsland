@@ -152,8 +152,8 @@
 @ Need help later?
 = צריך עזרה אחר כך?
 
-@ Bigger text, tap-to-read and the language are in Menu → Settings. You can watch this tour again there too.
-= טקסט גדול, הקשה לקריאה והשפה נמצאים בתפריט ← הגדרות. שם אפשר גם לצפות שוב בסיור.
+@ Bigger text, tap-to-read and the language are in Settings, the gear on the right. You can watch this tour again there too.
+= טקסט גדול, הקשה לקריאה והשפה נמצאים בהגדרות, גלגל השיניים מימין. שם אפשר גם לצפות שוב בסיור.
 
 # ---- the tutorial's placement circle
 
