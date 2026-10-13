@@ -253,6 +253,10 @@ namespace CapyIsland.UI
         public static Sprite Arrow => Cached("Arrow", (x, y) =>
             Triangle(x, y, new Vector2(-0.55f, 0.7f), new Vector2(0.8f, 0f), new Vector2(-0.55f, -0.7f), 0.12f));
 
+        /// <summary>A chevron pointing right, ›, drawn as two rounded strokes (flip it for ‹).</summary>
+        public static Sprite Chevron => Cached("Chevron", (x, y) =>
+            Line(x, y, 0.15f, -0.3f, 0.7f, 0.35f, 0f, -0.3f, -0.7f));
+
         public static Sprite Calendar => Cached("Calendar", (x, y) =>
         {
             float body = Cut(Box(x, y, 0f, -0.12f, 0.78f, 0.66f, 0.16f), Box(x, y, 0f, -0.24f, 0.62f, 0.4f, 0.06f));

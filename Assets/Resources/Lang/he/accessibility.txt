@@ -688,3 +688,9 @@
 
 @ Either way, tap any spot to walk there.
 = בכל מקרה, אפשר להקיש על כל מקום כדי ללכת אליו.
+
+@ Hide
+= הסתר
+
+@ Show
+= הצג

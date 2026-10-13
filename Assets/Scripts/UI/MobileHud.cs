@@ -117,6 +117,7 @@ namespace CapyIsland.UI
             {
                 bool dot = _tucked && SideHasDot();
                 if (_tuckDot.activeSelf != dot) _tuckDot.SetActive(dot);
+                PlaceTuck();
             }
             if (_stopWalking != null)
             {
@@ -137,32 +138,45 @@ namespace CapyIsland.UI
         // ---------------------------------------------------------------- tucking the side buttons away
 
         const string TuckedKey = "CapyIsland.SideTucked";
-        RectTransform _side, _tuckArrow;
+        const float SideX = -16f, SideSpacing = 14f;
+        RectTransform _side, _tuck, _tuckChevron;
+        TextMeshProUGUI _tuckLabel;
         GameObject _tuckDot;
         bool _tucked;
-        const float SideX = -16f;
 
         /// <summary>
-        /// A little arrow above the column of buttons on the right: tap it and the whole column
-        /// slides away off the edge, leaving the island clear; tap again to bring it back. Tucked
-        /// away, the arrow wears a red dot if any of the hidden buttons has one. Remembered.
+        /// A pill under the column of buttons on the right, reading "Hide ›": tap it and the
+        /// column slides away off the edge, leaving the island clear, and the pill turns to
+        /// "‹ Show" to bring it back. Tucked away, it wears a red dot if any hidden button has one.
+        /// Remembered between sessions.
         /// </summary>
         void BuildTuck(RectTransform side)
         {
             _side = side;
-            var handle = UiKit.Image(_safe, "SideTuck", UiKit.Circle, new Color(1f, 1f, 1f, 0.92f), true);
-            UiKit.Place(handle.rectTransform, new Vector2(1f, 1f), new Vector2(-48f, -24f), new Vector2(56f, 56f));
-            handle.rectTransform.SetSiblingIndex(side.GetSiblingIndex() + 1);
-            UiKit.AddShadow(handle.rectTransform, 8f, 3f, 0.22f);
-            var arrow = UiKit.Image(handle.transform, "Arrow", IconPainter.Arrow, UiKit.Ink);
-            arrow.preserveAspect = true;
-            UiKit.Stretch(arrow.rectTransform, 14f, 14f, 14f, 14f);
-            _tuckArrow = arrow.rectTransform;
-            var b = handle.gameObject.AddComponent<Button>();
+            var pill = UiKit.Image(_safe, "SideTuck", UiKit.Rounded(26), UiKit.HudGlass, true);
+            _tuck = pill.rectTransform;
+            UiKit.Place(_tuck, new Vector2(1f, 1f), new Vector2(SideX - 4f, side.anchoredPosition.y), new Vector2(128f, 56f));
+            _tuck.SetSiblingIndex(side.GetSiblingIndex() + 1);
+            var h = pill.gameObject.AddComponent<HorizontalLayoutGroup>();
+            h.padding = new RectOffset(14, 14, 8, 8);
+            h.spacing = 6f;
+            h.childAlignment = TextAnchor.MiddleCenter;
+            h.childControlWidth = h.childControlHeight = true;
+            h.childForceExpandWidth = h.childForceExpandHeight = false;
+            RtlLayout.Add(h);
+            _tuckLabel = UiKit.Text(pill.transform, "Label", "Hide", 28f, Color.white, true, TextAlignmentOptions.Center);
+            _tuckLabel.textWrappingMode = TextWrappingModes.NoWrap;
+            var chevron = UiKit.Image(pill.transform, "Chevron", IconPainter.Chevron, Color.white);
+            chevron.preserveAspect = true;
+            var cle = chevron.gameObject.AddComponent<LayoutElement>();
+            cle.preferredWidth = cle.preferredHeight = 24f;
+            _tuckChevron = chevron.rectTransform;
+            var b = pill.gameObject.AddComponent<Button>();
             b.transition = Selectable.Transition.None;
             b.onClick.AddListener(() => { Sfx.Play(SfxKind.Tap, 0.5f); Tuck(!_tucked, true); });
-            handle.gameObject.AddComponent<PressSquash>();
-            _tuckDot = NewDot.Fixed(handle.transform, 22f);
+            pill.gameObject.AddComponent<PressSquash>();
+            _tuckDot = NewDot.Fixed(pill.transform, 24f);
+            _tuckDot.AddComponent<LayoutElement>().ignoreLayout = true;
             _tuckDot.SetActive(false);
             Tuck(PlayerPrefs.GetInt(TuckedKey, 0) == 1, false);
         }
@@ -176,8 +190,26 @@ namespace CapyIsland.UI
             _side.DOKill();
             if (animate) _side.DOAnchorPosX(x, 0.3f).SetEase(tucked ? Ease.InBack : Ease.OutBack).SetUpdate(true);
             else _side.anchoredPosition = new Vector2(x, _side.anchoredPosition.y);
-            // Out: the arrow points the way the column goes (right). Away: it points back in.
-            _tuckArrow.localScale = new Vector3(tucked ? -1f : 1f, 1f, 1f);
+            _tuckLabel.text = tucked ? "Show" : "Hide";
+            // The chevron points the way the buttons will go: out to the edge, or back in.
+            _tuckChevron.localScale = new Vector3(tucked ? -1f : 1f, 1f, 1f);
+            _tuckChevron.SetSiblingIndex(tucked ? 0 : 1);
+        }
+
+        /// <summary>Keeps the pill just under the last button (the column changes on a visit).</summary>
+        void PlaceTuck()
+        {
+            float y = _side.anchoredPosition.y;
+            int shown = 0;
+            foreach (RectTransform child in _side)
+            {
+                if (!child.gameObject.activeSelf) continue;
+                y -= child.sizeDelta.y;
+                shown++;
+            }
+            y -= Mathf.Max(0, shown - 1) * SideSpacing + 8f + 18f;   // the last caption hangs a little lower
+            float lowest = -(((RectTransform)_safe).rect.height - _tuck.sizeDelta.y - 24f);
+            _tuck.anchoredPosition = new Vector2(_tuck.anchoredPosition.x, Mathf.Max(y, lowest));
         }
 
         /// <summary>Is any button in the column showing a red dot right now?</summary>
@@ -292,6 +324,8 @@ namespace CapyIsland.UI
             menu.AddEntry("Wardrobe", IconPainter.Hanger, UiKit.Hex("E58FB0"), () => wardrobe.Open(), () => Wardrobe.Ready, () => NewStuff.Any("wardrobe/"));
             menu.AddEntry("Hobbies", IconPainter.Rod, UiKit.Hex("3E9C8F"), () => HobbiesScreen.Show(), news: () => NewStuff.Any("hobbies/"));
 
+            // Settings first, at the top of the column.
+            UiKit.RoundButton(side, "Settings", IconPainter.Gear, "Settings", UiKit.Hex("6B8FA8"), () => settings.Open());
             var menuButton = UiKit.RoundButton(side, "Menu", IconPainter.Menu, "Menu", UiKit.Primary, () => menu.Open());
             // Something new somewhere inside: a dot here, then on the tile, and on down to the thing.
             NewDot.Live(menuButton.transform, () => !Attention.TutorialRunning && MenuNews());
@@ -321,8 +355,6 @@ namespace CapyIsland.UI
                 _eventsDot = edot.gameObject;
                 _eventsDot.SetActive(GameEvents.NeedsAttention);
             }
-            // Settings one tap away, like everything else here (it is in the menu too).
-            UiKit.RoundButton(side, "Settings", IconPainter.Gear, "Settings", UiKit.Hex("6B8FA8"), () => settings.Open());
             // While walking somewhere by itself (an arrow or "Show me" was tapped): a way to stop.
             var stop = UiKit.Button(_safe, "StopWalking", "Stop walking", UiKit.ButtonStyle.Secondary, PlayerAvatar.StopAutoWalk, 30f, IconPainter.Close);
             var sr = (RectTransform)stop.transform.parent;
