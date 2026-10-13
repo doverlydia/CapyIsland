@@ -421,8 +421,8 @@ namespace CapyIsland.Game
                 if (_pests > 0) did.Add($"bombed {_pests} pest{(_pests > 1 ? "s" : "")}");
                 if (_planted > 0) did.Add($"planted {_planted} flower garden{(_planted > 1 ? "s" : "")}");
                 if (did.Count > 0) Hints.Show(Who.name + " " + string.Join(", ", did) + " before heading home.");
-                // Sometimes they leave you a message in a bottle on your beach.
-                if (!_sentHome && UnityEngine.Random.value < 0.45f) SeaLibrary.LeaveNoteFrom(Who);
+                // Sometimes they hang an ema for you at Old Mochi's shrine.
+                if (!_sentHome && UnityEngine.Random.value < 0.45f) Shrine.LeaveEmaFrom(Who);
             }
             transform.DOScale(transform.localScale * 1.1f, 1.4f).OnComplete(() =>
             {

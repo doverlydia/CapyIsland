@@ -43,7 +43,7 @@ namespace CapyIsland.UI
             {
                 Hobby.Fishing => HobbyData.Art("Rod"), Hobby.Bugs => HobbyData.Art("Net"), Hobby.Birding => HobbyData.Art("Binoculars"),
                 Hobby.Sewing => HobbyData.Art("SewingMachine"), Hobby.Gardening => HobbyData.Art("Plot"), Hobby.Cooking => HobbyData.Art("Stove"),
-                Hobby.Writing => HobbyData.Art("Bottle"), _ => null,
+                Hobby.Writing => HobbyData.Art("Ema"), _ => null,
             };
             if (art != null) return art;
             return hobby switch

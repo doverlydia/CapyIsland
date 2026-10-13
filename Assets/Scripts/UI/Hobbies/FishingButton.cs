@@ -144,7 +144,7 @@ namespace CapyIsland.UI
         {
             bool any = false;
             foreach (var b in Baits.All) any |= Baits.Count(b) > 0;
-            if (!any) { Hints.Show("No bait yet. Skipper Nori sells it, down on the beach by the bottles."); return; }
+            if (!any) { Hints.Show("No bait yet. Skipper Nori sells it, down on the beach."); return; }
             var now = Baits.Cycle();
             Hints.Show(now != null ? now.Name + ": " + now.Blurb : "Fishing without bait.");
         }

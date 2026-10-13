@@ -121,9 +121,9 @@ namespace CapyIsland.UI
                     "Stray cats visit your island. Pet them and share fish until they trust you.",
                     "Cats", () => Go(Page.Cats))),
                 (Hobby.Writing, "Writing", IconPainter.Book, UiKit.Hex("A77BD6"), () => HobbyCard(Hobby.Writing, "Writing", IconPainter.Book, UiKit.Hex("A77BD6"),
-                    $"{HobbyLog.Books.Count} stor{(HobbyLog.Books.Count == 1 ? "y" : "ies")} written",
-                    "Message bottles wash up on your beach. Read them, and buy a bottle from the sailor to leave a story of your own.",
-                    "Show me", () => ShowInWorld(SeaLibrary.Spot, "The bottles are on your beach."))),
+                    $"{HobbyLog.Books.Count} ema hung",
+                    "Old Mochi keeps the shrine on the hill. Hang an ema with your wish on his rack, and read the ones friends leave you.",
+                    "Show me", () => ShowInWorld(Shrine.Spot, "The shrine is on your first island."))),
                 (Hobby.Sewing, "Sewing", IconPainter.Hat, UiKit.Hex("C2577F"), () => HobbyCard(Hobby.Sewing, "Sewing", IconPainter.Hat, UiKit.Hex("C2577F"),
                     $"{HobbyLog.Designs.Count} piece{(HobbyLog.Designs.Count == 1 ? "" : "s")} sewn",
                     "At your sewing machine: a hat needs cotton from your garden. Then decorate it and wear it!",
@@ -607,22 +607,28 @@ namespace CapyIsland.UI
     }
 
     /// <summary>
-    /// Books: the ones you have written, and the ones your friends have written — on a visit, the
-    /// shelf of whoever's island you are on. Write a new one with a title and a story.
+    /// Old Mochi's ema rack, as a page drawn like the rack itself: a red wooden frame under a dark
+    /// roof beam, with little wooden plaques hanging from its bars on white strings. Tap one to read
+    /// the wish on it. When one rack is full, the rest hang on the next (the arrows under it).
+    /// Hanging a new one asks an offering of one gold (Game.Shrine).
+    ///
+    /// (Named for the library it used to be, so screens that open it needn't change.)
     /// </summary>
     public class LibraryScreen : UiScreen
     {
         public static LibraryScreen Instance { get; private set; }
 
-        protected override string Title => "Library";
-        protected override Sprite TitleIcon => IconPainter.Book;
-        protected override Color AccentColour => UiKit.Hex("A77BD6");
+        protected override string Title => "Ema Rack";
+        protected override Sprite TitleIcon => HobbyData.Art("Ema") ?? IconPainter.Book;
+        protected override Color AccentColour => Vermilion;
+
+        static readonly Color Vermilion = UiKit.Hex("D2553F");
 
         RectTransform _list;
         ScrollRect _scroll;
-        List<Button> _tabs;
-        int _tab;
-        HashSet<string> _read = new();
+        int _page;
+        Action<string, string> _pendingWrite;
+        readonly HashSet<string> _read = new();
 
         void Awake() => Instance = this;
 
@@ -631,201 +637,225 @@ namespace CapyIsland.UI
             if (Instance == this) Instance = null;
         }
 
+        /// <summary>Opens on the rack.</summary>
+        public static void ShowRack()
+        {
+            if (Instance == null) return;
+            Instance._pendingWrite = null;
+            Instance._page = 0;
+            if (Instance.IsOpen) Instance.Refresh(); else Instance.Open();
+        }
+
+        /// <summary>Opens on a fresh ema to write; <paramref name="written"/> gets its wish and words.</summary>
+        public static void WriteEma(Action<string, string> written)
+        {
+            if (Instance == null) return;
+            Instance._pendingWrite = written;
+            if (Instance.IsOpen) Instance.Refresh(); else Instance.Open();
+        }
+
         protected override void Build(RectTransform body)
         {
-            _tabs = Tabs(body, new[] { "Friends' books", "My books" }, i => { _tab = i; Refresh(); }, out var bar);
-            bar.anchorMin = new Vector2(0f, 1f);
-            bar.anchorMax = new Vector2(1f, 1f);
-            bar.pivot = new Vector2(0.5f, 1f);
-            bar.sizeDelta = new Vector2(0f, 92f);
-            _scroll = UiKit.ScrollList(body, "List", out _list, 14f, new RectOffset(4, 4, 8, 32));
-            UiKit.Stretch((RectTransform)_scroll.transform, 0f, 0f, 0f, 108f);
+            _scroll = UiKit.ScrollList(body, "List", out _list, 16f, new RectOffset(4, 4, 8, 32));
+            UiKit.Stretch((RectTransform)_scroll.transform);
         }
 
         protected override void OnOpen() => Refresh();
 
         void Refresh()
         {
-            HighlightTab(_tabs, _tab, AccentColour);
             ClearChildren(_list);
-            if (_tab == 0) FriendsBooks();
-            else MyBooks();
+            if (_pendingWrite != null) Write(_pendingWrite);
+            else RackPage();
             _scroll.verticalNormalizedPosition = 1f;
         }
 
-        void FriendsBooks()
+        // ---------------------------------------------------------------- the rack
+
+        void RackPage()
         {
-            var shelves = new List<FriendProfile>();
-            if (Visit.Active) shelves.Add(Visit.Host);
-            foreach (var f in Friends.All) if (!Visit.Active || f.id != Visit.Host.id) shelves.Add(f);
-            if (shelves.Count == 0)
+            NewStuff.Clear("hobbies/Writing/");   // the ema friends left: seen
+            var all = Shrine.Rack();
+            int perPage = PegsX.Length * BarsY.Length;
+            int pages = Mathf.Max(1, Mathf.CeilToInt(all.Count / (float)perPage));
+            _page = Mathf.Clamp(_page, 0, pages - 1);
+
+            var hang = UiKit.Button(_list, "Hang", "Hang a new ema (1 gold)", UiKit.ButtonStyle.Primary, Shrine.WriteNew, 32f, HobbyData.Art("Ema"));
+            hang.transform.parent.gameObject.AddComponent<LayoutElement>().preferredHeight = 96f;
+
+            var shown = all.GetRange(_page * perPage, Mathf.Min(perPage, all.Count - _page * perPage));
+            Rack(shown);
+
+            if (pages > 1)
             {
-                Note("Make friends to read their books. Visit an island from the Friends menu!");
+                var row = UiKit.Rect("Pages", _list);
+                var h = row.gameObject.AddComponent<HorizontalLayoutGroup>();
+                h.spacing = 18f;
+                h.childAlignment = TextAnchor.MiddleCenter;
+                h.childControlWidth = h.childControlHeight = true;
+                h.childForceExpandWidth = false;
+                row.gameObject.AddComponent<LayoutElement>().preferredHeight = 84f;
+                RtlLayout.Add(h);
+                PageButton(row, -1, _page > 0);
+                var label = UiKit.Text(row, "Label", $"Rack {_page + 1} of {pages}", 30f, UiKit.Ink, true, TextAlignmentOptions.Center);
+                label.gameObject.AddComponent<LayoutElement>().preferredWidth = 260f;
+                PageButton(row, +1, _page < pages - 1);
+            }
+        }
+
+        void PageButton(RectTransform row, int dir, bool enabled)
+        {
+            var disc = UiKit.Image(row, dir < 0 ? "Prev" : "Next", UiKit.Circle, enabled ? Vermilion : UiKit.SurfaceSunk, true);
+            var le = disc.gameObject.AddComponent<LayoutElement>();
+            le.preferredWidth = le.preferredHeight = 76f;
+            var ic = UiKit.Image(disc.transform, "Arrow", IconPainter.Chevron, Color.white);
+            ic.preserveAspect = true;
+            UiKit.Stretch(ic.rectTransform, 22f, 22f, 22f, 22f);
+            if (dir < 0) ic.rectTransform.localScale = new Vector3(-1f, 1f, 1f);
+            if (!enabled) return;
+            var b = disc.gameObject.AddComponent<Button>();
+            b.transition = Selectable.Transition.None;
+            b.onClick.AddListener(() => { Sfx.Play(SfxKind.Tap, 0.5f); _page += dir; Refresh(); });
+            disc.gameObject.AddComponent<PressSquash>();
+        }
+
+        /// <summary>
+        /// One rack: the painting (Hobbies/Ema_Rack), with the ema hung from its pegs — three on
+        /// each of its two bars. Peg places are measured on the painting, as fractions of its size.
+        /// </summary>
+        void Rack(List<Shrine.Ema> ema)
+        {
+            float width = Sheet != null ? Sheet.sizeDelta.x - 72f : 900f;
+            var rack = UiKit.Rect("Rack", _list);
+            rack.gameObject.AddComponent<LayoutElement>().preferredHeight = width * RackAspect;
+
+            var art = UiKit.Image(rack, "Painting", HobbyData.Art("Ema_Rack"), Color.white);
+            art.preserveAspect = true;
+            UiKit.Stretch(art.rectTransform);
+
+            if (ema.Count == 0)
+            {
+                var t = UiKit.Text(rack, "Empty", "The rack is empty. Hang the first wish!", 30f, UiKit.Ink, true, TextAlignmentOptions.Center);
+                t.rectTransform.anchorMin = new Vector2(0.24f, 0.45f);
+                t.rectTransform.anchorMax = new Vector2(0.76f, 0.56f);
+                t.rectTransform.offsetMin = t.rectTransform.offsetMax = Vector2.zero;
+                t.overflowMode = TextOverflowModes.Overflow;
                 return;
             }
-            foreach (var who in shelves)
-            {
-                SectionLabel(_list, Visit.Active && who.id == Visit.Host.id ? who.name + "'s shelf (you're here)" : who.name + "'s shelf");
-                foreach (var book in BotBooks.ShelfOf(who))
-                    BookRow(book.Title, "by " + who.name, () => Read(book.Title, "by " + who.name, book.Text, who.name + "/" + book.Title));
-            }
+            for (int i = 0; i < ema.Count && i < PegsX.Length * BarsY.Length; i++)
+                Plaque(rack, ema[i], i, PegsX[i % PegsX.Length], BarsY[i / PegsX.Length], width * 0.205f);
         }
 
-        void MyBooks()
+        // Measured on the painting: the pegs used (left, middle, right) and the two bars, from the top.
+        static readonly float[] PegsX = { 0.286f, 0.501f, 0.714f };
+        static readonly float[] BarsY = { 0.418f, 0.577f };
+        const float RackAspect = 1.5f;
+
+        /// <summary>An ema on its peg: the plaque, a little crooked, with its wish written on the plain wood.</summary>
+        void Plaque(RectTransform rack, Shrine.Ema e, int index, float x, float barFromTop, float size)
         {
-            var write = UiKit.Button(_list, "Write", "Write a new book", UiKit.ButtonStyle.Primary, Write, 34f, IconPainter.Book);
-            write.transform.parent.gameObject.AddComponent<LayoutElement>().preferredHeight = 100f;
-            if (HobbyLog.Books.Count == 0) Note("Your shelf is empty. Every great author starts with one page.");
-            for (int i = HobbyLog.Books.Count - 1; i >= 0; i--)
-            {
-                var b = HobbyLog.Books[i];
-                int index = i;
-                BookRow(b.title, new DateTime(b.writtenTicks).ToString("d MMM yyyy"), () => Read(b.title, "by you", b.text, null, index));
-            }
+            var plaque = UiKit.Image(rack, "Ema" + index, HobbyData.Art("Ema_Blank"), e.Mine >= 0 ? UiKit.Hex("FFF6E2") : Color.white, true);
+            plaque.preserveAspect = true;
+            var r = plaque.rectTransform;
+            r.anchorMin = r.anchorMax = new Vector2(x, 1f - barFromTop);
+            // The cord's loop sits on the peg, so the plaque hangs from a point near its top.
+            r.pivot = new Vector2(0.5f, 0.86f);
+            r.sizeDelta = new Vector2(size, size);
+            r.anchoredPosition = Vector2.zero;
+            r.localRotation = Quaternion.Euler(0f, 0f, ((index * 37) % 11 - 5) * 0.8f);
+
+            // The wish's title, in ink on the plain wood below the little picture.
+            var t = UiKit.Text(plaque.transform, "Wish", e.Title, 22f, UiKit.Hex("4A3524"), true, TextAlignmentOptions.Center);
+            t.rectTransform.anchorMin = new Vector2(0.12f, 0.15f);
+            t.rectTransform.anchorMax = new Vector2(0.88f, 0.45f);
+            t.rectTransform.offsetMin = t.rectTransform.offsetMax = Vector2.zero;
+            t.enableAutoSizing = true;
+            t.fontSizeMin = 12f;
+            t.fontSizeMax = 22f;
+
+            var b = plaque.gameObject.AddComponent<Button>();
+            b.transition = Selectable.Transition.None;
+            var entry = e;
+            b.onClick.AddListener(() => { Sfx.Play(SfxKind.Tap, 0.5f); Read(entry); });
+            plaque.gameObject.AddComponent<PressSquash>();
         }
 
-        void BookRow(string title, string by, Action open)
-        {
-            var row = UiKit.Image(_list, title, UiKit.Rounded(28), Color.white).rectTransform;
-            var h = row.gameObject.AddComponent<HorizontalLayoutGroup>();
-            h.padding = new RectOffset(20, 20, 16, 16);
-            h.spacing = 18f;
-            h.childAlignment = TextAnchor.MiddleLeft;
-            h.childControlWidth = h.childControlHeight = true;
-            h.childForceExpandWidth = h.childForceExpandHeight = false;
-            row.gameObject.AddComponent<LayoutElement>().minHeight = 116f;
-            var cover = UiKit.Image(row, "Cover", UiKit.Rounded(14), Color.HSVToRGB(Mathf.Repeat(title.GetHashCode() * 0.0001f, 1f), 0.45f, 0.85f));
-            var cle = cover.gameObject.AddComponent<LayoutElement>();
-            cle.preferredWidth = 64f; cle.preferredHeight = 84f;
-            var ic = UiKit.Image(cover.transform, "Icon", IconPainter.Book, new Color(1f, 1f, 1f, 0.85f));
-            UiKit.Stretch(ic.rectTransform, 12f, 22f, 12f, 22f);
-            var col = UiKit.Rect("Column", row);
-            var v = col.gameObject.AddComponent<VerticalLayoutGroup>();
-            v.childControlWidth = v.childControlHeight = true;
-            v.childForceExpandWidth = true;
-            v.childForceExpandHeight = false;
-            col.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1f;
-            UiKit.Text(col, "Title", title, 32f, UiKit.Ink, true);
-            UiKit.Text(col, "By", by, 24f, UiKit.InkSoft);
-            var read = UiKit.Button(row, "Read", "Read", UiKit.ButtonStyle.Secondary, open, 28f);
-            var rle = read.transform.parent.gameObject.AddComponent<LayoutElement>();
-            rle.preferredWidth = 140f; rle.preferredHeight = 70f;
-        }
+        // ---------------------------------------------------------------- reading one
 
-        void Note(string text)
-        {
-            var t = UiKit.Text(_list, "Note", text, 28f, UiKit.InkSoft, false, TextAlignmentOptions.Center);
-            t.overflowMode = TextOverflowModes.Overflow;
-            t.margin = new Vector4(20f, 10f, 20f, 10f);
-        }
-
-        /// <summary>Opens a book on the page.</summary>
-        void Read(string title, string by, string text, string readKey, int mine = -1)
+        void Read(Shrine.Ema e)
         {
             ClearChildren(_list);
-            var back = UiKit.Button(_list, "Back", "Back to the shelf", UiKit.ButtonStyle.Secondary, Refresh, 28f);
+            var back = UiKit.Button(_list, "Back", "Back to the rack", UiKit.ButtonStyle.Secondary, Refresh, 28f);
             back.transform.parent.gameObject.AddComponent<LayoutElement>().preferredHeight = 76f;
-            var page = UiKit.Image(_list, "Page", UiKit.Rounded(30), UiKit.Hex("FFF8E8")).rectTransform;
+            var page = UiKit.Image(_list, "Page", UiKit.Rounded(30), UiKit.Hex("FBEBD0")).rectTransform;
             var v = page.gameObject.AddComponent<VerticalLayoutGroup>();
-            v.padding = new RectOffset(40, 40, 36, 44);
+            v.padding = new RectOffset(40, 40, 30, 44);
             v.spacing = 10f;
             v.childControlWidth = v.childControlHeight = true;
             v.childForceExpandWidth = true;
             v.childForceExpandHeight = false;
-            var t = UiKit.Text(page, "Title", title, 44f, UiKit.Ink, true, TextAlignmentOptions.Center);
-            t.overflowMode = TextOverflowModes.Overflow;
-            UiKit.Text(page, "By", by, 26f, UiKit.InkSoft, false, TextAlignmentOptions.Center);
-            var body = UiKit.Text(page, "Text", text, 32f, UiKit.Ink);
+            var pic = UiKit.Image(page, "Ema", HobbyData.Art("Ema"), Color.white);
+            pic.preserveAspect = true;
+            pic.gameObject.AddComponent<LayoutElement>().preferredHeight = 120f;
+            var title = UiKit.Text(page, "Title", e.Title, 42f, UiKit.Ink, true, TextAlignmentOptions.Center);
+            title.overflowMode = TextOverflowModes.Overflow;
+            UiKit.Text(page, "By", e.By, 26f, UiKit.InkSoft, false, TextAlignmentOptions.Center);
+            var body = UiKit.Text(page, "Text", e.Text, 32f, UiKit.Ink);
             body.overflowMode = TextOverflowModes.Overflow;
             body.lineSpacing = 12f;
-            body.margin = new Vector4(0f, 20f, 0f, 0f);
-            if (mine >= 0)
+            body.margin = new Vector4(0f, 16f, 0f, 0f);
+            if (e.Mine >= 0)
             {
-                var del = UiKit.Button(_list, "Delete", "Take off the shelf", UiKit.ButtonStyle.Secondary, () => { HobbyLog.RemoveBook(mine); Refresh(); }, 26f);
-                del.transform.parent.gameObject.AddComponent<LayoutElement>().preferredHeight = 70f;
+                int mine = e.Mine;
+                var down = UiKit.Button(_list, "TakeDown", "Take it down", UiKit.ButtonStyle.Secondary, () => { HobbyLog.RemoveBook(mine); Refresh(); }, 26f);
+                down.transform.parent.gameObject.AddComponent<LayoutElement>().preferredHeight = 70f;
             }
             _scroll.verticalNormalizedPosition = 1f;
 
-            // A little reading XP, once per book.
-            if (readKey != null && _read.Add(readKey) && PlayerPrefs.GetInt("CapyIsland.Read." + readKey.GetHashCode(), 0) == 0)
+            // A little Writing XP for reading, once per ema.
+            string key = e.By + "/" + e.Title;
+            if (_read.Add(key) && PlayerPrefs.GetInt("CapyIsland.Read." + key.GetHashCode(), 0) == 0)
             {
-                PlayerPrefs.SetInt("CapyIsland.Read." + readKey.GetHashCode(), 1);
+                PlayerPrefs.SetInt("CapyIsland.Read." + key.GetHashCode(), 1);
                 HobbyLog.AddXp(Hobby.Writing, 5);
             }
         }
 
-        /// <summary>Opens straight onto a story from a bottle on the beach.</summary>
-        public static void ReadBottle(string title, string by, string text)
-        {
-            if (Instance == null) return;
-            Instance.Open();
-            Instance.Read(title, by, text, by + "/" + title);
-        }
+        // ---------------------------------------------------------------- writing one
 
-        /// <summary>Opens the page to write the story going into a bottle; <paramref name="written"/> gets it.</summary>
-        public static void WriteBottle(Action<string, string> written, string title = null, string text = null, Action cancelled = null)
+        void Write(Action<string, string> written)
         {
-            if (Instance == null) return;
-            Instance.Open();
-            Instance.Write(written, title, text, cancelled);
-        }
-
-        void Write() => Write(null);
-
-        void Write(Action<string, string> written, string startTitle = null, string startText = null, Action cancelled = null)
-        {
-            ClearChildren(_list);
-            var title = UiKit.Input(_list, "Title", "Title", false, 96f);
+            var intro = UiKit.Text(_list, "Intro", "Write your wish, your thanks, or whatever is on your mind. The gods are good listeners.", 28f, UiKit.InkSoft, false, TextAlignmentOptions.Center);
+            intro.overflowMode = TextOverflowModes.Overflow;
+            var title = UiKit.Input(_list, "Title", "Your wish, in a few words", false, 96f);
             title.characterLimit = 40;
-            var text = UiKit.Input(_list, "Story", "Once upon a time, on a little island...", true, 640f);
-            text.characterLimit = 2000;
-            if (!string.IsNullOrEmpty(startTitle)) title.text = startTitle;
-            if (!string.IsNullOrEmpty(startText)) text.text = startText;
+            var text = UiKit.Input(_list, "Wish", "I wish...", true, 520f);
+            text.characterLimit = 800;
+            var problem = UiKit.Text(_list, "Problem", "", 28f, new Color(0.78f, 0.25f, 0.22f), true, TextAlignmentOptions.Center);
+            problem.gameObject.AddComponent<LayoutElement>().preferredHeight = 44f;
+            problem.gameObject.SetActive(false);
             var row = UiKit.Rect("Buttons", _list);
             var h = row.gameObject.AddComponent<HorizontalLayoutGroup>();
             h.spacing = 16f;
             h.childControlWidth = h.childControlHeight = true;
             h.childForceExpandWidth = true;
             row.gameObject.AddComponent<LayoutElement>().preferredHeight = 96f;
-            UiKit.Button(row, "Cancel", "Cancel", UiKit.ButtonStyle.Secondary, () =>
-            {
-                if (cancelled == null) { Refresh(); return; }
-                Close();
-                cancelled();
-            }, 30f);
-            // What is missing, said right here (Old Yuzu keeps quiet while a page is open).
-            var problem = UiKit.Text(_list, "Problem", "", 28f, new Color(0.78f, 0.25f, 0.22f), true, TMPro.TextAlignmentOptions.Center);
-            problem.gameObject.AddComponent<LayoutElement>().preferredHeight = 44f;
-            problem.gameObject.SetActive(false);
-            UiKit.Button(row, "Save", written != null ? "Put it in the bottle" : "Put it on my shelf", UiKit.ButtonStyle.Primary, () =>
+            UiKit.Button(row, "Cancel", "Cancel", UiKit.ButtonStyle.Secondary, () => { _pendingWrite = null; Refresh(); }, 30f);
+            UiKit.Button(row, "Hang", "Hang it on the rack", UiKit.ButtonStyle.Primary, () =>
             {
                 string t = title.text.Trim(), s = text.text.Trim();
-                // A bottle note can be short and needs no title; a story for the shelf wants both.
-                string missing = written != null
-                    ? (s.Length == 0 ? "Write a few words first." : null)
-                    : (t.Length == 0 || s.Length < 20 ? "A story needs a title and at least a few sentences." : null);
-                if (missing != null)
+                if (s.Length == 0)
                 {
-                    problem.text = missing;
+                    problem.text = "Write a few words first.";
                     problem.gameObject.SetActive(true);
                     problem.transform.DOKill(true);
                     problem.transform.DOPunchScale(Vector3.one * 0.08f, 0.3f, 6).SetUpdate(true);
                     return;
                 }
-                if (t.Length == 0) t = "Message in a Bottle";
-                if (written != null)
-                {
-                    Close();
-                    written(t, s);
-                    return;
-                }
-                HobbyLog.AddBook(t, s);
-                HobbyLog.AddXp(Hobby.Writing, Mathf.Clamp(s.Length / 20, 10, 40));
-                Motes.Trigger("hobby_book");
-                Hints.Show("\"" + t + "\" is on your shelf. Friends who visit can read it!");
-                Refresh();
+                if (t.Length == 0) t = "A wish";
+                _pendingWrite = null;
+                written(t, s);   // pays, hangs it, and shows the rack again
             }, 30f);
-            _scroll.verticalNormalizedPosition = 1f;
         }
     }
 

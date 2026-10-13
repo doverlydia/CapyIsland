@@ -23,9 +23,9 @@ namespace CapyIsland.EditorTools
             bool world = assetPath.StartsWith("Assets/Resources/World/");      // runtime-built world pieces (the hot spring)
             bool home = assetPath.StartsWith("Assets/Resources/Home/");        // your burrow, its furniture and shop
             // Full-screen paintings drawn big in the UI: the kitchen, the burrow, the tunnel.
-            bool painting = assetPath.EndsWith("/Cook_Kitchen.png") || assetPath.EndsWith("/Burrow_Cave.png") || assetPath.EndsWith("/Tunnel.png") || assetPath.EndsWith("/Sew_Room.png");
+            bool painting = assetPath.EndsWith("/Ema_Rack.png") || assetPath.EndsWith("/Cook_Kitchen.png") || assetPath.EndsWith("/Burrow_Cave.png") || assetPath.EndsWith("/Tunnel.png") || assetPath.EndsWith("/Sew_Room.png");
             bool big = assetPath.EndsWith("/Cook_Stove.png") || assetPath.EndsWith("/Cook_Pot.png") || assetPath.EndsWith("/Store_Furniture.png")
-                       || assetPath.Contains("/Vignette_") || assetPath.EndsWith("/Sew_Mannequin.png");   // drawn big in the hobby carousel and sewing room
+                       || assetPath.Contains("/Vignette_") || assetPath.EndsWith("/Sew_Mannequin.png") || assetPath.EndsWith("/Shrine.png");   // drawn big in the hobby carousel and sewing room
             if (!assetPath.StartsWith("Assets/Art/") && !wardrobe && !hobbies && !cutscene && !world && !home) return;
             if (assetPath.StartsWith("Assets/Art/Icon/")) return;   // app icons: full size, uncompressed, set by the App Icon menu
             if (!assetImporter.importSettingsMissing) return;
@@ -41,7 +41,7 @@ namespace CapyIsland.EditorTools
 
             // Outfit pieces sit centred on their anchor; the bare capybara stands on its feet like the king.
             bool centred = assetPath.StartsWith("Assets/Art/FX/") || assetPath.StartsWith("Assets/Art/UI/")
-                           || (hobbies && !assetPath.EndsWith("/Monster_Happy.png") && !assetPath.Contains("/Sleep_") && !assetPath.EndsWith("/Sailor.png") && !assetPath.Contains("/Miso_Dress")) || cutscene || world || home || (wardrobe && !assetPath.EndsWith("/Capy_Player.png"));
+                           || (hobbies && !assetPath.EndsWith("/Monster_Happy.png") && !assetPath.Contains("/Sleep_") && !assetPath.EndsWith("/Sailor.png") && !assetPath.EndsWith("/Mochi.png") && !assetPath.EndsWith("/Shrine.png") && !assetPath.Contains("/Miso_Dress")) || cutscene || world || home || (wardrobe && !assetPath.EndsWith("/Capy_Player.png"));
             var settings = new TextureImporterSettings();
             importer.ReadTextureSettings(settings);
             settings.spriteAlignment = (int)(centred ? SpriteAlignment.Center : SpriteAlignment.BottomCenter);

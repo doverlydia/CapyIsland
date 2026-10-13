@@ -1,0 +1,293 @@
+# Old Mochi's shrine and its ema rack (Game/Hobbies/Shrine.cs, UI LibraryScreen, StoryText.Mochi,
+# StoryText.IslandEma, BotBooks). Long texts translate paragraph by paragraph.
+
+# ---------------------------------------------------------------- names and buttons
+
+@ Old Mochi
+= סבא מוצ'י
+
+@ Ema Rack
+= מתלה האמה
+
+@ Hang a new ema (1 gold)
+= תלה אמה חדשה (מטבע זהב אחד)
+
+@ Hang an ema (1 gold)
+= תלה אמה (מטבע זהב אחד)
+
+@ Look at the rack
+= הסתכל על המתלה
+
+@ Rack {0} of {1}
+= מתלה {0} מתוך {1}
+
+@ The rack is empty. Hang the first wish!
+= המתלה ריק. תלה את המשאלה הראשונה!
+
+@ Back to the rack
+= חזרה למתלה
+
+@ Take it down
+= הורד אותה
+
+@ Write your wish, your thanks, or whatever is on your mind. The gods are good listeners.
+= כתוב את המשאלה שלך, תודה, או כל מה שעל ליבך. האלים יודעים להקשיב.
+
+@ Your wish, in a few words
+= המשאלה שלך, בכמה מילים
+
+@ I wish...
+= הלוואי ש...
+
+@ Hang it on the rack
+= תלה על המתלה
+
+@ Write a few words first.
+= כתוב קודם כמה מילים.
+
+@ A wish
+= משאלה
+
+@ from {0}
+= מאת {0}
+
+@ {0} ema hung
+= {0} אמה תלויות
+
+# ---------------------------------------------------------------- hints
+
+@ An ema is an offering of one gold coin.
+= אמה היא מנחה של מטבע זהב אחד.
+
+@ Your ema hangs on {0}'s rack. They'll find it!
+= האמה שלך תלויה על המתלה של {0}. הם ימצאו אותה!
+
+@ Your ema hangs on the rack. Friends who visit can read it!
+= האמה שלך תלויה על המתלה. חברים שמבקרים יכולים לקרוא אותה!
+
+@ {0} hung an ema at Old Mochi's shrine for you!
+= {0} תלה בשבילך אמה במקדש של סבא מוצ'י!
+
+@ Old Mochi keeps the shrine on the hill. Hang an ema with your wish on his rack, and read the ones friends leave you.
+= סבא מוצ'י שומר על המקדש שעל הגבעה. תלה על המתלה שלו אמה עם משאלה, וקרא את אלה שחברים משאירים לך.
+
+@ The shrine is on your first island.
+= המקדש נמצא באי הראשון שלך.
+
+@ No bait yet. Skipper Nori sells it, down on the beach.
+= עדיין אין פיתיון. הסקיפר נורי מוכר אותו, למטה בחוף.
+
+@ Ahoy! The fish are biting. My bait's laid out on the sand, take your pick. Stand by the water where the shadows swim, and cast.
+= אהוי! הדגים נושכים. הפיתיונות שלי פרוסים על החול, בחר מה שתרצה. עמוד ליד המים, איפה שהצללים שוחים, והטל חכה.
+
+@ Ahoy! The fish are biting. My rod's laid out right there on the sand. Buy it, stand by the water where the shadows swim, and cast.
+= אהוי! הדגים נושכים. החכה שלי מונחת שם על החול. קנה אותה, עמוד ליד המים, איפה שהצללים שוחים, והטל.
+
+# ---------------------------------------------------------------- the achievement
+
+@ A Wish on the Rack
+= משאלה על המתלה
+
+@ Your first ema hangs at Old Mochi's shrine. Friends who visit can read it.
+= האמה הראשונה שלך תלויה במקדש של סבא מוצ'י. חברים שמבקרים יכולים לקרוא אותה.
+
+@ Hang an ema at Old Mochi's shrine
+= תלה אמה במקדש של סבא מוצ'י
+
+# ---------------------------------------------------------------- Old Mochi talks
+
+@ Oh! A visitor. Nobody has climbed up to my shrine in a very long time.
+= הו! אורח. אף אחד לא טיפס אל המקדש שלי כבר הרבה מאוד זמן.
+
+@ I am Mochi. I kept this shrine before the Big Chill, and I suppose I am still keeping it. Old habits.
+= אני מוצ'י. שמרתי על המקדש הזה לפני הקור הגדול, ונראה שאני עדיין שומר עליו. הרגלים ישנים.
+
+@ Down by the spring there is a grumpy old ghost called Yuzu. She was my wife. Still is, I like to think. She keeps the spring, I keep the shrine.
+= למטה, ליד המעיין, יש רוחה זקנה ונרגנת בשם יוזו. היא הייתה אשתי. ואני אוהב לחשוב שהיא עדיין. היא שומרת על המעיין, ואני על המקדש.
+
+@ And Miso is our granddaughter. Don't tell her I said so, but she has her grandmother's stubbornness. Good. She'll need it.
+= ומיסו היא הנכדה שלנו. אל תגיד לה שאמרתי, אבל יש לה את העקשנות של סבתא שלה. טוב. היא תצטרך אותה.
+
+@ Now. Folk used to come here to hang an ema: a little wooden plaque with a wish on it, or a thank-you. Would you like to hang one? An offering of one gold coin, for the gods.
+= ובכן. פעם אנשים היו באים לכאן לתלות אמה: לוחית עץ קטנה עם משאלה, או תודה. רוצה לתלות אחת? מנחה של מטבע זהב אחד, לאלים.
+
+@ Ah, little one. Yuzu is showing you round, I see. Go on, go with her. My shrine will still be here.
+= אה, קטנטן. אני רואה שיוזו עושה לך סיור. לך, לך איתה. המקדש שלי יחכה כאן.
+
+@ Welcome back. The gods have been reading your ema, I'm sure of it.
+= ברוך שובך. האלים קוראים את האמה שלך, אני בטוח בזה.
+
+@ Every wish on that rack makes the shrine a little warmer. Even the silly ones. Especially the silly ones.
+= כל משאלה על המתלה מחממת את המקדש עוד קצת. אפילו הטיפשיות. בעיקר הטיפשיות.
+
+@ Have you seen Yuzu today? Tell her I swept the steps. She always said I never swept the steps.
+= ראית את יוזו היום? תגיד לה שטאטאתי את המדרגות. היא תמיד אמרה שאני אף פעם לא מטאטא את המדרגות.
+
+@ Miso came by yesterday and left a wish. I didn't read it. ...I read it. It was very sweet.
+= מיסו קפצה אתמול והשאירה משאלה. לא קראתי אותה. ...קראתי. היא הייתה מתוקה מאוד.
+
+@ Ah, a visitor from another island! You may hang an ema here for {0}. They'll find it on their rack.
+= אה, אורח מאי אחר! אתה יכול לתלות כאן אמה בשביל {0}. הם ימצאו אותה על המתלה שלהם.
+
+# ---------------------------------------------------------------- the islanders' ema
+
+@ For the steam
+= למען האדים
+
+@ Please let the hot spring steam again.
+= בבקשה, תנו למעיין החם להעלות אדים שוב.
+
+@ Not for me. I am a ghost, I don't feel the cold. For the little ones who have never seen it. And for one stubborn old keeper up on the hill.
+= לא בשבילי. אני רוח, אני לא מרגישה את הקור. בשביל הקטנים שמעולם לא ראו אותו. ובשביל שומר זקן ועקשן אחד, שם למעלה על הגבעה.
+
+@ A captain's wish
+= משאלה של קפטנית
+
+@ Dear gods of the sea,
+= אלי הים היקרים,
+
+@ Please thaw my ship before spring. She is getting lonely.
+= בבקשה הפשירו את הספינה שלי לפני האביב. היא מתחילה להרגיש בודדה.
+
+@ Also please keep the seagulls away from my biscuits. All of them. Forever.
+= וגם בבקשה הרחיקו את השחפים מהביסקוויטים שלי. את כולם. לתמיד.
+
+@ Yours, Captain W.
+= שלכם, הקפטנית ו.
+
+@ Thank you
+= תודה
+
+@ Thank you for the pickles that washed up on Tuesday. Very good pickles.
+= תודה על החמוצים שנסחפו לחוף ביום שלישי. חמוצים טובים מאוד.
+
+@ If those were meant for someone else, I am sorry. I have eaten them.
+= אם הם היו מיועדים למישהו אחר, אני מצטער. אכלתי אותם.
+
+@ A wish, folded very small
+= משאלה, מקופלת קטן קטן
+
+@ I wish the bathhouse could open again, full of yuzu like Grandma used to make it.
+= הלוואי שבית המרחץ ייפתח שוב, מלא ביוזו, כמו שסבתא הייתה מכינה אותו.
+
+@ And I wish to sit in the steam with someone kind, and not say anything at all for a very long time.
+= והלוואי שאשב באדים עם מישהו טוב לב, ולא אגיד שום דבר במשך הרבה מאוד זמן.
+
+@ I am not writing his name. The gods know who.
+= אני לא כותבת את השם שלו. האלים יודעים מי.
+
+@ For my Yuzu
+= ליוזו שלי
+
+@ I swept the shrine again today. Every day, all these years.
+= טאטאתי את המקדש שוב היום. כל יום, כל השנים האלה.
+
+@ If the spring wakes, let her see it. That is all I ask.
+= אם המעיין יתעורר, תנו לה לראות את זה. זה כל מה שאני מבקש.
+
+# ---------------------------------------------------------------- friends' ema (BotBooks)
+
+@ Please, one more nap
+= בבקשה, עוד תנומה אחת
+
+@ Dear gods,
+= אלים יקרים,
+
+@ I wish for a nap so long that a burrow capybara digs a hole next to my ear and someone balances a yuzu on my head.
+= הלוואי לתנומה כל כך ארוכה, שקפיברת מחילות תחפור בור ליד האוזן שלי ומישהו יאזן יוזו על הראש שלי.
+
+@ This happened last week. I would like it to happen again.
+= זה קרה בשבוע שעבר. הייתי רוצה שזה יקרה שוב.
+
+@ To the guinea pigs
+= לשרקנים
+
+@ I wish the guinea pigs would leave my roses alone.
+= הלוואי שהשרקנים יעזבו את הוורדים שלי בשקט.
+
+@ I have planted them their own garden, far from the mill. They are welcome to it.
+= שתלתי להם גינה משלהם, רחוק מהמנסרה. שיהנו ממנה.
+
+@ Please tell them. They do not listen to me.
+= בבקשה תגידו להם. הם לא מקשיבים לי.
+
+@ The big fish
+= הדג הגדול
+
+@ I have caught four hundred sardines. I named my favourite one Gerald.
+= דגתי ארבע מאות סרדינים. לאהוב עליי קראתי ג'רלד.
+
+@ I wish for the big shadow in the morning mist to bite, just once.
+= הלוואי שהצל הגדול בערפל של הבוקר יינשך, רק פעם אחת.
+
+@ Gerald says hello.
+= ג'רלד אומר שלום.
+
+@ Wake up, spring
+= תתעורר, מעיין
+
+@ Dear Hot Spring,
+= מעיין חם יקר,
+
+@ I planted a garden today and my workers sang while they chopped. I think you heard them.
+= שתלתי היום גינה, והפועלים שלי שרו בזמן שחטבו. אני חושב ששמעת אותם.
+
+@ Please wake up soon. We have saved you the best spot.
+= בבקשה תתעורר בקרוב. שמרנו לך את המקום הכי טוב.
+
+@ Thank you for the dance
+= תודה על הריקוד
+
+@ Thank you for Captain Wasabi, who taught me the Hot Pepper Hornpipe.
+= תודה על הקפטנית וואסאבי, שלימדה אותי את ריקוד הפלפל החריף.
+
+@ She says it has seven steps. I counted eleven. She says the falling over counts as style.
+= היא אומרת שיש בו שבעה צעדים. אני ספרתי אחד עשר. היא אומרת שהנפילות נחשבות לסגנון.
+
+@ I wish my feet better soon.
+= מאחל לרגליים שלי החלמה מהירה.
+
+@ For my woolly one
+= לצמרירי שלי
+
+@ Please keep my woolly capybara exactly as slow as he is.
+= בבקשה תשאירו את הקפיברה הצמרירית שלי בדיוק איטית כמו שהיא.
+
+@ He stops to look at every cloud. But when it rains, everyone huddles against him, warm right through to the middle.
+= הוא עוצר להסתכל על כל ענן. אבל כשיורד גשם, כולם מתכרבלים לידו, והוא חם עד האמצע.
+
+@ Gently, gently
+= בעדינות, בעדינות
+
+@ I wish to pop every bubble on the islands, gently.
+= הלוואי שאפוצץ כל בועה באיים, בעדינות.
+
+@ Old Yuzu filled them with warm air so nothing would be lost. It seems only polite.
+= סבתא יוזו מילאה אותן באוויר חם כדי ששום דבר לא יאבד. זה פשוט נימוס.
+
+@ No more rocks for dinner
+= בלי סלעים לארוחת ערב
+
+@ Thank you for my zombie capybara, who is brown again now and hums while he works.
+= תודה על קפיברת הזומבי שלי, שעכשיו שוב חומה ומזמזמת בזמן העבודה.
+
+@ I wish he would stop eating the rock pile. We all have our habits, I suppose.
+= הלוואי שהיא תפסיק לאכול את ערמת הסלעים. לכולנו יש הרגלים, כנראה.
+
+@ A wish for the sea
+= משאלה לים
+
+@ I wish the sea to stay a little different every day.
+= הלוואי שהים יישאר קצת שונה בכל יום.
+
+@ Some fish are for catching. Some are just for knowing they are there.
+= יש דגים שהם בשביל לדוג. ויש דגים שהם רק בשביל לדעת שהם שם.
+
+@ Ten thank-yous
+= עשר תודות
+
+@ Thank you for: the smell of maple after rain, the mill's song, my first capy house (it leans), the pear tree that drops pears on my head, the kingfisher on Tuesdays, bubbles, the bridge I waited three days for, my friends' islands, my friends.
+= תודה על: ריח האדר אחרי הגשם, השיר של המנסרה, בית הקפיברות הראשון שלי (הוא נוטה), עץ האגסים שמפיל אגסים על הראש שלי, השלדג של ימי שלישי, בועות, הגשר שחיכיתי לו שלושה ימים, האיים של החברים שלי, החברים שלי.
+
+@ And coming home.
+= ועל החזרה הביתה.

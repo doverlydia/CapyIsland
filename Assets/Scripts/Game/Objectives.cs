@@ -334,7 +334,7 @@ namespace CapyIsland.Game
             "visit_pests" => "Chase the pests off a friend's island",
             "hobby_fish" => "Catch a fish (walk to the shore)",
             "hobby_bird" => "Spot a bird in the trees",
-            "hobby_book" => "Write a book in the Library",
+            "hobby_book" => "Hang an ema at Old Mochi's shrine",
             "hobby_sew" => "Sew your own hat",
             "hobby_garden" => "Grow and harvest a vegetable",
             "hobby_cook" => "Cook a dish from your bag",
