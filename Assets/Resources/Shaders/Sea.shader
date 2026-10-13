@@ -123,16 +123,26 @@ Shader "CapyIsland/Sea"
                 float b = Fbm(p * 0.11 + float2(-t * 0.014, t * 0.019) + 5.3);
                 col *= 1.0 + (a - b) * _Tone * 2.0;
 
-                // Light on small waves: soft streaks, stretched sideways, that come and go, each with
-                // a faint darker trough just below it.
-                float2 q = float2(p.x * 0.45 + t * 0.12, p.y * 1.7 + sin(p.x * 0.25 + t * 0.4) * 0.5);
-                float n = Noise(q);
-                float crest = smoothstep(0.66, 0.84, n) * smoothstep(0.94, 0.82, n);
-                float trough = smoothstep(0.66, 0.84, Noise(q + float2(0.0, 0.35))) * (1.0 - crest);
-                float comeAndGo = smoothstep(0.38, 0.7, Noise(p * 0.05 + float2(t * 0.03, -t * 0.02) + 11.0));
-                float open = 0.35 + 0.65 * deep;   // calmer in the shallows
-                col *= 1.0 - trough * comeAndGo * open * _Glints * 0.12;
-                col = lerp(col, half3(1, 1, 1), crest * comeAndGo * open * _Glints * 0.75);
+                // Little wave marks, the way a painted map draws the sea: a sparse scatter of small
+                // white squiggles (one wave, up then down), each on its own clock — fading in,
+                // drifting a touch with the current, fading out. About half the cells have one.
+                const float2 cellSize = float2(3.4, 2.1);
+                float2 cell = floor(p / cellSize);
+                float r1 = Hash(cell), r2 = Hash(cell + 17.3), r3 = Hash(cell + 41.9);
+                float life = frac(t / 7.0 + r1);
+                float2 centre = (cell + 0.5 + (float2(r2, r3) - 0.5) * 0.45) * cellSize + float2(life * 0.45, 0.0);
+                float2 l = p - centre;
+                const float w = 0.42, h = 0.085;
+                float x = clamp(l.x, -w, w);
+                float slope = h * PI / w * cos(x / w * PI);
+                float gap = length(float2(l.x - x, (l.y - h * sin(x / w * PI)) / sqrt(1.0 + slope * slope)));
+                float thick = 0.04 * (1.0 - 0.55 * abs(x / w));            // tapering to the ends
+                float aa = fwidth(p.x) * 1.2;
+                float stroke = 1.0 - smoothstep(thick, thick + aa, gap);
+                float fade = smoothstep(0.0, 0.25, life) * (1.0 - smoothstep(0.6, 1.0, life));
+                float offshore = smoothstep(0.35, 0.7, d);                  // not in the surf
+                float mark = stroke * fade * step(0.5, r2) * offshore;
+                col = lerp(col, half3(1, 1, 1), mark * _Glints * 0.85);
 
                 // Foam (d: 0 at the shore, 1 a few units out).
                 float breakup = smoothstep(0.25, 0.65, Noise(p * 0.9 + float2(t * 0.15, 0)));
