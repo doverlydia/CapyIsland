@@ -207,6 +207,7 @@ namespace CapyIsland.Game
             Load();
             if (item == null || !_owned.Add(item.Id)) return false;
             Save();
+            if (!_catchingUp) NewStuff.Add("wardrobe/" + item.Slot + "/" + item.Id);
             if (announce) Unlocked?.Invoke(item);
             Changed?.Invoke();
             return true;
@@ -231,11 +232,15 @@ namespace CapyIsland.Game
         public static void CatchUp()
         {
             Load();
+            _catchingUp = true;   // pieces earned long ago aren't news
             foreach (var i in Items)
                 if (i.Unlock != "daily" && i.Unlock != "start" && !_owned.Contains(i.Id)
                     && Motes.TryGetByFunc(i.Unlock, out var m) && Motes.Has(m.Name))
                     Give(i, announce: false);
+            _catchingUp = false;
         }
+
+        static bool _catchingUp;
 
         /// <summary>An achievement fired: its piece, if it has one.</summary>
         public static void OnAchievement(MoteDef mote)

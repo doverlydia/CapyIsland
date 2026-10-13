@@ -640,6 +640,7 @@ namespace CapyIsland.Game
             void Adopt(HobbyLog.Cat state)
             {
                 state.adopted = true;
+                NewStuff.Add("hobbies/Cats/" + Kind.Id);
                 state.unplaced = true;
                 HobbyLog.Save();
                 HobbyLog.AddXp(Hobby.Cats, 30);

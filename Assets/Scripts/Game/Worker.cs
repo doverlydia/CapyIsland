@@ -401,11 +401,15 @@ namespace CapyIsland.Game
                 Hints.Show(who + " dug out the last rock in a hill. With no rocks in reach, the mine will close.");
         }
 
-        /// <summary>Is any garden planted on the island at all (eaten bare or not)?</summary>
+        /// <summary>Is any flower garden planted on the island at all (eaten bare or not)?</summary>
         static bool AnyFlowers()
         {
-            foreach (var node in FindObjectsByType<Harvestable>(FindObjectsSortMode.None))
-                if (node.InWorld && node.Family == NodeFamily.Flower) return true;
+            foreach (var tag in FindObjectsByType<CatalogItem>(FindObjectsSortMode.None))
+            {
+                var n = tag.StoreName ?? "";
+                if (!n.Contains("Garden") || n.Contains("Vegetable")) continue;
+                if (tag.TryGetComponent<Placeable>(out var p) && p.Placed) return true;
+            }
             return false;
         }
 

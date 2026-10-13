@@ -70,6 +70,12 @@ namespace CapyIsland.UI
             bar.pivot = new Vector2(0.5f, 1f);
             bar.sizeDelta = new Vector2(0f, 92f);
             bar.anchoredPosition = new Vector2(0f, -456f);
+            // A dot on a tab with a new piece in it.
+            for (int i = 0; i < Slots.Length && i < _tabs.Count; i++)
+            {
+                string news = "wardrobe/" + Slots[i] + "/";
+                NewDot.Live(_tabs[i].transform, () => NewStuff.Any(news), 26f);
+            }
 
             var scroll = UiKit.ScrollList(body, "Pieces", out _grid, 0f, stacked: false);
             UiKit.Stretch((RectTransform)scroll.transform, 0f, 0f, 0f, 564f);
@@ -88,7 +94,14 @@ namespace CapyIsland.UI
             if (IsOpen) Refresh();
         }
 
-        protected override void OnOpen() => Refresh();
+        protected override void OnOpen()
+        {
+            // Open where the new piece is, if there is one.
+            if (!NewStuff.Any("wardrobe/" + _slot + "/"))
+                foreach (var slot in Slots)
+                    if (NewStuff.Any("wardrobe/" + slot + "/")) { _slot = slot; break; }
+            Refresh();
+        }
 
         void Refresh()
         {
@@ -205,7 +218,9 @@ namespace CapyIsland.UI
                     Wardrobe.Toggle(chosen);
                 });
                 tile.gameObject.AddComponent<PressSquash>();
+                if (NewStuff.Has("wardrobe/" + item.Slot + "/" + item.Id)) NewDot.Fixed(tile.transform, 30f);
             }
+            NewStuff.Clear("wardrobe/" + _slot + "/");   // seen
         }
 
         protected override void Fit()

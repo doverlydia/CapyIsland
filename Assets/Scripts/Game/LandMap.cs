@@ -264,6 +264,7 @@ namespace CapyIsland.Game
             var b = Bridge(name);
             if (b == null || b.open) return;
             b.open = true;
+            if (!SaveGame.Restoring && !Visit.Active) NewStuff.Add("map/" + name);   // a new island to look at
             _component = null;
             _walk = null;
 

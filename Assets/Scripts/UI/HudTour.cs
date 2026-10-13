@@ -49,6 +49,7 @@ namespace CapyIsland.UI
             PlayerPrefs.DeleteKey(SeenKey);
             foreach (var id in AllIds) PlayerPrefs.DeleteKey(TipKey + id);
             _tips.Clear();
+            NewStuff.Clear("");     // nothing is new on a fresh island
             Guidance.Off = false;
             IntroCutscene.Forget();   // a fresh island opens with the story
             Game.YuzuHeart.Forget();  // and Old Yuzu frozen again
@@ -289,7 +290,7 @@ namespace CapyIsland.UI
             {
                 Id = "menu",
                 Title = "Menu",
-                Body = "Everything else lives here: your goals, the wardrobe, hobbies, friends, and Settings (bigger text, language, sound).",
+                Body = "Everything else lives here: your goals, the map, your collection, the wardrobe and your hobbies.",
                 Target = Hud("SideButtons/Menu"), Optional = true,
             });
             _steps.Add(new Step

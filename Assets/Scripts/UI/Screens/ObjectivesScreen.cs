@@ -47,6 +47,7 @@ namespace CapyIsland.UI
         protected override void Build(RectTransform body)
         {
             _tabs = Tabs(body, new[] { "Quests", "Achievements" }, i => { _tab = (Tab)i; Refresh(); }, out var bar);
+            NewDot.Live(_tabs[1].transform, () => NewStuff.Any("goals/"), 26f);   // a goal just reached
             bar.anchorMin = new Vector2(0f, 1f);
             bar.anchorMax = new Vector2(1f, 1f);
             bar.pivot = new Vector2(0.5f, 1f);
@@ -221,7 +222,9 @@ namespace CapyIsland.UI
             {
                 if (!a.Done) continue;
                 Row(IconPainter.Check, UiKit.Leaf, a.Def.Title, a.Def.Description, null, default, null, faded: true, reward: RewardOf(a.Def));
+                if (NewStuff.Has("goals/" + a.Def.Name)) NewDot.Fixed(_list.GetChild(_list.childCount - 1), 30f);
             }
+            NewStuff.Clear("goals/");   // seen
         }
 
         // ---------------------------------------------------------------- rows

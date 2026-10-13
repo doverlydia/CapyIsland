@@ -1,5 +1,6 @@
 using System.Collections;
 using CapyIsland.Game;
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -84,6 +85,10 @@ namespace CapyIsland.UI
 
         GameObject _giftDot, _eventsDot;
 
+        /// <summary>Something new behind one of the menu's tiles (each lights its own dot too).</summary>
+        static bool MenuNews() =>
+            NewStuff.Any("goals/") || NewStuff.Any("map/") || NewStuff.Any("wardrobe/") || NewStuff.Any("hobbies/") || CollectionScreen.AnyNews();
+
         /// <summary>
         /// A contest that ended while you were away: how you did, once, when the screen is free.
         /// (The daily gift no longer opens by itself — its red dot says it's there.)
@@ -108,6 +113,11 @@ namespace CapyIsland.UI
         void Update()
         {
             Attention.Tick();
+            if (_tuckDot != null && Time.frameCount % 15 == 0)
+            {
+                bool dot = _tucked && SideHasDot();
+                if (_tuckDot.activeSelf != dot) _tuckDot.SetActive(dot);
+            }
             if (_stopWalking != null)
             {
                 if (_king == null) _king = FindFirstObjectByType<PlayerAvatar>();
@@ -122,6 +132,61 @@ namespace CapyIsland.UI
             if (_eventsDot != null && Time.frameCount % 30 == 0) _eventsDot.SetActive(calm && GameEvents.NeedsAttention);
             if (_addFriend != null && _addFriend.activeSelf != (Visit.Active && !Visit.HostIsFriend))
                 _addFriend.SetActive(Visit.Active && !Visit.HostIsFriend);
+        }
+
+        // ---------------------------------------------------------------- tucking the side buttons away
+
+        const string TuckedKey = "CapyIsland.SideTucked";
+        RectTransform _side, _tuckArrow;
+        GameObject _tuckDot;
+        bool _tucked;
+        const float SideX = -16f;
+
+        /// <summary>
+        /// A little arrow above the column of buttons on the right: tap it and the whole column
+        /// slides away off the edge, leaving the island clear; tap again to bring it back. Tucked
+        /// away, the arrow wears a red dot if any of the hidden buttons has one. Remembered.
+        /// </summary>
+        void BuildTuck(RectTransform side)
+        {
+            _side = side;
+            var handle = UiKit.Image(_safe, "SideTuck", UiKit.Circle, new Color(1f, 1f, 1f, 0.92f), true);
+            UiKit.Place(handle.rectTransform, new Vector2(1f, 1f), new Vector2(-48f, -24f), new Vector2(56f, 56f));
+            handle.rectTransform.SetSiblingIndex(side.GetSiblingIndex() + 1);
+            UiKit.AddShadow(handle.rectTransform, 8f, 3f, 0.22f);
+            var arrow = UiKit.Image(handle.transform, "Arrow", IconPainter.Arrow, UiKit.Ink);
+            arrow.preserveAspect = true;
+            UiKit.Stretch(arrow.rectTransform, 14f, 14f, 14f, 14f);
+            _tuckArrow = arrow.rectTransform;
+            var b = handle.gameObject.AddComponent<Button>();
+            b.transition = Selectable.Transition.None;
+            b.onClick.AddListener(() => { Sfx.Play(SfxKind.Tap, 0.5f); Tuck(!_tucked, true); });
+            handle.gameObject.AddComponent<PressSquash>();
+            _tuckDot = NewDot.Fixed(handle.transform, 22f);
+            _tuckDot.SetActive(false);
+            Tuck(PlayerPrefs.GetInt(TuckedKey, 0) == 1, false);
+        }
+
+        void Tuck(bool tucked, bool animate)
+        {
+            _tucked = tucked;
+            PlayerPrefs.SetInt(TuckedKey, tucked ? 1 : 0);
+            PlayerPrefs.Save();
+            float x = tucked ? _side.sizeDelta.x + 40f : SideX;   // all the way past the edge
+            _side.DOKill();
+            if (animate) _side.DOAnchorPosX(x, 0.3f).SetEase(tucked ? Ease.InBack : Ease.OutBack).SetUpdate(true);
+            else _side.anchoredPosition = new Vector2(x, _side.anchoredPosition.y);
+            // Out: the arrow points the way the column goes (right). Away: it points back in.
+            _tuckArrow.localScale = new Vector3(tucked ? -1f : 1f, 1f, 1f);
+        }
+
+        /// <summary>Is any button in the column showing a red dot right now?</summary>
+        bool SideHasDot()
+        {
+            foreach (Transform button in _side)
+                foreach (var t in button.GetComponentsInChildren<Transform>(false))
+                    if (t.name == "Dot" || t.name == "NewDot") return true;
+            return false;
         }
 
         void BorrowResourceIcons()
@@ -183,6 +248,7 @@ namespace CapyIsland.UI
             side.anchoredPosition = new Vector2(-16f, -102f);
             side.sizeDelta = new Vector2(120f, 860f);
             side.SetSiblingIndex(afterBar + 2);
+            BuildTuck(side);
             var v = side.gameObject.AddComponent<VerticalLayoutGroup>();
             v.spacing = 14f;
             v.childAlignment = TextAnchor.UpperCenter;
@@ -216,17 +282,19 @@ namespace CapyIsland.UI
             var menu = MakeScreen<MenuScreen>(screens, "MenuScreen");
 
             menu.AddEntry("Profile", IconPainter.FaceSmile, UiKit.Hex("E58FB0"), () => profile.Open());
-            menu.AddEntry("Goals", IconPainter.Goals, UiKit.Primary, () => ObjectivesScreen.Show(ObjectivesScreen.Tab.Quests));
-            menu.AddEntry("Map", IconPainter.Map, UiKit.Spring, () => map.Open());
-            menu.AddEntry("Collection", IconPainter.Cards, UiKit.Hex("A77BD6"), () => collection.Open());
-            menu.AddEntry("Wardrobe", IconPainter.Hanger, UiKit.Hex("E58FB0"), () => wardrobe.Open(), () => Wardrobe.Ready);
-            menu.AddEntry("Daily Gifts", IconPainter.Calendar, UiKit.Sun, () => gifts.Open());
-            menu.AddEntry("Events", IconPainter.Trophy, UiKit.Hex("E3A92B"), () => events.Open());
-            menu.AddEntry("Hobbies", IconPainter.Rod, UiKit.Hex("3E9C8F"), () => HobbiesScreen.Show());
-            menu.AddEntry("Friends", IconPainter.Plane, UiKit.Hex("5B9BD5"), () => friends.Open());
-            menu.AddEntry("Settings", IconPainter.Gear, UiKit.Hex("6B8FA8"), () => settings.Open());
+            // A red dot on a tile when something new is in there (NewStuff). Daily Gifts, Events,
+            // Friends and Settings have their own buttons on the right, so they aren't in here.
+            menu.AddEntry("Goals", IconPainter.Goals, UiKit.Primary,
+                () => ObjectivesScreen.Show(NewStuff.Any("goals/") ? ObjectivesScreen.Tab.Achievements : ObjectivesScreen.Tab.Quests),
+                news: () => NewStuff.Any("goals/"));
+            menu.AddEntry("Map", IconPainter.Map, UiKit.Spring, () => map.Open(), news: () => NewStuff.Any("map/"));
+            menu.AddEntry("Collection", IconPainter.Cards, UiKit.Hex("A77BD6"), () => collection.Open(), news: CollectionScreen.AnyNews);
+            menu.AddEntry("Wardrobe", IconPainter.Hanger, UiKit.Hex("E58FB0"), () => wardrobe.Open(), () => Wardrobe.Ready, () => NewStuff.Any("wardrobe/"));
+            menu.AddEntry("Hobbies", IconPainter.Rod, UiKit.Hex("3E9C8F"), () => HobbiesScreen.Show(), news: () => NewStuff.Any("hobbies/"));
 
-            UiKit.RoundButton(side, "Menu", IconPainter.Menu, "Menu", UiKit.Primary, () => menu.Open());
+            var menuButton = UiKit.RoundButton(side, "Menu", IconPainter.Menu, "Menu", UiKit.Primary, () => menu.Open());
+            // Something new somewhere inside: a dot here, then on the tile, and on down to the thing.
+            NewDot.Live(menuButton.transform, () => !Attention.TutorialRunning && MenuNews());
             UiKit.RoundButton(side, "Map", IconPainter.Map, "Map", UiKit.Spring, () => map.Open());
             if (Visit.Active)
             {
@@ -245,7 +313,8 @@ namespace CapyIsland.UI
                 var dot = UiKit.Image(giftButton.transform, "Dot", UiKit.Circle, UiKit.Danger);
                 UiKit.Place(dot.rectTransform, new Vector2(1f, 1f), new Vector2(2f, 2f), new Vector2(34f, 34f));
                 _giftDot = dot.gameObject;
-                UiKit.RoundButton(side, "Friends", IconPainter.Plane, "Friends", UiKit.Hex("5B9BD5"), () => friends.Open());
+                var friendsButton = UiKit.RoundButton(side, "Friends", IconPainter.Plane, "Friends", UiKit.Hex("5B9BD5"), () => friends.Open());
+                NewDot.Live(friendsButton.transform, () => !Attention.TutorialRunning && NewStuff.Any("friends/"));
                 var eventsButton = UiKit.RoundButton(side, "Events", IconPainter.Trophy, "Events", UiKit.Hex("E3A92B"), () => events.Open());
                 var edot = UiKit.Image(eventsButton.transform, "Dot", UiKit.Circle, UiKit.Danger);
                 UiKit.Place(edot.rectTransform, new Vector2(1f, 1f), new Vector2(2f, 2f), new Vector2(34f, 34f));

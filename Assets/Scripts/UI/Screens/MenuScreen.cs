@@ -25,6 +25,7 @@ namespace CapyIsland.UI
             public Color Colour;
             public Func<bool> Available;
             public Action Open;
+            public Func<bool> News;
         }
 
         readonly List<Entry> _entries = new();
@@ -38,10 +39,13 @@ namespace CapyIsland.UI
             if (Instance == this) Instance = null;
         }
 
-        /// <summary>Adds a tile. Screens register themselves so the menu never needs to know them all.</summary>
-        public void AddEntry(string label, Sprite icon, Color colour, Action open, Func<bool> available = null)
+        /// <summary>
+        /// Adds a tile. Screens register themselves so the menu never needs to know them all.
+        /// <paramref name="news"/>: something new in there, for a red dot on the tile.
+        /// </summary>
+        public void AddEntry(string label, Sprite icon, Color colour, Action open, Func<bool> available = null, Func<bool> news = null)
         {
-            _entries.Add(new Entry { Label = label, Icon = icon, Colour = colour, Open = open, Available = available });
+            _entries.Add(new Entry { Label = label, Icon = icon, Colour = colour, Open = open, Available = available, News = news });
         }
 
         protected override void Build(RectTransform body)
@@ -95,6 +99,7 @@ namespace CapyIsland.UI
                     entry.Open?.Invoke();
                 });
                 face.gameObject.AddComponent<PressSquash>();
+                if (entry.News != null) NewDot.Live(face.transform, entry.News, 44f);
                 _tiles.Add((entry, soon.gameObject, b));
             }
         }

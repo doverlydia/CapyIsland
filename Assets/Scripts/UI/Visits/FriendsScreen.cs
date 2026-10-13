@@ -40,6 +40,7 @@ namespace CapyIsland.UI
 
         protected override void OnOpen()
         {
+            NewStuff.Clear("friends/");   // new friends are on show
             ClearChildren(_list);
             _blocked = Visit.WhyCantFly();
             _fixCard = null;

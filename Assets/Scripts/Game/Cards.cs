@@ -40,6 +40,7 @@ namespace CapyIsland.Game
                 if (_collected.Contains(card.Id)) continue;
                 if (Array.IndexOf(card.Items, itemName) < 0) continue;
                 _collected.Add(card.Id);
+                NewStuff.Add("collection/" + card.Id);
                 Found?.Invoke(card, itemName);
                 return;
             }

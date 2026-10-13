@@ -76,6 +76,7 @@ namespace CapyIsland.Game
             if (who == null || IsFriend(who.id)) return;
             _all.Add(who);
             Save();
+            NewStuff.Add("friends/" + who.id);
         }
 
         public static void Remove(FriendProfile who)

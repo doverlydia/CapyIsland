@@ -109,6 +109,7 @@ namespace CapyIsland.Game
             if (Visit.Active && !func.StartsWith("visit_") && !func.StartsWith("hobby_")) return;
             if (!TryGetByFunc(func, out var def) || _collected.Contains(def.Name)) return;
             _collected.Add(def.Name);
+            NewStuff.Add("goals/" + def.Name);
             Triggered?.Invoke(def);
         }
 

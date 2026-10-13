@@ -115,6 +115,7 @@ namespace CapyIsland.UI
             Layout();
             RebuildLocks();
             CentreOnKing();
+            Game.NewStuff.Clear("map/");   // the new island is on show
             // The first time you look at the map, and only then: how to travel on it.
             if (!Game.Guidance.Off && !HudTour.Seen("map"))
             {

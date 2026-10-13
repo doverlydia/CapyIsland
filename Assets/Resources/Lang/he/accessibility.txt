@@ -643,8 +643,8 @@
 @ Old Yuzu talks to you here, and her words tell you what to try next. When she goes quiet, tap her picture to hear her again.
 = כאן סבתא יוזו מדברת איתך, והמילים שלה אומרות לך מה לנסות עכשיו. כשהיא שותקת, הקש על התמונה שלה כדי לשמוע אותה שוב.
 
-@ Everything else lives here: your goals, the wardrobe, hobbies, friends, and Settings (bigger text, language, sound).
-= כל השאר נמצא כאן: המטרות, ארון הבגדים, התחביבים, החברים וההגדרות (טקסט גדול, שפה, צלילים).
+@ Everything else lives here: your goals, the map, your collection, the wardrobe and your hobbies.
+= כל השאר נמצא כאן: המטרות, המפה, האוסף, ארון הבגדים והתחביבים.
 
 @ End tutorial
 = סיים הדרכה

@@ -139,6 +139,7 @@ namespace CapyIsland.UI
                 if (HobbyLog.IsUnlocked(c.hobby)) c.card();
                 else LockedCard(c.hobby, c.name, c.icon);
             });
+            foreach (var c in all) NewStuff.Remove("hobbies/" + c.hobby);   // a newly taken-up hobby: seen
         }
 
         // ---------------------------------------------------------------- the carousel
@@ -353,7 +354,9 @@ namespace CapyIsland.UI
 
         void HobbyCard(Hobby hobby, string name, Sprite icon, Color colour, string stat, string tip, string action, Action open)
         {
-            PictureCard(hobby, colour, false, out var text);
+            var card = PictureCard(hobby, colour, false, out var text);
+            // New here: the hobby itself (just taken up), or a find in its journal.
+            if (NewStuff.Any("hobbies/" + hobby)) NewDot.Fixed(card, 40f);
             var title = UiKit.Text(text, "Name", $"{name}  <size=70%><color=#{ColorUtility.ToHtmlStringRGB(colour)}>Level {HobbyLog.Level(hobby)}</color></size>", 46f, UiKit.Ink, true, TextAlignmentOptions.Center);
             title.textWrappingMode = TextWrappingModes.NoWrap;
             var fill = UiKit.ProgressBar(text, "Progress", colour, 18f);
@@ -364,6 +367,7 @@ namespace CapyIsland.UI
             var go = UiKit.Button(text, "Open", action, UiKit.ButtonStyle.Primary, open, 32f);
             var ble = go.transform.parent.gameObject.AddComponent<LayoutElement>();
             ble.preferredHeight = 88f;
+            if (NewStuff.Any("hobbies/" + hobby + "/")) NewDot.Fixed(go.transform, 30f);
         }
 
         void Back()
@@ -402,11 +406,13 @@ namespace CapyIsland.UI
                 var tile = UiKit.Image(grid.transform, name, UiKit.Rounded(26), known ? Color.white : UiKit.SurfaceSunk);
                 Picture(tile.transform, pic, known);
                 Label(tile.transform, known ? name : "???", known);
+                if (known && NewStuff.Has("hobbies/" + hobby + "/" + entry.id)) NewDot.Fixed(tile.transform, 30f);
                 // When it is about, even before you have found one: something to go looking for.
                 string detail = HobbyData.Rarity(stars) + "\n" + (rain ? "Only in the rain" : GameClock.Describe(times));
                 if (known) detail += sizes ? $"\n×{entry.count} · best {entry.best:0} cm" : $"\n×{entry.count}";
                 Detail(tile.transform, detail);
             }
+            NewStuff.Clear("hobbies/" + hobby + "/");   // seen
         }
 
         /// <summary>How much of the page is found, and what a full page wins.</summary>
@@ -476,10 +482,12 @@ namespace CapyIsland.UI
                 var tile = UiKit.Image(grid.transform, crop.Name, UiKit.Rounded(26), known ? Color.white : UiKit.SurfaceSunk);
                 Picture(tile.transform, HobbyData.ItemArt("crop:" + crop.Id), known);
                 Label(tile.transform, known ? crop.Name : "???", known);
+                if (known && NewStuff.Has("hobbies/Gardening/" + crop.Id)) NewDot.Fixed(tile.transform, 30f);
                 Detail(tile.transform, known
                     ? Loc.F("×{0} harvested", entry.count) + "\n" + Loc.F("Grows in {0} min", crop.Minutes)
                     : Loc.F("Gardening level {0}", crop.MinLevel));
             }
+            NewStuff.Clear("hobbies/Gardening/");   // seen
         }
 
         void CatsPage()
@@ -496,7 +504,9 @@ namespace CapyIsland.UI
                 Picture(tile.transform, HobbyData.Art("Cat_" + cat.Id), met);
                 Label(tile.transform, adopted ? cat.Name : met ? "Stray cat" : "???", met);
                 Detail(tile.transform, adopted ? "Adopted!" : met ? $"Trust {state.bond}/{CatCare.MaxBond}" : "Not met yet");
+                if (adopted && NewStuff.Has("hobbies/Cats/" + cat.Id)) NewDot.Fixed(tile.transform, 30f);
             }
+            NewStuff.Clear("hobbies/Cats/");   // seen
             var tip = UiKit.Text(_list, "Tip", "Strays wander onto your island every so often. Pet them, share a fish, and once they trust you, adopt them.", 26f, UiKit.InkSoft, false, TextAlignmentOptions.Center);
             tip.overflowMode = TextOverflowModes.Overflow;
         }

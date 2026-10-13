@@ -24,6 +24,16 @@ namespace CapyIsland.UI
         enum Tab { Discoveries, Clothing, Furniture, Recipes, Fish, Birds, Bugs, Vegetables, Cats }
         static readonly string[] TabNames = { "Discoveries", "Clothing", "Furniture", "Recipes", "Fish", "Birds", "Bugs", "Vegetables", "Cats" };
 
+        /// <summary>Where each tab's new things are kept (<see cref="NewStuff"/>), or null for none.</summary>
+        static readonly string[] TabNews = { "collection/", "wardrobe/", null, null, "hobbies/Fishing/", "hobbies/Birding/", "hobbies/Bugs/", "hobbies/Gardening/", "hobbies/Cats/" };
+
+        /// <summary>Anything new on any tab (the menu tile's dot).</summary>
+        public static bool AnyNews()
+        {
+            foreach (var prefix in TabNews) if (prefix != null && NewStuff.Any(prefix)) return true;
+            return false;
+        }
+
         Tab _tab;
         RectTransform _content, _chips;
         ScrollRect _scroll;
@@ -82,6 +92,8 @@ namespace CapyIsland.UI
                 b.transition = Selectable.Transition.None;
                 b.onClick.AddListener(() => { _tab = (Tab)index; Refresh(); });
                 chip.gameObject.AddComponent<PressSquash>();
+                var news = TabNews[i];
+                if (news != null) NewDot.Live(chip.transform, () => NewStuff.Any(news), 26f);
                 _chipFaces.Add(chip);
             }
 
@@ -114,11 +126,12 @@ namespace CapyIsland.UI
             }
             ClearChildren(_content);
             int found = 0, total = 0;
-            void Add(Sprite pic, bool have, string name, string detail)
+            void Add(Sprite pic, bool have, string name, string detail, string key = null)
             {
                 total++;
                 if (have) found++;
-                Tile(pic, have, have ? name : "???", detail);
+                var tile = Tile(pic, have, have ? name : "???", detail);
+                if (key != null && NewStuff.Has(key)) NewDot.Fixed(tile, 30f);   // new since you last looked
             }
 
             int cooking = HobbyLog.Level(Hobby.Cooking);
@@ -133,7 +146,7 @@ namespace CapyIsland.UI
                         var pic = have && catalog != null && card.Items.Length > 0 ? catalog.Icon(card.Items[0]) : null;
                         string title = StoryText.CardTitle(card.Id);
                         if (string.IsNullOrEmpty(title)) title = card.Items.Length > 0 ? StoryText.Name(card.Items[0]) : "";
-                        Add(pic, have, title, null);
+                        Add(pic, have, title, null, "collection/" + card.Id);
                     }
                     break;
                 }
@@ -141,7 +154,7 @@ namespace CapyIsland.UI
                     foreach (var item in Wardrobe.Items)
                     {
                         bool have = Wardrobe.Owns(item);
-                        Add(Wardrobe.Art(item), have, item.Name, have ? null : Wardrobe.HowToEarn(item));
+                        Add(Wardrobe.Art(item), have, item.Name, have ? null : Wardrobe.HowToEarn(item), "wardrobe/" + item.Slot + "/" + item.Id);
                     }
                     break;
                 case Tab.Furniture:
@@ -164,28 +177,28 @@ namespace CapyIsland.UI
                     foreach (var f in HobbyData.Fish)
                     {
                         var e = HobbyLog.FishEntry(f.Id);
-                        Add(HobbyData.FishPicture(f), e != null, f.Name, e != null ? $"×{e.count} · best {e.best:0} cm" : HobbyData.Rarity(f.Stars));
+                        Add(HobbyData.FishPicture(f), e != null, f.Name, e != null ? $"×{e.count} · best {e.best:0} cm" : HobbyData.Rarity(f.Stars), "hobbies/Fishing/" + f.Id);
                     }
                     break;
                 case Tab.Birds:
                     foreach (var b in HobbyData.Birds)
                     {
                         var e = HobbyLog.BirdEntry(b.Id);
-                        Add(HobbyData.BirdPicture(b), e != null, b.Name, e != null ? $"×{e.count}" : HobbyData.Rarity(b.Stars));
+                        Add(HobbyData.BirdPicture(b), e != null, b.Name, e != null ? $"×{e.count}" : HobbyData.Rarity(b.Stars), "hobbies/Birding/" + b.Id);
                     }
                     break;
                 case Tab.Bugs:
                     foreach (var b in HobbyData.Bugs)
                     {
                         var e = HobbyLog.BugEntry(b.Id);
-                        Add(HobbyData.Art("Bug_" + b.Id), e != null, b.Name, e != null ? $"×{e.count}" : HobbyData.Rarity(b.Stars));
+                        Add(HobbyData.Art("Bug_" + b.Id), e != null, b.Name, e != null ? $"×{e.count}" : HobbyData.Rarity(b.Stars), "hobbies/Bugs/" + b.Id);
                     }
                     break;
                 case Tab.Vegetables:
                     foreach (var c in HobbyData.Crops)
                     {
                         var e = HobbyLog.CropEntry(c.Id);
-                        Add(HobbyData.ItemArt("crop:" + c.Id), e != null, c.Name, e != null ? Loc.F("×{0} harvested", e.count) : Loc.F("Gardening level {0}", c.MinLevel));
+                        Add(HobbyData.ItemArt("crop:" + c.Id), e != null, c.Name, e != null ? Loc.F("×{0} harvested", e.count) : Loc.F("Gardening level {0}", c.MinLevel), "hobbies/Gardening/" + c.Id);
                     }
                     break;
                 case Tab.Cats:
@@ -194,16 +207,18 @@ namespace CapyIsland.UI
                         HobbyLog.Cat state = null;
                         foreach (var c in HobbyLog.Cats) if (c.id == cat.Id) state = c;
                         bool adopted = state != null && state.adopted;
-                        Add(HobbyData.Art("Cat_" + cat.Id), adopted, cat.Name, adopted ? null : state != null && state.bond > 0 ? $"Trust {state.bond}/{CatCare.MaxBond}" : "Not met yet");
+                        Add(HobbyData.Art("Cat_" + cat.Id), adopted, cat.Name, adopted ? null : state != null && state.bond > 0 ? $"Trust {state.bond}/{CatCare.MaxBond}" : "Not met yet", "hobbies/Cats/" + cat.Id);
                     }
                     break;
             }
             _count.text = Loc.F("{0} of {1} found", found, total);
+            // Seen now: this tab's dots (here, on the menu, in the hobby journals) go.
+            if (TabNews[(int)_tab] != null) NewStuff.Clear(TabNews[(int)_tab]);
             _scroll.verticalNormalizedPosition = 1f;
         }
 
         /// <summary>One thing in the collection: its picture (a shadow if not found yet), its name, a small line under it.</summary>
-        void Tile(Sprite pic, bool have, string name, string detail)
+        RectTransform Tile(Sprite pic, bool have, string name, string detail)
         {
             var tile = UiKit.Image(_content, name, UiKit.Rounded(26), have ? Color.white : UiKit.SurfaceSunk);
             var p = UiKit.Image(tile.transform, "Picture", pic, have ? Color.white : new Color(0.2f, 0.16f, 0.13f, 0.4f));
@@ -228,7 +243,7 @@ namespace CapyIsland.UI
             label.enableAutoSizing = true;
             label.fontSizeMin = 16f;
             label.fontSizeMax = 26f;
-            if (string.IsNullOrEmpty(detail)) return;
+            if (string.IsNullOrEmpty(detail)) return tile.rectTransform;
             var d = UiKit.Text(tile.transform, "Detail", detail, 20f, UiKit.Hex("B98A1E"), false, TextAlignmentOptions.Center);
             d.rectTransform.anchorMin = Vector2.zero;
             d.rectTransform.anchorMax = new Vector2(1f, 0.19f);
@@ -237,6 +252,7 @@ namespace CapyIsland.UI
             d.enableAutoSizing = true;
             d.fontSizeMin = 13f;
             d.fontSizeMax = 20f;
+            return tile.rectTransform;
         }
 
         protected override void Fit()

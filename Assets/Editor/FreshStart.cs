@@ -32,7 +32,7 @@ namespace CapyIsland.EditorTools
             "CapyIsland.Daily.Last", "CapyIsland.Daily.Streak", "CapyIsland.Events", "CapyIsland.Hobbies",
             "CapyIsland.Wardrobe.Owned", "CapyIsland.Wardrobe.Worn", "CapyIsland.Airport", "CapyIsland.Bait",
             "CapyIsland.CatBegSeen", "CapyIsland.CatRideSeen", "CapyIsland.DishOrders", "CapyIsland.Friends",
-            "CapyIsland.LeftNotes", "CapyIsland.ShoreNotes", "CapyIsland.PlayerName", "CapyIsland.Visited",
+            "CapyIsland.LeftNotes", "CapyIsland.ShoreNotes", "CapyIsland.PlayerName", "CapyIsland.Visited", "CapyIsland.New",
         };
 
         [MenuItem("CapyIsland/Delete Save")]

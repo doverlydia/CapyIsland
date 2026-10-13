@@ -112,6 +112,7 @@ namespace CapyIsland.Game
         {
             if (IsUnlocked(h)) return false;
             D.unlocked.Add(h.ToString());
+            NewStuff.Add("hobbies/" + h);   // the hobby itself (finds go under "hobbies/<hobby>/")
             Save();
             Changed?.Invoke();
             return true;
@@ -170,7 +171,7 @@ namespace CapyIsland.Game
         {
             var e = CropEntry(id);
             bool first = e == null;
-            if (first) D.crops.Add(e = new Entry { id = id });
+            if (first) { D.crops.Add(e = new Entry { id = id }); NewStuff.Add("hobbies/Gardening/" + id); }
             e.count += amount;
             Save();
             if (first) JournalRewards.Check(Hobby.Gardening);
@@ -182,7 +183,7 @@ namespace CapyIsland.Game
         {
             var e = FishEntry(id);
             bool first = e == null;
-            if (first) D.fish.Add(e = new Entry { id = id });
+            if (first) { D.fish.Add(e = new Entry { id = id }); NewStuff.Add("hobbies/Fishing/" + id); }
             bool record = !first && size > e.best;
             e.count++;
             e.best = Mathf.Max(e.best, size);
@@ -196,6 +197,7 @@ namespace CapyIsland.Game
         public static bool LogBird(string id)
         {
             bool first = Log(D.birds, id);
+            if (first) NewStuff.Add("hobbies/Birding/" + id);
             GameEvents.Record(Hobby.Birding, HobbyData.BirdById(id)?.Stars ?? 1);
             if (first) JournalRewards.Check(Hobby.Birding);
             return first;
@@ -204,6 +206,7 @@ namespace CapyIsland.Game
         public static bool LogBug(string id)
         {
             bool first = Log(D.bugs, id);
+            if (first) NewStuff.Add("hobbies/Bugs/" + id);
             GameEvents.Record(Hobby.Bugs, HobbyData.Bug(id)?.Stars ?? 1);
             if (first) JournalRewards.Check(Hobby.Bugs);
             return first;
