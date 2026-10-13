@@ -56,6 +56,7 @@ namespace CapyIsland.Game
         public virtual bool MarkerActive => isActiveAndEnabled && Running;
         public Vector2 MarkerPosition => transform.position;
         public Sprite MarkerIcon => MapMarkers.SpriteOf(gameObject);
+        public string MarkerLabel => TryGetComponent<CatalogItem>(out var tag) ? StoryText.Name(tag.StoreName) : null;
 
         /// <summary>Starts life: grows in, then wanders off to feed.</summary>
         public void BeginLife()

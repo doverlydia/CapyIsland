@@ -52,6 +52,7 @@ namespace CapyIsland.Game
         public bool MarkerActive => !_taken && isActiveAndEnabled;
         public Vector2 MarkerPosition => transform.position;
         public Sprite MarkerIcon => _icon != null ? _icon.sprite : MapMarkers.SpriteOf(contents);
+        public string MarkerLabel => contents != null && contents.TryGetComponent<CatalogItem>(out var tag) ? StoryText.Name(tag.StoreName) : null;
 
         void Awake()
         {

@@ -155,6 +155,7 @@ namespace CapyIsland.Game
         public bool MarkerActive => !_leaving;
         public Vector2 MarkerPosition => transform.position;
         public Sprite MarkerIcon => _body != null ? _body.sprite : null;
+        public string MarkerLabel => Who != null ? Who.name : null;
 
         public bool Leaving => _leaving;
 

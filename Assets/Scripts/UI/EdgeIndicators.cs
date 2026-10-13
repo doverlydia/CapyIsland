@@ -154,7 +154,7 @@ namespace CapyIsland.UI
                 widget.LabelPill.gameObject.SetActive(labelled);
                 if (labelled)
                 {
-                    widget.Label.text = LabelOf(widget.Kind);
+                    widget.Label.text = hit.Marker.MarkerLabel ?? LabelOf(widget.Kind);   // what is there, by name
                     widget.LabelPill.anchoredPosition = -outward * (Size * 0.5f + 30f);
                 }
                 _placed.Add((widget, edge, 1));

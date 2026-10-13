@@ -140,6 +140,7 @@ namespace CapyIsland.Game
         public bool MarkerActive => HasNews;
         public Vector2 MarkerPosition => transform.position;
         public Sprite MarkerIcon => Portrait;
+        public string MarkerLabel => Speaker;
 
         void Update()
         {

@@ -17,6 +17,9 @@ namespace CapyIsland.Game
 
         /// <summary>A picture of what is there, or null for the kind's default.</summary>
         Sprite MarkerIcon { get; }
+
+        /// <summary>What is there, in words ("Daisy Garden", "Miso"), or null for the kind's word.</summary>
+        string MarkerLabel => null;
     }
 
     /// <summary>
