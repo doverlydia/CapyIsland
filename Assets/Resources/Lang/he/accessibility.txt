@@ -680,3 +680,11 @@
 
 @ Your note is updated.
 = הפתק שלך עודכן.
+
+# ---------------------------------------------------------------- walking
+
+@ Walk with a joystick
+= הליכה עם ג'ויסטיק
+
+@ Either way, tap any spot to walk there.
+= בכל מקרה, אפשר להקיש על כל מקום כדי ללכת אליו.

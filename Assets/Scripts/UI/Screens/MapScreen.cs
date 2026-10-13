@@ -115,6 +115,12 @@ namespace CapyIsland.UI
             Layout();
             RebuildLocks();
             CentreOnKing();
+            // The first time you look at the map, and only then: how to travel on it.
+            if (!Game.Guidance.Off && !HudTour.Seen("map"))
+            {
+                HudTour.MarkSeen("map");
+                CardPopup.Show("Map", "See all the islands. Drag yourself on the map to travel.", IconPainter.Map);
+            }
         }
 
         protected override void OnClose()

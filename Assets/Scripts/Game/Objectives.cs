@@ -107,6 +107,17 @@ namespace CapyIsland.Game
                     return new Goal { Source = Source.Talk, Title = "Talk to " + giver.Speaker, From = giver.Speaker,
                         Where = giver.transform.position, Icon = giver.Portrait };
 
+            // Someone new still in a bubble, or following you waiting for a home: let them in first
+            // (after the opening, that's Miso, whose quests lead the story).
+            foreach (var b in Object.FindObjectsByType<Bubble>(FindObjectsSortMode.None))
+                if (!b.Taken && b.Contents != null && b.Contents.TryGetComponent<QuestGiver>(out var newcomer))
+                    return new Goal { Source = Source.Talk, Title = "Pop the bubble to meet " + newcomer.Speaker, From = newcomer.Speaker,
+                        Where = b.transform.position };
+            foreach (var giver in Object.FindObjectsByType<QuestGiver>(FindObjectsSortMode.None))
+                if (giver.GiverKind != QuestGiver.Kind.Ghost && !giver.IsInWorld && giver.TryGetComponent<Placeable>(out var p) && !p.Placed)
+                    return new Goal { Source = Source.Talk, Title = "Drag " + giver.Speaker + " onto the grass to settle in", From = giver.Speaker,
+                        Icon = giver.Portrait };
+
             // Otherwise the next achievement still to earn.
             foreach (var a in AllAchievements())
                 if (!a.Done) return new Goal { Source = Source.Achievement, Title = a.Goal };

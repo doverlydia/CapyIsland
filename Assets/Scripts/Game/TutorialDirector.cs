@@ -59,6 +59,8 @@ namespace CapyIsland.Game
         void OnDestroy()
         {
             if (Instance == this) Instance = null;
+            if (Placeable.ZoneFor != null) Placeable.ZoneFor = null;
+            TowerOfLove.DiaryClosed -= OnDiaryClosed;
         }
 
         /// <summary>The current step as a short to-do, for the objective tracker.</summary>
@@ -196,6 +198,10 @@ namespace CapyIsland.Game
             }
             // The tutorial was ended: its steps still move the story on, but nothing points.
             if (Guidance.Off && pointer != null) pointer.Hide();
+            GlideToGoal();
+            PulseZone();
+            // A sunny morning from start to finish; the day starts moving once the island is yours.
+            GameClock.Hold(_step != Step.Done);
         }
 
         // ---------------------------------------------------------------- steps
@@ -228,17 +234,24 @@ namespace CapyIsland.Game
             if (king != null) ShowDrag(item, (Vector2)king.transform.position + new Vector2(1.4f, 0.4f), 7f);
         }
 
+        float _millPlacedAt = -1f;
+
         void TickPlantSawmill()
         {
             var mill = FindPlaceable("Sawmill");
             if (mill == null) return;
+            if (!mill.Placed) _millPlacedAt = -1f;
 
             if (mill.Placed)
             {
                 var workplace = mill.GetComponent<Workplace>();
                 // Planted, but out of reach of any tree: say so rather than let it look broken.
+                // (A moment's grace first: the forest's trees settle in a frame or two after a
+                // drop, and a "too far" that flashes up and vanishes only confuses.)
+                if (_millPlacedAt < 0f) _millPlacedAt = Time.time;
                 if (workplace != null && !workplace.HasWorkInReach())
                 {
+                    if (Time.time - _millPlacedAt < 1f) return;
                     Say("That sawmill is too far from the trees. Its capybaras can't walk that far to chop.");
                     var forest = FindPlaceable("Forest");
                     if (pointer != null && forest != null) pointer.PointAt(forest.transform);
@@ -273,7 +286,7 @@ namespace CapyIsland.Game
 
             if (worker.IsAssigned)
             {
-                Say("That's the rhythm: forest, sawmill, capybara. Watch the wood pile up with every chop.");
+                Tell("That's the rhythm: forest, sawmill, capybara. Watch the wood pile up with every chop.");
                 Advance(Step.WaitForHunger);
                 return;
             }
@@ -299,7 +312,7 @@ namespace CapyIsland.Game
             }
 
             UI.NapCutscene.Show();
-            Say("Your capybara has dozed off. It's hungry! Capybaras eat flowers, and there's a garden in that bubble.");
+            Tell("Your capybara has dozed off. It's hungry! Capybaras eat flowers, and there's a garden in that bubble.");
             Advance(Step.CollectGarden);
         }
 
@@ -315,11 +328,77 @@ namespace CapyIsland.Game
             if (gardenItem == null) { Advance(Step.Done); return; }
             if (gardenItem.Placed) { AwakenSpirits(); return; }
 
-            Say(CircleLineOr(gardenItem, "Plant the garden close to the sleepy capybara so it can reach the flowers.", PlantCircleLine));
-            Worker sleeper = null;
-            foreach (var w in FindObjectsByType<Worker>(FindObjectsSortMode.None))
-                if (w.IsAsleep && w.IsHungry) { sleeper = w; break; }
-            if (sleeper != null) ShowDrag(gardenItem, (Vector2)sleeper.transform.position + new Vector2(2.2f, -1.2f), 3f);
+            // The garden only goes down inside a glowing circle by the sleeper, so this first
+            // garden always feeds it (and the lesson isn't lost to one planted out of reach).
+            if (Placeable.ZoneFor != gardenItem)
+            {
+                Worker sleeper = null;
+                foreach (var w in FindObjectsByType<Worker>(FindObjectsSortMode.None))
+                    if (w.IsAsleep && w.IsHungry) { sleeper = w; break; }
+                var mill = FindFirstObjectByType<Workplace>();
+                Vector2 centre = sleeper != null ? sleeper.transform.position
+                               : mill != null ? mill.transform.position
+                               : (Vector2)transform.position;
+                ShowZone(gardenItem, centre);
+            }
+
+            Say(CircleLineOr(gardenItem, "Plant the garden inside the glowing circle, right by the sleepy capybara, so it can reach the flowers.", PlantCircleLine));
+            ShowDrag(gardenItem, Placeable.ZoneCentre + new Vector2(2.2f, -1.2f), 3f);
+        }
+
+        // ---------------------------------------------------------------- the garden circle
+
+        /// <summary>How far from the sleeper the first garden may go, in original world units.</summary>
+        const float GardenZoneRadius = 120f;
+
+        SpriteRenderer _zone, _zoneRim;
+
+        void ShowZone(Placeable item, Vector2 centre)
+        {
+            Placeable.ZoneFor = item;
+            Placeable.ZoneCentre = centre;
+            Placeable.ZoneRadius = GardenZoneRadius;
+            if (_zone == null)
+            {
+                var go = new GameObject("GardenZone");
+                _zone = go.AddComponent<SpriteRenderer>();
+                _zone.sprite = UI.IconPainter.Glow;
+                var rim = new GameObject("Rim");
+                rim.transform.SetParent(go.transform, false);
+                _zoneRim = rim.AddComponent<SpriteRenderer>();
+                _zoneRim.sprite = UI.IconPainter.Ring;
+                // On the ground, under everything, like the placement circle.
+                var preview = FindFirstObjectByType<PlacementPreview>(FindObjectsInactive.Include);
+                var under = preview != null ? preview.GetComponentInChildren<SpriteRenderer>(true) : null;
+                if (under != null)
+                {
+                    _zone.sortingLayerID = _zoneRim.sortingLayerID = under.sortingLayerID;
+                    _zone.sortingOrder = under.sortingOrder - 1;
+                    _zoneRim.sortingOrder = under.sortingOrder - 1;
+                }
+            }
+            // An ellipse on the ground: the radius is world units, which are half as tall on screen.
+            var size = BunniSpace.ToUnity(new Vector2(GardenZoneRadius, GardenZoneRadius) * 2f);
+            var glow = _zone.sprite.bounds.size;
+            _zone.transform.position = new Vector3(centre.x, centre.y, 0f);
+            _zone.transform.localScale = new Vector3(size.x / glow.x, size.y / glow.y, 1f);
+            var ring = _zoneRim.sprite.bounds.size;
+            _zoneRim.transform.localScale = new Vector3(glow.x / ring.x, glow.y / ring.y, 1f);
+            _zone.gameObject.SetActive(true);
+        }
+
+        void HideZone()
+        {
+            if (Placeable.ZoneFor != null) Placeable.ZoneFor = null;
+            if (_zone != null) _zone.gameObject.SetActive(false);
+        }
+
+        void PulseZone()
+        {
+            if (_zone == null || !_zone.gameObject.activeSelf) return;
+            float a = 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 3f);
+            _zone.color = new Color(1f, 0.86f, 0.4f, 0.22f + 0.12f * a);
+            _zoneRim.color = new Color(1f, 0.9f, 0.55f, 0.55f + 0.35f * a);
         }
 
         /// <summary>
@@ -333,7 +412,7 @@ namespace CapyIsland.Game
             var catalog = ItemCatalog.Instance;
             if (land != null && catalog != null)
                 catalog.MakeItem("Tower Of Love", land.SpotNearIslandMiddle(1, 83f));   // the middle of its island
-            Say("Oh! A warm heart! All your building is waking the island up. The spirits can feel it.");
+            Tell("Oh! A warm heart! All your building is waking the island up. The spirits can feel it.");
             _stepTimer = 6f;
             Advance(Step.ClickMote);
         }
@@ -356,17 +435,8 @@ namespace CapyIsland.Game
         void OpenFirstBridge()
         {
             var land = LandMap.Instance;
-            var catalog = ItemCatalog.Instance;
-            if (land != null)
-            {
-                land.OpenBridge("first_bridge");
-                if (catalog != null)
-                {
-                    BridgeGhost.Spawn("Ginger Cove", land.RandomSpotOnIsland(1, 30f), catalog.ItemParent);
-                    catalog.MakeStore("Coriander", land.RandomSpotOnIsland(1, 30f));
-                }
-            }
-            Say("Wonderful! A bridge has risen to the next island. Hold your finger down to walk your capybara across.");
+            if (land != null) land.OpenBridge("first_bridge");
+            Tell("Wonderful! A bridge has risen to the next island. Tap where the hand points and your capybara walks across.");
             _stepTimer = 10f;
             Advance(Step.CrossToHeart);
         }
@@ -377,7 +447,7 @@ namespace CapyIsland.Game
             var land = LandMap.Instance;
             if (king != null && land != null && land.IslandAt(king.transform.position) == 1)
             {
-                Say("Ah... this is the heart of the Capy Isles. The old hot spring is here somewhere.");
+                Tell("Ah... this is the heart of the Capy Isles. The old hot spring is here somewhere.");
                 _stepTimer = 10f;
                 WaitForDiary();
                 Advance(Step.OpenTower);
@@ -385,9 +455,17 @@ namespace CapyIsland.Game
             }
             if (pointer != null && land != null)
             {
+                // Just past the far end, on the new island: a tap there (or on the arrow to it)
+                // walks the whole way across, not to the middle of the bridge.
                 var bridge = land.Bridge("first_bridge");
-                if (bridge != null && bridge.circles.Count > 0)
-                    pointer.PointAt(LandMap.WorldToUnity(new Vector2(bridge.circles[2].x, bridge.circles[2].y)));
+                int n = bridge != null ? bridge.circles.Count : 0;
+                if (n >= 2)
+                {
+                    Vector2 end = LandMap.WorldToUnity(new Vector2(bridge.circles[n - 1].x, bridge.circles[n - 1].y));
+                    Vector2 before = LandMap.WorldToUnity(new Vector2(bridge.circles[n - 2].x, bridge.circles[n - 2].y));
+                    Vector2 across = end + (end - before).normalized * 3f;
+                    pointer.PointAt(land.IslandAt(across) == 1 ? across : end);
+                }
             }
         }
 
@@ -399,8 +477,9 @@ namespace CapyIsland.Game
             if (_towerOpened)
             {
                 TowerOfLove.DiaryClosed -= OnDiaryClosed;
-                Say("Whenever you're stuck, visit the Steam Tower. Bring the warmth back to the islands!");
+                Tell("Whenever you're stuck, visit the Steam Tower. Bring the warmth back to the islands!");
                 Advance(Step.Done);
+                WelcomeNeighbours();
                 return;
             }
             _stepTimer -= Time.deltaTime;
@@ -528,6 +607,7 @@ namespace CapyIsland.Game
             _step = next;
             _circleExplained = false;
             if (pointer != null) pointer.Hide();
+            HideZone();
         }
 
         void Say(string line)
@@ -535,6 +615,54 @@ namespace CapyIsland.Game
             if (Guidance.Off) return;   // the tutorial was ended: the story goes on, quietly
             // the latest instruction replaces any older one still waiting, so she never lags behind
             if (dialogue != null) dialogue.Instruct(line);
+        }
+
+        /// <summary>
+        /// A line to understand rather than a step to do (why the capybara fell asleep, what the
+        /// heart is). Queued, never replaced by the next instruction: she finishes it first.
+        /// </summary>
+        void Tell(string line)
+        {
+            if (Guidance.Off) return;
+            if (dialogue != null) dialogue.Say(line);
+        }
+
+        /// <summary>
+        /// The opening is over: now the next island's first neighbours turn up — Miso in a bubble
+        /// and the ghost who sells the next bridge. (Not earlier: the tower deserves the stage.)
+        /// A game saved after they arrived already has them.
+        /// </summary>
+        static void WelcomeNeighbours()
+        {
+            var land = LandMap.Instance;
+            var catalog = ItemCatalog.Instance;
+            if (land == null || catalog == null) return;
+            bool ghost = false, miso = false;
+            foreach (var g in FindObjectsByType<BridgeGhost>(FindObjectsSortMode.None)) if (g.BridgeName == "Ginger Cove") ghost = true;
+            foreach (var c in FindObjectsByType<CatalogItem>(FindObjectsSortMode.None))
+                if (c.StoreName == "Coriander") miso = true;
+            foreach (var b in FindObjectsByType<Bubble>(FindObjectsSortMode.None))
+                if (!b.Taken && b.Contents != null && b.Contents.TryGetComponent<CatalogItem>(out var inside) && inside.StoreName == "Coriander") miso = true;
+            if (!ghost) BridgeGhost.Spawn("Ginger Cove", land.RandomSpotOnIsland(1, 30f), catalog.ItemParent);
+            if (!miso) catalog.MakeStore("Coriander", land.RandomSpotOnIsland(1, 30f));
+        }
+
+        // ---------------------------------------------------------------- the camera
+
+        Step _glidedFor = Step.Done;
+
+        /// <summary>
+        /// When a step wants you somewhere you can't see — a bubble off screen, the tower — the
+        /// camera glides over to show it, holds a moment and glides back. Once per step, and never
+        /// over a movie or a window.
+        /// </summary>
+        void GlideToGoal()
+        {
+            if (_glidedFor == _step || pointer == null || Guidance.Off) return;
+            var target = pointer.Target;
+            if (!target.HasValue || Attention.Busy) return;
+            _glidedFor = _step;
+            if (!OnScreen(target.Value, 0f)) CameraRig.CameraFocus.Show(target.Value, 2.2f);
         }
 
         static Bubble FindBubble(string nameFragment)

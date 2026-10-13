@@ -50,7 +50,11 @@ namespace CapyIsland.Game
                 _nextWhim = Time.time + WhimCheck;
                 CheckWhims();
             }
+            // No strays during the opening: the first one turns up a minute or two after it, and
+            // only when nothing else has the screen.
+            if (Attention.TutorialRunning) { _nextStray = Time.time + UnityEngine.Random.Range(60f, 120f); return; }
             if (Time.time < _nextStray) return;
+            if (!Attention.Free(6f)) { _nextStray = Time.time + 5f; return; }
             _nextStray = Time.time + UnityEngine.Random.Range(90f, 180f);
 
             // At most two strays about at once; never one that is already here.

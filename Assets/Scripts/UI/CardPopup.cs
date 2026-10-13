@@ -73,7 +73,15 @@ namespace CapyIsland.UI
         void Enqueue(string title, string body, Sprite sprite, System.Action closed)
         {
             _queue.Enqueue((title, body, sprite, closed));
-            if (!_showing) ShowNext();
+            if (!_showing && !MoviePlaying) ShowNext();
+        }
+
+        /// <summary>A movie has the screen: cards wait for it to end rather than pop up underneath.</summary>
+        static bool MoviePlaying => Cutscene.Playing || AwakeningScreen.IsOpen;
+
+        void Update()
+        {
+            if (!_showing && _queue.Count > 0 && !MoviePlaying) ShowNext();
         }
 
         void ShowNext()

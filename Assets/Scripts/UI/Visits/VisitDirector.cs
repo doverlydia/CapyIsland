@@ -108,9 +108,7 @@ namespace CapyIsland.UI
         void MaybeKnock()
         {
             _nextRequest = Time.unscaledTime + Random.Range(360f, 720f);
-            var tutorial = TutorialDirector.Instance;
-            if (tutorial != null && !tutorial.Finished) return;
-            if (VisitorBot.Current != null || UiScreen.AnyOpen || SpeechDialog.IsOpen || CardPopup.IsShowing || Visit.Travelling) return;
+            if (VisitorBot.Current != null || !Attention.Free(8f)) return;
             if (Random.value > 0.6f) return;
 
             // Someone online on this server knocks; an online friend more often than a stranger.
@@ -144,12 +142,15 @@ namespace CapyIsland.UI
                 Hints.Show(who.name + " has logged off. See you next time!");
                 return;
             }
-            PromptScreen.Ask("Logged off", who, $"<b>{who.name}</b> had to go. Add them as a friend so you can visit their island?",
-                "Add friend", "No thanks", () =>
-                {
-                    Friends.Add(who);
-                    Hints.Show(who.name + " is now your friend. Visit them from the Friends menu!");
-                });
+            // Asked when the screen is free, not on top of whatever you're doing when they go.
+            Attention.Ask("logged-off:" + who.id, () =>
+                PromptScreen.Ask("Logged off", who, $"<b>{who.name}</b> had to go. Add them as a friend so you can visit their island?",
+                    "Add friend", "No thanks", () =>
+                    {
+                        Friends.Add(who);
+                        Hints.Show(who.name + " is now your friend. Visit them from the Friends menu!");
+                    }),
+                () => !Visit.Active && !Friends.IsFriend(who.id));
         }
     }
 }

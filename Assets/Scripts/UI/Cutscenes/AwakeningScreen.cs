@@ -127,6 +127,7 @@ namespace CapyIsland.UI
         /// </summary>
         void Update()
         {
+            KeepNameAboveKeyboard();
             if (_candle == null) return;
             float t = Time.unscaledTime;
             float flame = 0.65f * Mathf.PerlinNoise(t * 0.9f, 0.3f) + 0.35f * Mathf.PerlinNoise(t * 4.5f, 7.1f);
@@ -304,6 +305,7 @@ namespace CapyIsland.UI
         {
             IntroCutscene.Preload();   // the movie loads while you answer
             var panel = UiKit.Rect("Panel", _root);
+            _panel = panel;
             panel.anchorMin = new Vector2(0.06f, 0.06f);
             panel.anchorMax = new Vector2(0.94f, 0.5f);
             panel.offsetMin = panel.offsetMax = Vector2.zero;
@@ -323,6 +325,8 @@ namespace CapyIsland.UI
 
             Languages(panel);
             EasyReading(panel);
+            // Stepped aside while you type your name, so the name box can sit above the keyboard.
+            _asideWhileTyping = new[] { panel.GetChild(0).gameObject, panel.GetChild(1).gameObject, panel.GetChild(2).gameObject };   // the line, languages, Easy Reading
 
             _name = UiKit.Input(panel, "Name", "Your name", false, 110f);
             _name.characterLimit = PlayerProfile.MaxNameLength;
@@ -388,6 +392,37 @@ namespace CapyIsland.UI
                 Paint();
             });
             Paint();
+        }
+
+        RectTransform _panel;
+        GameObject[] _asideWhileTyping;
+        bool _typing;
+
+        /// <summary>
+        /// On a phone the keyboard rises over the bottom half of the screen, right where the name
+        /// box is. While you type, the questions above it step aside and the box moves up to sit
+        /// just above the keyboard; done typing, everything goes back.
+        /// </summary>
+        void KeepNameAboveKeyboard()
+        {
+            if (_name == null || _panel == null) return;
+            bool typing = _name.isFocused && (Application.isMobilePlatform || TouchScreenKeyboard.visible);
+            if (typing == _typing) return;
+            _typing = typing;
+            foreach (var g in _asideWhileTyping) if (g != null) g.SetActive(!typing);
+            float shift = 0f;
+            if (typing)
+            {
+                float height = _root.rect.height;
+                float keyboard = TouchScreenKeyboard.area.height > 1f ? TouchScreenKeyboard.area.height : Screen.height * 0.45f;
+                keyboard = keyboard / Mathf.Max(1f, Screen.height) * height;
+                // With the name box now first in the panel, lift the panel's top far enough that
+                // the box and the Continue button under it both clear the keyboard.
+                float top = height * 0.5f;
+                shift = Mathf.Max(0f, keyboard + 290f - top);
+            }
+            _panel.offsetMin = new Vector2(0f, shift);
+            _panel.offsetMax = new Vector2(0f, shift);
         }
 
         void Continue()

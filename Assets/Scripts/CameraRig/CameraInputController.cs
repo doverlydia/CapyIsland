@@ -10,13 +10,12 @@ namespace CapyIsland.CameraRig
     /// Three gestures, and they never compete for the same press:
     ///
     /// * press on an item — pick it up and drag it
-    /// * press on the ground and hold — the king walks toward your finger, tracking it as it moves
-    /// * quick tap on the ground — a tap, for bubbles and shops
+    /// * press on the ground and hold — the king walks toward your finger, tracking it as it moves;
+    ///   or, with the joystick on (Settings), a stick appears under the thumb and steers him
+    /// * quick tap — a bubble or shop takes it; on bare ground the king walks to that spot
     ///
-    /// Steering points at a destination rather than emulating a stick. A stick needs an origin the
-    /// player cannot see, so a press landing slightly off feels like it missed, and the further the
-    /// thumb travels the more the mapping drifts. Pointing has no origin to miss: the king goes
-    /// where you point, which is as accurate as your finger.
+    /// The joystick is a floating one: its centre is wherever the thumb landed, shown on screen,
+    /// and it is dragged along once the thumb pulls past its rim, so it never drifts out of reach.
     ///
     /// The camera follows the king, so there is no separate pan gesture to conflict with any of it.
     /// To carry something past the edge of the screen, drag it to the edge: the king walks that way
@@ -69,6 +68,20 @@ namespace CapyIsland.CameraRig
 
         bool _ignorePress;
         bool _pinching;
+
+        // The joystick: where its centre is, and whether it has shown yet (not for a mere tap).
+        bool _sticking, _stickShown;
+        Vector2 _stickCentre;
+        Game.PlayerAvatar _king;
+
+        /// <summary>The joystick's reach, in pixels: a comfortable thumb's travel.</summary>
+        static float StickRadius => Mathf.Min(Screen.width, Screen.height) * 0.11f;
+
+        /// <summary>
+        /// Seconds spent steering with the finger out near the screen edge (the reach the joystick
+        /// and tapping save you). A one-time tip mentions them once this adds up.
+        /// </summary>
+        public static float FarSteerSeconds { get; private set; }
         float _pinchStartDistance;
         float _pinchStartZoom;
 
@@ -92,6 +105,7 @@ namespace CapyIsland.CameraRig
                 _heldActor = null;
                 _pendingTap = null;
                 SteerTarget = null;
+                EndStick();
                 return;
             }
 
@@ -111,6 +125,7 @@ namespace CapyIsland.CameraRig
                 _pinching = true;
                 _pressing = false;
                 SteerTarget = null;
+                EndStick();
                 _pinchStartDistance = distance;
                 _pinchStartZoom = _rig.Zoom;
                 return;
@@ -175,6 +190,16 @@ namespace CapyIsland.CameraRig
                 _pendingTap = Game.TapTargets.Pick(world);
                 if (_pendingTap != null) { SteerTarget = null; return; }
 
+                // Joystick: its centre is where the thumb landed; it shows once the thumb moves.
+                if (Game.Controls.Joystick)
+                {
+                    _sticking = true;
+                    _stickShown = false;
+                    _stickCentre = screen;
+                    SteerTarget = null;
+                    return;
+                }
+
                 // Ground press: steer at once, so holding moves you without waiting for a drag.
                 SteerTarget = world;
                 return;
@@ -195,7 +220,12 @@ namespace CapyIsland.CameraRig
                     _heldActor.DragTo(world);
                     SteerTarget = EdgeWalk(screen);
                 }
-                else SteerTarget = world;   // track the finger
+                else if (_sticking) SteerTarget = Stick(screen);
+                else
+                {
+                    SteerTarget = world;   // track the finger
+                    if (NearEdge(screen)) FarSteerSeconds += Time.unscaledDeltaTime;
+                }
                 return;
             }
 
@@ -204,6 +234,7 @@ namespace CapyIsland.CameraRig
             {
                 _pressing = false;
                 SteerTarget = null;
+                EndStick();
                 if (_ignorePress) { _ignorePress = false; return; }
 
                 if (_pendingTap != null)
@@ -260,6 +291,45 @@ namespace CapyIsland.CameraRig
             float depth = Mathf.Clamp01(push.magnitude);
             float distance = steerDeadZone * (1.05f + 1.95f * Mathf.Max(0.35f, depth));
             return (Vector2)king.transform.position + push.normalized * distance;
+        }
+
+        /// <summary>
+        /// The joystick's steer target: off from the king in the stick's direction, at a distance
+        /// that turns how far the knob is pulled into his pace (he throttles over three dead zones).
+        /// </summary>
+        Vector2? Stick(Vector2 screen)
+        {
+            float radius = StickRadius;
+            var pull = screen - _stickCentre;
+            if (pull.magnitude > radius)
+            {
+                _stickCentre = screen - pull.normalized * radius;   // drag the ring along
+                pull = screen - _stickCentre;
+            }
+            if (!_movedBeyondSlop) return null;   // still might be a tap
+
+            if (!_stickShown) { UI.FloatingStick.Show(_stickCentre, radius); _stickShown = true; }
+            UI.FloatingStick.Move(_stickCentre, screen);
+
+            if (_king == null) _king = FindFirstObjectByType<Game.PlayerAvatar>();
+            if (_king == null) return null;
+            float depth = Mathf.Clamp01(pull.magnitude / radius);
+            if (depth < 0.15f) return null;
+            float distance = steerDeadZone * (1.05f + 1.95f * Mathf.InverseLerp(0.15f, 1f, depth));
+            return (Vector2)_king.transform.position + pull.normalized * distance;
+        }
+
+        void EndStick()
+        {
+            if (!_sticking) return;
+            _sticking = _stickShown = false;
+            UI.FloatingStick.Hide();
+        }
+
+        bool NearEdge(Vector2 screen)
+        {
+            float band = Mathf.Min(Screen.width, Screen.height) * edgeBand * 1.6f;
+            return screen.x < band || screen.x > Screen.width - band || screen.y < band || screen.y > Screen.height - band;
         }
 
         static bool ModalOpen => UI.TextReader.IsOpen || UI.HudTour.IsOpen || UI.SpeechDialog.IsOpen || UI.CardPopup.IsShowing || UI.PurchaseDialog.IsOpen || UI.UiScreen.AnyOpen;

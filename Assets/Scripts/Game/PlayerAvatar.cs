@@ -6,12 +6,12 @@ using UnityEngine;
 namespace CapyIsland.Game
 {
     /// <summary>
-    /// The king you control. Driven by the on-screen stick (or WASD / arrows on a keyboard), with
-    /// the camera trailing him as he moves.
+    /// The king you control, with the camera trailing him as he moves (WASD / arrows on a keyboard).
     ///
-    /// You hold anywhere on the ground and he walks toward your finger, tracking it as it moves.
-    /// That beats both tap-to-move (a beat of lag between intent and motion) and a virtual stick
-    /// (an invisible origin you can miss, and a mapping that drifts the further your thumb travels).
+    /// Tap a spot on the ground and he walks there. Hold on the ground and he walks toward your
+    /// finger, tracking it as it moves — or, with the joystick on (Settings), a floating stick
+    /// under your thumb steers him, so you never have to reach for the edge of the screen. See
+    /// <see cref="CameraInputController"/> for the gestures.
     /// </summary>
     public class PlayerAvatar : MonoBehaviour
     {
@@ -48,6 +48,10 @@ namespace CapyIsland.Game
         /// <summary>True while walking to a tapped arrow's target.</summary>
         public bool AutoWalking => _autoTarget.HasValue;
 
+        /// <summary>True while walking to a spot on the ground the player tapped (a short trip, no stop button).</summary>
+        public bool TapWalking => _autoTarget.HasValue && _tapWalk;
+        bool _tapWalk;
+
         /// <summary>
         /// Walks to <paramref name="target"/> on its own, stopping <paramref name="arrive"/> short
         /// of it. Any touch on the ground, a key, or picking something up takes control back; if
@@ -55,6 +59,7 @@ namespace CapyIsland.Game
         /// </summary>
         public void WalkTo(Vector2 target, float arrive = 1.6f)
         {
+            _tapWalk = false;
             // A route over land: round a bay, over a bridge — never straight into the sea.
             var land = LandMap.Instance;
             _route = land != null ? land.FindPath(transform.position, target) : new List<Vector2> { target };
@@ -129,6 +134,28 @@ namespace CapyIsland.Game
         {
             _rig = FindFirstObjectByType<ResponsiveCameraRig>();
             _input = _rig != null ? _rig.GetComponent<CameraInputController>() : null;
+            if (_input != null) _input.Tapped += OnGroundTapped;
+        }
+
+        void OnDisable()
+        {
+            if (_input != null) _input.Tapped -= OnGroundTapped;
+        }
+
+        /// <summary>
+        /// A quick tap on bare ground: walk there, whichever way you like to steer. A tap on the sea
+        /// is just a tap; land you can't reach yet says so.
+        /// </summary>
+        void OnGroundTapped(Vector2 world)
+        {
+            if (!BunniSpace.PointOnLand(world)) return;
+            if (Vector2.Distance(transform.position, world) < 0.5f) return;
+            var land = LandMap.Instance;
+            if (land != null && !land.Reachable(transform.position, world)) { Hints.Show(Unreachable); return; }
+            WalkTo(world, 0.15f);
+            if (!_autoTarget.HasValue) return;
+            _tapWalk = true;
+            WalkMarker.Show(world);
         }
 
         void Update()

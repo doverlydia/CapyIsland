@@ -25,6 +25,7 @@ namespace CapyIsland.UI
         RectTransform _list;
         ScrollRect _scroll;
         string _banner;
+        bool _allGoals;   // the whole to-do list, rather than the next few
 
         void Awake() => Instance = this;
 
@@ -39,6 +40,7 @@ namespace CapyIsland.UI
             if (Instance == null) { onClosed?.Invoke(); return; }
             Instance._tab = tab;
             Instance._banner = banner;
+            Instance._allGoals = false;
             Instance.Open(onClosed);
         }
 
@@ -180,6 +182,8 @@ namespace CapyIsland.UI
 
         // ---------------------------------------------------------------- achievements
 
+        const int NextFew = 3;
+
         void BuildAchievements()
         {
             var all = Objectives.AllAchievements();
@@ -194,15 +198,23 @@ namespace CapyIsland.UI
             var fill = UiKit.ProgressBar(col, "Progress", UiKit.Leaf, 26f);
             UiKit.SetProgress(fill, all.Count > 0 ? (float)done / all.Count : 0f);
 
+            // The next few, not all at once: a new island facing forty goals doesn't know where to start.
             SectionLabel(_list, "To do");
             int todo = 0;
             foreach (var a in all)
             {
                 if (a.Done) continue;
                 todo++;
+                if (!_allGoals && todo > NextFew) continue;
                 Row(IconPainter.Heart, UiKit.SurfaceSunk, a.Def.Title, a.Goal, null, default, null, iconTint: UiKit.InkSoft, reward: RewardOf(a.Def));
             }
             if (todo == 0) Empty("You've done everything. The island is whole again!");
+            else if (!_allGoals && todo > NextFew)
+            {
+                var more = UiKit.Button(_list, "AllGoals", "Show all " + todo + " goals", UiKit.ButtonStyle.Secondary,
+                    () => { _allGoals = true; Refresh(); }, 32f);
+                more.gameObject.AddComponent<LayoutElement>().preferredHeight = 88f;
+            }
 
             if (done > 0) SectionLabel(_list, "Complete");
             foreach (var a in all)

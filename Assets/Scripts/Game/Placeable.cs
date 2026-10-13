@@ -103,7 +103,20 @@ namespace CapyIsland.Game
         /// The original's placement test (CircleOnMap): the footprint must be on land and clear of
         /// every other item's footprint — buildings, planted groves and every tree and flower in them.
         /// </summary>
-        public bool CanPlaceAt(Vector2 position) => BunniSpace.CircleOnMap(position, innerRadius, this);
+        public bool CanPlaceAt(Vector2 position) => InZone(position) && BunniSpace.CircleOnMap(position, innerRadius, this);
+
+        /// <summary>
+        /// For one step of the opening: <see cref="ZoneFor"/> may only be planted inside this circle
+        /// (the tutorial's garden, right by the sleepy capybara). Outside it the circle under the
+        /// item shows red, as for any other spot it can't go.
+        /// </summary>
+        public static Placeable ZoneFor;
+        public static Vector2 ZoneCentre;
+        /// <summary>The zone's radius, in original world units (an ellipse on screen, like every circle here).</summary>
+        public static float ZoneRadius;
+
+        bool InZone(Vector2 position) =>
+            ZoneFor != this || BunniSpace.WorldDistance(position, ZoneCentre) <= ZoneRadius;
 
         /// <summary>
         /// Dropped by the player. Plants it if the spot is clear; otherwise it goes back into the
@@ -131,7 +144,9 @@ namespace CapyIsland.Game
             if (CanPlaceAt(transform.position)) { MarkPlaced(); return; }
 
             // Blocked: say why, rather than let it look as if the drop was ignored.
-            Hints.Show(BunniSpace.PointOnLand(transform.position)
+            if (!InZone(transform.position))
+                Hints.Show("Plant it inside the glowing circle, right next to the sleepy capybara.");
+            else Hints.Show(BunniSpace.PointOnLand(transform.position)
                 ? "Not enough room there. Drop it where the circle turns green."
                 : "That's water! Things can only be planted on land.");
 

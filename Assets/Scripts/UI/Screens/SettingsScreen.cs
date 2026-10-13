@@ -151,6 +151,13 @@ namespace CapyIsland.UI
             var arrows = Row(list, IconPainter.Arrow, "Names on edge arrows");
             Toggle(arrows, () => ArrowLabels, v => ArrowLabels = v);
 
+            // ---- Walking: a stick under the thumb for those who'd rather not reach across the screen.
+            var stick = Row(list, IconPainter.Paw, "Walk with a joystick");
+            Toggle(stick, () => Controls.Joystick, v => Controls.Joystick = v);
+            var stickNote = UiKit.Text(list, "StickNote", "Either way, tap any spot to walk there.", 28f, UiKit.InkSoft);
+            stickNote.overflowMode = TextOverflowModes.Overflow;
+            stickNote.margin = new Vector4(16f, -6f, 16f, 0f);
+
             // ---- Teaching on or off ("End tutorial" switches it off; this brings it back).
             var guide = Row(list, IconPainter.Book, "Tutorial and tips");
             Toggle(guide, () => !Guidance.Off, v => Guidance.Off = !v);

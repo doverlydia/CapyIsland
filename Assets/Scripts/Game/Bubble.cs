@@ -149,12 +149,14 @@ namespace CapyIsland.Game
             if (_bornAt < 0f) _bornAt = Time.time;
             if (!_nudged && Time.time - _bornAt > 30f && contents != null)
             {
-                var tutorial = FindFirstObjectByType<TutorialDirector>();
-                if (tutorial == null || tutorial.Finished)
+                if (!Attention.TutorialRunning)
                 {
                     _nudged = true;
                     var tag = contents.GetComponent<CatalogItem>();
-                    Hints.Show("You found a free <b>" + (tag != null ? StoryText.Name(tag.StoreName) : contents.name) + "</b>! Tap the bubble to pick it up.");
+                    string line = "You found a free <b>" + (tag != null ? StoryText.Name(tag.StoreName) : contents.name) + "</b>! Tap the bubble to pick it up.";
+                    // Waits its turn, and is dropped unsaid if the bubble is popped first.
+                    bool StillHere() => this != null && !_taken;
+                    Attention.Ask("nudge:" + GetInstanceID(), () => Hints.Show(line, StillHere), StillHere);
                 }
             }
 

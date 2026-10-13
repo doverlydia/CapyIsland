@@ -379,3 +379,14 @@
 
 @ Today's present is waiting for you.
 = המתנה של היום מחכה לך.
+
+# ---------------------------------------------------------------- goals after the opening
+
+@ Pop the bubble to meet {0}
+= פוצץ את הבועה כדי להכיר את {0}
+
+@ Drag {0} onto the grass to settle in
+= גרור את {0} אל הדשא, אל הבית החדש
+
+@ Show all {0} goals
+= הצג את כל {0} המטרות

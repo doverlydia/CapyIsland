@@ -15,11 +15,11 @@ namespace CapyIsland.UI
     /// Next move through the pages; "End tutorial" switches every tip (and Old Yuzu's step-by-step
     /// lines) off for good — Settings can switch them back, and replay the whole tour.
     ///
-    /// The first launch shows only two pages: language and Easy Reading, and how to walk. Every other
-    /// page is a one-page tip that waits for the moment it is useful (see <see cref="TipTriggers"/>):
-    /// the placing tip when the first thing joins your trail, the arrows the first time one appears,
-    /// the map when the first bridge opens… Each tip shows once. Settings → Show me around plays
-    /// every page in a row.
+    /// The game teaches by doing, so most of these never come by themselves: a page turns up only
+    /// when the thing it explains first matters to you (see <see cref="TipTriggers"/>) — the menu
+    /// after your first outfit, Friends when the first visitor lands — and only once the opening is
+    /// over and <see cref="Attention"/> says the screen is free. Each tip shows once. Settings →
+    /// Show me around plays every page in a row.
     ///
     /// Never while visiting someone else's island.
     /// </summary>
@@ -31,7 +31,14 @@ namespace CapyIsland.UI
         /// <summary>Has this page been shown (as a tip or in a tour)?</summary>
         public static bool Seen(string id) => PlayerPrefs.GetInt(SeenKey, 0) == 1 || PlayerPrefs.GetInt(TipKey + id, 0) == 1;
 
-        static readonly string[] AllIds = { "welcome", "goals", "arrows", "placing", "menu", "map", "gifts", "friends", "events", "profile", "clock", "hello", "help" };
+        /// <summary>Counts a page as seen when its subject was explained some other way (a card on first use).</summary>
+        public static void MarkSeen(string id)
+        {
+            PlayerPrefs.SetInt(TipKey + id, 1);
+            PlayerPrefs.Save();
+        }
+
+        static readonly string[] AllIds = { "welcome", "goals", "arrows", "menu", "map", "gifts", "friends", "events", "profile", "clock", "hello", "help", "walk" };
 
         /// <summary>
         /// Forgets every tip and the tour, and switches the tutorial back on (Start over): a fresh
@@ -50,9 +57,6 @@ namespace CapyIsland.UI
 
         static readonly List<string[]> _tips = new();
 
-        /// <summary>Tips that matter right now: they skip the line and the breather.</summary>
-        static bool Urgent(string[] tip) => System.Array.IndexOf(tip, "placing") >= 0;
-
         /// <summary>
         /// Asks for a tip (one or more pages, by id). Pages already seen are dropped; the rest wait
         /// in line until nothing else is on screen (<see cref="Pump"/>).
@@ -64,8 +68,7 @@ namespace CapyIsland.UI
             foreach (var id in ids) if (!Seen(id) && !Showing(id)) fresh.Add(id);
             if (fresh.Count == 0) return;
             foreach (var queued in _tips) if (queued[0] == fresh[0]) return;
-            if (Urgent(ids)) _tips.Insert(0, fresh.ToArray());
-            else _tips.Add(fresh.ToArray());
+            _tips.Add(fresh.ToArray());
         }
 
         /// <summary>Nothing else is on screen, so a tip may show.</summary>
@@ -81,8 +84,9 @@ namespace CapyIsland.UI
         /// <summary>Shows the next waiting tip, if the moment is right. Called by TipTriggers.</summary>
         public static void Pump()
         {
-            if (_tips.Count == 0 || !Quiet) return;
-            if (Time.unscaledTime < _restUntil && !Urgent(_tips[0])) return;
+            if (_tips.Count == 0 || !Quiet || Guidance.Off) return;
+            // The gatekeeper's rules: never during the opening, and a calm moment first.
+            if (!Attention.Free(4f) || Time.unscaledTime < _restUntil) return;
             var next = _tips[0];
             _tips.RemoveAt(0);
             // Drop pages that were seen while this tip waited (the full tour, say).
@@ -233,9 +237,14 @@ namespace CapyIsland.UI
             Sfx.Play(SfxKind.Tap, 0.4f);
         }
 
+        Canvas _canvas;
+
         void Update()
         {
             if (!_open) return;
+            // A movie that starts while a card is up plays on its own: the card steps aside until it ends.
+            if (_canvas != null) _canvas.enabled = !Cutscene.Playing;
+            if (Cutscene.Playing) return;
             if (Input.GetKeyDown(KeyCode.Escape) && !TextReader.IsOpen) { Finish(); return; }
             // Pressed the highlighted thing itself: the tip has done its job; the press goes through.
             if (_holeScreen.width > 0f && Input.GetMouseButtonDown(0) && _holeScreen.Contains(Input.mousePosition)) { Finish(); return; }
@@ -275,13 +284,6 @@ namespace CapyIsland.UI
                 Target = () => ScreenRect(EdgeIndicators.FirstShown),
                 Optional = true,
                 Extra = BuildArrowLegend,
-            });
-            _steps.Add(new Step
-            {
-                Id = "placing",
-                Title = "Placing things",
-                Body = "Things you collect follow you in a line. Drag one onto the ground to place it.\nWhile you drag, a circle shows the space it needs:",
-                Extra = BuildPlacingDiagram,
             });
             _steps.Add(new Step
             {
@@ -454,53 +456,6 @@ namespace CapyIsland.UI
             }
         }
 
-        void BuildPlacingDiagram(RectTransform parent)
-        {
-            var row = UiKit.Rect("Circles", parent);
-            var h = row.gameObject.AddComponent<HorizontalLayoutGroup>();
-            h.spacing = 24f;
-            h.childControlWidth = h.childControlHeight = true;
-            h.childForceExpandWidth = true;
-            h.childForceExpandHeight = false;
-            RtlLayout.Add(h);
-            var icon = ItemCatalog.Instance != null ? ItemCatalog.Instance.Icon("Small Pine Forest") : null;
-            Example(row, PlacementPreview.ClearColour, IconPainter.Check, "Green: you can let go here", icon);
-            Example(row, PlacementPreview.BlockedColour, IconPainter.Close, "Red: something is in the way", icon);
-
-            var edge = UiKit.Text(parent, "Edge",
-                "Want to put it further away? Drag it to the edge of the screen and your capybara walks that way.", 30f, UiKit.Ink);
-            edge.overflowMode = TextOverflowModes.Overflow;
-        }
-
-        static void Example(RectTransform parent, Color colour, Sprite mark, string caption, Sprite item)
-        {
-            var cell = UiKit.Rect("Example", parent);
-            var v = cell.gameObject.AddComponent<VerticalLayoutGroup>();
-            v.spacing = 8f;
-            v.childAlignment = TextAnchor.UpperCenter;
-            v.childControlWidth = v.childControlHeight = true;
-            v.childForceExpandWidth = true;
-            v.childForceExpandHeight = false;
-
-            var picture = UiKit.Rect("Picture", cell);
-            picture.gameObject.AddComponent<LayoutElement>().preferredHeight = 150f;
-            var ring = UiKit.Image(picture, "Circle", UiKit.Circle, new Color(colour.r, colour.g, colour.b, 0.55f));
-            UiKit.Place(ring.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, 6f), new Vector2(220f, 110f));
-            if (item != null)
-            {
-                var pic = UiKit.Image(picture, "Item", item, Color.white);
-                pic.preserveAspect = true;
-                UiKit.Place(pic.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, 40f), new Vector2(105f, 105f));
-            }
-            var badge = UiKit.Image(picture, "Badge", UiKit.Circle, new Color(colour.r, colour.g, colour.b, 1f));
-            UiKit.Place(badge.rectTransform, new Vector2(0.5f, 0f), new Vector2(92f, 34f), new Vector2(56f, 56f));
-            var m = UiKit.Image(badge.transform, "Mark", mark, Color.white);
-            UiKit.Stretch(m.rectTransform, 12f, 12f, 12f, 12f);
-
-            var t = UiKit.Text(cell, "Caption", caption, 28f, UiKit.Ink, true, TextAlignmentOptions.Top);
-            t.overflowMode = TextOverflowModes.Overflow;
-        }
-
         // ---------------------------------------------------------------- building
 
         void Build()
@@ -511,6 +466,7 @@ namespace CapyIsland.UI
             canvasGo.layer = 5;
             canvasGo.transform.SetParent(transform, false);
             var canvas = canvasGo.GetComponent<Canvas>();
+            _canvas = canvas;
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.sortingOrder = 29000;   // over everything but the reader, so the tour can be read big too
             var scaler = canvasGo.GetComponent<CanvasScaler>();

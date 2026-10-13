@@ -245,6 +245,7 @@ namespace CapyIsland.Game
 
         void Update()
         {
+            ShowHungerThought();
             if (_state == State.Following || _workplace == null) return;
 
             int frames = _clock.Consume(Time.deltaTime);
@@ -258,6 +259,30 @@ namespace CapyIsland.Game
                     case State.TakeWoodToMill: TickTakeWoodToMill(); break;
                 }
             }
+        }
+
+        // ---------------------------------------------------------------- the hungry dream
+
+        WorldBubble _thought;
+
+        /// <summary>
+        /// Asleep because it's hungry: a little garden in a thought bubble over its head, so you
+        /// can see at a glance what it needs. Tap it and Old Yuzu says so in words.
+        /// </summary>
+        void ShowHungerThought()
+        {
+            bool dreaming = _asleep && _hungry && _workplace != null;
+            if (dreaming == (_thought != null)) return;
+            if (!dreaming) { _thought.Pop(); _thought = null; return; }
+            var catalog = ItemCatalog.Instance;
+            var flowers = catalog != null ? catalog.Icon("Medium Posie Garden") : null;
+            _thought = WorldBubble.Show(transform, flowers, 1.5f, () =>
+                Hints.Show("This capybara is too hungry to work. Plant a garden near its workplace and it will wake up for a snack."));
+        }
+
+        void OnDisable()
+        {
+            if (_thought != null) { _thought.Pop(); _thought = null; }
         }
 
         // ---------------------------------------------------------------- hunger
@@ -363,13 +388,25 @@ namespace CapyIsland.Game
 
         void RaiseDreamHint()
         {
+            // The opening explains its own first hungry nap, with a movie and Old Yuzu.
+            if (Attention.TutorialRunning) return;
             string who = "A " + StoryText.Name(speciesName);
-            if (_hungry)
+            if (_hungry && !AnyFlowers())
+                Hints.Show(who + " is hungry and fell asleep. There's no garden to eat from: plant one near its workplace.");
+            else if (_hungry)
                 Hints.Show(who + " ate the last flower in the garden. Plant bigger gardens for your hungry workers.");
             else if (_workplace.Accepts == ResourceKind.Wood)
                 Hints.Show(who + " chopped down the last tree in a forest. Too many workers on one forest will strip it bare.");
             else
                 Hints.Show(who + " dug out the last rock in a hill. With no rocks in reach, the mine will close.");
+        }
+
+        /// <summary>Is any garden planted on the island at all (eaten bare or not)?</summary>
+        static bool AnyFlowers()
+        {
+            foreach (var node in FindObjectsByType<Harvestable>(FindObjectsSortMode.None))
+                if (node.InWorld && node.Family == NodeFamily.Flower) return true;
+            return false;
         }
 
         // ---------------------------------------------------------------- GetWood

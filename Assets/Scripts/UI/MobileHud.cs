@@ -77,14 +77,20 @@ namespace CapyIsland.UI
             if (Instance == this) Instance = null;
         }
 
+        /// <summary>
+        /// A new outfit waits its turn (never during the opening), and the first one is followed by
+        /// a word about the menu, where the wardrobe lives.
+        /// </summary>
         static void AnnounceOutfit(WearItem item) =>
-            CardPopup.Show("New outfit!", "<b>" + item.Name + "</b> is waiting for you in the Wardrobe.", Wardrobe.Art(item));
+            Attention.Ask("outfit:" + item.Id, () =>
+                CardPopup.Show("New outfit!", "<b>" + item.Name + "</b> is waiting for you in the Wardrobe.", Wardrobe.Art(item),
+                    () => HudTour.Tip("menu")));
 
         GameObject _giftDot, _eventsDot;
 
         /// <summary>
-        /// The daily gift opens by itself once a session, as soon as the island is yours (after the
-        /// tutorial) and nothing else is on screen.
+        /// A contest that ended while you were away: how you did, once, when the screen is free.
+        /// (The daily gift no longer opens by itself — its red dot says it's there.)
         /// </summary>
         IEnumerator Start()
         {
@@ -92,15 +98,10 @@ namespace CapyIsland.UI
             while (true)
             {
                 yield return new WaitForSecondsRealtime(1.5f);
-                var tutorial = TutorialDirector.Instance;
-                if (tutorial != null && !tutorial.Finished) continue;
-                if (Visit.Active || Visit.Travelling) yield break;   // gifts wait until you are home
-                if (UiScreen.AnyOpen || SpeechDialog.IsOpen || CardPopup.IsShowing || PurchaseDialog.IsOpen) continue;
-                if (HudTour.IsOpen || TextReader.IsOpen) continue;
-                // A contest that ended while you were away: how you did, once.
+                if (Attention.TutorialRunning) continue;
+                if (Visit.Active || Visit.Travelling) yield break;   // results wait until you are home
                 var result = GameEvents.TakeResult();
-                if (result != null) { EventsScreen.ShowResult(result); continue; }
-                if (DailyGifts.CanClaim && DailyGiftScreen.Instance != null) DailyGiftScreen.Instance.Open();
+                if (result != null) Attention.Ask("contest", () => EventsScreen.ShowResult(result));
                 yield break;
             }
         }
@@ -110,14 +111,19 @@ namespace CapyIsland.UI
 
         void Update()
         {
+            Attention.Tick();
             if (_stopWalking != null)
             {
                 if (_king == null) _king = FindFirstObjectByType<PlayerAvatar>();
-                bool walking = _king != null && _king.AutoWalking && !UiScreen.AnyOpen;
+                // A short walk to a tapped spot needs no stop button; a long trip somewhere does.
+                bool walking = _king != null && _king.AutoWalking && !_king.TapWalking && !UiScreen.AnyOpen;
                 if (_stopWalking.activeSelf != walking) _stopWalking.SetActive(walking);
             }
-            if (_giftDot != null && _giftDot.activeSelf != DailyGifts.CanClaim) _giftDot.SetActive(DailyGifts.CanClaim);
-            if (_eventsDot != null && Time.frameCount % 30 == 0) _eventsDot.SetActive(GameEvents.NeedsAttention);
+            // No red dots while Old Yuzu is still showing you round: one thing at a time.
+            bool calm = !Attention.TutorialRunning;
+            bool gift = calm && DailyGifts.CanClaim;
+            if (_giftDot != null && _giftDot.activeSelf != gift) _giftDot.SetActive(gift);
+            if (_eventsDot != null && Time.frameCount % 30 == 0) _eventsDot.SetActive(calm && GameEvents.NeedsAttention);
             if (_addFriend != null && _addFriend.activeSelf != (Visit.Active && !Visit.HostIsFriend))
                 _addFriend.SetActive(Visit.Active && !Visit.HostIsFriend);
         }

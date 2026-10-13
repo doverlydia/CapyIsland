@@ -259,9 +259,17 @@ namespace CapyIsland.Game
             { "Monster House", new[] { "Walks and works twice as fast as a capybara.", "Digs bronze, silver and gold 4 times quicker." } },
         };
 
-        /// <summary>The worker lines for an item's buy panel, or "" when it brings no worker.</summary>
+        /// <summary>The worker each house sells beside it, whose buy panel shows the same lines.</summary>
+        static readonly Dictionary<string, string> HomeOf = new()
+        {
+            { "Capybara", "Capy House" }, { "Fox", "Fox House" }, { "Panda", "Panda House" },
+            { "Pirate", "Pirate House" }, { "Monster", "Monster House" },
+        };
+
+        /// <summary>The worker lines for an item's buy panel (a home or the worker itself), or "" when it brings no worker.</summary>
         public static string WorkerStrengths(string id)
         {
+            if (!string.IsNullOrEmpty(id) && HomeOf.TryGetValue(id, out var home)) id = home;
             if (string.IsNullOrEmpty(id) || !Strengths.TryGetValue(id, out var lines)) return "";
             return "<b>As a worker</b>\n" + string.Join("\n", lines);
         }

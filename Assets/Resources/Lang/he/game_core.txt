@@ -89,8 +89,8 @@
 @ Tap the bubble to collect the daisy garden.
 = הקש על הבועה כדי לאסוף את גינת החינניות.
 
-@ Plant the garden close to the sleepy capybara so it can reach the flowers.
-= שתול את הגינה קרוב לקפיברה המנומנמת, כדי שתוכל להגיע לפרחים.
+@ Plant the garden inside the glowing circle, right by the sleepy capybara, so it can reach the flowers.
+= שתול את הגינה בתוך העיגול הזוהר, ממש ליד הקפיברה המנומנמת, כדי שתוכל להגיע לפרחים.
 
 @ Oh! A warm heart! All your building is waking the island up. The spirits can feel it.
 = אוי! לב חם! כל מה שאתה בונה מעורר את האי. הרוחות מרגישות את זה.
@@ -98,8 +98,8 @@
 @ That glowing heart following you is a warm heart. Tap it to send it home.
 = הלב הזוהר שהולך אחריך הוא לב חם. הקש עליו כדי לשלוח אותו הביתה.
 
-@ Wonderful! A bridge has risen to the next island. Hold your finger down to walk your capybara across.
-= נפלא! גשר עלה אל האי הבא. החזק את האצבע על המסך כדי ללכת עם הקפיברה שלך לצד השני.
+@ Wonderful! A bridge has risen to the next island. Tap where the hand points and your capybara walks across.
+= נפלא! גשר עלה אל האי הבא. הקש איפה שהיד מצביעה, והקפיברה שלך תלך לצד השני.
 
 @ Ah... this is the heart of the Capy Isles. The old hot spring is here somewhere.
 = אה... זה הלב של איי הקפיברות. המעיין החם הישן נמצא כאן איפשהו.
@@ -528,3 +528,17 @@
 
 @ A wish on a shooting star! +{0} gold
 = משאלה על כוכב נופל! +{0} זהב
+
+# ---------------------------------------------------------------- the calmer opening
+
+@ A {0} is hungry and fell asleep. There's no garden to eat from: plant one near its workplace.
+= {0} רעבה ונרדמה. אין גינה לאכול ממנה: שתול גינה ליד מקום העבודה שלה.
+
+@ This capybara is too hungry to work. Plant a garden near its workplace and it will wake up for a snack.
+= הקפיברה הזאת רעבה מכדי לעבוד. שתול גינה ליד מקום העבודה שלה, והיא תתעורר לנשנש.
+
+@ Plant it inside the glowing circle, right next to the sleepy capybara.
+= שתול אותה בתוך העיגול הזוהר, ממש ליד הקפיברה המנומנמת.
+
+@ Tip: you don't have to reach. Tap any spot to walk there, or switch on the joystick in Settings.
+= טיפ: לא צריך להגיע רחוק. הקש על כל מקום כדי ללכת אליו, או הפעל את הג'ויסטיק בהגדרות.

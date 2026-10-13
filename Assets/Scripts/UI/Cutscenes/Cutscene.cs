@@ -109,11 +109,11 @@ namespace CapyIsland.UI
         /// </summary>
         protected virtual bool ReaderPaced => false;
 
-        bool _waiting, _advance;
+        bool _advance;
 
         /// <summary>
         /// Holds the story until the line on screen has been read: a Next button bobs beside the
-        /// caption, and a tap on it (or anywhere on the picture) carries on. The scene keeps living
+        /// caption, and a tap on it (only on it — a stray tap must not turn the page) carries on. The scene keeps living
         /// meanwhile — steam, snow and bobbing go on.
         /// </summary>
         protected IEnumerator Next()
@@ -139,9 +139,7 @@ namespace CapyIsland.UI
             Track(group.DOFade(1f, 0.35f).SetUpdate(true));
             Track(r.DOAnchorPosY(r.anchoredPosition.y + 10f, 0.7f).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine).SetUpdate(true));
             _advance = false;
-            _waiting = true;
             while (!_advance && !_ending) yield return null;
-            _waiting = false;
             if (r != null) { DOTween.Kill(r); DOTween.Kill(group); Destroy(r.gameObject); }
             if (!_ending) Sfx.Play(SfxKind.Tap, 0.5f);
         }
@@ -458,7 +456,9 @@ namespace CapyIsland.UI
 
         public void OnPointerClick(PointerEventData e)
         {
-            if (ReaderPaced) { if (_waiting) _advance = true; return; }
+            // A story read at your own pace moves on only with its Next button: a stray tap or
+            // swipe on the picture must not turn the page before you've read it.
+            if (ReaderPaced) return;
             Skip();
         }
 
