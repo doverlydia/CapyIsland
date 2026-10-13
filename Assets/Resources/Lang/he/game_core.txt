@@ -89,8 +89,8 @@
 @ Tap the bubble to collect the daisy garden.
 = הקש על הבועה כדי לאסוף את גינת החינניות.
 
-@ Plant the garden inside the glowing circle, right by the sleepy capybara, so it can reach the flowers.
-= שתול את הגינה בתוך העיגול הזוהר, ממש ליד הקפיברה המנומנמת, כדי שתוכל להגיע לפרחים.
+@ Plant the garden close to the sleepy capybara so it can reach the flowers.
+= שתול את הגינה קרוב לקפיברה המנומנמת, כדי שתוכל להגיע לפרחים.
 
 @ Oh! A warm heart! All your building is waking the island up. The spirits can feel it.
 = אוי! לב חם! כל מה שאתה בונה מעורר את האי. הרוחות מרגישות את זה.
@@ -537,8 +537,8 @@
 @ This capybara is too hungry to work. Plant a garden near its workplace and it will wake up for a snack.
 = הקפיברה הזאת רעבה מכדי לעבוד. שתול גינה ליד מקום העבודה שלה, והיא תתעורר לנשנש.
 
-@ Plant it inside the glowing circle, right next to the sleepy capybara.
-= שתול אותה בתוך העיגול הזוהר, ממש ליד הקפיברה המנומנמת.
+@ That's too far from the sleepy capybara. Plant the garden closer, so it can reach the flowers.
+= זה רחוק מדי מהקפיברה המנומנמת. שתול את הגינה קרוב יותר, כדי שתוכל להגיע לפרחים.
 
 @ Tip: you don't have to reach. Tap any spot to walk there, or switch on the joystick in Settings.
 = טיפ: לא צריך להגיע רחוק. הקש על כל מקום כדי ללכת אליו, או הפעל את הג'ויסטיק בהגדרות.

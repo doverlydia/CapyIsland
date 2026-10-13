@@ -107,8 +107,8 @@ namespace CapyIsland.Game
 
         /// <summary>
         /// For one step of the opening: <see cref="ZoneFor"/> may only be planted inside this circle
-        /// (the tutorial's garden, right by the sleepy capybara). Outside it the circle under the
-        /// item shows red, as for any other spot it can't go.
+        /// (the tutorial's garden, near the sleepy capybara). Outside it the ring under the item
+        /// shows red, as for any other spot it can't go.
         /// </summary>
         public static Placeable ZoneFor;
         public static Vector2 ZoneCentre;
@@ -145,7 +145,7 @@ namespace CapyIsland.Game
 
             // Blocked: say why, rather than let it look as if the drop was ignored.
             if (!InZone(transform.position))
-                Hints.Show("Plant it inside the glowing circle, right next to the sleepy capybara.");
+                Hints.Show("That's too far from the sleepy capybara. Plant the garden closer, so it can reach the flowers.");
             else Hints.Show(BunniSpace.PointOnLand(transform.position)
                 ? "Not enough room there. Drop it where the circle turns green."
                 : "That's water! Things can only be planted on land.");

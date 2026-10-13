@@ -51,6 +51,35 @@ namespace CapyIsland.Game
             return b;
         }
 
+        bool _dream;
+        Vector3 _rest;
+
+        /// <summary>
+        /// A dream: a thought bubble well above a sleeper's head, a little see-through, with two
+        /// small dots trailing down to it instead of a speech tail, drifting and swaying gently.
+        /// The height is measured from the top of whoever it floats over.
+        /// </summary>
+        public static WorldBubble Thought(Transform over, Sprite icon, float above, System.Action onTap = null)
+        {
+            var body = over.GetComponentInChildren<SpriteRenderer>();
+            float top = body != null ? body.bounds.max.y - over.position.y : 1f;
+            var b = Show(over, icon, top + above, onTap);
+            b._dream = true;
+            b._rest = Vector3.one * 0.9f / Mathf.Max(0.01f, UI.UiKit.Circle.bounds.size.x);
+            b._disc.color = new Color(1f, 1f, 1f, 0.78f);
+            b._icon.color = new Color(1f, 1f, 1f, 0.9f);
+            // The speech tail becomes two little thought dots, getting smaller toward the head.
+            var tail = b.transform.Find("Tail").GetComponent<SpriteRenderer>();
+            tail.color = new Color(1f, 1f, 1f, 0.7f);
+            tail.transform.localScale = Vector3.one * 0.26f;
+            tail.transform.localPosition = new Vector3(-0.28f, -0.68f, 0f) * UI.UiKit.Circle.bounds.size.x;
+            var dot = Object.Instantiate(tail.gameObject, b.transform).GetComponent<SpriteRenderer>();
+            dot.name = "Dot";
+            dot.transform.localScale = Vector3.one * 0.15f;
+            dot.transform.localPosition = new Vector3(-0.42f, -0.98f, 0f) * UI.UiKit.Circle.bounds.size.x;
+            return b;
+        }
+
         public void SetIcon(Sprite icon, Color? tint = null)
         {
             _icon.sprite = icon;
@@ -71,6 +100,16 @@ namespace CapyIsland.Game
         void LateUpdate()
         {
             if (_over == null) { Destroy(gameObject); return; }
+            if (_dream)
+            {
+                // Slow and dreamy: a lazy float, a little sway, and a breath, once it has popped in.
+                float t = Time.time + _phase;
+                transform.position = Anchor() + new Vector3(Mathf.Sin(t * 0.9f) * 0.06f, Mathf.Sin(t * 1.5f) * 0.12f, 0f);
+                transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Sin(t * 1.1f) * 5f);
+                if (!DG.Tweening.DOTween.IsTweening(transform))
+                    transform.localScale = _rest * (1f + 0.05f * Mathf.Sin(t * 2.2f));
+                return;
+            }
             transform.position = Anchor() + Vector3.up * Mathf.Sin(Time.time * 2.4f + _phase) * 0.08f;
         }
 

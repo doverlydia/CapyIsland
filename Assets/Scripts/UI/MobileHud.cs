@@ -86,7 +86,7 @@ namespace CapyIsland.UI
                 CardPopup.Show("New outfit!", "<b>" + item.Name + "</b> is waiting for you in the Wardrobe.", Wardrobe.Art(item),
                     () => HudTour.Tip("menu")));
 
-        GameObject _giftDot, _eventsDot;
+        GameObject _giftDot, _eventsDot, _menuDot;
 
         /// <summary>
         /// A contest that ended while you were away: how you did, once, when the screen is free.
@@ -124,6 +124,7 @@ namespace CapyIsland.UI
             bool gift = calm && DailyGifts.CanClaim;
             if (_giftDot != null && _giftDot.activeSelf != gift) _giftDot.SetActive(gift);
             if (_eventsDot != null && Time.frameCount % 30 == 0) _eventsDot.SetActive(calm && GameEvents.NeedsAttention);
+            if (_menuDot != null && Time.frameCount % 15 == 0) _menuDot.SetActive(calm && HudTour.Wants("menu"));
             if (_addFriend != null && _addFriend.activeSelf != (Visit.Active && !Visit.HostIsFriend))
                 _addFriend.SetActive(Visit.Active && !Visit.HostIsFriend);
         }
@@ -185,7 +186,7 @@ namespace CapyIsland.UI
             var side = UiKit.Rect("SideButtons", _safe);
             side.anchorMin = side.anchorMax = side.pivot = new Vector2(1f, 1f);
             side.anchoredPosition = new Vector2(-16f, -102f);
-            side.sizeDelta = new Vector2(120f, 700f);
+            side.sizeDelta = new Vector2(120f, 860f);
             side.SetSiblingIndex(afterBar + 2);
             var v = side.gameObject.AddComponent<VerticalLayoutGroup>();
             v.spacing = 14f;
@@ -230,7 +231,12 @@ namespace CapyIsland.UI
             menu.AddEntry("Friends", IconPainter.Plane, UiKit.Hex("5B9BD5"), () => friends.Open());
             menu.AddEntry("Settings", IconPainter.Gear, UiKit.Hex("6B8FA8"), () => settings.Open());
 
-            UiKit.RoundButton(side, "Menu", IconPainter.Menu, "Menu", UiKit.Primary, () => menu.Open());
+            var menuButton = UiKit.RoundButton(side, "Menu", IconPainter.Menu, "Menu", UiKit.Primary, () => menu.Open());
+            // Something in the menu still to be shown to you: a dot until you look.
+            var mdot = UiKit.Image(menuButton.transform, "Dot", UiKit.Circle, UiKit.Danger);
+            UiKit.Place(mdot.rectTransform, new Vector2(1f, 1f), new Vector2(2f, 2f), new Vector2(34f, 34f));
+            _menuDot = mdot.gameObject;
+            _menuDot.SetActive(false);
             UiKit.RoundButton(side, "Map", IconPainter.Map, "Map", UiKit.Spring, () => map.Open());
             if (Visit.Active)
             {
@@ -256,6 +262,8 @@ namespace CapyIsland.UI
                 _eventsDot = edot.gameObject;
                 _eventsDot.SetActive(GameEvents.NeedsAttention);
             }
+            // Settings one tap away, like everything else here (it is in the menu too).
+            UiKit.RoundButton(side, "Settings", IconPainter.Gear, "Settings", UiKit.Hex("6B8FA8"), () => settings.Open());
             // While walking somewhere by itself (an arrow or "Show me" was tapped): a way to stop.
             var stop = UiKit.Button(_safe, "StopWalking", "Stop walking", UiKit.ButtonStyle.Secondary, PlayerAvatar.StopAutoWalk, 30f, IconPainter.Close);
             var sr = (RectTransform)stop.transform.parent;

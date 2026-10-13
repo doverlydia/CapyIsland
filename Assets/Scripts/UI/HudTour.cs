@@ -31,6 +31,31 @@ namespace CapyIsland.UI
         /// <summary>Has this page been shown (as a tip or in a tour)?</summary>
         public static bool Seen(string id) => PlayerPrefs.GetInt(SeenKey, 0) == 1 || PlayerPrefs.GetInt(TipKey + id, 0) == 1;
 
+        /// <summary>Tips the screen they're about tells, over itself, when you open it (see <see cref="MenuScreen"/>).</summary>
+        static bool ToldByItsScreen(string id) => id == "menu";
+
+        /// <summary>Is this page waiting its turn as a tip (and not yet seen)?</summary>
+        public static bool Wants(string id)
+        {
+            if (Seen(id)) return false;
+            foreach (var tip in _tips) if (System.Array.IndexOf(tip, id) >= 0) return true;
+            return false;
+        }
+
+        /// <summary>Takes a waiting page out of the line, as seen: it was explained another way.</summary>
+        public static void Withdraw(string id)
+        {
+            for (int i = _tips.Count - 1; i >= 0; i--)
+            {
+                if (System.Array.IndexOf(_tips[i], id) < 0) continue;
+                var rest = new List<string>(_tips[i]);
+                rest.Remove(id);
+                if (rest.Count == 0) _tips.RemoveAt(i);
+                else _tips[i] = rest.ToArray();
+            }
+            MarkSeen(id);
+        }
+
         /// <summary>Counts a page as seen when its subject was explained some other way (a card on first use).</summary>
         public static void MarkSeen(string id)
         {
@@ -87,8 +112,13 @@ namespace CapyIsland.UI
             if (_tips.Count == 0 || !Quiet || Guidance.Off) return;
             // The gatekeeper's rules: never during the opening, and a calm moment first.
             if (!Attention.Free(4f) || Time.unscaledTime < _restUntil) return;
-            var next = _tips[0];
-            _tips.RemoveAt(0);
+            // Some tips are told by their own screen when it opens (a red dot on its button calls
+            // you over); the line skips those.
+            int at = _tips.FindIndex(t => System.Array.Exists(t, id => !ToldByItsScreen(id)));
+            if (at < 0) return;
+            var next = System.Array.FindAll(_tips[at], id => !ToldByItsScreen(id));
+            var held = System.Array.FindAll(_tips[at], ToldByItsScreen);
+            if (held.Length > 0) _tips[at] = held; else _tips.RemoveAt(at);
             // Drop pages that were seen while this tip waited (the full tour, say).
             var fresh = new List<string>();
             foreach (var id in next)

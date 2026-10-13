@@ -276,7 +276,7 @@ namespace CapyIsland.Game
             if (!dreaming) { _thought.Pop(); _thought = null; return; }
             var catalog = ItemCatalog.Instance;
             var flowers = catalog != null ? catalog.Icon("Medium Posie Garden") : null;
-            _thought = WorldBubble.Show(transform, flowers, 1.5f, () =>
+            _thought = WorldBubble.Thought(transform, flowers, 0.75f, () =>
                 Hints.Show("This capybara is too hungry to work. Plant a garden near its workplace and it will wake up for a snack."));
         }
 

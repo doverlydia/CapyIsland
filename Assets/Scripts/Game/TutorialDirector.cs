@@ -199,7 +199,6 @@ namespace CapyIsland.Game
             // The tutorial was ended: its steps still move the story on, but nothing points.
             if (Guidance.Off && pointer != null) pointer.Hide();
             GlideToGoal();
-            PulseZone();
             // A sunny morning from start to finish; the day starts moving once the island is yours.
             GameClock.Hold(_step != Step.Done);
         }
@@ -328,7 +327,7 @@ namespace CapyIsland.Game
             if (gardenItem == null) { Advance(Step.Done); return; }
             if (gardenItem.Placed) { AwakenSpirits(); return; }
 
-            // The garden only goes down inside a glowing circle by the sleeper, so this first
+            // The garden only goes down near the sleeper, so this first
             // garden always feeds it (and the lesson isn't lost to one planted out of reach).
             if (Placeable.ZoneFor != gardenItem)
             {
@@ -339,66 +338,32 @@ namespace CapyIsland.Game
                 Vector2 centre = sleeper != null ? sleeper.transform.position
                                : mill != null ? mill.transform.position
                                : (Vector2)transform.position;
-                ShowZone(gardenItem, centre);
+                KeepNear(gardenItem, centre);
             }
 
-            Say(CircleLineOr(gardenItem, "Plant the garden inside the glowing circle, right by the sleepy capybara, so it can reach the flowers.", PlantCircleLine));
+            Say(CircleLineOr(gardenItem, "Plant the garden close to the sleepy capybara so it can reach the flowers.", PlantCircleLine));
             ShowDrag(gardenItem, Placeable.ZoneCentre + new Vector2(2.2f, -1.2f), 3f);
         }
 
-        // ---------------------------------------------------------------- the garden circle
+        // ---------------------------------------------------------------- the garden's reach
 
         /// <summary>How far from the sleeper the first garden may go, in original world units.</summary>
-        const float GardenZoneRadius = 120f;
+        const float GardenReach = 120f;
 
-        SpriteRenderer _zone, _zoneRim;
-
-        void ShowZone(Placeable item, Vector2 centre)
+        /// <summary>
+        /// The first garden has to go near the sleeper, so it always feeds it. Nothing is drawn: a
+        /// drop too far away turns the placement ring red and Old Yuzu says it's too far.
+        /// </summary>
+        static void KeepNear(Placeable item, Vector2 centre)
         {
             Placeable.ZoneFor = item;
             Placeable.ZoneCentre = centre;
-            Placeable.ZoneRadius = GardenZoneRadius;
-            if (_zone == null)
-            {
-                var go = new GameObject("GardenZone");
-                _zone = go.AddComponent<SpriteRenderer>();
-                _zone.sprite = UI.IconPainter.Glow;
-                var rim = new GameObject("Rim");
-                rim.transform.SetParent(go.transform, false);
-                _zoneRim = rim.AddComponent<SpriteRenderer>();
-                _zoneRim.sprite = UI.IconPainter.Ring;
-                // On the ground, under everything, like the placement circle.
-                var preview = FindFirstObjectByType<PlacementPreview>(FindObjectsInactive.Include);
-                var under = preview != null ? preview.GetComponentInChildren<SpriteRenderer>(true) : null;
-                if (under != null)
-                {
-                    _zone.sortingLayerID = _zoneRim.sortingLayerID = under.sortingLayerID;
-                    _zone.sortingOrder = under.sortingOrder - 1;
-                    _zoneRim.sortingOrder = under.sortingOrder - 1;
-                }
-            }
-            // An ellipse on the ground: the radius is world units, which are half as tall on screen.
-            var size = BunniSpace.ToUnity(new Vector2(GardenZoneRadius, GardenZoneRadius) * 2f);
-            var glow = _zone.sprite.bounds.size;
-            _zone.transform.position = new Vector3(centre.x, centre.y, 0f);
-            _zone.transform.localScale = new Vector3(size.x / glow.x, size.y / glow.y, 1f);
-            var ring = _zoneRim.sprite.bounds.size;
-            _zoneRim.transform.localScale = new Vector3(glow.x / ring.x, glow.y / ring.y, 1f);
-            _zone.gameObject.SetActive(true);
+            Placeable.ZoneRadius = GardenReach;
         }
 
-        void HideZone()
+        static void HideZone()
         {
             if (Placeable.ZoneFor != null) Placeable.ZoneFor = null;
-            if (_zone != null) _zone.gameObject.SetActive(false);
-        }
-
-        void PulseZone()
-        {
-            if (_zone == null || !_zone.gameObject.activeSelf) return;
-            float a = 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 3f);
-            _zone.color = new Color(1f, 0.86f, 0.4f, 0.22f + 0.12f * a);
-            _zoneRim.color = new Color(1f, 0.9f, 0.55f, 0.55f + 0.35f * a);
         }
 
         /// <summary>
