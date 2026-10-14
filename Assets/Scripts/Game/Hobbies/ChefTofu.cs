@@ -65,8 +65,12 @@ namespace CapyIsland.Game
             _root.transform.position = at;
             Stall(at);
             MakeChef(at + new Vector2(2.3f, -0.5f));
+            Book(BookSpot(at));
             LayOutWares(at);
         }
+
+        /// <summary>His recipe book, open on its stand beside the stall (the chef is on the other side).</summary>
+        static Vector2 BookSpot(Vector2 stall) => stall + new Vector2(-2.9f, 0.1f);
 
         // ---------------------------------------------------------------- where
 
@@ -76,6 +80,7 @@ namespace CapyIsland.Game
             for (float dx = -2.2f; dx <= 2.21f; dx += 1.1f)
                 for (float dy = 0f; dy <= 2.41f; dy += 1.2f) yield return at + new Vector2(dx, dy);   // the stall, up to its awning
             yield return at + new Vector2(2.3f, -0.5f);   // the chef
+            yield return BookSpot(at);
             foreach (var w in WareSpots(at)) yield return w;
         }
 
@@ -141,8 +146,10 @@ namespace CapyIsland.Game
             float scale = StallHeight / Mathf.Max(0.01f, sprite.bounds.size.y);
             body.transform.localScale = Vector3.one * scale;
             body.transform.localPosition = new Vector3(0f, StallHeight * 0.5f, 0f);
-            body.AddComponent<SpriteRenderer>().sprite = sprite;
+            var sr = body.AddComponent<SpriteRenderer>();
+            sr.sprite = sprite;
             go.AddComponent<YSorter>();
+            go.AddComponent<OpensRecipes>().Init(sr);   // tap the stall for his recipes
             // Holds its ground: nothing can be put down on top of it.
             var placeable = go.AddComponent<Placeable>();
             placeable.Configure("Chef_Stall", 55f, 55f);
@@ -166,11 +173,29 @@ namespace CapyIsland.Game
             go.AddComponent<Chef>().Init(sr);
         }
 
-        /// <summary>His wares in an arc in front of the stall, like a shop's.</summary>
+        void Book(Vector2 feet)
+        {
+            var art = HobbyData.Art("Recipe_Book");
+            if (art == null) return;
+            var go = new GameObject("RecipeBook");
+            go.transform.SetParent(_root.transform, false);
+            go.transform.position = feet;
+            var body = new GameObject("Sprite");
+            body.transform.SetParent(go.transform, false);
+            var sr = body.AddComponent<SpriteRenderer>();
+            sr.sprite = art;
+            float scale = 1.3f / Mathf.Max(0.01f, art.bounds.size.x);
+            body.transform.localScale = Vector3.one * scale;
+            body.transform.localPosition = new Vector3(0f, art.bounds.size.y * scale * 0.5f, 0f);
+            go.AddComponent<YSorter>();
+            go.AddComponent<OpensRecipes>().Init(sr);
+        }
+
+        /// <summary>His wares for sale in an arc in front of the stall, like a shop's: the stove and the pantry.</summary>
         static List<Vector2> WareSpots(Vector2 stall)
         {
             var spots = new List<Vector2>();
-            int count = 2 + HobbyData.Pantry.Length;
+            int count = 1 + HobbyData.Pantry.Length;
             var middle = stall + new Vector2(0f, -0.4f);
             for (int i = 0; i < count; i++)
             {
@@ -187,13 +212,11 @@ namespace CapyIsland.Game
         {
             var spots = WareSpots(stall);
             SaleDisplay.Create("Stove", spots[0], _root.transform);
-            BaitStand.Create("RecipeBook", "Chef Tofu's Recipes", "Tap to see the recipes Chef Tofu sells.", Vector3Int.zero,
-                HobbyData.Art("Recipe_Book") ?? HobbyData.Art("Dish_PumpkinPie"), null, spots[1], _root.transform, tap: OpenRecipes);
             for (int i = 0; i < HobbyData.Pantry.Length; i++)
             {
                 var p = HobbyData.Pantry[i];
                 BaitStand.Create("Pantry_" + p.Id, p.Name, p.Blurb, new Vector3Int(0, p.Gold, 0),
-                    HobbyData.ItemArt(p.Item), () => BuyPantry(p), spots[2 + i], _root.transform,
+                    HobbyData.ItemArt(p.Item), () => BuyPantry(p), spots[1 + i], _root.transform,
                     // only any use once you can cook
                     () => HobbyLog.IsUnlocked(Hobby.Cooking) ? null : "You need a stove first. Chef Tofu sells one right here.");
             }
@@ -231,6 +254,30 @@ namespace CapyIsland.Game
             HobbyLog.LearnRecipe(d.Id);
             Sfx.Play(SfxKind.Buy, 0.7f);
             return true;
+        }
+
+        /// <summary>His stall and his recipe book: tap either for the recipes he sells.</summary>
+        class OpensRecipes : MonoBehaviour, ITappable
+        {
+            SpriteRenderer _sr;
+
+            public void Init(SpriteRenderer sr) => _sr = sr;
+
+            void OnEnable() => TapTargets.Register(this);
+            void OnDisable() => TapTargets.Unregister(this);
+
+            public float TapDistance(Vector2 worldPoint)
+            {
+                if (_sr == null) return -1f;
+                var b = _sr.bounds;
+                return b.Contains(new Vector3(worldPoint.x, worldPoint.y, b.center.z)) ? Vector2.Distance(b.center, worldPoint) : -1f;
+            }
+
+            public void Tap()
+            {
+                Sfx.Play(SfxKind.Tap, 0.5f);
+                OpenRecipes();
+            }
         }
 
         /// <summary>Chef Tofu: a word, then his recipes.</summary>

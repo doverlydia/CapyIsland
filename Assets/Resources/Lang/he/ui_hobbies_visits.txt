@@ -1274,9 +1274,6 @@
 @ Chef Tofu's Recipes
 = המתכונים של השף טופו
 
-@ Tap to see the recipes Chef Tofu sells.
-= הקש כדי לראות את המתכונים שהשף טופו מוכר.
-
 @ A recipe shows what goes into a dish, and islanders only ask for dishes you know. Put the right things in the pot and you might work one out for yourself!
 = מתכון מראה מה נכנס למנה, ותושבי האי מבקשים רק מנות שאתה מכיר. שים את הדברים הנכונים בסיר ואולי תגלה מתכון בעצמך!
 
