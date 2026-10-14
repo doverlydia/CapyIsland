@@ -140,7 +140,7 @@ namespace CapyIsland.UI
                 case Tab.Discoveries:
                 {
                     var catalog = ItemCatalog.Instance;
-                    foreach (var card in QuestData.Cards)
+                    foreach (var card in Cards.All)
                     {
                         bool have = Cards.IsCollected(card.Id);
                         var pic = have && catalog != null && card.Items.Length > 0 ? catalog.Icon(card.Items[0]) : null;

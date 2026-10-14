@@ -151,8 +151,8 @@ namespace CapyIsland.UI
         static string CardsFound()
         {
             int found = 0;
-            foreach (var card in QuestData.Cards) if (Cards.IsCollected(card.Id)) found++;
-            return $"{found} / {QuestData.Cards.Length}";
+            foreach (var card in Cards.All) if (Cards.IsCollected(card.Id)) found++;
+            return $"{found} / {Cards.All.Length}";
         }
 
         static void Stat(Transform parent, Sprite icon, Color colour, string value, string label)

@@ -23,6 +23,16 @@ namespace CapyIsland.Game
             Found = null;
         }
 
+        /// <summary>
+        /// Cards no item can find, left out of the collection: the Guinea Pig Hutch and the Pirate
+        /// Shack (Deer House, Pirate House). The original game defines both but no shop ever sold
+        /// them, so they could never be collected.
+        /// </summary>
+        static readonly HashSet<int> Retired = new() { 37, 38 };
+
+        /// <summary>Every card there is to collect.</summary>
+        public static readonly CardDef[] All = Array.FindAll(QuestData.Cards, c => !Retired.Contains(c.Id));
+
         public static IEnumerable<int> Collected => _collected;
         public static bool IsCollected(int id) => _collected.Contains(id);
 
@@ -35,7 +45,7 @@ namespace CapyIsland.Game
         /// <summary>An item was bought or collected (Cards.FoundItem).</summary>
         public static void FoundItem(string itemName)
         {
-            foreach (var card in QuestData.Cards)
+            foreach (var card in All)
             {
                 if (_collected.Contains(card.Id)) continue;
                 if (Array.IndexOf(card.Items, itemName) < 0) continue;
