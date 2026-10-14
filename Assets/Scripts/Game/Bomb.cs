@@ -139,6 +139,9 @@ namespace CapyIsland.Game
             var placeable = victim.GetComponent<Placeable>();
             var catalog = ItemCatalog.Instance;
 
+            // Fixed scenery (the stone lanterns, Old Mochi's shrine) only holds its spot with a
+            // footprint; it can't ride in your trail, so a bubble of it would never come back.
+            if (placeable != null && victim.GetComponent<Follower>() == null) return;
             if (placeable != null)
             {
                 // A store item planted in the world goes back into a bubble of itself.
