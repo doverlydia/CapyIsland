@@ -124,6 +124,8 @@ namespace CapyIsland.CameraRig
             {
                 _pinching = true;
                 _pressing = false;
+                // A second finger mid-drag: let go of what was held, or it stays "in hand" for good.
+                if (_heldActor != null) { _heldActor.Cancel(); _heldActor = null; }
                 SteerTarget = null;
                 EndStick();
                 _pinchStartDistance = distance;

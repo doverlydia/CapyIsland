@@ -217,6 +217,9 @@ namespace CapyIsland.Game
             _state = State.Following;
         }
 
+        /// <summary>The drag was lost, not finished: no job, just back behind you.</summary>
+        void OnDragCancelled() => ReturnToKing();
+
         void ReturnToKing()
         {
             var king = FindFirstObjectByType<PlayerAvatar>();

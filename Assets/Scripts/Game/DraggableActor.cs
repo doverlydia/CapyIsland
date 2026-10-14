@@ -118,6 +118,32 @@ namespace CapyIsland.Game
             SendMessage("OnDropped", SendMessageOptions.DontRequireReceiver);
         }
 
+        /// <summary>
+        /// Let go without dropping: the press was lost (a second finger began a pinch, the app was
+        /// paused mid-drag). Nothing is planted or posted; it simply goes back to following you.
+        /// </summary>
+        public void Cancel()
+        {
+            if (!_held) return;
+            _held = false;
+            if (_body != null) _body.localPosition = _bodyRest;
+            SendMessage("OnDragCancelled", SendMessageOptions.DontRequireReceiver);
+        }
+
+        float _fingerless;
+
+        /// <summary>
+        /// The safety net: held, yet no finger on the screen for a moment. The release went missing
+        /// somewhere, and a thing stuck "in hand" leaves every station's ring up until a restart.
+        /// </summary>
+        void Update()
+        {
+            if (!_held) return;
+            if (Input.touchCount > 0 || Input.GetMouseButton(0)) { _fingerless = 0f; return; }
+            _fingerless += Time.unscaledDeltaTime;
+            if (_fingerless > 0.3f) { _fingerless = 0f; Cancel(); }
+        }
+
         void OnDrawGizmosSelected()
         {
             Gizmos.color = new Color(1f, 0.85f, 0.2f, 0.8f);
