@@ -68,7 +68,7 @@ namespace CapyIsland.UI
             {
                 Hobby.Fishing or Hobby.Birding => "Cutscene_Shore",
                 Hobby.Sewing => "Cutscene_Wedding",
-                Hobby.Gardening or Hobby.Cooking => "Cutscene_Farm",   // Sunflower Farm, where both live
+                Hobby.Gardening or Hobby.Cooking => "Cutscene_Farm",   // Sunflower Farm, where the food grows
                 _ => "Cutscene_Mill",
             };
             Backdrop(Resources.Load<Sprite>("Cutscenes/" + backdrop), UiKit.Hex("BFE3F2"), UiKit.Hex("8DBA5A"));

@@ -26,8 +26,15 @@ namespace CapyIsland.Game
         public static string Crop(CropKind c) =>
             Lines("Grow it on Sunflower Farm", Level(Hobby.Gardening, "Needs gardening level {0}", c.MinLevel));
 
+        /// <summary>A recipe you don't know yet: the hobby that gives it away, or Chef Tofu who sells it.</summary>
         public static string Dish(DishKind d) =>
-            Lines("Cook it at the farm's stove", Level(Hobby.Cooking, "Needs cooking level {0}", d.MinLevel));
+            Lines(d.FreeWith switch
+                {
+                    Hobby.Gardening => "Free when you take up gardening",
+                    Hobby.Fishing => "Free when you take up fishing",
+                    _ => "Buy the recipe from Chef Tofu by the hot spring",
+                },
+                Level(Hobby.Cooking, "Needs cooking level {0}", d.MinLevel));
 
         public const string Cat = "Wanders onto your island\nsome days";
 

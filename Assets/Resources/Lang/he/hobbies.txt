@@ -678,3 +678,78 @@
 
 @ 1. The smell of maple after rain.\n2. The sound the mill makes.\n3. My first capy house, which leans a little.\n4. The pear tree that drops pears on my head.\n5. The kingfisher who visits on Tuesdays.\n6. Bubbles.\n7. The bridge I waited three days to open.\n8. My friends' islands, which are nothing like mine.\n9. My friends.\n10. Coming home.
 = 1. הריח של האדר אחרי גשם.\n2. הקול שהמנסרה עושה.\n3. בית הקפיברות הראשון שלי, שנוטה קצת הצידה.\n4. עץ האגס שמפיל לי אגסים על הראש.\n5. השלדג שבא לבקר בימי שלישי.\n6. בועות.\n7. הגשר שחיכיתי שלושה ימים כדי לפתוח.\n8. האיים של החברים שלי, שלא דומים בכלל לשלי.\n9. החברים שלי.\n10. לחזור הביתה.
+
+@ Chef Tofu
+= השף טופו
+
+@ Fluffy Omelette
+= חביתה אוורירית
+
+@ Rolled up soft and golden, with a little crunch of cabbage.
+= מגולגלת, רכה וזהובה, עם קצת קראנץ' של כרוב.
+
+@ Onigiri
+= אוניגירי
+
+@ A rice ball with a fishy surprise inside. Perfect for a walk.
+= כדור אורז עם הפתעה של דג בפנים. מושלם לטיול.
+
+@ Pancakes
+= פנקייקים
+
+@ A fluffy stack with butter melting down the sides.
+= ערימה אוורירית עם חמאה שנמסה על הצדדים.
+
+@ Fish Tempura
+= טמפורה של דג
+
+@ Light, crispy batter. Gone the moment it leaves the pan.
+= בלילה קלילה ופריכה. נעלמת ברגע שהיא יוצאת מהמחבת.
+
+@ Strawberry Milkshake
+= מילקשייק תותים
+
+@ Pink, cold and frothy. Comes with a moustache.
+= ורוד, קר ומוקצף. מגיע עם שפם.
+
+@ Corn Bread
+= לחם תירס
+
+@ Golden squares, warm from the tin.
+= ריבועים זהובים, חמים מהתבנית.
+
+@ Custard Pudding
+= פודינג וניל
+
+@ It wobbles. Then it's gone.
+= הוא רוטט. ואז הוא נעלם.
+
+@ Eggs
+= ביצים
+
+@ Three fresh eggs, for omelettes, pancakes and baking.
+= שלוש ביצים טריות, לחביתות, לפנקייקים ולאפייה.
+
+@ Milk
+= חלב
+
+@ Two bottles of creamy milk, for pancakes, shakes and pudding.
+= שני בקבוקים של חלב שמנת, לפנקייקים, למילקשייקים ולפודינג.
+
+@ Flour
+= קמח
+
+@ Three scoops of flour, for batter, bread and anything fluffy.
+= שלוש כפות קמח, לבלילה, ללחם ולכל דבר אוורירי.
+
+@ Rice
+= אורז
+
+@ Three bowls of sticky rice, for rice balls.
+= שלוש קערות של אורז דביק, לכדורי אורז.
+
+@ Sugar
+= סוכר
+
+@ Three spoons of sugar: a little sweetness for desserts.
+= שלוש כפות סוכר: קצת מתיקות לקינוחים.

@@ -40,6 +40,7 @@ namespace CapyIsland.Game
             public List<Plot> plots = new();
             public int wornDesign = -1;
             public List<string> unlocked = new();   // hobbies whose gear you have bought
+            public List<string> recipes;   // dishes you know how to cook (null in saves from before recipes)
         }
 
         static Data _data;
@@ -75,6 +76,7 @@ namespace CapyIsland.Game
                     foreach (var e in _data.bag)
                         if (e.id.StartsWith("crop:") && e.count > 0) _data.crops.Add(new Entry { id = e.id.Substring(5), count = e.count });
                 }
+                if (_data.recipes == null) KnowOldRecipes();
                 return _data;
             }
         }
@@ -113,6 +115,7 @@ namespace CapyIsland.Game
             if (IsUnlocked(h)) return false;
             D.unlocked.Add(h.ToString());
             NewStuff.Add("hobbies/" + h);   // the hobby itself (finds go under "hobbies/<hobby>/")
+            GiveFreeRecipes(h);
             Save();
             Changed?.Invoke();
             return true;
@@ -126,7 +129,7 @@ namespace CapyIsland.Game
             Hobby.Birding => "Buy Binoculars at the Silver Store",
             Hobby.Sewing => "Buy a Sewing Machine at the Steel Store",
             Hobby.Gardening => "Pay the spirit at the south end of Pebble Cove to raise the bridge to Sunflower Farm",
-            Hobby.Cooking => "Tap the stove on Sunflower Farm",
+            Hobby.Cooking => "Buy a stove from Chef Tofu by the hot spring",
             _ => "",
         };
 
@@ -220,6 +223,53 @@ namespace CapyIsland.Game
             e.count++;
             Save();
             return first;
+        }
+
+        // ---------------------------------------------------------------- recipes
+
+        /// <summary>
+        /// The dishes you know how to cook. Taking up gardening or fishing gives you a first recipe;
+        /// Chef Tofu sells the rest; and a pot that happens to hold a recipe teaches it to you.
+        /// </summary>
+        public static IReadOnlyList<string> Recipes => D.recipes;
+
+        public static bool KnowsRecipe(string dishId) => D.recipes.Contains(dishId);
+
+        /// <summary>Learns a recipe. True if it was new.</summary>
+        public static bool LearnRecipe(string dishId, bool save = true)
+        {
+            if (string.IsNullOrEmpty(dishId) || D.recipes.Contains(dishId)) return false;
+            D.recipes.Add(dishId);
+            if (save) Save();
+            return true;
+        }
+
+        static void GiveFreeRecipes(Hobby h)
+        {
+            foreach (var d in HobbyData.Dishes)
+                if (d.FreeWith == h) LearnRecipe(d.Id, save: false);
+        }
+
+        /// <summary>
+        /// A save from before recipes: whoever cooked already knows every dish they could make
+        /// then (the ones without pantry goods, up to their level), and every hobby taken up gives
+        /// its free recipe, as it would now.
+        /// </summary>
+        static void KnowOldRecipes()
+        {
+            _data.recipes = new();
+            if (_data.xp[(int)Hobby.Cooking] > 0 || _data.unlocked.Contains(Hobby.Cooking.ToString()))
+            {
+                int level = Level(Hobby.Cooking);
+                foreach (var d in HobbyData.Dishes)
+                {
+                    bool pantry = false;
+                    foreach (var (item, _) in d.Needs) pantry |= item.StartsWith("pantry:");
+                    if (!pantry && d.MinLevel <= level) _data.recipes.Add(d.Id);
+                }
+            }
+            foreach (Hobby h in Enum.GetValues(typeof(Hobby)))
+                if (IsUnlocked(h)) GiveFreeRecipes(h);
         }
 
         // ---------------------------------------------------------------- the bag

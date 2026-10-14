@@ -277,6 +277,7 @@ namespace CapyIsland.UI
             gameObject.AddComponent<CatCare>();
             gameObject.AddComponent<DishOrders>();
             gameObject.AddComponent<SeaLibrary>();
+            gameObject.AddComponent<ChefTofu>();
             Airport.Restore(this);
 
             var tracker = ObjectiveTracker.Create(_safe);
@@ -323,6 +324,7 @@ namespace CapyIsland.UI
             MakeScreen<BurrowScreen>(screens, "BurrowScreen");
             MakeScreen<FurnitureShopScreen>(screens, "FurnitureShopScreen");
             MakeScreen<BaitShopScreen>(screens, "BaitShopScreen");
+            MakeScreen<RecipeShopScreen>(screens, "RecipeShopScreen");
             var events = MakeScreen<EventsScreen>(screens, "EventsScreen");
             // No menu: everything has its own way in. The column on the right (Settings first,
             // then what you visit most), your picture for the profile and wardrobe, the goal card

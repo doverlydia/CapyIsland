@@ -59,6 +59,33 @@ dishes () {
   gen Dish_TomatoSalad "$PROP" "a small bowl of fresh salad with red tomato wedges, green leaves and sweet corn, $VIEW."
 }
 
+# Dishes made with Chef Tofu's pantry (eggs, milk, flour, rice, sugar).
+dishes2 () {
+  gen Dish_Omelette "$PROP" "a fluffy golden rolled omelette with a few shreds of green cabbage on a small round plate, $VIEW."
+  gen Dish_Milkshake "$PROP" "a tall glass of pink strawberry milkshake with a swirl of whipped cream, a strawberry on top and a striped straw, $VIEW."
+  gen Dish_Pancakes "$PROP" "a small stack of three fluffy golden pancakes with a melting pat of butter and a drizzle of syrup on a round plate, $VIEW."
+  gen Dish_Tempura "$PROP" "a little basket of crispy golden fish tempura pieces in light batter on a folded paper, with a small dipping bowl, $VIEW."
+  gen Dish_Onigiri "$PROP" "two triangle rice balls (onigiri) of white rice, each wrapped at the bottom with a strip of dark green seaweed, on a little wooden board, $VIEW."
+  gen Dish_CornBread "$PROP" "a square slab of golden yellow corn bread with a few corn kernels baked on top, cut into chunky squares in a small baking tin, $VIEW."
+  gen Dish_Pudding "$PROP" "a wobbly round caramel custard pudding with glossy brown caramel on top, on a small plate, $VIEW."
+}
+
+# Chef Tofu's pantry: what you can't grow.
+pantry () {
+  gen Pantry_Egg "$PROP" "three smooth cream-white eggs in a small woven straw basket, $VIEW."
+  gen Pantry_Milk "$PROP" "a small old-fashioned glass milk bottle full of white milk with a blue paper cap, $VIEW."
+  gen Pantry_Flour "$PROP" "a small cloth sack of white flour tied with string, open at the top with flour peeking out and a little wooden scoop, $VIEW."
+  gen Pantry_Rice "$PROP" "a small round wooden bowl heaped with white rice grains next to a little cloth rice sack, $VIEW."
+  gen Pantry_Sugar "$PROP" "a small glass jar of white sugar cubes with a cork lid, $VIEW."
+}
+
+# Chef Tofu himself, and his kitchen stall on the Heart of the Isles.
+chef () {
+  gen Chef "ArtSource/Hobby_Sailor.png" "a friendly round capybara chef standing upright like the reference fisherman: a tall puffy white chef's hat, a white chef's jacket and a little red neckerchief, a cream apron, holding a wooden spoon up cheerfully in one paw, a small copper pot at his feet. Warm tan-brown fur, simple dot eyes, a gentle smile."
+  gen Chef_Stall "ArtSource/Store_Garden.png" "a small cosy outdoor kitchen stall $VIEW: a wooden counter with a cream and red striped cloth awning on posts, a little stove with a steaming pot on the counter, hanging copper pans and a string of onions, a crate of eggs and a jar of milk beside it. Storybook game building, chunky and simple."
+  gen Recipe_Book "$PROP" "a thick old cookbook lying open on a small wooden book stand, cream pages with little drawings of dishes, a red ribbon bookmark and a wooden spoon resting beside it, $VIEW."
+}
+
 bugs () {
   gen Bug_Butterfly "$PROP" "a single pretty butterfly with wide pale-yellow wings with orange spots, wings open, seen from above."
   gen Bug_BlueButterfly "$PROP" "a single butterfly with shimmering sky-blue wings edged in black, wings open, seen from above."
@@ -135,7 +162,7 @@ ship () {
     local name; name=$(basename "$src" .png); name=${name#Hobby_}
     case "$name" in Miso_Dress*) continue ;; esac   # untrimmed, framed like Capy_Coriander: batch_miso.sh ships them
     local size=128
-    case "$name" in Airport) size=320 ;; Plot|Cat_*|Stove|Pot|SewingMachine) size=192 ;; Sailor|Fish_*|Bird_*|Bug_*) size=256 ;; esac
+    case "$name" in Airport|Chef_Stall) size=320 ;; Plot|Cat_*|Stove|Pot|SewingMachine) size=192 ;; Sailor|Chef|Fish_*|Bird_*|Bug_*) size=256 ;; esac
     node Tools/ChatGPT/trim.mjs "$src" "$tmp/$name.png" --alpha 60 > /dev/null &&
       node Tools/ChatGPT/downscale.mjs "$tmp/$name.png" "$out/$name.png" "$size"
     rm -f "$tmp/$name.png"
@@ -146,6 +173,10 @@ case "${1:-}" in
   props) props ;;
   crops) crops ;;
   dishes) dishes ;;
+  dishes2) dishes2 ;;
+  pantry) pantry ;;
+  chef) chef ;;
+  kitchen) chef; pantry; dishes2 ;;
   bugs) bugs ;;
   fish) fish ;;
   birds) birds ;;

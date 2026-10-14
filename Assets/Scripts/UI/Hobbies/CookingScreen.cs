@@ -323,11 +323,15 @@ namespace CapyIsland.UI
             var scroll = UiKit.ScrollList(page, "Dishes", out var list, 14f, new RectOffset(4, 4, 4, 24));
             UiKit.Stretch((RectTransform)scroll.transform, 60f, 24f, 28f, 130f);
 
+            // What you know first, then what you could learn now, then what waits for your level.
             int level = HobbyLog.Level(Hobby.Cooking);
             var known = new List<DishKind>();
+            var unknown = new List<DishKind>();
             var locked = new List<DishKind>();
-            foreach (var d in HobbyData.Dishes) (d.MinLevel <= level ? known : locked).Add(d);
+            foreach (var d in HobbyData.Dishes)
+                (d.MinLevel > level ? locked : HobbyLog.KnowsRecipe(d.Id) ? known : unknown).Add(d);
             foreach (var d in known) RecipeRow(list, d, false);
+            foreach (var d in unknown) RecipeRow(list, d, true);
             foreach (var d in locked) RecipeRow(list, d, true);
 
             UiKit.PopIn(page, 0.9f);
@@ -371,7 +375,11 @@ namespace CapyIsland.UI
             needs.offsetMax = new Vector2(-24f, 0f);
             if (locked)
             {
-                var l = UiKit.Text(needs, "Level", Loc.F("Cooking level {0}", d.MinLevel), 26f, UiKit.InkSoft, true, TextAlignmentOptions.MidlineLeft);
+                // Not yours yet: Chef Tofu sells it (or a lucky pot teaches it); above your level, it waits.
+                string why = d.MinLevel > HobbyLog.Level(Hobby.Cooking)
+                    ? Loc.F("Cooking level {0}", d.MinLevel)
+                    : Loc.T("Buy it from Chef Tofu, or work it out in the pot");
+                var l = UiKit.Text(needs, "Level", why, 26f, UiKit.InkSoft, true, TextAlignmentOptions.MidlineLeft);
                 UiKit.Stretch(l.rectTransform);
                 var lk = UiKit.Image(row, "Lock", IconPainter.Lock, UiKit.InkSoft);
                 lk.preserveAspect = true;
@@ -611,8 +619,8 @@ namespace CapyIsland.UI
         }
 
         /// <summary>
-        /// Bag ingredients: each crop some recipe uses (not cotton, say), and all fish together
-        /// (recipes want "any fish").
+        /// Bag ingredients: each crop some recipe uses (not cotton, say), Chef Tofu's pantry goods,
+        /// and all fish together (recipes want "any fish").
         /// </summary>
         static List<(string id, int count)> Ingredients()
         {
@@ -622,7 +630,7 @@ namespace CapyIsland.UI
             int fish = HobbyLog.FishInBag();
             if (fish > 0) list.Add(("fish:any", fish));
             foreach (var e in HobbyLog.Bag)
-                if (e.id.StartsWith("crop:") && e.count > 0 && food.Contains(e.id)) list.Add((e.id, e.count));
+                if ((e.id.StartsWith("crop:") || e.id.StartsWith("pantry:")) && e.count > 0 && food.Contains(e.id)) list.Add((e.id, e.count));
             return list;
         }
 
@@ -691,7 +699,16 @@ namespace CapyIsland.UI
 
             // What it makes.
             var dish = _pot.Count > 0 ? Cooking.Match(_pot) : null;
+            _resultPic.color = Color.white;
             if (_pot.Count == 0) { _resultPic.enabled = false; _resultName.text = "<color=#8A7563>Empty pot</color>"; }
+            else if (dish != null && !HobbyLog.KnowsRecipe(dish.Id))
+            {
+                // A recipe you don't know yet: a hint of something, not its name. Cooking it teaches it.
+                _resultPic.enabled = true;
+                _resultPic.sprite = HobbyData.ItemArt("dish:" + dish.Id);
+                _resultPic.color = new Color(0.25f, 0.18f, 0.14f, 0.85f);
+                _resultName.text = "???\n<size=70%><color=#8A7563>Something new…?</color></size>";
+            }
             else if (dish != null) { _resultPic.enabled = true; _resultPic.sprite = HobbyData.ItemArt("dish:" + dish.Id); _resultName.text = dish.Name; }
             else { _resultPic.enabled = true; _resultPic.sprite = HobbyData.Art("Dish_Bizarre"); _resultName.text = "???\n<size=70%><color=#8A7563>No recipe for this…</color></size>"; }
             _cook.interactable = _pot.Count > 0 && !_cooking;
@@ -987,12 +1004,14 @@ namespace CapyIsland.UI
             // How it turned out.
             int stars = Mathf.Clamp(5 - misses - (hits - perfect + 1) / 2 - (redTime > 1f ? 1 : 0), 1, 5);
             var cooked = new List<string>(_pot);
+            bool discovered = dish != null && !burnt && !HobbyLog.KnowsRecipe(dish.Id);
             string id = Cooking.Finish(cooked, dish, burnt, stars);
             _pot.Clear();
             bool good = dish != null && !burnt;
             string title = good ? Loc.T(dish.Name) + "!" : "Bizarre Food…";
             string line = good
-                ? StarLine(stars) + "\nIt's in your bag. Look for someone with this dish in a bubble over their head!"
+                ? (discovered ? "<b>You worked out a new recipe!</b> It's in your recipe book now.\n" : "")
+                  + StarLine(stars) + "\nIt's in your bag. Look for someone with this dish in a bubble over their head!"
                 : burnt ? "It burned to a crisp. Tap the spatula sooner to keep the heat down!"
                         : "Nobody has a recipe for that, and now we know why.";
             CardPopup.Show(title, line, HobbyData.ItemArt(id));

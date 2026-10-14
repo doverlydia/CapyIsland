@@ -7,14 +7,15 @@ namespace CapyIsland.Game
     /// Sunflower Farm: the island south of Pebble Cove where gardening lives. A spirit at the end of
     /// Pebble Cove raises the bridge (6000 wood, 6000 gold); crossing it takes up gardening, and the
     /// farm is already laid out: twelve plots in a field — as many open as your gardening level
-    /// allows, the rest roped off until you grow into them — and a stove for cooking.
+    /// allows, the rest roped off until you grow into them. (The stove for cooking is Chef Tofu's
+    /// to sell, by the hot spring.)
     ///
     /// The farm is built fresh every time the island loads (like the stone lanterns): its plots
-    /// and stove are fixtures, never saved as items, never carried off, spared by bombs. What grows
-    /// in each plot is kept in <see cref="HobbyLog.Plots"/> by where the plot stands.
+    /// are fixtures, never saved as items, never carried off, spared by bombs. What grows in each
+    /// plot is kept in <see cref="HobbyLog.Plots"/> by where the plot stands.
     ///
-    /// Islands from before the farm (plots dotted about, a Garden Shop, a stove) are moved over the
-    /// first time they load: the bridge rises for free and every crop goes on growing in a farm plot.
+    /// Islands from before the farm (plots dotted about, a Garden Shop) are moved over the first
+    /// time they load: the bridge rises for free and every crop goes on growing in a farm plot.
     /// </summary>
     public class Farm : MonoBehaviour
     {
@@ -51,13 +52,16 @@ namespace CapyIsland.Game
             }
         }
 
-        /// <summary>The farm's stove, once the farm is laid out.</summary>
-        public static Vector2? StoveSpot => IsOpen && Centre.HasValue ? Centre.Value + new Vector2(-9.5f, 0.6f) : null;
+        /// <summary>Where the farm's stove stood, back when the farm came with one.</summary>
+        static Vector2? StoveSpot => IsOpen && Centre.HasValue ? Centre.Value + new Vector2(-9.5f, 0.6f) : null;
+
+        /// <summary>Set once the farm has stopped coming with a stove (so the old one is handed over just once).</summary>
+        public const string StoveKey = "CapyIsland.FarmStoveGiven";
 
         readonly List<Gardening.PlotView> _plots = new();
         GameObject _root;
         Vector2? _centre;
-        bool _introPending;
+        bool _introPending, _stoveOwed;
 
         void Awake() => Instance = this;
 
@@ -81,6 +85,13 @@ namespace CapyIsland.Game
             _centre = LandMap.WorldToUnity(rect.center);
 
             MoveOldGarden();
+            // The farm used to come with a stove (a fixture, never saved). Islands that had it keep
+            // a stove where it stood, now one of their own; everyone else buys one from Chef Tofu.
+            if (!PlayerPrefs.HasKey(StoveKey))
+            {
+                PlayerPrefs.SetInt(StoveKey, 1);
+                _stoveOwed = IsOpen && CookingStove.Placed() == null;
+            }
             if (IsOpen) LayOut();
             else EnsureGhost();
             LandMap.BridgeOpened += OnBridgeOpened;
@@ -165,7 +176,7 @@ namespace CapyIsland.Game
                 if (view != null) { view.FarmIndex = i; _plots.Add(view); }
                 i++;
             }
-            Fixture(catalog, "Stove", StoveSpot.Value);
+            if (_stoveOwed) GiveOldStove(catalog);
 
             // Dressing, where its art has been made: a barn, a scarecrow over the field, hay.
             // The barn is the farm's shop: its seeds stand out front, like any store's wares.
@@ -191,6 +202,20 @@ namespace CapyIsland.Game
             var placeable = go.GetComponent<Placeable>();
             if (placeable != null) placeable.MarkPlaced(silent: true);
             return go;
+        }
+
+        /// <summary>The farm's old stove, where it stood, as a stove of your own: saved, and yours to move.</summary>
+        void GiveOldStove(ItemCatalog catalog)
+        {
+            _stoveOwed = false;
+            var go = catalog.Create("Stove");
+            if (go == null) return;
+            var at = StoveSpot.Value;
+            go.transform.position = new Vector3(at.x, at.y, 0f);
+            go.SetActive(true);
+            var placeable = go.GetComponent<Placeable>();
+            if (placeable != null) placeable.MarkPlaced(silent: true);
+            StoreData.InvalidateCounts();
         }
 
         /// <summary>
@@ -236,19 +261,19 @@ namespace CapyIsland.Game
         // ---------------------------------------------------------------- older islands
 
         /// <summary>
-        /// An island from before the farm: its plots, Garden Shop and stove go, the bridge rises for
+        /// An island from before the farm: its plots and Garden Shop go, the bridge rises for
         /// free, and every crop carries on growing in a farm plot (in the order they were planted).
         /// </summary>
         void MoveOldGarden()
         {
             var old = new List<GameObject>();
             foreach (var tag in FindObjectsByType<CatalogItem>(FindObjectsSortMode.None))
-                if (tag.StoreName is "Vegetable Plot" or "Garden Shop" or "Stove") old.Add(tag.gameObject);
+                if (tag.StoreName is "Vegetable Plot" or "Garden Shop") old.Add(tag.gameObject);
             foreach (var bubble in FindObjectsByType<Bubble>(FindObjectsSortMode.None))
             {
                 if (bubble.Taken || bubble.Contents == null) continue;
                 var tag = bubble.Contents.GetComponent<CatalogItem>();
-                if (tag != null && tag.StoreName is "Vegetable Plot" or "Garden Shop" or "Stove") old.Add(bubble.gameObject);
+                if (tag != null && tag.StoreName is "Vegetable Plot" or "Garden Shop") old.Add(bubble.gameObject);
             }
 
             var spots = new List<Vector2>(PlotSpots());

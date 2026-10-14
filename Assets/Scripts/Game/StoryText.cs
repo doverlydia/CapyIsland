@@ -30,6 +30,8 @@ namespace CapyIsland.Game
         public const string Elder = "Elder Matcha";
         /// <summary>The shrine keeper on the hill: Old Yuzu's husband, Miso's grandpa. Only his spirit is left.</summary>
         public const string Keeper = "Old Mochi";
+        /// <summary>The cook by the hot spring: sells the stove, the pantry goods and recipes.</summary>
+        public const string Chef = "Chef Tofu";
 
         /// <summary>The opening movie's narration, in order (UI/Cutscenes/IntroCutscene).</summary>
         public static readonly string[] Intro =
@@ -281,7 +283,7 @@ namespace CapyIsland.Game
             { "Wedding Isle", "Pay the spirit to raise the bridge to Blossom Isle." },
             { "Pirate Cove", "Pay the spirit to raise the bridge to Barnacle Bay." },
             { "Monster Isle", "Pay the spirit to raise the bridge to the Gloomfen." },
-            { "Farm Isle", "Pay the spirit to raise the bridge to Sunflower Farm: fields ready to plant, and a stove for cooking." },
+            { "Farm Isle", "Pay the spirit to raise the bridge to Sunflower Farm: fields ready to plant, and a barn full of seeds." },
 
             { "Bomb", "Goes fizz, then BOOM. Clears pests, and turns everything nearby back into bubbles." },
             { "Deer Bomb", "A gentler bomb. Sends guinea pigs and zombie capybaras packing and leaves everything else alone." },

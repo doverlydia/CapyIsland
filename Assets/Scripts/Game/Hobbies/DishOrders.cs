@@ -127,12 +127,12 @@ namespace CapyIsland.Game
             }
         }
 
-        /// <summary>Something you can cook at your level (more interesting dishes as you improve).</summary>
+        /// <summary>Something you know how to cook at your level (more interesting dishes as you improve).</summary>
         static string Pick()
         {
             int level = HobbyLog.Level(Hobby.Cooking);
             var known = new List<DishKind>();
-            foreach (var d in HobbyData.Dishes) if (d.MinLevel <= level) known.Add(d);
+            foreach (var d in HobbyData.Dishes) if (d.MinLevel <= level && HobbyLog.KnowsRecipe(d.Id)) known.Add(d);
             return known.Count > 0 ? known[UnityEngine.Random.Range(0, known.Count)].Id : null;
         }
 

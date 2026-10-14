@@ -3,7 +3,7 @@ using UnityEngine;
 namespace CapyIsland.Game
 {
     /// <summary>
-    /// The stove from the Garden Shop. Once it stands somewhere, tap it to cook: the pot pops up,
+    /// The stove from Chef Tofu. Once it stands somewhere, tap it to cook: the pot pops up,
     /// you drag ingredients from your bag into it, and then it's you against the heat.
     /// </summary>
     public class CookingStove : MonoBehaviour, ITappable
@@ -31,7 +31,7 @@ namespace CapyIsland.Game
         public void Tap()
         {
             Sfx.Play(SfxKind.Tap, 0.5f);
-            // The farm's stove takes up cooking the first time you use it: its movie, then the kitchen.
+            // Buying it takes up cooking; a stove from before then does on its first use: its movie, then the kitchen.
             if (HobbyLog.Unlock(Hobby.Cooking)) { UI.HobbyCutscene.Show(Hobby.Cooking); return; }
             UI.CookingScreen.Show();
         }

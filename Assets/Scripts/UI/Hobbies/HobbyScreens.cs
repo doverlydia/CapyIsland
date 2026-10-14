@@ -540,14 +540,15 @@ namespace CapyIsland.UI
             Back();
             // A recipe book: the cooking itself happens at your stove.
             var stove = CookingStove.Placed();
-            var go = UiKit.Button(_list, "Stove", stove != null ? "Go to my stove" : "Find the stove on Sunflower Farm",
-                UiKit.ButtonStyle.Primary, () => ShowInWorld(stove != null ? (Vector2?)stove.transform.position : Farm.Destination,
-                    "Open Pebble Cove first: Sunflower Farm's bridge is at its south end."), 30f, IconPainter.Flame);
+            var go = UiKit.Button(_list, "Stove", stove != null ? "Go to my stove" : "Buy a stove from Chef Tofu",
+                UiKit.ButtonStyle.Primary, () => ShowInWorld(stove != null ? (Vector2?)stove.transform.position : ChefTofu.Spot, null), 30f, IconPainter.Flame);
             go.transform.parent.gameObject.AddComponent<LayoutElement>().preferredHeight = 96f;
-            int level = HobbyLog.Level(Hobby.Cooking);
+            // Recipes and pantry goods: Chef Tofu's.
+            var chef = UiKit.Button(_list, "Chef", "Visit Chef Tofu", UiKit.ButtonStyle.Spring, () => ShowInWorld(ChefTofu.Spot, null), 30f);
+            chef.transform.parent.gameObject.AddComponent<LayoutElement>().preferredHeight = 96f;
             foreach (var dish in HobbyData.Dishes)
             {
-                bool known = dish.MinLevel <= level;
+                bool known = HobbyLog.KnowsRecipe(dish.Id);
                 var needs = new StringBuilder();
                 foreach (var (item, count) in dish.Needs)
                 {

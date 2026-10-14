@@ -3,7 +3,7 @@ using UnityEngine;
 namespace CapyIsland.Game
 {
     /// <summary>
-    /// One of Skipper Nori's wares on the sand (a pack of bait, a message bottle) — a stand just like a shop's:
+    /// One of Skipper Nori's or Chef Tofu's wares (a pack of bait, eggs, the recipe book) — a stand just like a shop's:
     /// the ware bobbing on a pale base, half faded while you can't afford it, tap to open the
     /// purchase dialog.
     /// </summary>
@@ -13,6 +13,7 @@ namespace CapyIsland.Game
         Vector3Int _price;
         System.Func<bool> _buy;
         System.Func<string> _locked;
+        System.Action _tap;   // a stand that opens something instead of selling (Chef Tofu's recipe book)
         SpriteRenderer _icon, _shadow, _plinth;
         float _phase, _alpha = -1f;
         const float TapRadius = 0.9f, IconSize = 1.1f;
@@ -30,7 +31,7 @@ namespace CapyIsland.Game
                 () => HobbyLog.IsUnlocked(Hobby.Fishing) ? null : "You need a fishing rod first. Nori sells one right here.");
 
         public static BaitStand Create(string id, string title, string description, Vector3Int price, Sprite sprite, System.Func<bool> buy, Vector2 at, Transform parent,
-            System.Func<string> locked = null)
+            System.Func<string> locked = null, System.Action tap = null)
         {
             var go = new GameObject(id);
             go.transform.SetParent(parent, false);
@@ -64,7 +65,7 @@ namespace CapyIsland.Game
             }
 
             var stand = go.AddComponent<BaitStand>();
-            stand._title = title; stand._description = description; stand._price = price; stand._buy = buy; stand._locked = locked;
+            stand._title = title; stand._description = description; stand._price = price; stand._buy = buy; stand._locked = locked; stand._tap = tap;
             stand._phase = Random.value * 6f;
             stand._icon = sr;
             stand._shadow = go.transform.Find("Shadow")?.GetComponent<SpriteRenderer>();
@@ -100,6 +101,10 @@ namespace CapyIsland.Game
             return d <= TapRadius ? d : -1f;
         }
 
-        public void Tap() => SaleDisplay.BrowseOther(this);
+        public void Tap()
+        {
+            if (_tap != null) { Sfx.Play(SfxKind.Tap, 0.5f); _tap(); }
+            else SaleDisplay.BrowseOther(this);
+        }
     }
 }

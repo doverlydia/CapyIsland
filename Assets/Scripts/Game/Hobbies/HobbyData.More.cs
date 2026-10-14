@@ -15,6 +15,19 @@ namespace CapyIsland.Game
         public string Id, Name, Blurb;
         public (string item, int count)[] Needs;
         public int MinLevel;
+        /// <summary>The hobby whose taking-up gives this recipe away, or null: Chef Tofu sells it.</summary>
+        public Hobby? FreeWith;
+
+        /// <summary>What Chef Tofu asks for the recipe: dearer as the dish gets fancier.</summary>
+        public int RecipeGold => 30 + MinLevel * 30;
+    }
+
+    /// <summary>What you can't grow or catch: Chef Tofu sells it in small packs, straight into the bag.</summary>
+    public class PantryKind
+    {
+        public string Id, Name, Blurb;
+        public int Pack, Gold;
+        public string Item => "pantry:" + Id;
     }
 
     public enum BugHome { Flower, Tree, Ground }
@@ -50,9 +63,9 @@ namespace CapyIsland.Game
 
         public static readonly DishKind[] Dishes =
         {
-            new() { Id = "CarrotSoup",     Name = "Carrot Soup",     MinLevel = 1, Needs = new[] { ("crop:Carrot", 3) },
+            new() { Id = "CarrotSoup",     Name = "Carrot Soup",     MinLevel = 1, Needs = new[] { ("crop:Carrot", 3) }, FreeWith = Hobby.Gardening,
                     Blurb = "Smooth, warm and orange. Fills a hungry worker right up." },
-            new() { Id = "GrilledFish",    Name = "Grilled Fish",    MinLevel = 1, Needs = new[] { ("fish:any", 2) },
+            new() { Id = "GrilledFish",    Name = "Grilled Fish",    MinLevel = 1, Needs = new[] { ("fish:any", 2) }, FreeWith = Hobby.Fishing,
                     Blurb = "Crispy skin, a squeeze of lemon. A fisher's favourite." },
             new() { Id = "TomatoSalad",    Name = "Tomato Salad",    MinLevel = 2, Needs = new[] { ("crop:Tomato", 2), ("crop:Cabbage", 1) },
                     Blurb = "Fresh and crunchy, straight from the garden." },
@@ -66,7 +79,33 @@ namespace CapyIsland.Game
                     Blurb = "Bubbling broth with a slice of yuzu. Warms you to the toes." },
             new() { Id = "PumpkinPie",     Name = "Pumpkin Pie",     MinLevel = 7, Needs = new[] { ("crop:Pumpkin", 1), ("crop:Strawberry", 2) },
                     Blurb = "The pride of any island kitchen." },
+            // With Chef Tofu's pantry.
+            new() { Id = "Omelette",       Name = "Fluffy Omelette", MinLevel = 1, Needs = new[] { ("pantry:Egg", 2), ("crop:Cabbage", 1) },
+                    Blurb = "Rolled up soft and golden, with a little crunch of cabbage." },
+            new() { Id = "Onigiri",        Name = "Onigiri",         MinLevel = 1, Needs = new[] { ("pantry:Rice", 2), ("fish:any", 1) },
+                    Blurb = "A rice ball with a fishy surprise inside. Perfect for a walk." },
+            new() { Id = "Pancakes",       Name = "Pancakes",        MinLevel = 2, Needs = new[] { ("pantry:Flour", 1), ("pantry:Egg", 1), ("pantry:Milk", 1) },
+                    Blurb = "A fluffy stack with butter melting down the sides." },
+            new() { Id = "Tempura",        Name = "Fish Tempura",    MinLevel = 3, Needs = new[] { ("fish:any", 2), ("pantry:Flour", 1), ("pantry:Egg", 1) },
+                    Blurb = "Light, crispy batter. Gone the moment it leaves the pan." },
+            new() { Id = "Milkshake",      Name = "Strawberry Milkshake", MinLevel = 4, Needs = new[] { ("crop:Strawberry", 2), ("pantry:Milk", 1), ("pantry:Sugar", 1) },
+                    Blurb = "Pink, cold and frothy. Comes with a moustache." },
+            new() { Id = "CornBread",      Name = "Corn Bread",      MinLevel = 4, Needs = new[] { ("crop:Corn", 2), ("pantry:Flour", 1), ("pantry:Egg", 1) },
+                    Blurb = "Golden squares, warm from the tin." },
+            new() { Id = "Pudding",        Name = "Custard Pudding", MinLevel = 5, Needs = new[] { ("pantry:Milk", 2), ("pantry:Egg", 1), ("pantry:Sugar", 1) },
+                    Blurb = "It wobbles. Then it's gone." },
         };
+
+        public static readonly PantryKind[] Pantry =
+        {
+            new() { Id = "Egg",   Name = "Eggs",  Pack = 3, Gold = 12, Blurb = "Three fresh eggs, for omelettes, pancakes and baking." },
+            new() { Id = "Milk",  Name = "Milk",  Pack = 2, Gold = 12, Blurb = "Two bottles of creamy milk, for pancakes, shakes and pudding." },
+            new() { Id = "Flour", Name = "Flour", Pack = 3, Gold = 10, Blurb = "Three scoops of flour, for batter, bread and anything fluffy." },
+            new() { Id = "Rice",  Name = "Rice",  Pack = 3, Gold = 10, Blurb = "Three bowls of sticky rice, for rice balls." },
+            new() { Id = "Sugar", Name = "Sugar", Pack = 3, Gold = 8,  Blurb = "Three spoons of sugar: a little sweetness for desserts." },
+        };
+
+        public static PantryKind PantryById(string id) => System.Array.Find(Pantry, p => p.Id == id);
 
         public static readonly BugKind[] Bugs =
         {
@@ -120,6 +159,7 @@ namespace CapyIsland.Game
         {
             if (item.StartsWith("fish:")) { var f = FishById(item.Substring(5)); return f != null ? FishPicture(f) : null; }
             if (item.StartsWith("crop:")) return Art("Crop_" + item.Substring(5));
+            if (item.StartsWith("pantry:")) return Art("Pantry_" + item.Substring(7));
             if (item.StartsWith("dish:")) return Art("Dish_" + item.Substring(5));
             if (item == "mat:Silk") return Art("Bug_Silkworm");
             if (item.StartsWith("bait:")) return Art("Bait_" + item.Substring(5));
@@ -131,6 +171,7 @@ namespace CapyIsland.Game
             if (item == "fish:any") return "any fish";
             if (item.StartsWith("fish:")) return FishById(item.Substring(5))?.Name ?? "Fish";
             if (item.StartsWith("crop:")) return Crop(item.Substring(5))?.Name ?? "Crop";
+            if (item.StartsWith("pantry:")) return PantryById(item.Substring(7))?.Name ?? "Food";
             if (item == "dish:Bizarre") return "Bizarre Food";
             if (item == "mat:Silk") return "Silk";
             if (item.StartsWith("bait:")) return Baits.ById(item.Substring(5))?.Name ?? "Bait";

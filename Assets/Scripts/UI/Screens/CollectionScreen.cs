@@ -169,7 +169,7 @@ namespace CapyIsland.UI
                 case Tab.Recipes:
                     foreach (var d in HobbyData.Dishes)
                     {
-                        bool have = d.MinLevel <= cooking && HobbyLog.IsUnlocked(Hobby.Cooking);
+                        bool have = HobbyLog.KnowsRecipe(d.Id);
                         Add(HobbyData.ItemArt("dish:" + d.Id), have, d.Name, have ? null : Whereabouts.Dish(d));
                     }
                     break;
