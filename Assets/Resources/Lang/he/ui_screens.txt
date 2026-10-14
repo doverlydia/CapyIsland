@@ -447,3 +447,9 @@
 
 @ That save code is cut short or changed. Copy the whole code and try again.
 = קוד השמירה הזה קטוע או שונה. העתק את כל הקוד ונסה שוב.
+
+@ Bring back a saved island
+= להחזיר אי שמור
+
+@ Paste the save code you kept in a note. The island you're on now gives way to that one, so export this one first if you want to keep it.
+= הדבק את קוד השמירה ששמרת בפתק. האי שאתה נמצא בו עכשיו יוחלף באי מהקוד, אז ייצא את האי הזה קודם אם אתה רוצה לשמור אותו.

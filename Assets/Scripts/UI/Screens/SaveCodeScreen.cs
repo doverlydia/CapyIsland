@@ -18,7 +18,7 @@ namespace CapyIsland.UI
     {
         const string ObjectName = "[SaveCode]";
 
-        bool _import;
+        bool _import, _replacing;
         string _code;          // the code shown (export) or pasted (import)
         object _island;        // read from the pasted code, ready to load
         TextMeshProUGUI _preview, _status;
@@ -36,7 +36,13 @@ namespace CapyIsland.UI
         /// <summary>Asks for a save code and loads it (the first screen).</summary>
         public static void ShowImport() => Open(true);
 
-        static void Open(bool import)
+        /// <summary>
+        /// Asks for a save code and loads it; <paramref name="replacing"/> (from Settings) warns that
+        /// the island you're playing gives way to the one in the code.
+        /// </summary>
+        public static void ShowImport(bool replacing) => Open(true, replacing);
+
+        static void Open(bool import, bool replacing = false)
         {
             var old = GameObject.Find(ObjectName);
             if (old != null) Destroy(old);
@@ -50,6 +56,7 @@ namespace CapyIsland.UI
             scaler.matchWidthOrHeight = 0.5f;
             var screen = go.AddComponent<SaveCodeScreen>();
             screen._import = import;
+            screen._replacing = replacing;
             if (!import) SaveGame.Instance?.Save();   // the code holds the island as it is right now
             screen._code = import ? "" : SaveTransfer.Export();
             screen.Build();
@@ -79,7 +86,9 @@ namespace CapyIsland.UI
             var title = UiKit.Text(card.transform, "Title", _import ? "Load a save" : "Your save code", 48f, UiKit.Ink, true, TextAlignmentOptions.Center);
             title.overflowMode = TextOverflowModes.Overflow;
             var about = UiKit.Text(card.transform, "About", _import
-                    ? "Paste the save code you kept in a note, and your island comes back just as you left it."
+                    ? _replacing
+                        ? "Paste the save code you kept in a note. The island you're on now gives way to that one, so export this one first if you want to keep it."
+                        : "Paste the save code you kept in a note, and your island comes back just as you left it."
                     : "Copy it and paste it into a note somewhere safe. To bring this island back, on this phone or another device, choose \"Load a save\" on the first screen and paste it in.",
                 30f, UiKit.InkSoft, false, TextAlignmentOptions.Center);
             about.overflowMode = TextOverflowModes.Overflow;
