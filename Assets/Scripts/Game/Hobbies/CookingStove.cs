@@ -31,6 +31,8 @@ namespace CapyIsland.Game
         public void Tap()
         {
             Sfx.Play(SfxKind.Tap, 0.5f);
+            // The farm's stove takes up cooking the first time you use it: its movie, then the kitchen.
+            if (HobbyLog.Unlock(Hobby.Cooking)) { UI.HobbyCutscene.Show(Hobby.Cooking); return; }
             UI.CookingScreen.Show();
         }
 

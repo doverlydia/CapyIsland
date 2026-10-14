@@ -29,8 +29,8 @@ namespace CapyIsland.UI
                 Hobby.Bugs => ("How to catch bugs", "Bugs settle on flowers, trees and grass. Walk close and tap one to swing your net.\nSome are shy, so don't run straight at them!"),
                 Hobby.Birding => ("How to watch birds", "Birds land in trees and on the shore. Tap one from a few steps away to spot it through your binoculars.\nGet too close and it flies off!"),
                 Hobby.Sewing => ("How to sew", "Put your sewing machine down, then tap it.\nA hat needs cotton from your garden. Decorate it, and it goes in your wardrobe!"),
-                Hobby.Gardening => ("How to garden", "Put a vegetable plot down anywhere and tap it to plant seeds.\nThey grow while you're away. Tap again to harvest!"),
-                Hobby.Cooking => ("How to cook", "Put your stove down and tap it. Drag ingredients into the pot, press Cook, and tap the spatula in time to keep the heat down.\nIslanders with a dish in a bubble will pay for it!"),
+                Hobby.Gardening => ("How to garden", "Tap a plot on Sunflower Farm to plant seeds.\nThey grow while you're away. Tap again to harvest! More plots open as your gardening level grows."),
+                Hobby.Cooking => ("How to cook", "Drag ingredients into the pot, press Cook, and tap the spatula in time to keep the heat down.\nIslanders with a dish in a bubble will pay for it!"),
                 _ => ("New hobby!", "Find it in Hobbies, in the menu."),
             };
             CardPopup.Show(title, body, Picture(hobby));
@@ -68,6 +68,7 @@ namespace CapyIsland.UI
             {
                 Hobby.Fishing or Hobby.Birding => "Cutscene_Shore",
                 Hobby.Sewing => "Cutscene_Wedding",
+                Hobby.Gardening or Hobby.Cooking => "Cutscene_Farm",   // Sunflower Farm, where both live
                 _ => "Cutscene_Mill",
             };
             Backdrop(Resources.Load<Sprite>("Cutscenes/" + backdrop), UiKit.Hex("BFE3F2"), UiKit.Hex("8DBA5A"));

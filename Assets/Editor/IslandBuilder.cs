@@ -300,13 +300,51 @@ namespace CapyIsland.EditorTools
             EditorUtility.SetDirty(land);
             ScatterDressing(ground.transform, land);
 
-            // The camera may roam the whole world, with a little sea beyond it.
+            SetCameraBounds();
+        }
+
+        /// <summary>The camera may roam the whole world, with a little sea beyond it (the farm included).</summary>
+        static void SetCameraBounds()
+        {
             var rig = Object.FindFirstObjectByType<CameraRig.ResponsiveCameraRig>();
-            if (rig != null)
+            if (rig == null) return;
+            var worldCentre = Game.LandMap.WorldToUnity(new Vector2(Game.LandMap.WorldSize * 0.5f, Game.LandMap.WorldSize * 0.5f));
+            var bounds = new Bounds(new Vector3(worldCentre.x, worldCentre.y, 0f), new Vector3(200f, 104f, 0f));
+            var south = Game.LandMap.WorldToUnity(new Vector2(0f, IslandPainter.SouthEdge));
+            bounds.Encapsulate(new Vector3(bounds.center.x, south.y - 6f, 0f));
+            rig.WorldBounds = bounds;
+            EditorUtility.SetDirty(rig);
+        }
+
+        /// <summary>
+        /// Adds land the layout has and the open scene doesn't yet (the farm and its bridge), painted
+        /// and appended to the land map, without rebuilding the rest of the island.
+        /// </summary>
+        [MenuItem("CapyIsland/Build/Add new land")]
+        public static void AddNewLand()
+        {
+            var land = Object.FindFirstObjectByType<Game.LandMap>();
+            if (land == null) { Debug.LogError("No LandMap in the open scene."); return; }
+            var have = new System.Collections.Generic.HashSet<string>();
+            foreach (var p in land.Pieces) have.Add(p.name);
+
+            var pieces = new System.Collections.Generic.List<Game.LandMap.Piece>(land.Pieces);
+            var layout = IslandPainter.Layout();
+            int added = 0;
+            for (int i = 0; i < layout.Count; i++)
             {
-                rig.WorldBounds = new Bounds(new Vector3(worldCentre.x, worldCentre.y, 0f), new Vector3(200f, 104f, 0f));
-                EditorUtility.SetDirty(rig);
+                if (have.Contains(layout[i].name)) continue;
+                layout[i].layers = IslandPainter.Paint(layout[i], i, land.transform, false);
+                if (layout[i].isBridge)
+                    foreach (var layer in layout[i].layers) layer.enabled = false;
+                pieces.Add(layout[i]);
+                added++;
             }
+            land.SetPieces(pieces);
+            EditorUtility.SetDirty(land);
+            SetCameraBounds();
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(land.gameObject.scene);
+            Debug.Log($"Added {added} piece(s) of land.");
         }
 
         static void Quad(Transform parent, string name, Vector3 pos, Vector2 size, Color color, int order)

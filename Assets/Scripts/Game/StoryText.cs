@@ -168,6 +168,7 @@ namespace CapyIsland.Game
             { "Wedding Isle", "Blossom Isle" },
             { "Pirate Cove", "Barnacle Bay" },
             { "Monster Isle", "Gloomfen" },
+            { "Farm Isle", "Sunflower Farm" },
         };
 
         /// <summary>The seas between the islands, as the map writes them (west channel, lagoon, strait, open sea).</summary>
@@ -280,6 +281,7 @@ namespace CapyIsland.Game
             { "Wedding Isle", "Pay the spirit to raise the bridge to Blossom Isle." },
             { "Pirate Cove", "Pay the spirit to raise the bridge to Barnacle Bay." },
             { "Monster Isle", "Pay the spirit to raise the bridge to the Gloomfen." },
+            { "Farm Isle", "Pay the spirit to raise the bridge to Sunflower Farm: fields ready to plant, and a stove for cooking." },
 
             { "Bomb", "Goes fizz, then BOOM. Clears pests, and turns everything nearby back into bubbles." },
             { "Deer Bomb", "A gentler bomb. Sends guinea pigs and zombie capybaras packing and leaves everything else alone." },

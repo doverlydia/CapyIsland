@@ -1147,11 +1147,11 @@
 @ In the grass
 = בדשא
 
-@ Grow it in a vegetable plot
-= גדל אותו בערוגת ירקות
+@ Grow it on Sunflower Farm
+= גדל אותו בחוות החמניות
 
-@ Cook it at your stove
-= בשל אותו בכיריים שלך
+@ Cook it at the farm's stove
+= בשל אותו בכיריים של החווה
 
 @ Wanders onto your island
 = משוטט לאי שלך
@@ -1173,3 +1173,45 @@
 
 @ Lantern Sea
 = ים הפנסים
+
+@ Sunflower Farm
+= חוות החמניות
+
+@ Pay the spirit to raise the bridge to Sunflower Farm: fields ready to plant, and a stove for cooking.
+= שלם לרוח כדי להרים את הגשר לחוות החמניות: שדות מוכנים לשתילה, וכיריים לבישול.
+
+@ Your vegetable plots have moved to Sunflower Farm, south of Pebble Cove. Your crops are still growing there!
+= ערוגות הירקות שלך עברו לחוות החמניות, דרומית למפרץ החלוקים. הגידולים שלך עדיין צומחים שם!
+
+@ This plot opens at gardening level {0}.
+= הערוגה הזו נפתחת בגינון ברמה {0}.
+
+@ Pay the spirit at the south end of Pebble Cove to raise the bridge to Sunflower Farm
+= שלם לרוח בקצה הדרומי של מפרץ החלוקים כדי להרים את הגשר לחוות החמניות
+
+@ Tap the stove on Sunflower Farm
+= הקש על הכיריים בחוות החמניות
+
+@ Tap a plot on Sunflower Farm to plant seeds.
+= הקש על ערוגה בחוות החמניות כדי לשתול זרעים.
+
+@ They grow while you're away. Tap again to harvest! More plots open as your gardening level grows.
+= הם גדלים גם כשאתה לא כאן. הקש שוב כדי לקצור! ערוגות נוספות נפתחות ככל שרמת הגינון שלך עולה.
+
+@ Drag ingredients into the pot, press Cook, and tap the spatula in time to keep the heat down.
+= גרור מרכיבים לסיר, לחץ על בשל, והקש על המרית בזמן כדי להוריד את החום.
+
+@ Go to my farm
+= לחווה שלי
+
+@ Find Sunflower Farm
+= מצא את חוות החמניות
+
+@ Open Pebble Cove first: Sunflower Farm's bridge is at its south end.
+= קודם פתח את מפרץ החלוקים: הגשר לחוות החמניות נמצא בקצה הדרומי שלו.
+
+@ Find the stove on Sunflower Farm
+= מצא את הכיריים בחוות החמניות
+
+@ Tap a plot on Sunflower Farm to plant seeds, and come back when it's grown. More plots open as you level up.
+= הקש על ערוגה בחוות החמניות כדי לשתול זרעים, וחזור כשהם גדלו. ערוגות נוספות נפתחות כשאתה עולה ברמה.

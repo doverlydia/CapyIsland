@@ -273,6 +273,7 @@ namespace CapyIsland.UI
             gameObject.AddComponent<Birding>();
             gameObject.AddComponent<BugCatching>();
             gameObject.AddComponent<Gardening>();
+            gameObject.AddComponent<Farm>();
             gameObject.AddComponent<CatCare>();
             gameObject.AddComponent<DishOrders>();
             gameObject.AddComponent<SeaLibrary>();

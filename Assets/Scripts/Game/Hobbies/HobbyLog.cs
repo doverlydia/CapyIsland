@@ -125,8 +125,8 @@ namespace CapyIsland.Game
             Hobby.Bugs => "Buy a Bug Net at the Bronze Store",
             Hobby.Birding => "Buy Binoculars at the Silver Store",
             Hobby.Sewing => "Buy a Sewing Machine at the Steel Store",
-            Hobby.Gardening => "Buy a Vegetable Plot at the Garden Shop (after the Legendary Gem Store)",
-            Hobby.Cooking => "Buy a Cooking Stove at the Garden Shop (after the Legendary Gem Store)",
+            Hobby.Gardening => "Pay the spirit at the south end of Pebble Cove to raise the bridge to Sunflower Farm",
+            Hobby.Cooking => "Tap the stove on Sunflower Farm",
             _ => "",
         };
 

@@ -104,6 +104,7 @@ namespace CapyIsland.Game
             "Verdant Bay" => "pete_isle",
             "Pirate Cove" => "pirate_cove",
             "Wedding Isle" => "wedding_isle",
+            Farm.GhostName => Farm.BridgePiece,
             _ => null,
         };
 
@@ -210,6 +211,11 @@ namespace CapyIsland.Game
 
                 case "Wedding Isle":
                     land.OpenBridge("wedding_isle");
+                    break;
+
+                case Farm.GhostName:
+                    land.OpenBridge(Farm.BridgePiece);
+                    if (Farm.Instance != null) Farm.Instance.Opened();
                     break;
             }
         }

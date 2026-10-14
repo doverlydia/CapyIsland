@@ -5,21 +5,20 @@ using UnityEngine;
 namespace CapyIsland.Game
 {
     /// <summary>
-    /// Gardening. Vegetable plots come from the Garden Shop like any other store item: buy one,
-    /// put it wherever you like, tap it to plant seeds bought with a little gold, and come back
-    /// when they have grown (real minutes, even while the game is closed). Harvests go in your
-    /// bag, for cooking at your stove. The more you grow, the more kinds of seed you can plant
-    /// and the more plots the shop will sell you.
+    /// Gardening. The plots are on Sunflower Farm (<see cref="Farm"/>): tap one to plant seeds
+    /// bought with a little gold, and come back when they have grown (real minutes, even while the
+    /// game is closed). Harvests go in your bag, for cooking at the farm's stove. The more you grow,
+    /// the more kinds of seed you can plant and the more of the farm's plots open up.
     ///
-    /// Each plot's crop is kept in <see cref="HobbyLog.Plots"/> by where the plot stands, so a
-    /// plot and its growing seeds survive saving, loading and the odd bomb (which loses the crop).
+    /// Each plot's crop is kept in <see cref="HobbyLog.Plots"/> by where the plot stands, so its
+    /// growing seeds survive saving and loading.
     /// </summary>
     public class Gardening : MonoBehaviour
     {
         public const int DigWood = 20;
         public static Gardening Instance { get; private set; }
 
-        /// <summary>How many plots the shop will sell you at your gardening level.</summary>
+        /// <summary>How many of the farm's plots are open at your gardening level.</summary>
         public static int MaxPlots => 2 + HobbyLog.Level(Hobby.Gardening);
 
         void Awake() => Instance = this;
@@ -27,40 +26,6 @@ namespace CapyIsland.Game
         void OnDestroy()
         {
             if (Instance == this) Instance = null;
-        }
-
-        void Start()
-        {
-            if (Visit.Active) return;   // your plots grow on your island
-            HobbyItems.AfterLoad(this, Migrate);
-        }
-
-        /// <summary>
-        /// Plots made before they were store items live only in the hobby log: turn each into a real
-        /// plot where it stood (or a bubble, if it was never put down). Ones already in the world —
-        /// every plot bought from the shop — are found by position and left alone.
-        /// </summary>
-        void Migrate()
-        {
-            var catalog = ItemCatalog.Instance;
-            if (catalog == null) return;
-            var views = FindObjectsByType<PlotView>(FindObjectsSortMode.None);
-            for (int i = HobbyLog.Plots.Count - 1; i >= 0; i--)
-            {
-                var plot = HobbyLog.Plots[i];
-                bool standing = false;
-                foreach (var v in views)
-                    if (v.Data == plot) { standing = true; break; }
-                if (standing) continue;
-                if (plot.unplaced)
-                {
-                    HobbyLog.Plots.RemoveAt(i);
-                    var king = FindFirstObjectByType<PlayerAvatar>();
-                    catalog.MakeStore("Vegetable Plot", king != null ? (Vector2)king.transform.position + new Vector2(1.6f, -0.8f) : plot.pos);
-                }
-                else catalog.MakeItem("Vegetable Plot", plot.pos);   // finds its record by position
-            }
-            HobbyLog.Save();
         }
 
         /// <summary>The crop record for a plot standing at <paramref name="at"/>, if any.</summary>
@@ -82,6 +47,17 @@ namespace CapyIsland.Game
             float _lastY = float.NaN;
 
             public HobbyLog.Plot Data => _data;
+
+            /// <summary>Its place in the farm's field (0 = first), set by <see cref="Farm"/>.</summary>
+            [System.NonSerialized] public int FarmIndex = -1;
+
+            /// <summary>Beyond what your gardening level allows: roped off until you grow into it.</summary>
+            public bool Locked => FarmIndex >= MaxPlots;
+
+            /// <summary>The gardening level that opens this plot.</summary>
+            public int OpensAt => Mathf.Max(1, FarmIndex - 1);
+
+            SpriteRenderer _lock;
 
             void Awake()
             {
@@ -109,7 +85,7 @@ namespace CapyIsland.Game
                 }
                 _shownStage = null;
                 Refresh();
-                if (fresh && !SaveGame.Restoring)
+                if (fresh && !SaveGame.Restoring && !Farm.LayingOut)
                 {
                     Sfx.PlayAt(SfxKind.Plop, at);
                     Hints.Show("Tap your plot to plant some seeds.");
@@ -160,10 +136,34 @@ namespace CapyIsland.Game
                 if (Time.frameCount % 15 == 0) Refresh();
             }
 
+            /// <summary>A roped-off plot: dimmed soil and a padlock until your level reaches it.</summary>
+            void ShowLock()
+            {
+                bool locked = Locked;
+                if (locked && _lock == null)
+                {
+                    var go = new GameObject("Lock");
+                    go.transform.SetParent(transform, false);
+                    go.transform.localPosition = new Vector3(0f, 0.35f, 0f);
+                    _lock = go.AddComponent<SpriteRenderer>();
+                    _lock.sprite = UI.IconPainter.Lock;
+                    _lock.color = new Color(1f, 0.97f, 0.9f, 0.95f);   // cream, to stand out on the dark soil
+                    float size = 0.75f / Mathf.Max(0.01f, _lock.sprite.bounds.size.y * transform.lossyScale.y);
+                    go.transform.localScale = Vector3.one * size;
+                }
+                if (_lock != null)
+                {
+                    _lock.enabled = locked;
+                    _lock.sortingOrder = _soil.sortingOrder + 2;
+                }
+                _soil.color = locked ? new Color(0.72f, 0.68f, 0.64f) : Color.white;
+            }
+
             void Refresh()
             {
                 var d = Data;
                 if (d == null || !_placeable.Placed) return;
+                if (FarmIndex >= 0) ShowLock();
                 _lastY = float.NaN;
                 bool planted = !string.IsNullOrEmpty(d.crop);
                 float p = Progress;
@@ -204,6 +204,11 @@ namespace CapyIsland.Game
             {
                 var d = Data;
                 if (d == null) return;
+                if (Locked && string.IsNullOrEmpty(d.crop))
+                {
+                    Hints.Show(string.Format("This plot opens at gardening level {0}.", OpensAt));
+                    return;
+                }
                 if (string.IsNullOrEmpty(d.crop)) { ChooseSeed(); return; }
                 var kind = HobbyData.Crop(d.crop);
                 float p = Progress;

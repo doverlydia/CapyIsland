@@ -24,10 +24,10 @@ namespace CapyIsland.Game
                 When(b.Times, b.RainOnly), Level(Hobby.Bugs, "Needs bug catching level {0}", b.MinLevel));
 
         public static string Crop(CropKind c) =>
-            Lines("Grow it in a vegetable plot", Level(Hobby.Gardening, "Needs gardening level {0}", c.MinLevel));
+            Lines("Grow it on Sunflower Farm", Level(Hobby.Gardening, "Needs gardening level {0}", c.MinLevel));
 
         public static string Dish(DishKind d) =>
-            Lines("Cook it at your stove", Level(Hobby.Cooking, "Needs cooking level {0}", d.MinLevel));
+            Lines("Cook it at the farm's stove", Level(Hobby.Cooking, "Needs cooking level {0}", d.MinLevel));
 
         public const string Cat = "Wanders onto your island\nsome days";
 

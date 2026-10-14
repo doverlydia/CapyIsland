@@ -51,6 +51,33 @@ namespace CapyIsland.EditorTools
             ("monster_isle", new[] { new Vector3(2812, 1485, 0), new Vector3(2812, 2970, 0), new Vector3(3375, 2250, 1), new Vector3(2250, 2250, 1) }),
         };
 
+        /// <summary>
+        /// Land of our own, south of the original's square: the farm, under Pebble Cove, and the
+        /// bridge to it. Listed after everything else, so no older island's number or painted file
+        /// moves (island 7, pieces 13 and 14).
+        /// </summary>
+        static readonly (string name, Rect[] rects)[] LaterIslands =
+        {
+            ("Farm Isle", new[] { R(0.04f, 1f, 0.42f, 0.3f) }),
+        };
+
+        static readonly (string name, Vector3[] locs)[] LaterBridges =
+        {
+            ("farm_bridge", new[] { new Vector3(1125, 4480, 0) }),
+        };
+
+        /// <summary>The southernmost edge of any island rect, in world units (the camera goes this far).</summary>
+        public static float SouthEdge
+        {
+            get
+            {
+                float south = LandMap.WorldSize;
+                foreach (var island in LaterIslands)
+                    foreach (var r in island.rects) south = Mathf.Max(south, r.yMax);
+                return south;
+            }
+        }
+
         static Rect R(float x, float y, float w, float h) =>
             new Rect(x * LandMap.WorldSize, y * LandMap.WorldSize, w * LandMap.WorldSize, h * LandMap.WorldSize);
 
@@ -59,19 +86,29 @@ namespace CapyIsland.EditorTools
         public static List<LandMap.Piece> Layout()
         {
             var pieces = new List<LandMap.Piece>();
-            for (int i = 0; i < Islands.Length; i++)
+            void Islands_((string name, Rect[] rects)[] list, int first)
             {
-                var piece = new LandMap.Piece { name = Islands[i].name, isBridge = false, open = true };
-                piece.rects.AddRange(Islands[i].rects);
-                piece.circles = IslandCircles(Islands[i].rects, 1000 + i * 17);
-                pieces.Add(piece);
+                for (int i = 0; i < list.Length; i++)
+                {
+                    var piece = new LandMap.Piece { name = list[i].name, isBridge = false, open = true };
+                    piece.rects.AddRange(list[i].rects);
+                    piece.circles = IslandCircles(list[i].rects, 1000 + (first + i) * 17);
+                    pieces.Add(piece);
+                }
             }
-            for (int i = 0; i < Bridges.Length; i++)
+            void Bridges_((string name, Vector3[] locs)[] list, int first)
             {
-                var piece = new LandMap.Piece { name = Bridges[i].name, isBridge = true, open = false };
-                piece.circles = BridgeCircles(Bridges[i].locs, 5000 + i * 31);
-                pieces.Add(piece);
+                for (int i = 0; i < list.Length; i++)
+                {
+                    var piece = new LandMap.Piece { name = list[i].name, isBridge = true, open = false };
+                    piece.circles = BridgeCircles(list[i].locs, 5000 + (first + i) * 31);
+                    pieces.Add(piece);
+                }
             }
+            Islands_(Islands, 0);
+            Bridges_(Bridges, 0);
+            Islands_(LaterIslands, Islands.Length);
+            Bridges_(LaterBridges, Bridges.Length);
             return pieces;
         }
 

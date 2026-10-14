@@ -47,8 +47,8 @@ namespace CapyIsland.Game
         static Dictionary<string, StoreItemDef> _byName;
 
         /// <summary>
-        /// Items that are ours, not the original's: the Garden Shop (the last store, sold at the
-        /// Legendary Gem Store) and the hobby kit it sells. Kept apart from the generated table.
+        /// Items that are ours, not the original's: the hobby kit, the shops for it, and the bridge to
+        /// Sunflower Farm. Kept apart from the generated table.
         /// </summary>
         public static readonly StoreItemDef[] Extra =
         {
@@ -60,6 +60,8 @@ namespace CapyIsland.Game
             new StoreItemDef("Binoculars", 205, 400, 400, 0, 30f, 0f, 1, StoreItemKind.Tool),
             new StoreItemDef("Sewing Machine", 206, 1500, 1500, 0, 40f, 0f, 1, StoreItemKind.Sewing),
             new StoreItemDef("Furniture Shop", 207, 2000, 1500, 0, 41f, 0f, 1, StoreItemKind.FurnitureShop),
+            // The spirit at the end of Pebble Cove: the bridge to Sunflower Farm (Farm).
+            new StoreItemDef("Farm Isle", 208, 6000, 6000, 0, 0f, 0f, 1, StoreItemKind.BridgeGhost),
         };
 
         /// <summary>The hobby a piece of gear (or a station) opens up, if it is one.</summary>
@@ -85,8 +87,8 @@ namespace CapyIsland.Game
 
         static StoreData()
         {
-            Lists["garden_store"] = new[] { "Vegetable Plot", "Stove" };
-            AddTo("gem_store", "Garden Shop");
+            // Gardening and its stove live on Sunflower Farm now (Farm): the Garden Shop is no longer
+            // sold. Its items stay defined so older islands still load them, to be moved to the farm.
             AddTo("bronze_store", "Bug Net");
             AddTo("silver_store", "Binoculars");
             AddTo("steel_store", "Sewing Machine");

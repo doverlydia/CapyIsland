@@ -110,7 +110,7 @@ namespace CapyIsland.UI
                     "Journal", () => Go(Page.Bugs))),
                 (Hobby.Gardening, "Gardening", IconPainter.Sparkle, UiKit.Hex("8A5A32"), () => HobbyCard(Hobby.Gardening, "Gardening", IconPainter.Sparkle, UiKit.Hex("8A5A32"),
                     $"{HobbyLog.Crops.Count} of {HobbyData.Crops.Length} vegetables grown",
-                    "Buy vegetable plots at the Garden Shop and put them anywhere. Tap one to plant seeds, come back when it's grown.",
+                    "Tap a plot on Sunflower Farm to plant seeds, and come back when it's grown. More plots open as you level up.",
                     "Journal", () => Go(Page.Veg))),
                 (Hobby.Cooking, "Cooking", IconPainter.Flame, UiKit.Primary, () => HobbyCard(Hobby.Cooking, "Cooking", IconPainter.Flame, UiKit.Primary,
                     $"{CountDishes()} dish{(CountDishes() == 1 ? "" : "es")} in your bag",
@@ -473,8 +473,8 @@ namespace CapyIsland.UI
         void VegPage()
         {
             Back();
-            var plots = UiKit.Button(_list, "Plots", "Go to my plots", UiKit.ButtonStyle.Spring,
-                () => ShowInWorld(FindPlaced("Vegetable Plot") ?? FindPlaced("Garden Shop"), "Buy a vegetable plot at the Garden Shop, then put it down anywhere."), 30f, IconPainter.Sparkle);
+            var plots = UiKit.Button(_list, "Plots", Farm.IsOpen ? "Go to my farm" : "Find Sunflower Farm", UiKit.ButtonStyle.Spring,
+                () => ShowInWorld(Farm.Destination, "Open Pebble Cove first: Sunflower Farm's bridge is at its south end."), 30f, IconPainter.Sparkle);
             plots.transform.parent.gameObject.AddComponent<LayoutElement>().preferredHeight = 90f;
             JournalHeader(Hobby.Gardening);
             var grid = Grid(HobbyData.Crops.Length);
@@ -540,9 +540,9 @@ namespace CapyIsland.UI
             Back();
             // A recipe book: the cooking itself happens at your stove.
             var stove = CookingStove.Placed();
-            var go = UiKit.Button(_list, "Stove", stove != null ? "Go to my stove" : "Find a stove at the Garden Shop",
-                UiKit.ButtonStyle.Primary, () => ShowInWorld(stove != null ? stove.transform : FindPlaced("Garden Shop"),
-                    stove != null ? null : "The Garden Shop opens up after the Legendary Gem Store. It sells the Cooking Stove."), 30f, IconPainter.Flame);
+            var go = UiKit.Button(_list, "Stove", stove != null ? "Go to my stove" : "Find the stove on Sunflower Farm",
+                UiKit.ButtonStyle.Primary, () => ShowInWorld(stove != null ? (Vector2?)stove.transform.position : Farm.Destination,
+                    "Open Pebble Cove first: Sunflower Farm's bridge is at its south end."), 30f, IconPainter.Flame);
             go.transform.parent.gameObject.AddComponent<LayoutElement>().preferredHeight = 96f;
             int level = HobbyLog.Level(Hobby.Cooking);
             foreach (var dish in HobbyData.Dishes)
@@ -574,11 +574,13 @@ namespace CapyIsland.UI
         }
 
         /// <summary>Closes the menu and walks over to something on the island — or says where to find it.</summary>
-        void ShowInWorld(Transform target, string otherwise)
+        void ShowInWorld(Transform target, string otherwise) => ShowInWorld(target != null ? (Vector2?)target.position : null, otherwise);
+
+        void ShowInWorld(Vector2? target, string otherwise)
         {
             if (target == null) { if (otherwise != null) Hints.Show(otherwise); Close(); return; }
             Close();
-            PlayerAvatar.GoTo(target.position);
+            PlayerAvatar.GoTo(target.Value);
         }
 
         RectTransform ItemRow(string item, string detail, string name = null)
