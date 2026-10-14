@@ -102,7 +102,16 @@ namespace CapyIsland.UI
                 case ResourceKind.Gold: _targetGold = value; break;
                 case ResourceKind.Gem: _targetGem = value; break;
             }
+            // The island's own numbers arriving as the save loads (over the scene's starting 1000
+            // wood and 1500 gold) are shown as they are, not counted down to.
+            if (Time.timeSinceLevelLoad < LoadingSeconds)
+            {
+                _shownWood = _targetWood; _shownGold = _targetGold; _shownGem = _targetGem;
+                Redraw();
+            }
         }
+
+        const float LoadingSeconds = 1.5f;
 
         void Update()
         {
@@ -114,9 +123,10 @@ namespace CapyIsland.UI
                 if (_bumpTimer <= 0f) { _bumping.localScale = Vector3.one; _bumping = null; }
             }
 
-            // Ticking the number up is a small thing that makes earning feel like earning.
+            // Ticking the number up is a small thing that makes earning feel like earning. On real
+            // time, so a paused game (a card, a movie) never leaves a counter stuck halfway.
             bool changed = false;
-            _countTimer += Time.deltaTime;
+            _countTimer += Time.unscaledDeltaTime;
             if (_countTimer >= countUpSeconds / 12f)
             {
                 _countTimer = 0f;

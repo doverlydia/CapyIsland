@@ -22,7 +22,50 @@ namespace CapyIsland.UI
 
         RectTransform _list;
 
+        /// <summary>A recipe's price button, kept up to date while the list is open (the island earns as you look).</summary>
+        class Price
+        {
+            public DishKind Dish;
+            public Button Button;
+            public Image Face, Lip;
+            public TextMeshProUGUI[] Labels;
+            public Image[] Icons;
+            public TextMeshProUGUI Short;
+            public int Shown = -1;   // the gold still missing, as last drawn (0 = affordable)
+        }
+
+        readonly List<Price> _prices = new();
+        float _nextCheck;
+
         void Awake() => Instance = this;
+
+        protected override void Update()
+        {
+            base.Update();
+            if (_prices.Count == 0 || Time.unscaledTime < _nextCheck) return;
+            _nextCheck = Time.unscaledTime + 0.25f;
+            foreach (var p in _prices) Paint(p);
+        }
+
+        /// <summary>Bright and pressable when you can pay; grey, with how much is missing, when you can't.</summary>
+        static void Paint(Price p)
+        {
+            if (p.Button == null) return;
+            var store = ResourceStore.Instance;
+            int missing = Mathf.Max(0, p.Dish.RecipeGold - (store != null ? store.Get(ResourceKind.Gold) : 0));
+            if (missing == p.Shown) return;
+            p.Shown = missing;
+            bool afford = missing == 0;
+            var fill = afford ? UiKit.Primary : UiKit.Hex("E4DDD2");
+            p.Face.color = fill;
+            p.Lip.color = Color.Lerp(fill, Color.black, 0.22f);
+            var ink = afford ? Color.white : UiKit.InkSoft;
+            foreach (var t in p.Labels) t.color = ink;
+            foreach (var i in p.Icons) i.color = afford ? Color.white : new Color(1f, 1f, 1f, 0.5f);
+            p.Button.interactable = afford;
+            p.Short.gameObject.SetActive(!afford);
+            if (!afford) p.Short.text = Loc.F("You need {0} more gold.", missing);
+        }
 
         void OnDestroy()
         {
@@ -40,6 +83,7 @@ namespace CapyIsland.UI
         void Refresh()
         {
             for (int i = _list.childCount - 1; i >= 0; i--) Destroy(_list.GetChild(i).gameObject);
+            _prices.Clear();
 
             // The recipes you already know are in your book, right at the top; the list below is
             // only what's still to learn.
@@ -109,13 +153,25 @@ namespace CapyIsland.UI
                 Tag(row, why, UiKit.InkSoft);
                 return;
             }
-            var store = ResourceStore.Instance;
-            var buy = UiKit.Button(row, "Buy", Loc.F("{0} gold", d.RecipeGold), UiKit.ButtonStyle.Primary, () => { if (ChefTofu.BuyRecipe(d)) Refresh(); }, 26f,
-                UiKit.ResourceIcon(ResourceKind.Gold));
+            // Too dear for now: a grey price that clearly can't be pressed, and how much is missing
+            // (kept up to date while the list is open: see Paint).
+            var buy = UiKit.Button(row, "Buy", Loc.F("{0} gold", d.RecipeGold), UiKit.ButtonStyle.Primary,
+                () => { if (ChefTofu.BuyRecipe(d)) Refresh(); }, 26f, UiKit.ResourceIcon(ResourceKind.Gold));
             var ble = buy.transform.parent.gameObject.AddComponent<LayoutElement>();
             ble.preferredWidth = ble.minWidth = 200f;
             ble.preferredHeight = 84f;
-            buy.interactable = store != null && store.CanAfford(0, d.RecipeGold, 0);
+            var shortBy = UiKit.Text(words, "Short", "", 24f, UiKit.Danger, true);
+            shortBy.overflowMode = TextOverflowModes.Overflow;
+            var price = new Price
+            {
+                Dish = d, Button = buy, Face = buy.GetComponent<Image>(),
+                Lip = buy.transform.parent.Find("Lip")?.GetComponent<Image>(),
+                Labels = buy.GetComponentsInChildren<TextMeshProUGUI>(true),
+                Icons = System.Array.FindAll(buy.GetComponentsInChildren<Image>(true), i => i.gameObject != buy.gameObject),
+                Short = shortBy,
+            };
+            _prices.Add(price);
+            Paint(price);
         }
 
         static void Tag(RectTransform row, string text, Color colour)
