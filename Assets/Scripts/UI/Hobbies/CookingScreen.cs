@@ -822,6 +822,37 @@ namespace CapyIsland.UI
                 .OnComplete(() => { if (p != null) Destroy(p.gameObject); });
         }
 
+        // ---------------------------------------------------------------- the pointing hand
+
+        const string StirsKey = "CapyIsland.CookStirs";
+        const int StirsToLearn = 3;
+
+        /// <summary>Stirs made, ever: the hand stops pointing once you have the hang of it.</summary>
+        static int StirsLearned
+        {
+            get => PlayerPrefs.GetInt(StirsKey, 0);
+            set { if (value <= StirsToLearn) PlayerPrefs.SetInt(StirsKey, value); }
+        }
+
+        /// <summary>The tutorial's hand, tapping at a spatula: it goes with the prompt.</summary>
+        static void PointAt(RectTransform prompt, float size)
+        {
+            var sprite = TutorialPointer.HandSprite;
+            if (sprite == null) return;
+            var hand = UiKit.Image(prompt, "Hand", sprite, Color.white);
+            hand.preserveAspect = true;
+            hand.raycastTarget = false;   // the tap is for the spatula under it
+            var rt = hand.rectTransform;
+            rt.anchorMin = rt.anchorMax = new Vector2(0.62f, 0.38f);
+            rt.pivot = new Vector2(0.48f, 0.06f);   // the fingertip
+            rt.sizeDelta = new Vector2(size * 0.9f, size * 0.9f);
+            rt.localRotation = Quaternion.Euler(0f, 0f, -150f);   // reaching up at it from below right
+            rt.anchoredPosition = Vector2.zero;
+            // Tap, tap: back along the arm and in again.
+            rt.DOAnchorPos(new Vector2(size * 0.06f, -size * 0.1f), 0.35f).SetEase(Ease.InOutSine)
+                .SetLoops(-1, LoopType.Yoyo).SetUpdate(true).SetLink(hand.gameObject);
+        }
+
         IEnumerator Cook()
         {
             _cooking = true;
@@ -855,6 +886,7 @@ namespace CapyIsland.UI
             Image ring = null;
             float promptLeft = 0f;
             bool tapped = false;
+            bool missedLast = false;
 
             _status.text = "Tap the spatula when it appears, to stir and cool it down!";
             Sfx.Play(SfxKind.Fuse, 0.5f);
@@ -896,6 +928,7 @@ namespace CapyIsland.UI
                     var b = disc.gameObject.AddComponent<Button>();
                     b.transition = Selectable.Transition.None;
                     b.onClick.AddListener(() => tapped = true);
+                    if (StirsLearned < StirsToLearn || missedLast) PointAt(prompt, ps);
                     prompt.localScale = Vector3.zero;
                     prompt.DOScale(1f, 0.15f).SetEase(Ease.OutBack).SetUpdate(true);
                     promptLeft = window;
@@ -911,6 +944,8 @@ namespace CapyIsland.UI
                         if (tapped)
                         {
                             hits++;
+                            missedLast = false;
+                            StirsLearned++;
                             bool great = ring.fillAmount > 0.45f;
                             if (great) perfect++;
                             heat = Mathf.Max(0f, heat - 0.32f);
@@ -922,6 +957,7 @@ namespace CapyIsland.UI
                         else
                         {
                             misses++;
+                            missedLast = true;
                             heat += 0.22f;
                             _status.text = "<color=#FF9A8A><b>Too slow! It's getting hot…</b></color>";
                             Sfx.Play(SfxKind.Fuse, 0.7f);
