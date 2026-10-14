@@ -52,6 +52,9 @@ namespace CapyIsland.Game
         public bool SoldOut => StoreData.IsSoldOut(storeName);
         public bool Visible => _alpha > 0.01f;
 
+        /// <summary>On show but not for you yet (seeds above your gardening level): greyed, and the dialog says why.</summary>
+        public string Locked => StoreData.LockedReason(storeName);
+
         public static SaleDisplay Create(string storeName, Vector2 at, Transform parent)
         {
             var go = new GameObject("Sale_" + storeName.Replace(" ", ""));
@@ -111,7 +114,9 @@ namespace CapyIsland.Game
         {
             // The original sets alpha every frame from availability.
             float target;
+            bool locked = Locked != null;
             if (!StoreData.IsUnlocked(storeName) || SoldOut) target = 0f;
+            else if (locked) target = 0.6f;
             else
             {
                 var p = Price;
@@ -122,7 +127,8 @@ namespace CapyIsland.Game
 
             if (_icon != null)
             {
-                var c = _icon.color; c.a = _alpha; _icon.color = c;
+                float grey = locked ? 0.55f : 1f;
+                _icon.color = new Color(grey, grey, grey, _alpha);
                 // A slow, friendly bob so wares read as "for sale", not as planted things.
                 _icon.transform.localPosition = new Vector3(0f, 0.08f + Mathf.Sin(Time.time * 2f + _phase) * 0.06f, 0f);
             }

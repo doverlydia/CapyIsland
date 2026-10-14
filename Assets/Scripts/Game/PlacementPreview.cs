@@ -77,9 +77,10 @@ namespace CapyIsland.Game
             foreach (var actor in FindObjectsByType<DraggableActor>(FindObjectsSortMode.None))
             {
                 if (!actor.IsHeld) continue;
+                // Its own drop rules first (a seed packet is a placeable, but only lands on a plot).
+                if (actor.GetComponent<IDropSpot>() is Component spot) return spot;
                 var placeable = actor.GetComponent<Placeable>();
                 if (placeable != null) return placeable;
-                if (actor.GetComponent<IDropSpot>() is Component spot) return spot;
             }
             return null;
         }

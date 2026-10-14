@@ -125,6 +125,9 @@ namespace CapyIsland.Game
         /// </summary>
         void OnDropped()
         {
+            // Something with its own idea of where it goes (a seed packet: only on a plot) handles its drop itself.
+            if (GetComponent<IDropSpot>() != null) return;
+
             // Dropped on Pirate Pete: he makes an offer; until then it goes back in the trail.
             var pete = PiratePete.Near(transform.position);
             if (pete != null && pete.gameObject != gameObject)

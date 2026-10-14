@@ -1192,12 +1192,6 @@
 @ Tap the stove on Sunflower Farm
 = הקש על הכיריים בחוות החמניות
 
-@ Tap a plot on Sunflower Farm to plant seeds.
-= הקש על ערוגה בחוות החמניות כדי לשתול זרעים.
-
-@ They grow while you're away. Tap again to harvest! More plots open as your gardening level grows.
-= הם גדלים גם כשאתה לא כאן. הקש שוב כדי לקצור! ערוגות נוספות נפתחות ככל שרמת הגינון שלך עולה.
-
 @ Drag ingredients into the pot, press Cook, and tap the spatula in time to keep the heat down.
 = גרור מרכיבים לסיר, לחץ על בשל, והקש על המרית בזמן כדי להוריד את החום.
 
@@ -1213,5 +1207,30 @@
 @ Find the stove on Sunflower Farm
 = מצא את הכיריים בחוות החמניות
 
-@ Tap a plot on Sunflower Farm to plant seeds, and come back when it's grown. More plots open as you level up.
-= הקש על ערוגה בחוות החמניות כדי לשתול זרעים, וחזור כשהם גדלו. ערוגות נוספות נפתחות כשאתה עולה ברמה.
+
+@ Buy seeds at the barn on Sunflower Farm, then drag them from your trail onto an empty plot.
+= קנה זרעים באסם בחוות החמניות, ואז גרור אותם מהשובל שלך אל ערוגה ריקה.
+
+@ They grow while you're away. Tap the plot to harvest! More plots and seeds open as your gardening level grows.
+= הם גדלים גם כשאתה לא כאן. הקש על הערוגה כדי לקצור! ערוגות וזרעים נוספים נפתחים ככל שרמת הגינון שלך עולה.
+
+@ Buy seeds at the barn on Sunflower Farm and drag them onto a plot. Come back when they've grown. More plots and seeds open as you level up.
+= קנה זרעים באסם בחוות החמניות וגרור אותם אל ערוגה. חזור כשהם גדלו. ערוגות וזרעים נוספים נפתחים כשאתה עולה ברמה.
+
+@ Buy seeds at the barn, then drag them from your trail onto an empty plot.
+= קנה זרעים באסם, ואז גרור אותם מהשובל שלך אל ערוגה ריקה.
+
+@ Something is already growing there.
+= משהו כבר גדל שם.
+
+@ Seeds go on an empty plot on Sunflower Farm.
+= זרעים שותלים בערוגה ריקה בחוות החמניות.
+
+@ Requires gardening level {0}
+= דורש גינון ברמה {0}
+
+@ {0} Seeds
+= זרעי {0}
+
+@ Drop it on an empty plot on Sunflower Farm: {0} × {1} in {2} min.
+= הנח אותו על ערוגה ריקה בחוות החמניות: {0} × {1} תוך {2} דק'.

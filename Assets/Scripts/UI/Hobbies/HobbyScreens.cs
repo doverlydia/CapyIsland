@@ -110,7 +110,7 @@ namespace CapyIsland.UI
                     "Journal", () => Go(Page.Bugs))),
                 (Hobby.Gardening, "Gardening", IconPainter.Sparkle, UiKit.Hex("8A5A32"), () => HobbyCard(Hobby.Gardening, "Gardening", IconPainter.Sparkle, UiKit.Hex("8A5A32"),
                     $"{HobbyLog.Crops.Count} of {HobbyData.Crops.Length} vegetables grown",
-                    "Tap a plot on Sunflower Farm to plant seeds, and come back when it's grown. More plots open as you level up.",
+                    "Buy seeds at the barn on Sunflower Farm and drag them onto a plot. Come back when they've grown. More plots and seeds open as you level up.",
                     "Journal", () => Go(Page.Veg))),
                 (Hobby.Cooking, "Cooking", IconPainter.Flame, UiKit.Primary, () => HobbyCard(Hobby.Cooking, "Cooking", IconPainter.Flame, UiKit.Primary,
                     $"{CountDishes()} dish{(CountDishes() == 1 ? "" : "es")} in your bag",

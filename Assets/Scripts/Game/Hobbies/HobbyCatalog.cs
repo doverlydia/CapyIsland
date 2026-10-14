@@ -15,6 +15,7 @@ namespace CapyIsland.Game
             Add(catalog, GardenShop());
             Add(catalog, Plot());
             Add(catalog, Stove());
+            foreach (var crop in HobbyData.Crops) Add(catalog, Seeds(crop));
             Add(catalog, Gear("Fishing Rod", "Rod"));
             Add(catalog, Gear("Bug Net", "Net"));
             Add(catalog, Gear("Binoculars", "Binoculars"));
@@ -75,6 +76,17 @@ namespace CapyIsland.Game
             crop.AddComponent<SpriteRenderer>().enabled = false;
             go.AddComponent<Gardening.PlotView>();
             return Tagged(go, "Vegetable Plot");
+        }
+
+        /// <summary>A packet of a crop's seeds, sold at the farm's barn and dropped on a farm plot.</summary>
+        static GameObject Seeds(CropKind crop)
+        {
+            var art = HobbyData.Art("Seeds_" + crop.Id) ?? HobbyData.Art("Crop_" + crop.Id);
+            if (art == null) return null;
+            string name = StoreData.SeedName(crop);
+            var go = HobbyItems.Make(name, art, 0.9f, 0.95f, StoreData.Get(name).Inner);
+            go.AddComponent<SeedPacket>().Configure(crop.Id);
+            return Tagged(go, name);
         }
 
         static GameObject Stove()

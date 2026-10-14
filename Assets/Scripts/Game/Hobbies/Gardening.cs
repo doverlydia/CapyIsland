@@ -206,10 +206,14 @@ namespace CapyIsland.Game
                 if (d == null) return;
                 if (Locked && string.IsNullOrEmpty(d.crop))
                 {
-                    Hints.Show(string.Format("This plot opens at gardening level {0}.", OpensAt));
+                    Hints.Show(WhyNot);
                     return;
                 }
-                if (string.IsNullOrEmpty(d.crop)) { ChooseSeed(); return; }
+                if (string.IsNullOrEmpty(d.crop))
+                {
+                    Hints.Show("Buy seeds at the barn, then drag them from your trail onto an empty plot.");
+                    return;
+                }
                 var kind = HobbyData.Crop(d.crop);
                 float p = Progress;
                 if (p < 1f)
@@ -222,28 +226,31 @@ namespace CapyIsland.Game
                 Harvest(kind);
             }
 
-            void ChooseSeed()
+            /// <summary>Open, and nothing growing: a seed packet can go here.</summary>
+            public bool CanPlant => FarmIndex >= 0 && !Locked && Data != null && string.IsNullOrEmpty(Data.crop) && _placeable.Placed;
+
+            /// <summary>Why a packet can't go here, or null if it can.</summary>
+            public string WhyNot => Locked ? string.Format("This plot opens at gardening level {0}.", OpensAt)
+                                  : Data != null && !string.IsNullOrEmpty(Data.crop) ? "Something is already growing there."
+                                  : null;
+
+            /// <summary>The farm plot under a point (a dropped packet), or null.</summary>
+            public static PlotView Under(Vector2 at)
             {
-                int level = HobbyLog.Level(Hobby.Gardening);
-                var store = ResourceStore.Instance;
-                var choices = new System.Collections.Generic.List<UI.SpeechDialog.Choice>();
-                foreach (var c in HobbyData.Crops)
+                PlotView best = null;
+                float bestDistance = 1.1f;
+                foreach (var v in FindObjectsByType<PlotView>(FindObjectsSortMode.None))
                 {
-                    if (c.MinLevel > level) continue;
-                    var kind = c;
-                    bool afford = store != null && store.Get(ResourceKind.Gold) >= c.SeedGold;
-                    choices.Add(new UI.SpeechDialog.Choice($"{c.Name} ({c.SeedGold} gold)", () => Plant(kind), afford));
-                    if (choices.Count >= 4) break;
+                    if (v.FarmIndex < 0) continue;
+                    float d = Vector2.Distance(v._soil != null ? (Vector2)v._soil.bounds.center : (Vector2)v.transform.position, at);
+                    if (d < bestDistance) { best = v; bestDistance = d; }
                 }
-                choices.Add(new UI.SpeechDialog.Choice("Not now", null));
-                UI.SpeechDialog.ShowChoices(HobbyData.Art("Plot"), "Vegetable plot",
-                    new[] { "What would you like to plant? Seeds grow while you're away, too." }, null, choices);
+                return best;
             }
 
-            void Plant(CropKind kind)
+            /// <summary>A packet of seeds dropped on this plot (paid for at the barn).</summary>
+            public void Plant(CropKind kind)
             {
-                var store = ResourceStore.Instance;
-                if (store == null || !store.TrySpend(0, kind.SeedGold, 0)) return;
                 var d = Data;
                 d.crop = kind.Id;
                 d.plantedTicks = DateTime.Now.Ticks;

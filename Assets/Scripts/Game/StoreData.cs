@@ -12,6 +12,7 @@ namespace CapyIsland.Game
         Tool,          // hobby gear you carry (rod, net, binoculars): buying it unlocks the hobby
         Sewing,        // the sewing machine, a placed station
         FurnitureShop, // sells the burrow door and the day's furniture for your home (Game/Home)
+        Seed,          // a packet of seeds from the farm's barn: carried, and dropped on a farm plot to plant it
     }
 
     /// <summary>One store item. <see cref="Name"/> is its id; the player sees <see cref="Title"/>.</summary>
@@ -89,6 +90,10 @@ namespace CapyIsland.Game
         {
             // Gardening and its stove live on Sunflower Farm now (Farm): the Garden Shop is no longer
             // sold. Its items stay defined so older islands still load them, to be moved to the farm.
+            // The farm's barn sells the seeds.
+            var seeds = new List<string>();
+            foreach (var c in HobbyData.Crops) seeds.Add(SeedName(c));
+            Lists["farm_store"] = seeds.ToArray();
             AddTo("bronze_store", "Bug Net");
             AddTo("silver_store", "Binoculars");
             AddTo("steel_store", "Sewing Machine");
@@ -116,8 +121,43 @@ namespace CapyIsland.Game
                 _byName = new Dictionary<string, StoreItemDef>();
                 foreach (var d in All) _byName[d.Name] = d;
                 foreach (var d in Extra) _byName[d.Name] = d;
+                foreach (var d in Seeds()) _byName[d.Name] = d;
             }
             return _byName.TryGetValue(name, out def);
+        }
+
+        // ---------------------------------------------------------------- seeds
+
+        /// <summary>The store name of a crop's seed packet ("Carrot Seeds").</summary>
+        public static string SeedName(CropKind crop) => crop.Id + " Seeds";
+
+        /// <summary>The crop a seed packet grows, or null if the name isn't a packet.</summary>
+        public static CropKind SeedCrop(string name)
+        {
+            if (string.IsNullOrEmpty(name) || !name.EndsWith(" Seeds", System.StringComparison.Ordinal)) return null;
+            return HobbyData.Crop(name.Substring(0, name.Length - " Seeds".Length));
+        }
+
+        /// <summary>A packet for every crop, at its seed price in gold, as many as you like.</summary>
+        static IEnumerable<StoreItemDef> Seeds()
+        {
+            for (int i = 0; i < HobbyData.Crops.Length; i++)
+            {
+                var c = HobbyData.Crops[i];
+                yield return new StoreItemDef(SeedName(c), 300 + i, 0, c.SeedGold, 0, 12f, 0f, 0, StoreItemKind.Seed);
+            }
+        }
+
+        /// <summary>
+        /// Why something on display can't be bought yet, or null: seeds wait for your gardening
+        /// level. The display still shows (greyed), so you can see what's coming.
+        /// </summary>
+        public static string LockedReason(string name)
+        {
+            var crop = SeedCrop(name);
+            if (crop != null && crop.MinLevel > HobbyLog.Level(Hobby.Gardening))
+                return string.Format("Requires gardening level {0}", crop.MinLevel);
+            return null;
         }
 
         public static StoreItemDef Get(string name) => TryGet(name, out var d) ? d : default;

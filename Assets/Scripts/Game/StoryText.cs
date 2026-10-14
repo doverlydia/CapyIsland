@@ -288,8 +288,13 @@ namespace CapyIsland.Game
         };
 
         /// <summary>The line about an item in the shop and on its cards.</summary>
-        public static string Blurb(string id) =>
-            !string.IsNullOrEmpty(id) && Blurbs.TryGetValue(id, out var b) && b.Length > 0 ? b : "";
+        public static string Blurb(string id)
+        {
+            // A seed packet says what it grows, and where to plant it.
+            if (StoreData.SeedCrop(id) is CropKind crop)
+                return string.Format("Drop it on an empty plot on Sunflower Farm: {0} × {1} in {2} min.", crop.Yield, crop.Name, crop.Minutes);
+            return !string.IsNullOrEmpty(id) && Blurbs.TryGetValue(id, out var b) && b.Length > 0 ? b : "";
+        }
 
         /// <summary>
         /// What a worker home's capybara is good at, for its buy panel — so a pricier breed says why.

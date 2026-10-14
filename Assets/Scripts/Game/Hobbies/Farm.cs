@@ -168,8 +168,9 @@ namespace CapyIsland.Game
             Fixture(catalog, "Stove", StoveSpot.Value);
 
             // Dressing, where its art has been made: a barn, a scarecrow over the field, hay.
-            Prop("Farm_Barn", Offset(10.5f, 1.8f), 4.2f, 70f);
-            Prop("Farm_Scarecrow", Offset(6.3f, -1.4f), 2.2f, 14f);
+            // The barn is the farm's shop: its seeds stand out front, like any store's wares.
+            Prop("Farm_Barn", Offset(10.5f, 2.2f), 4.2f, 70f, shopList: "farm_store");
+            Prop("Farm_Scarecrow", Offset(6.0f, 4.0f), 2.2f, 14f);
             Prop("Farm_Hay", Offset(7.8f, -3.6f), 1.4f, 18f);
             Prop("Farm_Hay", Offset(-11.2f, -2.6f), 1.4f, 18f);
             Fence(Offset(0f, -3.7f), 6, 1.1f);
@@ -210,7 +211,7 @@ namespace CapyIsland.Game
         const float SharedPost = 0.215f;
 
         /// <summary>A piece of farm dressing standing on its feet, holding its spot.</summary>
-        void Prop(string art, Vector2 feet, float height, float footprint)
+        void Prop(string art, Vector2 feet, float height, float footprint, string shopList = null)
         {
             var sprite = HobbyData.Art(art);
             if (sprite == null) return;
@@ -225,6 +226,8 @@ namespace CapyIsland.Game
             body.AddComponent<SpriteRenderer>().sprite = sprite;
             go.AddComponent<YSorter>();
             if (footprint <= 0f) return;
+            // A shop lays its wares out when it's planted (StoreBuilding.OnPlacedInWorld).
+            if (shopList != null) go.AddComponent<StoreBuilding>().Configure(shopList, "");
             var placeable = go.AddComponent<Placeable>();
             placeable.Configure(art, footprint, footprint);
             placeable.MarkPlaced(silent: true);

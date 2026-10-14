@@ -29,7 +29,7 @@ namespace CapyIsland.UI
                 Hobby.Bugs => ("How to catch bugs", "Bugs settle on flowers, trees and grass. Walk close and tap one to swing your net.\nSome are shy, so don't run straight at them!"),
                 Hobby.Birding => ("How to watch birds", "Birds land in trees and on the shore. Tap one from a few steps away to spot it through your binoculars.\nGet too close and it flies off!"),
                 Hobby.Sewing => ("How to sew", "Put your sewing machine down, then tap it.\nA hat needs cotton from your garden. Decorate it, and it goes in your wardrobe!"),
-                Hobby.Gardening => ("How to garden", "Tap a plot on Sunflower Farm to plant seeds.\nThey grow while you're away. Tap again to harvest! More plots open as your gardening level grows."),
+                Hobby.Gardening => ("How to garden", "Buy seeds at the barn on Sunflower Farm, then drag them from your trail onto an empty plot.\nThey grow while you're away. Tap the plot to harvest! More plots and seeds open as your gardening level grows."),
                 Hobby.Cooking => ("How to cook", "Drag ingredients into the pot, press Cook, and tap the spatula in time to keep the heat down.\nIslanders with a dish in a bubble will pay for it!"),
                 _ => ("New hobby!", "Find it in Hobbies, in the menu."),
             };
