@@ -509,6 +509,8 @@ namespace CapyIsland.Game
                 _bobberBody.localScale = new Vector3(0.26f, 0.16f, 1f);
             }
             Sfx.Play(SfxKind.Pop, 0.9f);
+            Sfx.PlayAt(SfxKind.Plop, _bobberAt, 0.9f, 0.1f);
+            Splash(_bobberAt);
             Ripple(_bobberAt, 1.8f);
             Ripple(_bobberAt, 1.1f);
 #if UNITY_ANDROID || UNITY_IOS
@@ -754,6 +756,48 @@ namespace CapyIsland.Game
             _line.material = _lineMaterial;
             _line.startColor = _line.endColor = new Color(1f, 1f, 1f, 0.85f);
             _line.sortingOrder = 30000;
+        }
+
+        /// <summary>
+        /// The big splash of a bite: a white burst where it broke the surface, and droplets thrown
+        /// up in every direction, falling back with little rings where they land in the water.
+        /// </summary>
+        static void Splash(Vector2 at)
+        {
+            var dot = UI.UiKit.Circle;
+            float unit = Mathf.Max(0.01f, dot.bounds.size.x);
+
+            var burst = new GameObject("SplashBurst");
+            burst.transform.position = at;
+            var bs = burst.AddComponent<SpriteRenderer>();
+            bs.sprite = dot;
+            bs.color = new Color(1f, 1f, 1f, 0.75f);
+            bs.sortingOrder = 29990;   // up out of the water, over the shore
+            burst.transform.localScale = new Vector3(0.25f, 0.13f, 1f) / unit;
+            burst.transform.DOScale(new Vector3(1.5f, 0.75f, 1f) / unit, 0.4f).SetEase(Ease.OutCubic);
+            bs.DOFade(0f, 0.4f).SetEase(Ease.InQuad).OnComplete(() => Destroy(burst));
+
+            for (int i = 0; i < 22; i++)
+            {
+                var drop = new GameObject("SplashDrop");
+                drop.transform.position = at + UnityEngine.Random.insideUnitCircle * 0.12f;
+                var sr = drop.AddComponent<SpriteRenderer>();
+                sr.sprite = dot;
+                sr.color = new Color(0.95f, 0.99f, 1f, 1f);
+                sr.sortingOrder = 29991;
+                float size = UnityEngine.Random.Range(0.1f, 0.24f);
+                drop.transform.localScale = Vector3.one * (size / unit);
+                // out to the sides (squashed: the water is seen from above at an angle), up and back down
+                var land = at + new Vector2(UnityEngine.Random.Range(-1.2f, 1.2f), UnityEngine.Random.Range(-0.45f, 0.35f));
+                float time = UnityEngine.Random.Range(0.5f, 0.85f);
+                drop.transform.DOJump(land, UnityEngine.Random.Range(0.5f, 1.6f), 1, time).SetEase(Ease.Linear)
+                    .OnComplete(() =>
+                    {
+                        if (!BunniSpace.PointOnLand(land)) Ripple(land, 0.35f);
+                        Destroy(drop);
+                    });
+                sr.DOFade(0f, time * 0.35f).SetDelay(time * 0.65f);
+            }
         }
 
         static void Ripple(Vector2 at, float size)
