@@ -566,3 +566,12 @@
 
 @ The {0} comes after {1}'s task: {2}
 = קודם המשימה של {1}: {2}, ואז {0}
+
+@ While it works, have a look around: pinch with two fingers to zoom in and out.
+= בזמן שהיא עובדת, תסתכל מסביב: צבוט בשתי אצבעות כדי להתקרב ולהתרחק.
+
+@ While it works, have a look around: pinch with two fingers, or scroll the mouse wheel, to zoom in and out.
+= בזמן שהיא עובדת, תסתכל מסביב: צבוט בשתי אצבעות, או גלגל את גלגלת העכבר, כדי להתקרב ולהתרחק.
+
+@ While it works, have a look around: scroll the mouse wheel to zoom in and out.
+= בזמן שהיא עובדת, תסתכל מסביב: גלגל את גלגלת העכבר כדי להתקרב ולהתרחק.

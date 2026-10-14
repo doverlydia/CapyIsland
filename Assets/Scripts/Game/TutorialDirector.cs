@@ -287,6 +287,7 @@ namespace CapyIsland.Game
             if (worker.IsAssigned)
             {
                 Tell("That's the rhythm: forest, sawmill, capybara. Watch the wood pile up with every chop.");
+                Tell(ZoomLine());   // a quiet moment while it works: time to look around
                 Advance(Step.WaitForHunger);
                 return;
             }
@@ -295,6 +296,15 @@ namespace CapyIsland.Game
             var mill = FindFirstObjectByType<Workplace>();
             if (pointer != null && mill != null) pointer.DragFrom(worker.transform, mill.transform);
         }
+
+        /// <summary>
+        /// How to zoom, the way this device does it: a phone (in the app or in a browser) pinches, a
+        /// computer scrolls, and a computer with a touch screen can do either.
+        /// </summary>
+        static string ZoomLine() =>
+            Application.isMobilePlatform ? "While it works, have a look around: pinch with two fingers to zoom in and out."
+            : Input.touchSupported ? "While it works, have a look around: pinch with two fingers, or scroll the mouse wheel, to zoom in and out."
+            : "While it works, have a look around: scroll the mouse wheel to zoom in and out.";
 
         void TickWaitForHunger()
         {
