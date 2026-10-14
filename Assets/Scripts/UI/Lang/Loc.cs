@@ -260,10 +260,14 @@ namespace CapyIsland.UI
             return null;
         }
 
+        /// <summary>
+        /// Has English in it to translate: a Latin letter. Text that is already Hebrew (a card page
+        /// cut from a translated card) passes straight through rather than being looked up again.
+        /// </summary>
         static bool HasLetter(string s)
         {
             foreach (char c in s)
-                if (char.IsLetter(c)) return true;
+                if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')) return true;
             return false;
         }
 

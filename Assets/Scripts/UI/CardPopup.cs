@@ -24,6 +24,8 @@ namespace CapyIsland.UI
         [SerializeField] Button dismiss;
 
         readonly Queue<(string title, string body, Sprite sprite, System.Action closed)> _queue = new();
+        /// <summary>The rest of a card too long for one page: shown next, before anything queued.</summary>
+        (string title, string body, Sprite sprite, System.Action closed)? _nextPage;
         System.Action _current;
         float _timeScaleBefore = 1f;
         bool _showing;
@@ -86,7 +88,7 @@ namespace CapyIsland.UI
 
         void ShowNext()
         {
-            if (_queue.Count == 0)
+            if (_nextPage == null && _queue.Count == 0)
             {
                 _showing = false;
                 if (panel != null) panel.SetActive(false);
@@ -98,7 +100,8 @@ namespace CapyIsland.UI
             _showing = true;
             Time.timeScale = 0f;
 
-            var (title, body, sprite, closed) = _queue.Dequeue();
+            var (title, body, sprite, closed) = _nextPage ?? _queue.Dequeue();
+            _nextPage = null;
             _current = closed;
             if (titleLabel != null) titleLabel.text = title;
             if (bodyLabel != null) bodyLabel.text = body;
@@ -110,12 +113,57 @@ namespace CapyIsland.UI
                 picture.color = IconPainter.IsIcon(sprite) ? UiKit.Primary : Color.white;
             }
             if (panel != null) panel.SetActive(true);
+
+            // Too much for one card: the rest goes on the next page (same title and picture), and
+            // whatever waits for the card waits for its last page.
+            // Cut in the language it is read in, so each page shows as it should either way.
+            if (bodyLabel != null && Overflows() && Split(Loc.T(body), out var first, out var rest))
+            {
+                bodyLabel.text = first;
+                _nextPage = (title, rest, sprite, closed);
+                _current = null;
+            }
             if (card != null)
             {
                 card.DOKill();
                 card.localScale = Vector3.one * 0.3f;
                 card.DOScale(1f, 0.35f).SetEase(Ease.OutBack).SetUpdate(true);
             }
+        }
+
+        bool Overflows()
+        {
+            Canvas.ForceUpdateCanvases();
+            bodyLabel.ForceMeshUpdate();
+            return bodyLabel.isTextOverflowing;
+        }
+
+        /// <summary>
+        /// Splits a card's text in two: at the paragraph break nearest the middle, else at the
+        /// sentence end nearest it. False if there is nowhere sensible to cut.
+        /// </summary>
+        static bool Split(string body, out string first, out string rest)
+        {
+            first = body;
+            rest = null;
+            int cut = Nearest(body, "\n");
+            if (cut < 0) cut = Nearest(body, ". ");
+            if (cut <= 0 || cut >= body.Length) return false;
+            first = body.Substring(0, cut).Trim();
+            rest = body.Substring(cut).Trim();
+            return first.Length > 0 && rest.Length > 0;
+        }
+
+        /// <summary>Where to cut after the <paramref name="mark"/> nearest the middle, or -1.</summary>
+        static int Nearest(string s, string mark)
+        {
+            int mid = s.Length / 2, best = -1;
+            for (int i = s.IndexOf(mark, System.StringComparison.Ordinal); i >= 0; i = s.IndexOf(mark, i + 1, System.StringComparison.Ordinal))
+            {
+                int at = i + (mark == "\n" ? 0 : 1);   // a sentence keeps its full stop
+                if (best < 0 || Mathf.Abs(at - mid) < Mathf.Abs(best - mid)) best = at;
+            }
+            return best;
         }
 
         void Dismiss()
