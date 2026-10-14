@@ -67,7 +67,7 @@ namespace CapyIsland.UI
             string backdrop = _hobby switch
             {
                 Hobby.Fishing or Hobby.Birding => "Cutscene_Shore",
-                Hobby.Sewing => "Cutscene_Wedding",
+                Hobby.Sewing => "Cutscene_Sewing",   // a sunny sewing room
                 Hobby.Gardening => "Cutscene_Farm",   // Sunflower Farm
                 Hobby.Cooking => "Cutscene_Kitchen",   // an outdoor kitchen like Chef Tofu's, by the hot spring
                 Hobby.Bugs => "Cutscene_Meadow",
