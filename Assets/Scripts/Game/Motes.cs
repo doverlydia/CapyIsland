@@ -34,7 +34,14 @@ namespace CapyIsland.Game
         /// here can trigger it, so the island could never be saved), and logging in a second day,
         /// which the daily sign-in reward replaces. They never fire and do not count.
         /// </summary>
-        static readonly HashSet<string> Retired = new() { "visit_forums", "welcome_back" };
+        static readonly HashSet<string> Retired = new() { "visit_forums", "welcome_back", Wedding };
+
+        /// <summary>
+        /// The wedding is not a heart: it is what the hearts are for. Every other heart home wakes
+        /// Old Yuzu, and she marries you at the chapel. It is still remembered with the rest
+        /// (<see cref="Record"/>), so the island knows you are married.
+        /// </summary>
+        public const string Wedding = "wedding_mote";
 
         /// <summary>Achievements this game adds of its own.</summary>
         static readonly MoteDef[] Added =
@@ -111,6 +118,16 @@ namespace CapyIsland.Game
             _collected.Add(def.Name);
             NewStuff.Add("goals/" + def.Name);
             Triggered?.Invoke(def);
+        }
+
+        /// <summary>
+        /// Remembers something that happened without it being a heart (the wedding): no heart
+        /// appears and nothing counts it, but <see cref="Has"/> knows and it is saved.
+        /// </summary>
+        public static void Record(string func)
+        {
+            foreach (var m in QuestData.Motes)
+                if (m.Func == func) { _collected.Add(m.Name); return; }
         }
 
         /// <summary>A heart has reached the Tower of Love.</summary>

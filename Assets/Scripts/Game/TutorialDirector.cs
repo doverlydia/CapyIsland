@@ -196,8 +196,9 @@ namespace CapyIsland.Game
                 case Step.CrossToHeart: TickCrossToHeart(); break;
                 case Step.OpenTower: TickOpenTower(); break;
             }
-            // The tutorial was ended: its steps still move the story on, but nothing points.
-            if (Guidance.Off && pointer != null) pointer.Hide();
+            // The tutorial was ended: its steps still move the story on, but nothing points. Once it
+            // is over the hand belongs to the story (a quest's focus, the chapel), so leave it be.
+            if (Guidance.Off && _step != Step.Done && pointer != null) pointer.Hide();
             GlideToGoal();
             // A sunny morning from start to finish; the day starts moving once the island is yours.
             GameClock.Hold(_step != Step.Done);

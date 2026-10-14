@@ -33,6 +33,9 @@ namespace CapyIsland.Game
         public ResourceKind Type => _type;
         public int Value => _value;
 
+        /// <summary>Opens and pays without a sound: the tower's steady chests once the island is saved.</summary>
+        public bool Silent { get; set; }
+
         /// <summary>Creates a chest at <paramref name="at"/> with random contents of the given tier.</summary>
         public static TreasureChest Spawn(Vector2 at, int tier, Transform parent)
         {
@@ -131,7 +134,7 @@ namespace CapyIsland.Game
 
                 case Step.Showing:
                     if (_counter <= 20) return false;
-                    ResourcePing.Fly(_type, _value, (Vector2)transform.position + Vector2.up * 0.7f);
+                    ResourcePing.Fly(_type, _value, (Vector2)transform.position + Vector2.up * 0.7f, Silent);
                     _step = Step.Paid; _counter = 0;
                     return false;
 
@@ -152,7 +155,7 @@ namespace CapyIsland.Game
 
         void Open()
         {
-            Sfx.PlayAt(SfxKind.Chest, transform.position);
+            if (!Silent) Sfx.PlayAt(SfxKind.Chest, transform.position);
             var art = GameArt.Instance;
             if (_body != null && art != null && art.chestOpen != null) _body.sprite = art.chestOpen;
             if (_body != null)

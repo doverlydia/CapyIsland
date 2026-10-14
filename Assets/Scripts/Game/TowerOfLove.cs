@@ -82,7 +82,7 @@ namespace CapyIsland.Game
         public Vector2 MarkerPosition => transform.position;
         public Sprite MarkerIcon => _bodyRenderer != null ? _bodyRenderer.sprite : null;
 
-        public bool IslandSaved => Motes.CollectedCount >= Motes.Total;
+        public bool IslandSaved => Motes.CollectedCount >= Motes.Total && YuzuHeart.Married;
 
         void Update()
         {
@@ -103,7 +103,8 @@ namespace CapyIsland.Game
                 _rewardCounter = 0;
                 var catalog = ItemCatalog.Instance;
                 var spot = (Vector2)transform.position + BunniSpace.ToUnity(UnityEngine.Random.insideUnitCircle * 90f + new Vector2(0f, -60f));
-                TreasureChest.Spawn(spot, 4, catalog != null ? catalog.ItemParent : transform.parent);
+                // One a second, for good: quietly, or the island never stops dinging.
+                TreasureChest.Spawn(spot, 4, catalog != null ? catalog.ItemParent : transform.parent).Silent = true;
             }
         }
 

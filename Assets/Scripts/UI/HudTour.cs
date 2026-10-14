@@ -73,14 +73,20 @@ namespace CapyIsland.UI
         }
 
         /// <summary>Nothing else is on screen, so a tip may show.</summary>
-        public static bool Quiet =>
+        public static bool Quiet => Calm && !YuzuTalking;
+
+        /// <summary>
+        /// No window, card or movie up — though Old Yuzu may be chatting. Story movies wait for
+        /// <see cref="Quiet"/> a while, then settle for this: on a busy island her hints can run
+        /// back to back for minutes.
+        /// </summary>
+        public static bool Calm =>
             !IsOpen && !UiScreen.AnyOpen && !SpeechDialog.IsOpen && !CardPopup.IsShowing && !PurchaseDialog.IsOpen
             && !Cutscene.Playing && !TextReader.IsOpen && !Visit.Active && !Visit.Travelling
-            && !AwakeningScreen.IsOpen && !IntroAudio.Active   // never during the opening, start to finish
-            && !YuzuTalking;
+            && !AwakeningScreen.IsOpen && !IntroAudio.Active;   // never during the opening, start to finish
 
         /// <summary>Old Yuzu is mid-sentence: a tip waits for her to finish rather than cut her off.</summary>
-        static bool YuzuTalking => GhostDialogue.Instance != null && GhostDialogue.Instance.MidLine;
+        public static bool YuzuTalking => GhostDialogue.Instance != null && GhostDialogue.Instance.MidLine;
 
         /// <summary>Shows the next waiting tip, if the moment is right. Called by TipTriggers.</summary>
         public static void Pump()

@@ -21,11 +21,18 @@ namespace CapyIsland.Game
         }
     }
 
-    public class Priest : MonoBehaviour, ITappable
+    public class Priest : MonoBehaviour, ITappable, IMapMarker
     {
         public const int WeddingWood = 50, WeddingGold = 50;
 
+        /// <summary>Close enough to the chapel that the task turns from "go there" to "pay".</summary>
+        public const float NearDistance = 4.5f;
+
+        public static Priest Instance { get; private set; }
+
         SpriteRenderer _body;
+        bool _pointed;   // the hand has shown you her, this visit
+        float _nextLook;
 
         public static Priest Spawn(Vector2 at, Transform parent)
         {
@@ -55,8 +62,22 @@ namespace CapyIsland.Game
             return priest;
         }
 
-        void OnEnable() => TapTargets.Register(this);
-        void OnDisable() => TapTargets.Unregister(this);
+        void OnEnable()
+        {
+            Instance = this;
+            TapTargets.Register(this);
+            MapMarkers.Register(this);
+        }
+
+        void OnDisable()
+        {
+            if (Instance == this) Instance = null;
+            TapTargets.Unregister(this);
+            MapMarkers.Unregister(this);
+        }
+
+        /// <summary>Where she stands, for the arrows.</summary>
+        public Vector2 Spot => _body != null ? (Vector2)_body.bounds.center : (Vector2)transform.position;
 
         /// <summary>Only once she is back: until then there is nobody here to say the words.</summary>
         void Update()
@@ -65,7 +86,39 @@ namespace CapyIsland.Game
             if (_body != null && _body.enabled != here) _body.enabled = here;
             var shadow = transform.Find("Shadow");
             if (shadow != null && shadow.gameObject.activeSelf != here) shadow.gameObject.SetActive(here);
+            PointWhenNear();
         }
+
+        /// <summary>
+        /// The wedding waiting: when you walk up to the chapel, the hand shows you who to tap.
+        /// Once per visit, so it never nags while you stand about.
+        /// </summary>
+        void PointWhenNear()
+        {
+            if (Time.time < _nextLook) return;
+            _nextLook = Time.time + 0.5f;
+            // Shown even with the tutorial switched off: this is the story's last step, not a lesson.
+            if (!YuzuHeart.WeddingDue || _body == null || !_body.enabled) return;
+            var king = FindFirstObjectByType<PlayerAvatar>();
+            if (king == null) return;
+            bool near = Vector2.Distance(king.transform.position, transform.position) < NearDistance;
+            if (!near) { _pointed = false; return; }
+            if (_pointed) return;
+            var tutorial = TutorialDirector.Instance;
+            if (tutorial != null && !tutorial.Finished) return;   // the hand is busy teaching
+            var pointer = FindFirstObjectByType<TutorialPointer>();
+            if (pointer == null) return;
+            _pointed = true;
+            pointer.PointAt(_body.transform, 6f);
+        }
+
+        // ---------------------------------------------------------------- the arrows
+
+        public MarkerKind MarkerKind => MarkerKind.Quest;
+        public bool MarkerActive => YuzuHeart.WeddingDue && _body != null && _body.enabled;
+        public Vector2 MarkerPosition => Spot;
+        public Sprite MarkerIcon => _body != null ? _body.sprite : null;
+        public string MarkerLabel => StoryText.Name("Church");
 
         public float TapDistance(Vector2 worldPoint)
         {
@@ -108,7 +161,12 @@ namespace CapyIsland.Game
             // The little movie first (as the original did), then the party carries on outside.
             UI.WeddingCutscene.Show(renewal, () =>
             {
-                Motes.Trigger("wedding_mote");
+                // Not a heart: the hearts are what woke her. Remembered, and the bow tie is yours.
+                if (!renewal)
+                {
+                    Motes.Record(Motes.Wedding);
+                    Wardrobe.Give(Wardrobe.RewardFor(Motes.Wedding));
+                }
                 Celebrate();
             });
         }

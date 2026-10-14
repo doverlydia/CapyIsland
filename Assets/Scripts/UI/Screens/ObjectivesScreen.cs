@@ -93,7 +93,17 @@ namespace CapyIsland.UI
 
             var quests = Objectives.ActiveQuests();
             SectionLabel(_list, "Story");
-            if (quests.Count == 0)
+            bool wedding = YuzuHeart.WeddingDue && Priest.Instance != null;
+            if (wedding)
+            {
+                var g = Objectives.WeddingGoal(Priest.Instance);
+                string line = g.Step == null ? g.Title : g.Title + "\n<color=#C9653A>" + g.Step + "</color>";
+                var step = Objectives.StepTo(g.Where.Value, out var ghost);
+                if (step != null) line += "\n<color=#C9653A>" + step + "</color>";
+                Row(g.Icon, Color.white, StoryText.Guide, line, "The wedding", UiKit.Danger,
+                    ghost != null ? (Vector2)ghost.transform.position : g.Where.Value, portrait: true);
+            }
+            if (quests.Count == 0 && !wedding)
             {
                 Empty("Nobody needs a hand right now. Keep building, and new friends will turn up with requests.");
             }

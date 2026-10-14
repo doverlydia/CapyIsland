@@ -92,6 +92,9 @@ namespace CapyIsland.Game
                     return new Goal { Source = Source.Reward, Title = "Collect your reward from " + giver.Speaker, From = giver.Speaker,
                         Where = giver.transform.position, Icon = giver.Portrait };
 
+            // Old Yuzu back and waiting at the chapel: the story's last step leads.
+            if (YuzuHeart.WeddingDue && Priest.Instance != null) return WeddingGoal(Priest.Instance);
+
             // A quest in progress next.
             foreach (var giver in Givers())
             {
@@ -123,6 +126,30 @@ namespace CapyIsland.Game
                 if (!a.Done) return new Goal { Source = Source.Achievement, Title = a.Goal };
 
             return new Goal { Source = Source.Done, Title = "Every goal complete. Enjoy your island!" };
+        }
+
+        /// <summary>
+        /// The wedding, in two steps: walk to the chapel, then pay Old Yuzu for it there (with what
+        /// is still missing, if you can't yet afford it).
+        /// </summary>
+        public static Goal WeddingGoal(Priest priest)
+        {
+            var goal = new Goal { Source = Source.Quest, From = StoryText.Guide, Icon = priest.MarkerIcon, Where = priest.Spot };
+            var king = Object.FindFirstObjectByType<PlayerAvatar>();
+            bool near = king != null && Vector2.Distance(king.transform.position, priest.transform.position) < Priest.NearDistance;
+            if (!near)
+            {
+                goal.Title = "Go to the Blossom Chapel";
+                return goal;
+            }
+            goal.Title = "Pay Old Yuzu 50 wood and 50 gold for the wedding";
+            var store = ResourceStore.Instance;
+            if (store == null) return goal;
+            int wood = Priest.WeddingWood - store.Get(ResourceKind.Wood), gold = Priest.WeddingGold - store.Get(ResourceKind.Gold);
+            if (wood > 0 && gold > 0) goal.Step = "First: gather " + wood + " more wood and " + gold + " more gold";
+            else if (wood > 0) goal.Step = "First: gather " + wood + " more wood";
+            else if (gold > 0) goal.Step = "First: gather " + gold + " more gold";
+            return goal;
         }
 
         /// <summary>Quests that have been started and not yet handed in.</summary>
@@ -181,11 +208,6 @@ namespace CapyIsland.Game
                         if (!bubble.Taken && bubble.Contents != null && bubble.Contents.GetComponent<PiratePete>() != null)
                             return bubble.transform.position;
                     return null;
-                case "wedding_mote":
-                    // Nobody can marry you until Old Yuzu is back: the hearts go to the tower.
-                    if (!YuzuHeart.Alive) return TowerOfLove.Instance != null ? TowerOfLove.Instance.transform.position : null;
-                    var church = UnityEngine.Object.FindFirstObjectByType<Church>();
-                    return church != null ? church.transform.position : null;
                 case "peach_dance":
                     return GiverOf(QuestGiver.Kind.Peach);
                 case "girl_quest_1":
@@ -324,7 +346,6 @@ namespace CapyIsland.Game
             "girl_quest_8" => "Chase every guinea pig off the island",
             "girl_quest_10" => "Keep helping Miso",
             "girl_crown" => "Buy the Tiara",
-            "wedding_mote" => YuzuHeart.Alive ? "Hold the wedding at the Blossom Chapel" : "Bring every warm heart home",
             "panda_sawmill" => "Put a woolly capybara to work at a sawmill",
             "5_plum" => "Grow five Legendary Plum Trees",
             "monster_tame" => "Warm up five zombie capybaras",

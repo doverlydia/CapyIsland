@@ -21,13 +21,18 @@ namespace CapyIsland.Game
         SpriteRenderer _icon;
         TextMeshPro _label;
         bool _credited;
+        bool _silent;
 
-        /// <summary>Launches a ping from <paramref name="worldFrom"/>; the amount is added on arrival.</summary>
-        public static void Fly(ResourceKind kind, int amount, Vector2 worldFrom)
+        /// <summary>
+        /// Launches a ping from <paramref name="worldFrom"/>; the amount is added on arrival.
+        /// <paramref name="silent"/> skips the coin chime (the tower's endless chests).
+        /// </summary>
+        public static void Fly(ResourceKind kind, int amount, Vector2 worldFrom, bool silent = false)
         {
             var go = new GameObject("Ping_" + kind);
             go.transform.position = new Vector3(worldFrom.x, worldFrom.y, -1f);
             var ping = go.AddComponent<ResourcePing>();
+            ping._silent = silent;
             ping.Init(kind, amount);
         }
 
@@ -104,7 +109,7 @@ namespace CapyIsland.Game
             if (_credited) return;
             _credited = true;
             if (ResourceStore.Instance != null) ResourceStore.Instance.Add(_kind, _amount);
-            Sfx.Play(SfxKind.Coin, 0.35f, 0.15f);
+            if (!_silent) Sfx.Play(SfxKind.Coin, 0.35f, 0.15f);
             UI.ResourceBar.Bump(_kind);
         }
 

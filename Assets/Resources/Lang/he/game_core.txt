@@ -542,3 +542,21 @@
 
 @ Tip: you don't have to reach. Tap any spot to walk there, or switch on the joystick in Settings.
 = טיפ: לא צריך להגיע רחוק. הקש על כל מקום כדי ללכת אליו, או הפעל את הג'ויסטיק בהגדרות.
+
+@ Go to the Blossom Chapel
+= לך לקפלת הפריחה
+
+@ Pay Old Yuzu 50 wood and 50 gold for the wedding
+= שלם לסבתא יוזו 50 עץ ו-50 זהב עבור החתונה
+
+@ First: gather {0} more wood and {1} more gold
+= קודם: אסוף עוד {0} עץ ועוד {1} זהב
+
+@ First: gather {0} more wood
+= קודם: אסוף עוד {0} עץ
+
+@ First: gather {0} more gold
+= קודם: אסוף עוד {0} זהב
+
+@ The wedding
+= החתונה

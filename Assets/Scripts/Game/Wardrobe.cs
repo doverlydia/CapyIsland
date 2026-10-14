@@ -180,6 +180,7 @@ namespace CapyIsland.Game
             if (item.Unlock == "cat_gift") return "A present from a cat";
             if (item.Unlock == "sewn") return "You sewed this!";
             if (item.Unlock == "finale") return "Bring every warm heart home";
+            if (item.Unlock == Motes.Wedding) return "Hold the wedding at the Blossom Chapel";
             if (item.Unlock.StartsWith("contest_")) return "First place in a contest";
             if (item.Unlock == "journal_Fishing") return "Complete the fish journal";
             if (item.Unlock == "journal_Birding") return "Complete the bird journal";
@@ -235,7 +236,7 @@ namespace CapyIsland.Game
             _catchingUp = true;   // pieces earned long ago aren't news
             foreach (var i in Items)
                 if (i.Unlock != "daily" && i.Unlock != "start" && !_owned.Contains(i.Id)
-                    && Motes.TryGetByFunc(i.Unlock, out var m) && Motes.Has(m.Name))
+                    && (Motes.TryGetByFunc(i.Unlock, out var m) && Motes.Has(m.Name) || i.Unlock == Motes.Wedding && YuzuHeart.Married))
                     Give(i, announce: false);
             _catchingUp = false;
         }

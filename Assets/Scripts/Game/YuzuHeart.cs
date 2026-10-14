@@ -11,9 +11,9 @@ namespace CapyIsland.Game
     ///
     /// Nobody says so. The player notices first: a drip from the ice at a quarter of the hearts,
     /// a twitch at half (she spins round: "did you see that?"), a glow at three quarters (she
-    /// starts to wonder), and when every heart but the wedding's is home, she comes back to life.
-    /// Only then can the wedding be held: she marries you and her granddaughter herself, and that
-    /// last heart completes the island.
+    /// starts to wonder), and when every heart is home, she comes back to life. Then the wedding:
+    /// she marries you and her granddaughter herself at the chapel (it is not a heart of its own),
+    /// and after it the finale.
     ///
     /// The step reached is remembered with the island (Start over and Delete Save forget it).
     /// </summary>
@@ -21,8 +21,14 @@ namespace CapyIsland.Game
     {
         const string StageKey = "CapyIsland.YuzuStage";
 
-        /// <summary>The one heart that can only come after she is back: her granddaughter's wedding.</summary>
+        /// <summary>Her granddaughter's wedding, remembered under this name (it is not a heart).</summary>
         public const string WeddingHeart = "The wedding bells toll for thee";
+
+        /// <summary>You and Miso are married.</summary>
+        public static bool Married => Motes.Has(WeddingHeart);
+
+        /// <summary>She is back and Miso has said yes, and the wedding is still to be held.</summary>
+        public static bool WeddingDue => Alive && !Married && Motes.Has("Madly in Love");
 
         public enum Stage { Frozen, Drip, Twitch, Glow, Alive }
 
@@ -36,11 +42,11 @@ namespace CapyIsland.Game
 
         const string FinaleKey = "CapyIsland.Finale";
 
-        /// <summary>Every heart home (the wedding's last of all): the finale has played.</summary>
+        /// <summary>Every heart home and the wedding held: the finale has played.</summary>
         public static bool FinaleSeen => PlayerPrefs.GetInt(FinaleKey, 0) == 1;
 
-        /// <summary>Everything is home: time for the finale, if it hasn't played.</summary>
-        public static bool FinaleDue => Alive && !FinaleSeen && Motes.Total > 0 && Motes.CollectedCount >= Motes.Total;
+        /// <summary>Everything is home and you are married: time for the finale, if it hasn't played.</summary>
+        public static bool FinaleDue => Alive && Married && !FinaleSeen && Motes.Total > 0 && Motes.CollectedCount >= Motes.Total;
 
         public static void MarkFinale()
         {
@@ -55,23 +61,10 @@ namespace CapyIsland.Game
         static void ResetSession() => Changed = null;
 
         /// <summary>
-        /// How much of the ice has melted: every heart earned except the wedding's — the same count
-        /// as the achievements list, whether or not its heart has been tapped home yet.
+        /// How much of the ice has melted: every heart earned — the same count as the achievements
+        /// list, whether or not its heart has been tapped home yet.
         /// </summary>
-        public static float Thaw
-        {
-            get
-            {
-                int total = 0, home = 0;
-                foreach (var m in Motes.All)
-                {
-                    if (m.Name == WeddingHeart) continue;
-                    total++;
-                    if (Motes.Has(m.Name)) home++;
-                }
-                return total > 0 ? (float)home / total : 0f;
-            }
-        }
+        public static float Thaw => Motes.Total > 0 ? (float)Motes.CollectedCount / Motes.Total : 0f;
 
         /// <summary>The step the hearts brought home have earned.</summary>
         public static Stage Earned
@@ -108,7 +101,10 @@ namespace CapyIsland.Game
     /// </summary>
     public class YuzuHeartDirector : MonoBehaviour
     {
+        const float PatienceSeconds = 15f;
+
         float _next;
+        float _calmFor;   // seconds a movie has been waiting on nothing but Old Yuzu's chatter
         bool _playing;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -122,8 +118,15 @@ namespace CapyIsland.Game
         {
             if (_playing || Time.unscaledTime < _next) return;
             _next = Time.unscaledTime + 1f;
-            if (Visit.Active || Visit.Travelling || HotSpring.Bathing || TowerOfLove.Instance == null) return;
-            if (!UI.HudTour.Quiet) return;
+            // Not waiting on the tower: a bomb can bubble it, and she must still wake while it rides in your trail.
+            if (Visit.Active || Visit.Travelling || HotSpring.Bathing || LandMap.Instance == null) return;
+            if (!YuzuHeart.FinaleDue && YuzuHeart.Earned <= YuzuHeart.Shown) { _calmFor = 0f; return; }
+            if (!UI.HudTour.Calm) { _calmFor = 0f; return; }
+            // Let her finish what she is saying, but not forever: her hints can follow one another
+            // for minutes on a busy island, and these movies matter more than a tip.
+            _calmFor += 1f;
+            if (UI.HudTour.YuzuTalking && _calmFor < PatienceSeconds) return;
+            _calmFor = 0f;
             // Every heart home: the finale, then her lantern.
             if (YuzuHeart.FinaleDue)
             {
@@ -137,9 +140,10 @@ namespace CapyIsland.Game
                 });
                 return;
             }
-            var shown = YuzuHeart.Shown;
-            if (YuzuHeart.Earned <= shown) return;
-            var next = shown + 1;
+            // Several steps earned at once (an older save, a burst of hearts): just the latest movie,
+            // so waking her is never four movies away.
+            var next = YuzuHeart.Earned;
+            if (next <= YuzuHeart.Shown) return;
             _playing = true;
             UI.ThawCutscene.Show(next, () =>
             {
