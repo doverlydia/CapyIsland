@@ -314,7 +314,9 @@ namespace CapyIsland.UI
             if (f != null && f.Mode && (!f.AtShore && f.Now == Fishing.State.Idle)) f.Mode = false;
 
             bool mode = !blocked && f.Mode;
-            bool offer = !blocked && !f.Mode && f.AtShore && f.Now == Fishing.State.Idle && HobbyLog.IsUnlocked(Hobby.Fishing);
+            // The offer steps aside for anyone talking or a card, rather than sitting over their words.
+            bool offer = !blocked && !f.Mode && f.AtShore && f.Now == Fishing.State.Idle && HobbyLog.IsUnlocked(Hobby.Fishing)
+                         && !SpeechDialog.IsOpen && !CardPopup.IsShowing;
             if (_mode.activeSelf != mode) _mode.SetActive(mode);
             if (_start.activeSelf != offer) _start.SetActive(offer);
             if (!mode) return;
