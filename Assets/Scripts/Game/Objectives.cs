@@ -246,7 +246,12 @@ namespace CapyIsland.Game
             // and the arrows point at where to do it.
             if (StoreData.UnlockedBy(item) is string waitsFor && Motes.TryGetByFunc(waitsFor, out var step) && !Motes.Has(step.Name))
             {
-                firstStep = "First: " + GoalFor(step);
+                // Whose task it is, so one character's card doesn't seem to set another's errand.
+                string who = System.Array.Exists(QuestData.Coriander, d => d.CompleteMote == step.Name) ? StoryText.Sweetheart
+                           : System.Array.Exists(QuestData.Peach, d => d.CompleteMote == step.Name) ? StoryText.Captain : null;
+                firstStep = who != null
+                    ? string.Format("The {0} comes after {1}'s task: {2}", StoryText.Name(item), who, GoalFor(step))
+                    : "First: " + GoalFor(step);
                 return ForSale.TryGetValue(waitsFor, out var needed) ? BuyPath(needed, out _, depth + 1) : null;
             }
 

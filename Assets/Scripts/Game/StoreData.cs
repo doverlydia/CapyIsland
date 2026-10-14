@@ -162,28 +162,32 @@ namespace CapyIsland.Game
 
         public static StoreItemDef Get(string name) => TryGet(name, out var d) ? d : default;
 
-        /// <summary>
-        /// Whether a sale display is shown at all (StoreItem.Avaliable). The Steel Store waits for
-        /// the Wedding Dress, the Gold Store for the pearls, the Church for the tiara.
-        /// </summary>
         /// <summary>The heart (by func) a gated display waits for — the story step before it's for sale — or null.</summary>
         public static string UnlockedBy(string name) => name switch
         {
             "Silver Store" => "bronze_store",
-            "Steel Store" => "girl_quest_2",
-            "Gold Store" => "girl_quest_6",
             "Church" => "girl_crown",
             _ => null,
         };
 
+        /// <summary>
+        /// Whether a sale display is shown at all (StoreItem.Avaliable). The Church waits for the
+        /// tiara. Unlike the original, the Steel and Gold Stores don't wait for Miso's gifts: the
+        /// Captain's errands need them too, and one character's task shouldn't hold up another's.
+        /// Miso's gifts themselves (dress, pearls, tiara) go on sale once she has asked for them,
+        /// since a gift bought before she asks wouldn't count.
+        /// </summary>
         public static bool IsUnlocked(string name) => name switch
         {
             "Silver Store" => Motes.Has("Bronze Store"),
-            "Steel Store" => Motes.Has("The Girl's New Dress"),
-            "Gold Store" => Motes.Has("The Girl's New Necklace"),
             "Church" => Motes.Has("The Girl's Tiara"),
+            "Wedding Dress" => Asked("The Girl's New Dress"),
+            "String of Pearls" => Asked("The Girl's New Necklace"),
+            "Tiara" => Asked("The Girl's Tiara"),
             _ => true,
         };
+
+        static bool Asked(string taskHeart) => QuestSystem.Instance == null || !QuestSystem.Instance.WaitsForTask(taskHeart);
 
         /// <summary>
         /// Sold out (StoreItem.SoldOut): the dress, pearls and tiara once given; otherwise when the
