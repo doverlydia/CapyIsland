@@ -242,6 +242,14 @@ namespace CapyIsland.Game
             if (stand.HasValue) return stand;
             if (depth > 5) return null;
 
+            // Its plans wait for a story step (the Steel Store for the Wedding Dress): that comes first,
+            // and the arrows point at where to do it.
+            if (StoreData.UnlockedBy(item) is string waitsFor && Motes.TryGetByFunc(waitsFor, out var step) && !Motes.Has(step.Name))
+            {
+                firstStep = "First: " + GoalFor(step);
+                return ForSale.TryGetValue(waitsFor, out var needed) ? BuyPath(needed, out _, depth + 1) : null;
+            }
+
             foreach (var kv in StoreData.Lists)
             {
                 if (!ShopBuilding.TryGetValue(kv.Key, out var shop)) continue;

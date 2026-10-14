@@ -166,6 +166,16 @@ namespace CapyIsland.Game
         /// Whether a sale display is shown at all (StoreItem.Avaliable). The Steel Store waits for
         /// the Wedding Dress, the Gold Store for the pearls, the Church for the tiara.
         /// </summary>
+        /// <summary>The heart (by func) a gated display waits for — the story step before it's for sale — or null.</summary>
+        public static string UnlockedBy(string name) => name switch
+        {
+            "Silver Store" => "bronze_store",
+            "Steel Store" => "girl_quest_2",
+            "Gold Store" => "girl_quest_6",
+            "Church" => "girl_crown",
+            _ => null,
+        };
+
         public static bool IsUnlocked(string name) => name switch
         {
             "Silver Store" => Motes.Has("Bronze Store"),
