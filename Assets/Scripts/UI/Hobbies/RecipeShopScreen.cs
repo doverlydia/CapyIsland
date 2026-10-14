@@ -89,8 +89,8 @@ namespace CapyIsland.UI
                 Tag(row, "Known", UiKit.Leaf);
                 return;
             }
-            // A free one says how to get it, before anything else.
-            if (d.FreeWith is Hobby free && !HobbyLog.IsUnlocked(free))
+            // A free one says how to get it, once you have a stove (before that: "Buy a stove first", like the rest).
+            if (d.FreeWith is Hobby free && !HobbyLog.IsUnlocked(free) && HobbyLog.IsUnlocked(Hobby.Cooking))
             {
                 Tag(row, free == Hobby.Fishing ? "Free when you take up fishing" : "Free when you take up gardening", UiKit.InkSoft);
                 return;
