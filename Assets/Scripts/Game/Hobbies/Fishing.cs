@@ -79,7 +79,8 @@ namespace CapyIsland.Game
         /// <summary>How close a maxed-out line is to snapping, 0 … 1 (it holds for a moment first).</summary>
         public float Overload => Mathf.Clamp01(_overload / SnapAfter);
 
-        const float SnapAfter = 1.5f;   // seconds a line can stay at full strain before it snaps
+        const float SnapAfter = 1.1f;   // seconds a line can stay at full strain before it snaps
+        const float SlackEscape = 4.5f; // seconds of slack before it swims off
         float _overload;
 
         Shadow _hooked;
@@ -532,7 +533,7 @@ namespace CapyIsland.Game
 
             if (Holding)
             {
-                Tension += dt * (Surging ? 0.85f : 0.22f) * _strength * (_bait != null ? _bait.Gentle : 1f);
+                Tension += dt * (Surging ? 1f : 0.28f) * _strength * (_bait != null ? _bait.Gentle : 1f);
                 _remaining -= dt * (Surging ? 0.3f : 0.85f);
                 _slackFor = 0f;
             }
@@ -548,7 +549,7 @@ namespace CapyIsland.Game
             if (Tension >= 1f && Holding) _overload += dt;
             else _overload = Mathf.Max(0f, _overload - dt * 2f);
             if (_overload >= SnapAfter) { Escape("Snap! The line broke. Let go when it turns red."); return; }
-            if (_remaining > _needed + 2f || _slackFor > 6f) { Escape("It swam off. Keep reeling between its pulls."); return; }
+            if (_remaining > _needed + 1.5f || _slackFor > SlackEscape) { Escape("It swam off. Keep reeling between its pulls."); return; }
             if (_remaining <= 0f) { Catch(_hooked); return; }
             float distance = LandAt + (_startDistance - LandAt) * Mathf.Clamp(_remaining / _needed, 0f, 1.3f);
 
