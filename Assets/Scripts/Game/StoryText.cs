@@ -162,12 +162,16 @@ namespace CapyIsland.Game
             { "Medium Posie Garden", "Medium Daisy Garden" },
             { "Large Posie Garden", "Large Daisy Garden" },
 
+            { "Capy Island", "Home Isle" },     // where you start (the game's own name stays the title)
             { "Verdant Bay", "Mossy Meadow" },
             { "Ginger Cove", "Pebble Cove" },
             { "Wedding Isle", "Blossom Isle" },
             { "Pirate Cove", "Barnacle Bay" },
             { "Monster Isle", "Gloomfen" },
         };
+
+        /// <summary>The seas between the islands, as the map writes them (west channel, lagoon, strait, open sea).</summary>
+        public static readonly string[] Seas = { "Kombu Channel", "Misty Lagoon", "Sakura Strait", "Lantern Sea" };
 
         /// <summary>What the player calls a thing, from its internal id.</summary>
         public static string Name(string id) =>

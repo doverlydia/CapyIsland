@@ -146,7 +146,7 @@ namespace CapyIsland.UI
                         var pic = have && catalog != null && card.Items.Length > 0 ? catalog.Icon(card.Items[0]) : null;
                         string title = StoryText.CardTitle(card.Id);
                         if (string.IsNullOrEmpty(title)) title = card.Items.Length > 0 ? StoryText.Name(card.Items[0]) : "";
-                        Add(pic, have, title, null, "collection/" + card.Id);
+                        Add(pic, have, title, have ? null : Whereabouts.Card(card), "collection/" + card.Id);
                     }
                     break;
                 }
@@ -170,35 +170,35 @@ namespace CapyIsland.UI
                     foreach (var d in HobbyData.Dishes)
                     {
                         bool have = d.MinLevel <= cooking && HobbyLog.IsUnlocked(Hobby.Cooking);
-                        Add(HobbyData.ItemArt("dish:" + d.Id), have, d.Name, have ? null : Loc.F("Cooking level {0}", d.MinLevel));
+                        Add(HobbyData.ItemArt("dish:" + d.Id), have, d.Name, have ? null : Whereabouts.Dish(d));
                     }
                     break;
                 case Tab.Fish:
                     foreach (var f in HobbyData.Fish)
                     {
                         var e = HobbyLog.FishEntry(f.Id);
-                        Add(HobbyData.FishPicture(f), e != null, f.Name, e != null ? $"×{e.count} · best {e.best:0} cm" : HobbyData.Rarity(f.Stars), "hobbies/Fishing/" + f.Id);
+                        Add(HobbyData.FishPicture(f), e != null, f.Name, e != null ? $"×{e.count} · best {e.best:0} cm" : Whereabouts.Fish(f), "hobbies/Fishing/" + f.Id);
                     }
                     break;
                 case Tab.Birds:
                     foreach (var b in HobbyData.Birds)
                     {
                         var e = HobbyLog.BirdEntry(b.Id);
-                        Add(HobbyData.BirdPicture(b), e != null, b.Name, e != null ? $"×{e.count}" : HobbyData.Rarity(b.Stars), "hobbies/Birding/" + b.Id);
+                        Add(HobbyData.BirdPicture(b), e != null, b.Name, e != null ? $"×{e.count}" : Whereabouts.Bird(b), "hobbies/Birding/" + b.Id);
                     }
                     break;
                 case Tab.Bugs:
                     foreach (var b in HobbyData.Bugs)
                     {
                         var e = HobbyLog.BugEntry(b.Id);
-                        Add(HobbyData.Art("Bug_" + b.Id), e != null, b.Name, e != null ? $"×{e.count}" : HobbyData.Rarity(b.Stars), "hobbies/Bugs/" + b.Id);
+                        Add(HobbyData.Art("Bug_" + b.Id), e != null, b.Name, e != null ? $"×{e.count}" : Whereabouts.Bug(b), "hobbies/Bugs/" + b.Id);
                     }
                     break;
                 case Tab.Vegetables:
                     foreach (var c in HobbyData.Crops)
                     {
                         var e = HobbyLog.CropEntry(c.Id);
-                        Add(HobbyData.ItemArt("crop:" + c.Id), e != null, c.Name, e != null ? Loc.F("×{0} harvested", e.count) : Loc.F("Gardening level {0}", c.MinLevel), "hobbies/Gardening/" + c.Id);
+                        Add(HobbyData.ItemArt("crop:" + c.Id), e != null, c.Name, e != null ? Loc.F("×{0} harvested", e.count) : Whereabouts.Crop(c), "hobbies/Gardening/" + c.Id);
                     }
                     break;
                 case Tab.Cats:
@@ -207,7 +207,7 @@ namespace CapyIsland.UI
                         HobbyLog.Cat state = null;
                         foreach (var c in HobbyLog.Cats) if (c.id == cat.Id) state = c;
                         bool adopted = state != null && state.adopted;
-                        Add(HobbyData.Art("Cat_" + cat.Id), adopted, cat.Name, adopted ? null : state != null && state.bond > 0 ? $"Trust {state.bond}/{CatCare.MaxBond}" : "Not met yet", "hobbies/Cats/" + cat.Id);
+                        Add(HobbyData.Art("Cat_" + cat.Id), adopted, cat.Name, adopted ? null : state != null && state.bond > 0 ? $"Trust {state.bond}/{CatCare.MaxBond}" : Whereabouts.Cat, "hobbies/Cats/" + cat.Id);
                     }
                     break;
             }
@@ -220,10 +220,13 @@ namespace CapyIsland.UI
         /// <summary>One thing in the collection: its picture (a shadow if not found yet), its name, a small line under it.</summary>
         RectTransform Tile(Sprite pic, bool have, string name, string detail)
         {
+            // Not found yet: the shadow gets smaller and where-and-when gets the room.
+            bool hint = !have && !string.IsNullOrEmpty(detail);
+            float detailTop = hint ? 0.34f : 0.19f, labelTop = hint ? 0.48f : 0.36f;
             var tile = UiKit.Image(_content, name, UiKit.Rounded(26), have ? Color.white : UiKit.SurfaceSunk);
             var p = UiKit.Image(tile.transform, "Picture", pic, have ? Color.white : new Color(0.2f, 0.16f, 0.13f, 0.4f));
             p.preserveAspect = true;
-            p.rectTransform.anchorMin = new Vector2(0f, 0.36f);
+            p.rectTransform.anchorMin = new Vector2(0f, labelTop);
             p.rectTransform.anchorMax = Vector2.one;
             p.rectTransform.offsetMin = new Vector2(16f, 0f);
             p.rectTransform.offsetMax = new Vector2(-16f, -12f);
@@ -231,13 +234,13 @@ namespace CapyIsland.UI
             {
                 p.enabled = false;
                 var q = UiKit.Text(tile.transform, "Unknown", "?", 90f, UiKit.InkSoft, true, TextAlignmentOptions.Center);
-                q.rectTransform.anchorMin = new Vector2(0f, 0.36f);
+                q.rectTransform.anchorMin = new Vector2(0f, labelTop);
                 q.rectTransform.anchorMax = Vector2.one;
                 q.rectTransform.offsetMin = q.rectTransform.offsetMax = Vector2.zero;
             }
             var label = UiKit.Text(tile.transform, "Name", name, 26f, have ? UiKit.Ink : UiKit.InkSoft, true, TextAlignmentOptions.Center);
-            label.rectTransform.anchorMin = new Vector2(0f, 0.18f);
-            label.rectTransform.anchorMax = new Vector2(1f, 0.36f);
+            label.rectTransform.anchorMin = new Vector2(0f, detailTop - 0.01f);
+            label.rectTransform.anchorMax = new Vector2(1f, labelTop);
             label.rectTransform.offsetMin = new Vector2(8f, 0f);
             label.rectTransform.offsetMax = new Vector2(-8f, 0f);
             label.enableAutoSizing = true;
@@ -246,7 +249,7 @@ namespace CapyIsland.UI
             if (string.IsNullOrEmpty(detail)) return tile.rectTransform;
             var d = UiKit.Text(tile.transform, "Detail", detail, 20f, UiKit.Hex("B98A1E"), false, TextAlignmentOptions.Center);
             d.rectTransform.anchorMin = Vector2.zero;
-            d.rectTransform.anchorMax = new Vector2(1f, 0.19f);
+            d.rectTransform.anchorMax = new Vector2(1f, detailTop);
             d.rectTransform.offsetMin = new Vector2(6f, 6f);
             d.rectTransform.offsetMax = new Vector2(-6f, 0f);
             d.enableAutoSizing = true;

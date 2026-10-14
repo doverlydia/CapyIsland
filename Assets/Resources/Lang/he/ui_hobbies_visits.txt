@@ -1095,3 +1095,81 @@
 
 @ Move
 = הזזה
+
+@ Home Isle
+= אי הבית
+
+@ Heart of the Isles
+= לב האיים
+
+@ Sold at the {0}
+= נמכר ב{0}
+
+@ Moves in when it has a home
+= עובר לגור כשיש לו בית
+
+@ Warm up a zombie capybara
+= חמם קפיברת זומבי
+
+@ Comes with the story
+= מגיע עם הסיפור
+
+@ Needs fishing level {0}
+= צריך דיג ברמה {0}
+
+@ Needs birdwatching level {0}
+= צריך צפרות ברמה {0}
+
+@ Needs bug catching level {0}
+= צריך ציד חרקים ברמה {0}
+
+@ Needs gardening level {0}
+= צריך גינון ברמה {0}
+
+@ Needs cooking level {0}
+= צריך בישול ברמה {0}
+
+@ From any shore
+= מכל חוף
+
+@ On rocks by the shore
+= על סלעים ליד החוף
+
+@ Up in the trees
+= למעלה על העצים
+
+@ On flower gardens
+= בגינות פרחים
+
+@ In the trees
+= בין העצים
+
+@ In the grass
+= בדשא
+
+@ Grow it in a vegetable plot
+= גדל אותו בערוגת ירקות
+
+@ Cook it at your stove
+= בשל אותו בכיריים שלך
+
+@ Wanders onto your island
+= משוטט לאי שלך
+
+@ some days
+= בחלק מהימים
+
+@ Found on {0}
+= נמצא ב{0}
+
+@ Kombu Channel
+= תעלת הקומבו
+
+@ Misty Lagoon
+= הלגונה הערפילית
+
+@ Sakura Strait
+= מצר הסאקורה
+
+@ Lantern Sea
+= ים הפנסים

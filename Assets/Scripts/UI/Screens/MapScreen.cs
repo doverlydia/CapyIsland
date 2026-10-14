@@ -114,6 +114,7 @@ namespace CapyIsland.UI
             if (_camera != null) _camera.enabled = true;
             Layout();
             RebuildLocks();
+            RebuildNames();
             CentreOnKing();
             Game.NewStuff.Clear("map/");   // the new island is on show
             // The first time you look at the map, and only then: how to travel on it.
@@ -132,7 +133,10 @@ namespace CapyIsland.UI
         protected override void Fit()
         {
             base.Fit();
-            if (IsOpen) Layout();
+            if (!IsOpen) return;
+            Layout();
+            RebuildLocks();
+            RebuildNames();
         }
 
         // ---------------------------------------------------------------- the picture
@@ -362,6 +366,79 @@ namespace CapyIsland.UI
                 badge.transform.SetAsFirstSibling();
                 _locks.Add(badge.rectTransform);
             }
+        }
+
+        // ---------------------------------------------------------------- names
+
+        readonly List<RectTransform> _names = new();
+
+        /// <summary>
+        /// The seas, by the openest water in each (Unity units: the islands never move). Names in
+        /// <see cref="StoryText.Seas"/>.
+        /// </summary>
+        static readonly Vector2[] SeaSpots = { new(19f, -16f), new(67f, -46f), new(109f, -18f), new(65f, -72f) };
+
+        /// <summary>
+        /// Every island's name and every sea's, so "Found on Mossy Meadow" or "the Kombu Channel"
+        /// has somewhere to look. At home only: a friend's island is just the one.
+        /// </summary>
+        void RebuildNames()
+        {
+            foreach (var n in _names) if (n != null) Destroy(n.gameObject);
+            _names.Clear();
+            _taken.Clear();
+            var land = LandMap.Instance;
+            if (land == null || Visit.Active) return;
+
+            // Island names along the top of each island: the middle is where things stand.
+            for (int i = 0; ; i++)
+            {
+                var island = land.Island(i);
+                if (island == null) break;
+                if (island.rects.Count == 0 || island.circles.Count == 0) continue;
+                float top = float.MinValue;
+                foreach (var c in island.circles)
+                {
+                    top = Mathf.Max(top, LandMap.WorldToUnity(new Vector2(c.x, c.y - c.z)).y);
+                    top = Mathf.Max(top, LandMap.WorldToUnity(new Vector2(c.x, c.y + c.z)).y);
+                }
+                var middle = LandMap.WorldToUnity(island.rects[0].center);
+                Tag(StoryText.Name(island.name), ToMap(new Vector2(middle.x, top)) - new Vector2(0f, 46f), 32f, new Color(0.12f, 0.2f, 0.24f, 0.62f));
+            }
+
+            // The seas: lighter, as if written on the water.
+            for (int i = 0; i < SeaSpots.Length && i < StoryText.Seas.Length; i++)
+                Tag(StoryText.Seas[i], ToMap(SeaSpots[i]), 26f, new Color(0.16f, 0.3f, 0.55f, 0.45f));
+            // Under the pins, over the picture.
+            foreach (var n in _names) n.SetSiblingIndex(0);
+        }
+
+        readonly List<Rect> _taken = new();   // where the names already placed sit
+
+        /// <summary>A name in a pill; stepped up or down out of the way if another is already there.</summary>
+        void Tag(string text, Vector2 at, float size, Color back)
+        {
+            var pill = UiKit.Image(_markerLayer, "Name", UiKit.Rounded(18), back);
+            var t = UiKit.Text(pill.transform, "Label", text, size, Color.white, true, TextAlignmentOptions.Center);
+            t.textWrappingMode = TextWrappingModes.NoWrap;
+            t.overflowMode = TextOverflowModes.Overflow;
+            var fits = t.GetPreferredValues(Loc.T(text));
+            var box = new Vector2(fits.x + size * 1.1f, size * 1.6f);
+            pill.rectTransform.sizeDelta = box;
+
+            Vector2 best = at;
+            foreach (float step in new[] { 0f, -1f, 1f, -2f, 2f, -3f, 3f })
+            {
+                var p = at + new Vector2(0f, step * (box.y + 4f));
+                var r = new Rect(p - box * 0.5f, box);
+                bool clear = true;
+                foreach (var other in _taken) if (other.Overlaps(r)) { clear = false; break; }
+                if (clear) { best = p; break; }
+            }
+            _taken.Add(new Rect(best - box * 0.5f, box));
+            pill.rectTransform.anchoredPosition = best;
+            UiKit.Stretch(t.rectTransform);
+            _names.Add(pill.rectTransform);
         }
 
         // ---------------------------------------------------------------- travelling

@@ -67,9 +67,9 @@ namespace CapyIsland.UI
             };
             switch (_page)
             {
-                case Page.Fish: Journal(Hobby.Fishing, HobbyData.Fish.Length, i => (HobbyData.Fish[i].Name, HobbyData.FishPicture(HobbyData.Fish[i]), HobbyData.Fish[i].Stars, HobbyLog.FishEntry(HobbyData.Fish[i].Id), HobbyData.Fish[i].Times, HobbyData.Fish[i].RainOnly), true); break;
-                case Page.Birds: Journal(Hobby.Birding, HobbyData.Birds.Length, i => (HobbyData.Birds[i].Name, HobbyData.BirdPicture(HobbyData.Birds[i]), HobbyData.Birds[i].Stars, HobbyLog.BirdEntry(HobbyData.Birds[i].Id), HobbyData.Birds[i].Times, HobbyData.Birds[i].RainOnly), false); break;
-                case Page.Bugs: Journal(Hobby.Bugs, HobbyData.Bugs.Length, i => (HobbyData.Bugs[i].Name, HobbyData.Art("Bug_" + HobbyData.Bugs[i].Id), HobbyData.Bugs[i].Stars, HobbyLog.BugEntry(HobbyData.Bugs[i].Id), HobbyData.Bugs[i].Times, HobbyData.Bugs[i].RainOnly), false); break;
+                case Page.Fish: Journal(Hobby.Fishing, HobbyData.Fish.Length, i => (HobbyData.Fish[i].Name, HobbyData.FishPicture(HobbyData.Fish[i]), HobbyData.Fish[i].Stars, HobbyLog.FishEntry(HobbyData.Fish[i].Id), HobbyData.Fish[i].Times, HobbyData.Fish[i].RainOnly, Whereabouts.Fish(HobbyData.Fish[i])), true); break;
+                case Page.Birds: Journal(Hobby.Birding, HobbyData.Birds.Length, i => (HobbyData.Birds[i].Name, HobbyData.BirdPicture(HobbyData.Birds[i]), HobbyData.Birds[i].Stars, HobbyLog.BirdEntry(HobbyData.Birds[i].Id), HobbyData.Birds[i].Times, HobbyData.Birds[i].RainOnly, Whereabouts.Bird(HobbyData.Birds[i])), false); break;
+                case Page.Bugs: Journal(Hobby.Bugs, HobbyData.Bugs.Length, i => (HobbyData.Bugs[i].Name, HobbyData.Art("Bug_" + HobbyData.Bugs[i].Id), HobbyData.Bugs[i].Stars, HobbyLog.BugEntry(HobbyData.Bugs[i].Id), HobbyData.Bugs[i].Times, HobbyData.Bugs[i].RainOnly, Whereabouts.Bug(HobbyData.Bugs[i])), false); break;
                 case Page.Cats: CatsPage(); break;
                 case Page.Bag: BagPage(); break;
                 case Page.Kitchen: KitchenPage(); break;
@@ -394,23 +394,25 @@ namespace CapyIsland.UI
             return g;
         }
 
-        void Journal(Hobby hobby, int count, Func<int, (string name, Sprite pic, int stars, HobbyLog.Entry entry, DayParts times, bool rain)> get, bool sizes)
+        void Journal(Hobby hobby, int count, Func<int, (string name, Sprite pic, int stars, HobbyLog.Entry entry, DayParts times, bool rain, string where)> get, bool sizes)
         {
             Back();
             JournalHeader(hobby);
             var grid = Grid(count);
             for (int i = 0; i < count; i++)
             {
-                var (name, pic, stars, entry, times, rain) = get(i);
+                var (name, pic, stars, entry, times, rain, where) = get(i);
                 bool known = entry != null;
                 var tile = UiKit.Image(grid.transform, name, UiKit.Rounded(26), known ? Color.white : UiKit.SurfaceSunk);
                 Picture(tile.transform, pic, known);
                 Label(tile.transform, known ? name : "???", known);
                 if (known && NewStuff.Has("hobbies/" + hobby + "/" + entry.id)) NewDot.Fixed(tile.transform, 30f);
-                // When it is about, even before you have found one: something to go looking for.
-                string detail = HobbyData.Rarity(stars) + "\n" + (rain ? "Only in the rain" : GameClock.Describe(times));
-                if (known) detail += sizes ? $"\n×{entry.count} · best {entry.best:0} cm" : $"\n×{entry.count}";
-                Detail(tile.transform, detail);
+                // Not found yet: where and when to go looking. Found: when it's about, and your tally.
+                string detail = known
+                    ? HobbyData.Rarity(stars) + "\n" + (rain ? "Only in the rain" : GameClock.Describe(times))
+                      + (sizes ? $"\n×{entry.count} · best {entry.best:0} cm" : $"\n×{entry.count}")
+                    : HobbyData.Rarity(stars) + "\n" + where;
+                Detail(tile.transform, detail, known);
             }
             NewStuff.Clear("hobbies/" + hobby + "/");   // seen
         }
@@ -434,16 +436,17 @@ namespace CapyIsland.UI
             var p = UiKit.Image(tile, "Picture", pic, known ? Color.white : new Color(0.2f, 0.16f, 0.13f, 0.55f));
             p.preserveAspect = true;
             p.enabled = pic != null;
-            p.rectTransform.anchorMin = new Vector2(0.08f, 0.38f);
+            p.rectTransform.anchorMin = new Vector2(0.08f, known ? 0.38f : 0.52f);
             p.rectTransform.anchorMax = new Vector2(0.92f, 0.95f);
             p.rectTransform.offsetMin = p.rectTransform.offsetMax = Vector2.zero;
         }
 
+        // A tile not found yet gives the shadow less room and where-and-when more.
         static void Label(Transform tile, string text, bool strong)
         {
             var label = UiKit.Text(tile, "Name", text, 24f, strong ? UiKit.Ink : UiKit.InkSoft, true, TextAlignmentOptions.Center);
-            label.rectTransform.anchorMin = new Vector2(0f, 0.2f);
-            label.rectTransform.anchorMax = new Vector2(1f, 0.38f);
+            label.rectTransform.anchorMin = new Vector2(0f, strong ? 0.2f : 0.38f);
+            label.rectTransform.anchorMax = new Vector2(1f, strong ? 0.38f : 0.52f);
             label.rectTransform.offsetMin = new Vector2(6f, 0f);
             label.rectTransform.offsetMax = new Vector2(-6f, 0f);
             label.enableAutoSizing = true;
@@ -451,11 +454,11 @@ namespace CapyIsland.UI
             label.fontSizeMax = 24f;
         }
 
-        static void Detail(Transform tile, string text)
+        static void Detail(Transform tile, string text, bool known = true)
         {
             var d = UiKit.Text(tile, "Detail", text, 20f, UiKit.Hex("B98A1E"), false, TextAlignmentOptions.Center);
             d.rectTransform.anchorMin = Vector2.zero;
-            d.rectTransform.anchorMax = new Vector2(1f, 0.22f);
+            d.rectTransform.anchorMax = new Vector2(1f, known ? 0.22f : 0.38f);
             d.rectTransform.offsetMin = new Vector2(4f, 4f);
             d.rectTransform.offsetMax = new Vector2(-4f, 0f);
             d.enableAutoSizing = true;
@@ -485,7 +488,7 @@ namespace CapyIsland.UI
                 if (known && NewStuff.Has("hobbies/Gardening/" + crop.Id)) NewDot.Fixed(tile.transform, 30f);
                 Detail(tile.transform, known
                     ? Loc.F("×{0} harvested", entry.count) + "\n" + Loc.F("Grows in {0} min", crop.Minutes)
-                    : Loc.F("Gardening level {0}", crop.MinLevel));
+                    : Whereabouts.Crop(crop), known);
             }
             NewStuff.Clear("hobbies/Gardening/");   // seen
         }
@@ -503,7 +506,7 @@ namespace CapyIsland.UI
                 var tile = UiKit.Image(grid.transform, cat.Name, UiKit.Rounded(26), adopted ? UiKit.Hex("FDE8F0") : met ? Color.white : UiKit.SurfaceSunk);
                 Picture(tile.transform, HobbyData.Art("Cat_" + cat.Id), met);
                 Label(tile.transform, adopted ? cat.Name : met ? "Stray cat" : "???", met);
-                Detail(tile.transform, adopted ? "Adopted!" : met ? $"Trust {state.bond}/{CatCare.MaxBond}" : "Not met yet");
+                Detail(tile.transform, adopted ? "Adopted!" : met ? $"Trust {state.bond}/{CatCare.MaxBond}" : Whereabouts.Cat, met);
                 if (adopted && NewStuff.Has("hobbies/Cats/" + cat.Id)) NewDot.Fixed(tile.transform, 30f);
             }
             NewStuff.Clear("hobbies/Cats/");   // seen
@@ -553,7 +556,7 @@ namespace CapyIsland.UI
                     // A list no table can hold: each name is translated as it goes in.
                     needs.Append(have ? "" : "<color=#C0503E>").Append(count).Append(' ').Append(Loc.T(HobbyData.ItemName(item))).Append(have ? "" : "</color>");
                 }
-                string line = known ? needs.ToString() + "\n<size=85%>" + dish.Blurb + "</size>" : $"Unlocks at cooking level {dish.MinLevel}";
+                string line = known ? needs.ToString() + "\n<size=85%>" + dish.Blurb + "</size>" : Whereabouts.Dish(dish);
                 ItemRow("dish:" + dish.Id, line, known ? dish.Name : "???");
             }
         }

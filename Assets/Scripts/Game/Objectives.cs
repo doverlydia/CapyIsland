@@ -269,10 +269,11 @@ namespace CapyIsland.Game
         }
 
         /// <summary>Which shop building each stock list belongs to.</summary>
-        static readonly Dictionary<string, string> ShopBuilding = new()
+        public static readonly Dictionary<string, string> ShopBuilding = new()
         {
             { "general_store", "General Store" }, { "bronze_store", "Bronze Store" }, { "silver_store", "Silver Store" },
             { "steel_store", "Steel Store" }, { "gold_store", "Gold Store" }, { "gem_store", "Legendary Gem Store" }, { "bank", "Bank" },
+            { "fancy_store", "Fancy Store" }, { "garden_store", "Garden Shop" },
         };
 
         static bool Matches(string sold, string item) => item == "Mine" ? sold == "Mine" : sold.Contains(item);
