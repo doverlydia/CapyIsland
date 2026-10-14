@@ -41,21 +41,35 @@ namespace CapyIsland.UI
         {
             for (int i = _list.childCount - 1; i >= 0; i--) Destroy(_list.GetChild(i).gameObject);
 
+            // The recipes you already know are in your book, right at the top; the list below is
+            // only what's still to learn.
+            var book = UiKit.Button(_list, "MyBook", "My recipe book", UiKit.ButtonStyle.Secondary, () =>
+            {
+                Sfx.Play(SfxKind.Tap, 0.5f);
+                RecipeBook.Open((RectTransform)transform);
+            }, 30f, IconPainter.Book);
+            book.transform.parent.gameObject.AddComponent<LayoutElement>().preferredHeight = 96f;
+
             var intro = UiKit.Text(_list, "Intro", "A recipe shows what goes into a dish, and islanders only ask for dishes you know. Put the right things in the pot and you might work one out for yourself!", 28f, UiKit.InkSoft);
             intro.overflowMode = TextOverflowModes.Overflow;
 
-            // For sale first, then what's coming, then what you know.
-            var rows = new List<DishKind>(HobbyData.Dishes);
-            int Order(DishKind d) => HobbyLog.KnowsRecipe(d.Id) ? 2 : ChefTofu.WhyNot(d) != null || d.FreeWith != null ? 1 : 0;
+            // For sale first, then what's coming.
+            var rows = new List<DishKind>();
+            foreach (var d in HobbyData.Dishes) if (!HobbyLog.KnowsRecipe(d.Id)) rows.Add(d);
+            int Order(DishKind d) => ChefTofu.WhyNot(d) != null || d.FreeWith != null ? 1 : 0;
             rows.Sort((a, b) => Order(a) != Order(b) ? Order(a).CompareTo(Order(b)) : a.MinLevel.CompareTo(b.MinLevel));
             foreach (var d in rows) Row(d);
+            if (rows.Count == 0)
+            {
+                var all = UiKit.Text(_list, "All", "You know every recipe Chef Tofu has. Bravo!", 30f, UiKit.Leaf, true, TextAlignmentOptions.Center);
+                all.overflowMode = TextOverflowModes.Overflow;
+            }
         }
 
         void Row(DishKind d)
         {
-            bool known = HobbyLog.KnowsRecipe(d.Id);
             string why = ChefTofu.WhyNot(d);
-            bool levelLocked = !known && why != null;
+            bool levelLocked = why != null;
 
             var row = UiKit.Image(_list, d.Id, UiKit.Rounded(30), levelLocked ? UiKit.Hex("EFE6D6") : Color.white).rectTransform;
             var h = row.gameObject.AddComponent<HorizontalLayoutGroup>();
@@ -84,11 +98,6 @@ namespace CapyIsland.UI
             blurb.overflowMode = TextOverflowModes.Overflow;
 
             // The right-hand side: a price, or why not.
-            if (known)
-            {
-                Tag(row, "Known", UiKit.Leaf);
-                return;
-            }
             // A free one says how to get it, once you have a stove (before that: "Buy a stove first", like the rest).
             if (d.FreeWith is Hobby free && !HobbyLog.IsUnlocked(free) && HobbyLog.IsUnlocked(Hobby.Cooking))
             {

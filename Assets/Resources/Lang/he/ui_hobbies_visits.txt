@@ -1262,9 +1262,6 @@
 @ Already in your recipe book
 = כבר בספר המתכונים שלך
 
-@ Known
-= ידוע
-
 @ <b>You worked out a new recipe!</b> It's in your recipe book now.
 = <b>גילית מתכון חדש!</b> הוא בספר המתכונים שלך עכשיו.
 
@@ -1294,3 +1291,9 @@
 
 @ Buy a stove first
 = קודם קנה כיריים
+
+@ My recipe book
+= ספר המתכונים שלי
+
+@ You know every recipe Chef Tofu has. Bravo!
+= אתה מכיר כל מתכון שיש לשף טופו. כל הכבוד!
