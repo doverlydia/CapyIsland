@@ -182,6 +182,12 @@ namespace CapyIsland.UI
             var ile = introButton.transform.parent.gameObject.AddComponent<LayoutElement>();
             ile.preferredWidth = 220f; ile.preferredHeight = 72f;
 
+            // ---- Your island as a code, to keep in a note (and load on the first screen).
+            var keep = Row(list, IconPainter.Star, "Keep a copy of your island");
+            var exportButton = UiKit.Button(keep, "Export", "Export", UiKit.ButtonStyle.Spring, SaveCodeScreen.ShowExport, 28f);
+            var ele = exportButton.transform.parent.gameObject.AddComponent<LayoutElement>();
+            ele.preferredWidth = 220f; ele.preferredHeight = 72f;
+
             // ---- New island.
             var reset = Row(list, IconPainter.Star, "Start a new island");
             var resetButton = UiKit.Button(reset, "Reset", "Start over", UiKit.ButtonStyle.Secondary, () => _confirm.SetActive(true), 28f);

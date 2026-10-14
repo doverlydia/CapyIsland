@@ -393,3 +393,57 @@
 
 @ <b>{0}</b> is waiting for you in the Wardrobe. To try it on, tap your picture at the top left, then Change outfit.
 = <b>{0}</b> מחכה לך בארון הבגדים. כדי למדוד, הקש על התמונה שלך למעלה משמאל, ואז על "החלף בגדים".
+
+@ Load a save
+= טען שמירה
+
+@ Your save code
+= קוד השמירה שלך
+
+@ Paste the save code you kept in a note, and your island comes back just as you left it.
+= הדבק את קוד השמירה ששמרת בפתק, והאי שלך יחזור בדיוק כמו שהשארת אותו.
+
+@ Copy it and paste it into a note somewhere safe. To bring this island back, on this phone or another device, choose "Load a save" on the first screen and paste it in.
+= העתק אותו והדבק אותו בפתק במקום בטוח. כדי להחזיר את האי הזה, בטלפון הזה או במכשיר אחר, בחר "טען שמירה" במסך הראשון והדבק אותו שם.
+
+@ Paste your save code here
+= הדבק כאן את קוד השמירה
+
+@ Copy
+= העתק
+
+@ Paste
+= הדבק
+
+@ Load
+= טען
+
+@ Export
+= ייצוא
+
+@ Keep a copy of your island
+= שמור עותק של האי שלך
+
+@ {0} characters
+= {0} תווים
+
+@ Copied! Now paste it into a note.
+= הועתק! עכשיו הדבק אותו בפתק.
+
+@ Nothing to paste. Copy your save code first, or paste it into the box.
+= אין מה להדביק. העתק קודם את קוד השמירה, או הדבק אותו בתיבה.
+
+@ Save code found. Tap Load to bring your island back.
+= קוד השמירה נמצא. הקש טען כדי להחזיר את האי שלך.
+
+@ That doesn't look like a Capy Island save code.
+= זה לא נראה כמו קוד שמירה של Capy Island.
+
+@ Paste your save code first.
+= הדבק קודם את קוד השמירה שלך.
+
+@ That save code is missing its island. Copy the whole code and try again.
+= בקוד השמירה הזה חסר האי. העתק את כל הקוד ונסה שוב.
+
+@ That save code is cut short or changed. Copy the whole code and try again.
+= קוד השמירה הזה קטוע או שונה. העתק את כל הקוד ונסה שוב.

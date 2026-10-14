@@ -58,7 +58,8 @@ namespace CapyIsland.UI
                 s.DOKill();
                 s.DOFade(0f, fade).SetUpdate(true).OnComplete(s.Stop);
             }
-            DOVirtual.DelayedCall(fade * 0.5f, () => Active = false, ignoreTimeScale: true);
+            if (fade <= 0f) Active = false;   // at once: the game is about to reload (a save loaded)
+            else DOVirtual.DelayedCall(fade * 0.5f, () => Active = false, ignoreTimeScale: true);
         }
 
         /// <summary>

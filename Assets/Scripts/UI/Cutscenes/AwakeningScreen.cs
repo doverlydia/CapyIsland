@@ -48,9 +48,21 @@ namespace CapyIsland.UI
         float _born;
         Sprite _soft;
 
+        /// <summary>
+        /// Landscape: the screen is too short to stack the bubble over the questions, so once she
+        /// wakes the bubble drifts to the left and the questions take the right half.
+        /// </summary>
+        bool _wide;
+
+        /// <summary>Where the bubble floats, and everything that gathers around it.</summary>
+        Vector2 Spot => _spot;
+        Vector2 _spot;
+
         void Build()
         {
             IsOpen = true;
+            _wide = Screen.width > Screen.height;
+            _spot = _wide ? new Vector2(0.5f, 0.55f) : new Vector2(0.5f, 0.66f);
             _timeScaleBefore = Time.timeScale;
             Time.timeScale = 0f;
             IntroAudio.Play("intro_awaken", 2.5f);
@@ -67,20 +79,20 @@ namespace CapyIsland.UI
             _candle = UiKit.Image(_root, "Candle", _soft, new Color(1f, 0.74f, 0.42f, 0f));
             _candle.raycastTarget = false;
             var cr = _candle.rectTransform;
-            cr.anchorMin = cr.anchorMax = new Vector2(0.5f, 0.6f);
+            cr.anchorMin = cr.anchorMax = Spot - new Vector2(0f, 0.06f);
             cr.sizeDelta = new Vector2(1900f, 1900f);
 
             // A faint glow in the dark, where she sleeps; it grows as she drifts closer.
             _glow = UiKit.Image(_root, "Glow", _soft, new Color(0.55f, 0.95f, 0.9f, 0f));
             _glow.raycastTarget = false;
             var gr = _glow.rectTransform;
-            gr.anchorMin = gr.anchorMax = new Vector2(0.5f, 0.66f);
+            gr.anchorMin = gr.anchorMax = Spot;
             gr.sizeDelta = new Vector2(900f, 900f);
             _glow.DOFade(0.22f, 2.4f).SetUpdate(true);
 
             // Old Yuzu, curled up asleep in a bubble, floating up to you out of the dark.
             _bubble = UiKit.Rect("Bubble", _root);
-            _bubble.anchorMin = _bubble.anchorMax = new Vector2(0.5f, 0.66f);
+            _bubble.anchorMin = _bubble.anchorMax = Spot;
             _bubble.sizeDelta = new Vector2(500f, 500f);
             _bubble.localScale = Vector3.one * 0.28f;
             _bubble.DOScale(1f, Approach).SetEase(Ease.OutSine).SetUpdate(true);
@@ -163,7 +175,7 @@ namespace CapyIsland.UI
             m.raycastTarget = false;
             var r = m.rectTransform;
             r.SetSiblingIndex(_bubble.GetSiblingIndex());   // behind the bubble, the hand and the words
-            r.anchorMin = r.anchorMax = new Vector2(0.5f, 0.66f);
+            r.anchorMin = r.anchorMax = Spot;
             float size = UnityEngine.Random.Range(10f, 30f);
             r.sizeDelta = new Vector2(size, size);
             // a ring around the bubble, wider than it, with a few strays further out
@@ -202,7 +214,7 @@ namespace CapyIsland.UI
                 var z = UiKit.Text(_root, "Z", "z", 54f, new Color(0.75f, 0.95f, 0.92f, 0f), true, TextAlignmentOptions.Center);
                 z.raycastTarget = false;
                 var r = z.rectTransform;
-                r.anchorMin = r.anchorMax = new Vector2(0.5f, 0.66f);
+                r.anchorMin = r.anchorMax = Spot;
                 r.sizeDelta = new Vector2(80f, 80f);
                 r.anchoredPosition = _bubble.anchoredPosition + new Vector2(150f, 150f) * _bubble.localScale.x;
                 z.DOFade(0.8f, 0.4f).SetUpdate(true);
@@ -221,7 +233,7 @@ namespace CapyIsland.UI
             _prompt = UiKit.Text(_root, "Prompt", "Tap the bubble!", 46f, new Color(0.9f, 0.97f, 0.96f, 0f), true, TextAlignmentOptions.Center);
             _prompt.raycastTarget = false;
             var pr = _prompt.rectTransform;
-            pr.anchorMin = pr.anchorMax = new Vector2(0.5f, 0.39f);
+            pr.anchorMin = pr.anchorMax = _wide ? new Vector2(Spot.x, 0.14f) : new Vector2(0.5f, 0.39f);
             pr.sizeDelta = new Vector2(900f, 100f);
             _prompt.DOFade(1f, 0.6f).SetUpdate(true);
             pr.DOScale(1.06f, 0.9f).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine).SetUpdate(true);
@@ -232,7 +244,7 @@ namespace CapyIsland.UI
             _hand.preserveAspect = true;
             _hand.raycastTarget = false;
             var hr = _hand.rectTransform;
-            hr.anchorMin = hr.anchorMax = new Vector2(0.5f, 0.66f);
+            hr.anchorMin = hr.anchorMax = Spot;
             // Upside down from the tutorial's "go here" pointer: the hand reaches up from below and
             // its fingertip presses on the bubble, a tap rather than a direction.
             hr.pivot = new Vector2(0.5f, 0f);   // the fingertip, once flipped
@@ -270,7 +282,7 @@ namespace CapyIsland.UI
                 var drop = UiKit.Image(_root, "Drop", UiKit.Circle, new Color(0.8f, 0.97f, 1f, 0.9f));
                 drop.raycastTarget = false;
                 var d = drop.rectTransform;
-                d.anchorMin = d.anchorMax = new Vector2(0.5f, 0.66f);
+                d.anchorMin = d.anchorMax = Spot;
                 float size = UnityEngine.Random.Range(14f, 30f);
                 d.sizeDelta = new Vector2(size, size);
                 float a = i / 16f * Mathf.PI * 2f + UnityEngine.Random.Range(-0.2f, 0.2f);
@@ -304,10 +316,12 @@ namespace CapyIsland.UI
         void ShowQuestion()
         {
             IntroCutscene.Preload();   // the movie loads while you answer
+            if (_wide) MakeRoom();
             var panel = UiKit.Rect("Panel", _root);
             _panel = panel;
-            panel.anchorMin = new Vector2(0.06f, 0.06f);
-            panel.anchorMax = new Vector2(0.94f, 0.5f);
+            // Under the bubble; in landscape beside it, below the "Load a save" corner.
+            panel.anchorMin = _wide ? new Vector2(0.52f, 0.06f) : new Vector2(0.06f, 0.06f);
+            panel.anchorMax = _wide ? new Vector2(0.95f, 0.86f) : new Vector2(0.94f, 0.5f);
             panel.offsetMin = panel.offsetMax = Vector2.zero;
             var v = panel.gameObject.AddComponent<VerticalLayoutGroup>();
             v.spacing = 26f;
@@ -336,6 +350,34 @@ namespace CapyIsland.UI
 
             var go = UiKit.Button(panel, "Continue", "Continue", UiKit.ButtonStyle.Primary, Continue, 40f);
             go.transform.parent.gameObject.AddComponent<LayoutElement>().preferredHeight = 112f;
+
+            // Played before, on another device or before clearing the browser: bring that island back.
+            // Up in the corner, out of the panel: the panel's height is fixed, and another row in it
+            // squeezed the language pills to nothing in landscape.
+            var load = UiKit.Button(_root, "LoadSave", "Load a save", UiKit.ButtonStyle.Ghost, SaveCodeScreen.ShowImport, 32f);
+            var corner = (RectTransform)load.transform.parent;
+            corner.anchorMin = corner.anchorMax = corner.pivot = new Vector2(1f, 1f);
+            corner.anchoredPosition = new Vector2(-36f, -36f);
+            corner.sizeDelta = new Vector2(320f, 90f);
+            var cornerGroup = corner.gameObject.AddComponent<CanvasGroup>();
+            cornerGroup.alpha = 0f;
+            cornerGroup.DOFade(1f, 1f).SetDelay(0.9f).SetUpdate(true);
+            // Light on the dark, like the language pills.
+            load.GetComponent<Image>().color = new Color(1f, 1f, 1f, 0.12f);
+            foreach (var t in load.GetComponentsInChildren<TextMeshProUGUI>()) t.color = new Color(0.88f, 0.95f, 0.94f);
+        }
+
+        /// <summary>Landscape: she drifts over to the left, making room for the questions beside her.</summary>
+        void MakeRoom()
+        {
+            Vector2 from = _spot, to = new Vector2(0.27f, 0.55f);
+            DOVirtual.Float(0f, 1f, 0.9f, t =>
+            {
+                _spot = Vector2.Lerp(from, to, t);
+                _bubble.anchorMin = _bubble.anchorMax = _spot;
+                _glow.rectTransform.anchorMin = _glow.rectTransform.anchorMax = _spot;
+                _candle.rectTransform.anchorMin = _candle.rectTransform.anchorMax = _spot - new Vector2(0f, 0.06f);
+            }).SetEase(Ease.InOutSine).SetUpdate(true).SetTarget(this);
         }
 
         void Languages(RectTransform parent)
@@ -418,7 +460,7 @@ namespace CapyIsland.UI
                 keyboard = keyboard / Mathf.Max(1f, Screen.height) * height;
                 // With the name box now first in the panel, lift the panel's top far enough that
                 // the box and the Continue button under it both clear the keyboard.
-                float top = height * 0.5f;
+                float top = height * _panel.anchorMax.y;
                 shift = Mathf.Max(0f, keyboard + 290f - top);
             }
             _panel.offsetMin = new Vector2(0f, shift);
