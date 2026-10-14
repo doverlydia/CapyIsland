@@ -676,6 +676,15 @@ namespace CapyIsland.UI
             var actor = Cast(body, at, height, faceRight);
             if (!Wardrobe.Ready) return actor;
             var size = actor.Root.sizeDelta;
+
+            // The body becomes one layer among its clothes rather than their parent picture (a child
+            // always draws over its parent), so a cape can sit behind it and still move with it.
+            var holder = actor.Body.GetComponent<Image>();
+            var self = UiKit.Image(actor.Body, "Base", holder.sprite, holder.color);
+            self.preserveAspect = true;
+            self.raycastTarget = false;
+            UiKit.Stretch(self.rectTransform);
+            holder.enabled = false;
             foreach (WearSlot slot in Enum.GetValues(typeof(WearSlot)))
             {
                 var item = Wardrobe.Worn(slot);
@@ -691,9 +700,8 @@ namespace CapyIsland.UI
                 r.sizeDelta = new Vector2(pw, pw * art.rect.height / art.rect.width);
                 r.anchoredPosition = Vector2.zero;
                 r.localRotation = Quaternion.Euler(0f, 0f, item.Rotation);
-                if (item.Behind) r.SetAsFirstSibling();
+                if (item.Behind) r.SetAsFirstSibling();   // under the body layer
             }
-            // The body image itself must stay under the pieces it carries.
             return actor;
         }
 
@@ -891,7 +899,7 @@ namespace CapyIsland.UI
             /// </summary>
             public Tween Sink(float fraction, float seconds)
             {
-                var img = Body.GetComponent<Image>();
+                var img = Picture;
                 img.type = Image.Type.Filled;
                 img.fillMethod = Image.FillMethod.Vertical;
                 img.fillOrigin = (int)Image.OriginVertical.Top;
@@ -902,11 +910,34 @@ namespace CapyIsland.UI
                 return _scene.Track(seq);
             }
 
-            public Tween Tint(Color colour, float seconds) =>
-                _scene.Track(Body.GetComponent<Image>().DOColor(colour, seconds).SetUpdate(true));
+            /// <summary>The picture of the body itself: the body image, or (for a dressed player) its "Base" layer.</summary>
+            Image Picture
+            {
+                get
+                {
+                    var img = Body.GetComponent<Image>();
+                    if (img != null && img.enabled) return img;
+                    var layer = Body.Find("Base");
+                    return layer != null ? layer.GetComponent<Image>() : img;
+                }
+            }
 
-            public Tween Fade(float alpha, float seconds) =>
-                _scene.Track(Body.GetComponent<Image>().DOFade(alpha, seconds).SetUpdate(true));
+            /// <summary>Tints the body and anything it wears (soaked through, warmed by a fire).</summary>
+            public Tween Tint(Color colour, float seconds)
+            {
+                var seq = DOTween.Sequence().SetUpdate(true);
+                foreach (var img in Body.GetComponentsInChildren<Image>())
+                    if (img.enabled) seq.Join(img.DOColor(colour, seconds));
+                return _scene.Track(seq);
+            }
+
+            public Tween Fade(float alpha, float seconds)
+            {
+                var seq = DOTween.Sequence().SetUpdate(true);
+                foreach (var img in Body.GetComponentsInChildren<Image>())
+                    if (img.enabled) seq.Join(img.DOFade(alpha, seconds));
+                return _scene.Track(seq);
+            }
 
             /// <summary>A gentle up-and-down float, for ghosts.</summary>
             /// <summary>
