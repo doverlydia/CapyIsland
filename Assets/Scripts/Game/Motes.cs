@@ -115,6 +115,8 @@ namespace CapyIsland.Game
             // is not where your own story moves on.
             if (Visit.Active && !func.StartsWith("visit_") && !func.StartsWith("hobby_")) return;
             if (!TryGetByFunc(func, out var def) || _collected.Contains(def.Name)) return;
+            // A task's heart only once the task has been given (QuestSystem.Advance rechecks then).
+            if (QuestSystem.Instance != null && QuestSystem.Instance.WaitsForTask(def.Name)) return;
             _collected.Add(def.Name);
             NewStuff.Add("goals/" + def.Name);
             Triggered?.Invoke(def);
@@ -156,6 +158,20 @@ namespace CapyIsland.Game
                 case "Wedding Dress": Trigger("girl_quest_2"); break;
                 case "String of Pearls": Trigger("girl_quest_6"); break;
                 case "Tiara": Trigger("girl_crown"); break;
+            }
+        }
+
+        /// <summary>
+        /// A task was just given: whatever already stands on the island (or rides in your trail)
+        /// that does it counts now, as if it had just been bought or planted.
+        /// </summary>
+        public static void Recheck()
+        {
+            foreach (var tag in UnityEngine.Object.FindObjectsByType<CatalogItem>(FindObjectsSortMode.None))
+            {
+                var placeable = tag.GetComponent<Placeable>();
+                if (placeable != null && placeable.Placed) PlacementMote(tag.StoreName);
+                PurchaseMote(tag.StoreName);
             }
         }
 

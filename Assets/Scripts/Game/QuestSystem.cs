@@ -72,6 +72,18 @@ namespace CapyIsland.Game
 
         public Progress Ghost(int id) => _ghosts.Find(g => g.Def.Id == id);
 
+        /// <summary>
+        /// Miso's and the Captain's task hearts wait for the task: true while the task this heart
+        /// completes hasn't been given yet (a friend's gift of roses doesn't do a task nobody set).
+        /// </summary>
+        public bool WaitsForTask(string moteName)
+        {
+            foreach (var list in new[] { _coriander, _peach })
+                foreach (var q in list)
+                    if (q.Def.CompleteMote == moteName) return q.Stage == Stage.NotStarted;
+            return false;
+        }
+
         // ---------------------------------------------------------------- motes
 
         void OnMote(MoteDef mote)
@@ -194,6 +206,8 @@ namespace CapyIsland.Game
             {
                 q.Stage = Stage.IntroRead;
                 MissionSetUps.Run(q.Def.SetUp, giver);
+                // Already done before they asked (roses a friend gave you)? It counts now.
+                Motes.Recheck();
                 return;
             }
 

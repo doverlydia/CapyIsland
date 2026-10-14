@@ -266,6 +266,9 @@ namespace CapyIsland.Game
         {
             var store = ResourceStore.Instance;
             if (store == null || !store.TrySpend(0, 0, 500)) return;
+            // Paid on her very first ask: that's the task given and done at once (its heart waits for the task).
+            var q = QuestSystem.Instance != null ? QuestSystem.Instance.Current(Kind.Peach) : null;
+            if (q != null && q.Stage == QuestSystem.Stage.NotStarted) q.Stage = QuestSystem.Stage.IntroRead;
             // The little movie (the original played one), then a happy jig back on the island.
             UI.DanceCutscene.Show(() =>
             {
