@@ -244,6 +244,7 @@ namespace CapyIsland.Game
         public static string WhyNot(DishKind d)
         {
             if (HobbyLog.KnowsRecipe(d.Id)) return "Already in your recipe book";
+            if (!HobbyLog.IsUnlocked(Hobby.Cooking)) return "Buy a stove first";   // no use for a recipe without one
             if (d.MinLevel > HobbyLog.Level(Hobby.Cooking)) return UI.Loc.F("Requires cooking level {0}", d.MinLevel);
             return null;
         }

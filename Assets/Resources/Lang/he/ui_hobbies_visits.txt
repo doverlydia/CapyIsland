@@ -1291,3 +1291,6 @@
 
 @ Every good kitchen starts with a stove, and mine are the best on the isles. Then come back for eggs, milk, flour, and all the recipes you can learn!
 = כל מטבח טוב מתחיל בכיריים, ושלי הן הכי טובות באיים. אחר כך תחזור לקנות ביצים, חלב, קמח ואת כל המתכונים שאפשר ללמוד!
+
+@ Buy a stove first
+= קודם קנה כיריים

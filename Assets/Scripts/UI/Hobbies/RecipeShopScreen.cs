@@ -89,14 +89,15 @@ namespace CapyIsland.UI
                 Tag(row, "Known", UiKit.Leaf);
                 return;
             }
-            if (levelLocked)
-            {
-                Tag(row, why, UiKit.InkSoft);
-                return;
-            }
+            // A free one says how to get it, before anything else.
             if (d.FreeWith is Hobby free && !HobbyLog.IsUnlocked(free))
             {
                 Tag(row, free == Hobby.Fishing ? "Free when you take up fishing" : "Free when you take up gardening", UiKit.InkSoft);
+                return;
+            }
+            if (levelLocked)
+            {
+                Tag(row, why, UiKit.InkSoft);
                 return;
             }
             var store = ResourceStore.Instance;
