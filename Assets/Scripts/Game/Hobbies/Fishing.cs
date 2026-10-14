@@ -89,17 +89,17 @@ namespace CapyIsland.Game
         LineRenderer _line;
         Vector2 _castFrom, _bobberAt, _aimDir;
         Vector2 _waterAt;   // during a fight: where the fish is in the water (before it's lifted out)
+        Vector2 _hookAt;    // where it bit
         bool _lifted;       // the hooked fish is out of the water, up at the rod
         float _stateUntil, _giveUpAt;
         int _nibblesLeft;
         bool _warnedEarly;
 
         // The fight.
-        const float LandAt = 0.7f;
         BaitKind _bait;   // on the hook for this cast, or null
         float BiteSpeed => _bait != null ? _bait.BiteSpeed : 1f;
 
-        float _needed, _remaining, _startDistance, _strength, _phaseUntil, _nextSplash, _slackFor;   // line still to reel in, in reel-seconds
+        float _needed, _remaining, _strength, _phaseUntil, _nextSplash, _slackFor;   // line still to reel in, in reel-seconds
 
         PlayerAvatar _king;
         static Material _lineMaterial;
@@ -491,8 +491,7 @@ namespace CapyIsland.Game
             // Bigger and rarer fish pull harder; a higher fishing level makes the line a little kinder.
             float rod = 1f - Mathf.Min(0.25f, HobbyLog.Level(Hobby.Fishing) * 0.03f);
             _strength = (0.8f + kind.Stars * 0.12f + kind.Shadow * 0.06f) * rod;
-            _startDistance = Mathf.Max(LandAt + 1.2f, Vector2.Distance(_castFrom, _bobberAt));
-            _waterAt = _bobberAt;
+            _waterAt = _hookAt = _bobberAt;
             _lifted = false;
             // How much reeling it takes depends on the fish, not on how far out it bit: a common fish
             // is a few holds, a big rare one a proper tussle.
@@ -556,25 +555,28 @@ namespace CapyIsland.Game
             if (_remaining > _needed + 1.5f || _slackFor > SlackEscape) { Escape("It swam off. Keep reeling between its pulls."); return; }
             if (_remaining <= 0f) { Catch(_hooked); return; }
 
-            // Most of the reeling brings it in through the water to the shore; the last of it lifts
-            // it out, up the shortening line, to dangle at the end of the rod.
+            // The fish comes in straight along the line, from where it bit to the end of the rod, as
+            // far as you've reeled: the line shortens with every bit of reeling, and the fish pulling
+            // away takes it back out. Over water it's a shadow swimming; once the way in leaves the
+            // water (and for the last stretch, whatever's below), it's lifted out, dangling.
             float ratio = Mathf.Clamp(_remaining / _needed, 0f, 1.3f);
-            float lift = Mathf.SmoothStep(0f, 1f, 1f - Mathf.Clamp01(ratio / LiftShare));
-            float distance = LandAt + (_startDistance - LandAt) * Mathf.Max(0f, (ratio - LiftShare) / (1f - LiftShare));
+            var end = RodTip() + Vector2.down * 0.5f;
+            var along = Vector2.LerpUnclamped(end, _hookAt, ratio);
+            if (ratio > 1f && BunniSpace.PointOnLand(along)) along = _hookAt;   // pulled out past where it bit, but not onto land
+            bool up = ratio < LiftShare || BunniSpace.PointOnLand(along);
 
-            // Move the bobber and fish along the line, thrashing side to side while it fights.
-            var dir = (_waterAt - you).normalized;
+            // Thrashing side to side while it fights, in the water.
+            var dir = (_hookAt - end).sqrMagnitude > 0.0001f ? (_hookAt - end).normalized : (_hookAt - you).normalized;
             var side = new Vector2(-dir.y, dir.x);
-            float thrash = (Surging ? Mathf.Sin(Time.time * 14f) * 0.35f : Mathf.Sin(Time.time * 3f) * 0.08f) * (1f - lift);
-            var w = you + dir * distance + side * thrash;
-            if (BunniSpace.PointOnLand(w)) w = BunniSpace.PointOnLand(you + dir * distance) ? _waterAt : you + dir * distance;   // never up on the sand
-            _waterAt = w;
-            var p = Vector2.Lerp(w, RodTip() + Vector2.down * 0.5f, lift);
+            float thrash = up ? 0f : Surging ? Mathf.Sin(Time.time * 14f) * 0.35f : Mathf.Sin(Time.time * 3f) * 0.08f;
+            var p = along + side * thrash;
+            if (!up && BunniSpace.PointOnLand(p)) p = along;   // a thrash never flips it up onto the sand
+            if (!up) _waterAt = p;
             _bobberAt = p;
             if (_bobber != null) _bobber.transform.position = p;
             if (_hooked != null && _hooked.Go != null)
             {
-                ShowLifted(_hooked, lift > 0.05f);
+                ShowLifted(_hooked, up);
                 float wiggle = Mathf.Sin(Time.time * (Surging ? 22f : 8f)) * (Surging ? 18f : 6f);
                 if (_lifted)
                 {
@@ -597,8 +599,8 @@ namespace CapyIsland.Game
             }
         }
 
-        /// <summary>The share of the reeling, at the end, that lifts the fish out of the water to the rod.</summary>
-        const float LiftShare = 0.25f;
+        /// <summary>The last stretch of the line, by the rod, where the fish always hangs in the air.</summary>
+        const float LiftShare = 0.12f;
 
         /// <summary>
         /// Out of the water a hooked fish is itself, not a shadow: its picture, in front of
