@@ -79,9 +79,21 @@ pantry () {
   gen Pantry_Sugar "$PROP" "a small glass jar of white sugar cubes with a cork lid, $VIEW."
 }
 
+chefghost () {
+  local out="ArtSource/Hobby_Chef.png"
+  echo "=== $out ==="
+  if node Tools/ChatGPT/chatgpt.mjs image "Match the FIRST attached image's rendering EXACTLY: a stylised capybara spirit with pastel lavender and pinkish-white ghostly colouring, soft and slightly glowing, no legs but a soft wispy ghost tail curling away beneath the body, a dark warm brown outline, the same proportions and shading. Draw instead: the capybara chef from the SECOND attached image as a ghost just like the FIRST image: a tall puffy chef's hat, a chef's jacket with a little neckerchief and an apron, holding a wooden spoon up cheerfully in one paw, a happy closed-eye smile, all in the same pale lavender spirit colours as the FIRST image, with the neckerchief a soft faded coral. Subject only, centered with a small margin, on a fully transparent background, no backdrop, no shadow, nothing beneath it, no text." \
+      --out "$out" --transparent --quality high --ref "Assets/Resources/Hobbies/Mochi.png,ArtSource/Hobby_Chef.png"; then
+    node Tools/ChatGPT/cleanalpha.mjs "$out"
+  else
+    echo "FAILED: $out"
+  fi
+}
+
 # Chef Tofu himself, and his kitchen stall on the Heart of the Isles.
 chef () {
-  gen Chef "ArtSource/Hobby_Sailor.png" "a friendly round capybara chef standing upright like the reference fisherman: a tall puffy white chef's hat, a white chef's jacket and a little red neckerchief, a cream apron, holding a wooden spoon up cheerfully in one paw, a small copper pot at his feet. Warm tan-brown fur, simple dot eyes, a gentle smile."
+  # A spirit, like Old Mochi at the shrine: the islands' cook before the Big Chill, still at his stove.
+  chefghost
   gen Chef_Stall "ArtSource/Store_Garden.png" "a small cosy outdoor kitchen stall $VIEW: a wooden counter with a cream and red striped cloth awning on posts, a little stove with a steaming pot on the counter, hanging copper pans and a string of onions, a crate of eggs and a jar of milk beside it. Storybook game building, chunky and simple."
   gen Recipe_Book "$PROP" "a thick old cookbook lying open on a small wooden book stand, cream pages with little drawings of dishes, a red ribbon bookmark and a wooden spoon resting beside it, $VIEW."
 }
@@ -176,6 +188,7 @@ case "${1:-}" in
   dishes2) dishes2 ;;
   pantry) pantry ;;
   chef) chef ;;
+  chefghost) chefghost ;;
   kitchen) chef; pantry; dishes2 ;;
   bugs) bugs ;;
   fish) fish ;;

@@ -1280,11 +1280,14 @@
 @ You need a stove first. Chef Tofu sells one right here.
 = קודם צריך כיריים. השף טופו מוכר אותן ממש כאן.
 
-@ Hello, hello! Chef Tofu, at your service. Every good kitchen starts with a stove, and mine are the best on the isles. Then come back for eggs, milk, flour, and all the recipes you can learn!
-= שלום, שלום! השף טופו, לשירותך. כל מטבח טוב מתחיל בכיריים, ושלי הן הכי טובות באיים. אחר כך תחזור לקנות ביצים, חלב, קמח ואת כל המתכונים שאפשר ללמוד!
-
 @ Back for more? Anything you can't grow or catch, I've got right here. And my recipes are all in my book!
 = חזרת לעוד? כל מה שאי אפשר לגדל או לדוג, יש לי ממש כאן. וכל המתכונים שלי נמצאים בספר שלי!
 
 @ Chef Tofu by the hot spring sells recipes, eggs and milk.
 = השף טופו ליד המעיין החם מוכר מתכונים, ביצים וחלב.
+
+@ Hello, hello! Chef Tofu, at your service. I cooked for the whole of the isles before the Big Chill, and being a ghost was never going to keep me out of my kitchen.
+= שלום, שלום! השף טופו, לשירותך. בישלתי לכל האיים לפני הקור הגדול, ולהיות רוח רפאים בטח לא ירחיק אותי מהמטבח שלי.
+
+@ Every good kitchen starts with a stove, and mine are the best on the isles. Then come back for eggs, milk, flour, and all the recipes you can learn!
+= כל מטבח טוב מתחיל בכיריים, ושלי הן הכי טובות באיים. אחר כך תחזור לקנות ביצים, חלב, קמח ואת כל המתכונים שאפשר ללמוד!

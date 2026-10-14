@@ -167,6 +167,7 @@ namespace CapyIsland.Game
             body.transform.SetParent(go.transform, false);
             var sr = body.AddComponent<SpriteRenderer>();
             sr.sprite = art;
+            sr.color = new Color(1f, 1f, 1f, 0.9f);   // a spirit, like Old Mochi: not quite all there
             body.transform.localPosition = new Vector3(0f, art.bounds.extents.y - art.bounds.center.y, 0f);
             go.transform.localScale = Vector3.one * (ChefHeight / Mathf.Max(0.01f, art.bounds.size.y));
             go.AddComponent<YSorter>();
@@ -280,12 +281,24 @@ namespace CapyIsland.Game
             }
         }
 
-        /// <summary>Chef Tofu: a word, then his recipes.</summary>
+        /// <summary>Chef Tofu: a word, then his recipes. A spirit, he bobs gently where he floats.</summary>
         class Chef : MonoBehaviour, ITappable
         {
             SpriteRenderer _sr;
+            float _restY;
 
-            public void Init(SpriteRenderer sr) => _sr = sr;
+            public void Init(SpriteRenderer sr)
+            {
+                _sr = sr;
+                _restY = sr.transform.localPosition.y;
+            }
+
+            void Update()
+            {
+                if (_sr == null) return;
+                var body = _sr.transform;
+                body.localPosition = new Vector3(0f, _restY + Mathf.Sin(Time.time * 1.4f) * 0.06f / Mathf.Max(0.01f, transform.localScale.y), 0f);
+            }
 
             void OnEnable() => TapTargets.Register(this);
             void OnDisable() => TapTargets.Unregister(this);
@@ -300,10 +313,8 @@ namespace CapyIsland.Game
             public void Tap()
             {
                 Sfx.Play(SfxKind.Tap, 0.5f);
-                string line = CookingStove.Placed() == null && !HobbyLog.IsUnlocked(Hobby.Cooking)
-                    ? "Hello, hello! Chef Tofu, at your service. Every good kitchen starts with a stove, and mine are the best on the isles. Then come back for eggs, milk, flour, and all the recipes you can learn!"
-                    : "Back for more? Anything you can't grow or catch, I've got right here. And my recipes are all in my book!";
-                UI.SpeechDialog.Show(_sr.sprite, StoryText.Chef, new[] { line }, OpenRecipes);
+                var pages = CookingStove.Placed() == null && !HobbyLog.IsUnlocked(Hobby.Cooking) ? StoryText.Tofu.Meet : StoryText.Tofu.Back;
+                UI.SpeechDialog.Show(_sr.sprite, StoryText.Chef, pages, OpenRecipes);
             }
         }
     }

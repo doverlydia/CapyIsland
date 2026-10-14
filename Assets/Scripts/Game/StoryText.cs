@@ -80,6 +80,22 @@ namespace CapyIsland.Game
                 "I swept the shrine again today. Every day, all these years.\n\nIf the spring wakes, let her see it. That is all I ask."),
         };
 
+        /// <summary>Chef Tofu, the islands' cook before the Big Chill: a spirit still minding his stall by the spring.</summary>
+        public static class Tofu
+        {
+            /// <summary>Before you can cook: who he is, and the stove.</summary>
+            public static readonly string[] Meet =
+            {
+                "Hello, hello! Chef Tofu, at your service. I cooked for the whole of the isles before the Big Chill, and being a ghost was never going to keep me out of my kitchen.",
+                "Every good kitchen starts with a stove, and mine are the best on the isles. Then come back for eggs, milk, flour, and all the recipes you can learn!",
+            };
+
+            public static readonly string[] Back =
+            {
+                "Back for more? Anything you can't grow or catch, I've got right here. And my recipes are all in my book!",
+            };
+        }
+
         /// <summary>Old Mochi, the shrine keeper's spirit.</summary>
         public static class Mochi
         {
