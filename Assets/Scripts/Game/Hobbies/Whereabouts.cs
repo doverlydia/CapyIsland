@@ -47,7 +47,7 @@ namespace CapyIsland.Game
                 "Monster" => "Warm up a zombie capybara",
                 // Waiting on the islands as their bridges open: named as the map names them.
                 "Pear Tree" => string.Format("Found on {0}", StoryText.Name("Verdant Bay")),
-                "Monster House" => string.Format("Found on {0}", StoryText.Name("Monster Isle")),
+                "Monster House" => string.Format("Found on {0}", StoryText.Name("Pirate Cove")),   // with the zombies (MissionSetUps)
                 "Coriander" or "Pirate Peach" or "Pirate Pete" or "Tower Of Love" or "General Store" or "Church" => "Comes with the story",
                 _ => "Keep playing",
             };
