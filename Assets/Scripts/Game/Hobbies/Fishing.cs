@@ -88,6 +88,8 @@ namespace CapyIsland.Game
         Transform _bobberBody;
         LineRenderer _line;
         Vector2 _castFrom, _bobberAt, _aimDir;
+        Vector2 _waterAt;   // during a fight: where the fish is in the water (before it's lifted out)
+        bool _lifted;       // the hooked fish is out of the water, up at the rod
         float _stateUntil, _giveUpAt;
         int _nibblesLeft;
         bool _warnedEarly;
@@ -490,6 +492,8 @@ namespace CapyIsland.Game
             float rod = 1f - Mathf.Min(0.25f, HobbyLog.Level(Hobby.Fishing) * 0.03f);
             _strength = (0.8f + kind.Stars * 0.12f + kind.Shadow * 0.06f) * rod;
             _startDistance = Mathf.Max(LandAt + 1.2f, Vector2.Distance(_castFrom, _bobberAt));
+            _waterAt = _bobberAt;
+            _lifted = false;
             // How much reeling it takes depends on the fish, not on how far out it bit: a common fish
             // is a few holds, a big rare one a proper tussle.
             _needed = _remaining = 4.5f + kind.Shadow * 0.7f + kind.Stars * 0.6f;
@@ -551,26 +555,80 @@ namespace CapyIsland.Game
             if (_overload >= SnapAfter) { Escape("Snap! The line broke. Let go when it turns red."); return; }
             if (_remaining > _needed + 1.5f || _slackFor > SlackEscape) { Escape("It swam off. Keep reeling between its pulls."); return; }
             if (_remaining <= 0f) { Catch(_hooked); return; }
-            float distance = LandAt + (_startDistance - LandAt) * Mathf.Clamp(_remaining / _needed, 0f, 1.3f);
+
+            // Most of the reeling brings it in through the water to the shore; the last of it lifts
+            // it out, up the shortening line, to dangle at the end of the rod.
+            float ratio = Mathf.Clamp(_remaining / _needed, 0f, 1.3f);
+            float lift = Mathf.SmoothStep(0f, 1f, 1f - Mathf.Clamp01(ratio / LiftShare));
+            float distance = LandAt + (_startDistance - LandAt) * Mathf.Max(0f, (ratio - LiftShare) / (1f - LiftShare));
 
             // Move the bobber and fish along the line, thrashing side to side while it fights.
-            var dir = (_bobberAt - you).normalized;
+            var dir = (_waterAt - you).normalized;
             var side = new Vector2(-dir.y, dir.x);
-            float thrash = Surging ? Mathf.Sin(Time.time * 14f) * 0.35f : Mathf.Sin(Time.time * 3f) * 0.08f;
-            var p = you + dir * distance + side * thrash;
-            if (BunniSpace.PointOnLand(p)) p = BunniSpace.PointOnLand(you + dir * distance) ? _bobberAt : you + dir * distance;   // never up on the sand
+            float thrash = (Surging ? Mathf.Sin(Time.time * 14f) * 0.35f : Mathf.Sin(Time.time * 3f) * 0.08f) * (1f - lift);
+            var w = you + dir * distance + side * thrash;
+            if (BunniSpace.PointOnLand(w)) w = BunniSpace.PointOnLand(you + dir * distance) ? _waterAt : you + dir * distance;   // never up on the sand
+            _waterAt = w;
+            var p = Vector2.Lerp(w, RodTip() + Vector2.down * 0.5f, lift);
             _bobberAt = p;
             if (_bobber != null) _bobber.transform.position = p;
             if (_hooked != null && _hooked.Go != null)
             {
-                _hooked.Go.transform.position = p + dir * 0.35f;
-                _hooked.Sr.flipX = dir.x < 0f;   // its nose points away from you, pulling
-                _hooked.Go.transform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Sin(Time.time * (Surging ? 22f : 8f)) * (Surging ? 18f : 6f));
+                ShowLifted(_hooked, lift > 0.05f);
+                float wiggle = Mathf.Sin(Time.time * (Surging ? 22f : 8f)) * (Surging ? 18f : 6f);
+                if (_lifted)
+                {
+                    // Out of the water: hanging nose-up from the hook, wriggling.
+                    _hooked.Go.transform.position = p + Vector2.down * 0.32f;
+                    _hooked.Sr.flipX = false;
+                    _hooked.Go.transform.localRotation = Quaternion.Euler(0f, 0f, -90f + wiggle);
+                }
+                else
+                {
+                    _hooked.Go.transform.position = p + dir * 0.35f;
+                    _hooked.Sr.flipX = dir.x < 0f;   // its nose points away from you, pulling
+                    _hooked.Go.transform.localRotation = Quaternion.Euler(0f, 0f, wiggle);
+                }
             }
-            if (Surging && Time.time >= _nextSplash)
+            if (Surging && !_lifted && Time.time >= _nextSplash)
             {
                 _nextSplash = Time.time + 0.28f;
                 Ripple(p, 0.8f);
+            }
+        }
+
+        /// <summary>The share of the reeling, at the end, that lifts the fish out of the water to the rod.</summary>
+        const float LiftShare = 0.25f;
+
+        /// <summary>
+        /// Out of the water a hooked fish is itself, not a shadow: its picture, in front of
+        /// everything, sized to it. Back in (it pulled away), a shadow again.
+        /// </summary>
+        void ShowLifted(Shadow s, bool up)
+        {
+            if (up == _lifted || s == null || s.Sr == null) return;
+            var picture = HobbyData.FishPicture(s.Kind);
+            if (picture == null) return;
+            _lifted = up;
+            s.Sr.DOKill();
+            if (up)
+            {
+                s.Sr.sprite = picture;
+                s.Sr.color = Color.white;
+                s.Sr.sortingOrder = 29999;   // just under the line
+                float width = 0.55f + s.Kind.Shadow * 0.12f;
+                s.Go.transform.localScale = Vector3.one * (width / Mathf.Max(0.01f, picture.bounds.size.x));
+                Sfx.PlayAt(SfxKind.Plop, _waterAt, 0.7f, 0.1f);
+                Ripple(_waterAt, 1.4f);
+            }
+            else
+            {
+                s.Sr.sprite = UI.IconPainter.FishShadow;
+                s.Sr.color = new Color(0.08f, 0.14f, 0.22f, 0.42f);
+                s.Sr.sortingOrder = ShadowOrder;
+                float scale = 0.45f + s.Kind.Shadow * 0.22f;
+                s.Go.transform.localScale = new Vector3(scale, scale * 0.8f, 1f);
+                Ripple(_waterAt, 1.1f);
             }
         }
 
@@ -593,7 +651,7 @@ namespace CapyIsland.Game
 
             Remove(s);
             Sfx.Play(SfxKind.Chest, 0.8f);
-            Ripple(_bobberAt, 2.2f);
+            if (!_lifted) Ripple(_bobberAt, 2.2f);
             string line = $"{size:0} cm · {HobbyData.Rarity(kind.Stars)}" + (first ? "\n<color=#2DB3A6><b>New to your journal!</b></color>" : record ? "\n<color=#E3A92B><b>A new record!</b></color>" : "") + $"\n+{xp} fishing XP";
             UI.CardPopup.Show("You caught " + HobbyData.WithArticle(kind.Name) + "!", line, HobbyData.FishPicture(kind));
             EndLine();
@@ -612,6 +670,7 @@ namespace CapyIsland.Game
         {
             PutRodAway();
             Now = State.Idle;
+            _lifted = false;
             Holding = false;
             Tension = 0f;
             Surging = false;
