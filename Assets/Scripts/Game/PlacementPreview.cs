@@ -57,7 +57,10 @@ namespace CapyIsland.Game
 
             if (held == null)
             {
-                if (_tracking != null) Hide();
+                // Not "_tracking != null": a thing used up as it was dropped (a seed packet, planted)
+                // is already destroyed, and Unity calls a destroyed object null — the ring, the tick
+                // and the name over it would stay behind.
+                if (!ReferenceEquals(_tracking, null)) Hide();
                 _tracking = null;
                 return;
             }
