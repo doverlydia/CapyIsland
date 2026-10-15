@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace CapyIsland.Game
 {
@@ -100,11 +101,18 @@ namespace CapyIsland.Game
             }
         }
 
-        /// <summary>Keeps pieces just in front of (or, for capes, just behind) the body as it sorts.</summary>
+        /// <summary>
+        /// Keeps pieces just in front of (or, for capes, just behind) the body as it sorts. Body and
+        /// pieces sort as one group against the island: otherwise a tree standing a hair lower than
+        /// the capybara lands between body and hat, hiding the one and not the other.
+        /// </summary>
         public static void SortPieces(SpriteRenderer body, Dictionary<WearSlot, SpriteRenderer> pieces, Func<WearSlot, WearItem> worn)
         {
             if (body == null || pieces.Count == 0) return;
             int order = body.sortingOrder;
+            if (!body.TryGetComponent<SortingGroup>(out var group)) group = body.gameObject.AddComponent<SortingGroup>();
+            group.sortingLayerID = body.sortingLayerID;
+            group.sortingOrder = order;
             foreach (var kv in pieces)
             {
                 if (kv.Value == null || !kv.Value.enabled) continue;

@@ -15,7 +15,10 @@ namespace CapyIsland.UI
     /// bottom — tap a piece, or drag it up, to stand it in the room. Drag pieces about to
     /// arrange them; the further back they stand the smaller they look, and they are drawn
     /// behind whatever stands in front. Tap a piece to flip it round or put it away again.
-    /// Everything is remembered (HomeLog).
+    /// Tap the floor and your capybara walks there. Everything is remembered (HomeLog).
+    ///
+    /// The first time you come down, the Furniture Shop is waiting in a bubble: pop it and it
+    /// joins your trail, to be put up outside on the island (it's far too big for in here).
     /// </summary>
     public class BurrowScreen : UiScreen
     {
@@ -66,6 +69,7 @@ namespace CapyIsland.UI
         {
             base.Update();
             if (IsOpen && _body != null && IsWide() != _wide) Layout();
+            if (IsOpen) Walk();
         }
 
         bool IsWide() => _body.rect.width > _body.rect.height * 1.1f;
@@ -89,14 +93,13 @@ namespace CapyIsland.UI
             UiKit.Stretch(_room);
             var catcher = UiKit.Image(_room, "Floor", null, new Color(0f, 0f, 0f, 0f), true);
             UiKit.Stretch(catcher.rectTransform);
-            var deselect = catcher.gameObject.AddComponent<Button>();
-            deselect.transition = Selectable.Transition.None;
-            deselect.onClick.AddListener(() => Select(null));
+            catcher.gameObject.AddComponent<FloorTap>().Init(this);
             _floor = new Rect(60f, drawerH + 50f, w - 120f, Mathf.Max(100f, floorLine - 20f - (drawerH + 50f)));
             _pieceScale = Mathf.Min(w, h * 0.62f);
 
             You();
             foreach (var p in HomeLog.Room) MakeView(p);
+            ShopBubble();
             Sort();
 
             TopBar();
@@ -151,22 +154,146 @@ namespace CapyIsland.UI
                 note.anchorMin = note.anchorMax = note.pivot = new Vector2(0.5f, 1f);
                 note.anchoredPosition = new Vector2(0f, -150f);
                 note.sizeDelta = new Vector2(Mathf.Min(_body.rect.width - 80f, 820f), 140f);
-                var nt = UiKit.Text(note, "Text", "Your burrow is bare! Buy something cosy at the Furniture Shop on your island.", 30f, Color.white, true, TextAlignmentOptions.Center);
+                // While the Furniture Shop still waits in its bubble, that's the thing to do.
+                string line = HomeLog.ShopGiven || StoreData.CountByName("Furniture Shop") > 0
+                    ? "Your burrow is bare! Buy something cosy at the Furniture Shop on your island."
+                    : "Your burrow is bare! Pop the bubble: there's a Furniture Shop inside.";
+                var nt = UiKit.Text(note, "Text", line, 30f, Color.white, true, TextAlignmentOptions.Center);
                 UiKit.Stretch(nt.rectTransform, 24f, 8f, 24f, 8f);
             }
         }
 
-        /// <summary>Your capybara, at home, standing by the steps down from the door.</summary>
+        // ---------------------------------------------------------------- you, walking about
+
+        // Where you stand (floor coordinates) and where you're walking to; kept while the game runs.
+        static Vector2 _youAt = new(0.16f, 0.62f);
+        Vector2? _walkTo;
+        bool _facingRight = true;   // into the room, from the steps
+        float _hop;
+        RectTransform _you, _youBody;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetSpot() => _youAt = new Vector2(0.16f, 0.62f);
+
+        /// <summary>Your capybara, at home, by the steps down from the door (or wherever you walked to).</summary>
         void You()
         {
             float hgt = _pieceScale * 0.3f;
-            var you = DressedCapy(_room, hgt);
-            you.name = "You";
-            you.anchorMin = you.anchorMax = Vector2.zero;
-            you.anchoredPosition = FloorPoint(0.16f, 0.62f);
-            float s = DepthScale(0.62f);
-            you.localScale = new Vector3(-s, s, 1f);   // facing into the room
-            you.DOAnchorPosY(you.anchoredPosition.y + 6f, 1.6f).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine).SetUpdate(true);
+            _you = DressedCapy(_room, hgt);
+            _you.name = "You";
+            _you.anchorMin = _you.anchorMax = Vector2.zero;
+            _youBody = (RectTransform)_you.Find("Body");
+            _walkTo = null;
+            PlaceYou();
+            // Breathing, on the picture so walking can move the whole capybara.
+            if (_youBody != null)
+            {
+                _youBody.pivot = new Vector2(0.5f, 0f);
+                _youBody.DOScaleY(1.025f, 1.6f).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine).SetUpdate(true);
+            }
+        }
+
+        void PlaceYou()
+        {
+            if (_you == null) return;
+            _you.anchoredPosition = FloorPoint(_youAt.x, _youAt.y);
+            float s = DepthScale(_youAt.y);
+            // The picture faces left: mirrored to face right.
+            _you.localScale = new Vector3(_facingRight ? -s : s, s, 1f);
+        }
+
+        /// <summary>Tapped the floor: off you trot.</summary>
+        void WalkTo(Vector2 floor)
+        {
+            _walkTo = floor;
+            Sfx.Play(SfxKind.Tap, 0.25f);
+        }
+
+        const float WalkSpeed = 420f;   // canvas units a second, at the front of the room
+
+        void Walk()
+        {
+            if (_you == null || !_walkTo.HasValue) return;
+            Vector2 here = FloorPoint(_youAt.x, _youAt.y), there = FloorPoint(_walkTo.Value.x, _walkTo.Value.y);
+            var step = Vector2.MoveTowards(here, there, WalkSpeed * DepthScale(_youAt.y) * Time.unscaledDeltaTime);
+            if (Mathf.Abs(there.x - here.x) > 1f) _facingRight = there.x > here.x;
+            _youAt = new Vector2((step.x - _floor.xMin) / _floor.width, (step.y - _floor.yMin) / _floor.height);
+            bool arrived = (step - there).sqrMagnitude < 1f;
+            _hop += Time.unscaledDeltaTime * 14f;
+            if (_youBody != null) _youBody.anchoredPosition = new Vector2(0f, arrived ? 0f : Mathf.Abs(Mathf.Sin(_hop)) * 10f);
+            if (arrived) _walkTo = null;
+            PlaceYou();
+            Sort();
+        }
+
+        /// <summary>The floor itself: a tap drops whatever was picked and walks you there.</summary>
+        class FloorTap : MonoBehaviour, IPointerClickHandler
+        {
+            BurrowScreen _screen;
+
+            public void Init(BurrowScreen s) => _screen = s;
+
+            public void OnPointerClick(PointerEventData e)
+            {
+                bool picked = _screen._selected != null;
+                _screen.Select(null);
+                if (picked || !_screen.OverRoom(e.position, e.pressEventCamera)) return;   // the first tap just lets go
+                _screen.WalkTo(_screen.ToFloor(e.position, e.pressEventCamera));
+            }
+        }
+
+        // ---------------------------------------------------------------- the Furniture Shop's bubble
+
+        /// <summary>
+        /// In a new burrow, the Furniture Shop waits in a bubble (unless you have one already).
+        /// It only goes up outside, so popping it puts it in your trail on the island.
+        /// </summary>
+        void ShopBubble()
+        {
+            if (HomeLog.ShopGiven) return;
+            if (StoreData.CountByName("Furniture Shop") > 0) { HomeLog.ShopGiven = true; return; }
+            var catalog = ItemCatalog.Instance;
+            var art = catalog != null && catalog.Has("Furniture Shop") ? catalog.Icon("Furniture Shop") : null;
+            if (art == null) return;
+
+            float size = _pieceScale * 0.34f;
+            var bubble = UiKit.Image(_room, "ShopBubble", UiKit.Circle, new Color(0.85f, 0.95f, 1f, 0.55f), true).rectTransform;
+            bubble.anchorMin = bubble.anchorMax = Vector2.zero;
+            bubble.sizeDelta = new Vector2(size, size);
+            bubble.anchoredPosition = FloorPoint(0.62f, 0.55f) + new Vector2(0f, size * 0.6f);
+            var rim = UiKit.Image(bubble, "Rim", IconPainter.Ring, new Color(1f, 1f, 1f, 0.9f));
+            UiKit.Stretch(rim.rectTransform);
+            var pic = UiKit.Image(bubble, "Shop", art, Color.white);
+            pic.preserveAspect = true;
+            UiKit.Stretch(pic.rectTransform, size * 0.16f, size * 0.16f, size * 0.16f, size * 0.16f);
+            var shine = UiKit.Image(bubble, "Shine", UiKit.Circle, new Color(1f, 1f, 1f, 0.7f));
+            UiKit.Place(shine.rectTransform, new Vector2(0.28f, 0.74f), Vector2.zero, new Vector2(size * 0.16f, size * 0.1f));
+            shine.raycastTarget = false;
+            bubble.DOAnchorPosY(bubble.anchoredPosition.y + 14f, 1.4f).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine).SetUpdate(true);
+
+            var tap = bubble.gameObject.AddComponent<Button>();
+            tap.transition = Selectable.Transition.None;
+            tap.onClick.AddListener(() => PopShop(bubble, art));
+        }
+
+        void PopShop(RectTransform bubble, Sprite art)
+        {
+            if (HomeLog.ShopGiven) return;
+            var catalog = ItemCatalog.Instance;
+            var item = catalog != null ? catalog.Create("Furniture Shop") : null;
+            if (item == null) return;
+            var king = FindFirstObjectByType<PlayerAvatar>();
+            item.transform.position = king != null ? king.transform.position : Vector3.zero;
+            item.SetActive(true);
+            if (item.TryGetComponent<Placeable>(out var placeable)) placeable.MarkCarried();
+            StoreData.InvalidateCounts();
+            HomeLog.ShopGiven = true;
+
+            Sfx.Play(SfxKind.Pop, 0.8f);
+            bubble.DOKill();
+            bubble.DOScale(1.25f, 0.12f).SetUpdate(true).OnComplete(() => { if (bubble != null) Destroy(bubble.gameObject); });
+            CardPopup.Show("A Furniture Shop!",
+                "It's far too big for in here, so it's in your trail. Go outside and put it up somewhere on your island, then tap it to shop for your burrow.", art);
         }
 
         /// <summary>The player's capybara as it is dressed right now, standing on its feet (pivot at the bottom).</summary>
@@ -251,9 +378,11 @@ namespace CapyIsland.UI
             if (you != null)
             {
                 int at = 1;
-                foreach (var (p, _) in order) if (Furniture.Get(p.id)?.Flat == true || p.y > 0.62f) at++;
+                foreach (var (p, _) in order) if (Furniture.Get(p.id)?.Flat == true || p.y > _youAt.y) at++;
                 you.SetSiblingIndex(Mathf.Min(at, _room.childCount - 1));
             }
+            var shop = _room.Find("ShopBubble");   // floats over everything until popped
+            if (shop != null) shop.SetAsLastSibling();
             if (_toolbar != null) _toolbar.SetAsLastSibling();
         }
 

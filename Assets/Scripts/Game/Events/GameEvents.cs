@@ -14,12 +14,14 @@ namespace CapyIsland.Game
         public bool You;
     }
 
-    /// <summary>A contest that has ended, waiting to be shown (and paid out) once.</summary>
+    /// <summary>A contest that has ended, with its prize waiting to be claimed (once).</summary>
     public class ContestResult
     {
+        public long Contest;
         public ContestKind Kind;
         public int Rank, Score, Gems;
         public WearItem Medal;
+        public DateTime Start, End;   // its first day and the day it ended on (UTC dates)
     }
 
     /// <summary>The day's special goal: something particular to do before the day is out.</summary>
@@ -41,7 +43,8 @@ namespace CapyIsland.Game
     ///  * <b>Contests</b> last three days and take turns: most fish, then most bugs, then most birds
     ///    spotted. Bot capybaras fill the leaderboard, their totals growing over the three days the
     ///    way real players' would. When a contest ends the top three win gems, and first place
-    ///    also wins that contest's gold medal for the wardrobe.
+    ///    also wins that contest's gold medal for the wardrobe. A finished contest's prize waits
+    ///    on the Events screen until you claim it, however many contests go by meanwhile.
     ///  * A <b>special goal</b> changes every day: catch five fish after dark, spot birds at dawn or
     ///    dusk, find something rare… with a reward to claim when it is done.
     ///
@@ -71,6 +74,14 @@ namespace CapyIsland.Game
             public int lastScore;
             public long seenContest = -1;        // what the Events screen last showed you
             public long seenGoalDay = -1;
+            public List<Finished> unclaimed = new();   // ended contests you took part in, prize not yet claimed
+        }
+
+        [Serializable]
+        class Finished
+        {
+            public long contest;
+            public int score;
         }
 
         static State _s;
@@ -121,12 +132,22 @@ namespace CapyIsland.Game
         /// <summary>When the calendar has moved on to a new contest, keep the old score for its results.</summary>
         static void Roll()
         {
+            S.unclaimed ??= new List<Finished>();
+            // Older saves kept only the one contest before this: its prize goes on the list too.
+            if (S.lastContest >= 0 && S.lastContest > S.resolvedThrough && S.lastScore > 0 && !S.unclaimed.Exists(f => f.contest == S.lastContest))
+            {
+                S.unclaimed.Add(new Finished { contest = S.lastContest, score = S.lastScore });
+                S.resolvedThrough = S.lastContest;
+                Save();
+            }
             long now = Contest;
             if (S.contest == now) return;
             if (S.contest >= 0)
             {
                 S.lastContest = S.contest;
                 S.lastScore = S.score;
+                if (S.score > 0) S.unclaimed.Add(new Finished { contest = S.contest, score = S.score });
+                S.resolvedThrough = S.contest;
             }
             S.contest = now;
             S.score = 0;
@@ -172,29 +193,47 @@ namespace CapyIsland.Game
             return list;
         }
 
-        /// <summary>
-        /// The last contest's result, if it has not been handed out yet. Paying it is done here,
-        /// once: gems for the top three (a little thank-you below that) and the medal for first.
-        /// </summary>
-        public static ContestResult TakeResult()
+        /// <summary>Ended contests you took part in whose prize is still to claim, oldest first.</summary>
+        public static List<ContestResult> Unclaimed()
         {
             Roll();
-            if (S.lastContest < 0 || S.lastContest <= S.resolvedThrough) return null;
-            long contest = S.lastContest;
-            S.resolvedThrough = contest;
-            if (S.lastScore <= 0) { Save(); return null; }   // didn't take part
+            var list = new List<ContestResult>();
+            foreach (var f in S.unclaimed) list.Add(ResultOf(f));
+            list.Sort((a, b) => a.Contest.CompareTo(b.Contest));
+            return list;
+        }
 
-            var board = Board(contest, S.lastScore, 1.0);
+        public static bool PrizeWaiting { get { Roll(); return S.unclaimed.Count > 0; } }
+
+        static ContestResult ResultOf(Finished f)
+        {
+            var board = Board(f.contest, f.score, 1.0);
             int rank = board.FindIndex(e => e.You) + 1;
-            var result = new ContestResult { Kind = KindOf(contest), Rank = rank, Score = S.lastScore };
-            result.Gems = rank <= PrizeGems.Length ? PrizeGems[rank - 1] : ThanksGems;
-            var store = ResourceStore.Instance;
-            if (store != null) store.Add(ResourceKind.Gem, result.Gems);
-            if (rank == 1)
+            var result = new ContestResult
             {
-                result.Medal = Array.Find(Wardrobe.Items, w => w.Unlock == "contest_" + result.Kind);
-                if (result.Medal != null) Wardrobe.Give(result.Medal, announce: false);
-            }
+                Contest = f.contest, Kind = KindOf(f.contest), Rank = rank, Score = f.score,
+                Start = Epoch.AddDays(f.contest * ContestDays), End = EndOf(f.contest).AddDays(-1),
+            };
+            result.Gems = rank <= PrizeGems.Length ? PrizeGems[rank - 1] : ThanksGems;
+            if (rank == 1) result.Medal = Array.Find(Wardrobe.Items, w => w.Unlock == "contest_" + result.Kind);
+            return result;
+        }
+
+        /// <summary>
+        /// Hands over an ended contest's prize, once: gems for the top three (a little thank-you
+        /// below that) and the medal for first. Null if it was already claimed.
+        /// </summary>
+        public static ContestResult Claim(long contest)
+        {
+            Roll();
+            var f = S.unclaimed.Find(x => x.contest == contest);
+            if (f == null) return null;
+            var result = ResultOf(f);
+            var store = ResourceStore.Instance;
+            if (store == null) return null;   // nowhere to put the gems yet: it keeps
+            store.Add(ResourceKind.Gem, result.Gems);
+            if (result.Medal != null) Wardrobe.Give(result.Medal, announce: false);
+            S.unclaimed.Remove(f);
             Save();
             return result;
         }
@@ -246,7 +285,7 @@ namespace CapyIsland.Game
         public static bool Unseen => S.seenContest != Contest || (TodaysGoal != null && S.seenGoalDay != Day);
 
         /// <summary>For the red dot on the Events button: something new, or something to collect.</summary>
-        public static bool NeedsAttention => Unseen || RewardWaiting;
+        public static bool NeedsAttention => Unseen || RewardWaiting || PrizeWaiting;
 
         /// <summary>The Events screen has been looked at: what is running now is no longer news.</summary>
         public static void MarkSeen()
@@ -291,6 +330,7 @@ namespace CapyIsland.Game
         /// <summary>Called by the hobby log for every fish caught, bird spotted and bug caught.</summary>
         public static void Record(Hobby hobby, int stars)
         {
+            Gathering.Caught(hobby);   // a live contest on someone's island counts it too
             Roll();
             bool changed = false;
             if (HobbyOf(CurrentKind) == hobby) { S.score++; changed = true; }

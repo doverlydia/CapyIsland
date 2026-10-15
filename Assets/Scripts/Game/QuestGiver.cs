@@ -159,7 +159,7 @@ namespace CapyIsland.Game
             if (_hintTimer > 0f && InWorld)
             {
                 _hintTimer -= Time.deltaTime;
-                if (_hintTimer <= 0f && !QuestSystem.AnyoneTalkedTo) Hints.Show(NudgeLine, () => !QuestSystem.AnyoneTalkedTo);
+                if (_hintTimer <= 0f && !QuestSystem.AnyoneTalkedTo) Hints.Island(NudgeLine, () => !QuestSystem.AnyoneTalkedTo);
             }
         }
 

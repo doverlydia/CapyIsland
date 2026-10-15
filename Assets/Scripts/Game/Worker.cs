@@ -176,7 +176,7 @@ namespace CapyIsland.Game
             if (full != null)
             {
                 var name = full.TryGetComponent<Placeable>(out var p) ? StoryText.Name(p.DisplayName) : "workplace";
-                Hints.Show($"That {name} is full. It has room for {full.MaxWorkers} capybaras.");
+                Hints.Island($"That {name} is full. It has room for {full.MaxWorkers} capybaras.");
             }
         }
 
@@ -280,7 +280,7 @@ namespace CapyIsland.Game
             var catalog = ItemCatalog.Instance;
             var flowers = catalog != null ? catalog.Icon("Medium Posie Garden") : null;
             _thought = WorldBubble.Thought(transform, flowers, 0.75f, () =>
-                Hints.Show("This capybara is too hungry to work. Plant a garden near its workplace and it will wake up for a snack."));
+                Hints.Island("This capybara is too hungry to work. Plant a garden near its workplace and it will wake up for a snack."));
         }
 
         void OnDisable()
@@ -395,13 +395,13 @@ namespace CapyIsland.Game
             if (Attention.TutorialRunning) return;
             string who = "A " + StoryText.Name(speciesName);
             if (_hungry && !AnyFlowers())
-                Hints.Show(who + " is hungry and fell asleep. There's no garden to eat from: plant one near its workplace.");
+                Hints.Island(who + " is hungry and fell asleep. There's no garden to eat from: plant one near its workplace.");
             else if (_hungry)
-                Hints.Show(who + " ate the last flower in the garden. Plant bigger gardens for your hungry workers.");
+                Hints.Island(who + " ate the last flower in the garden. Plant bigger gardens for your hungry workers.");
             else if (_workplace.Accepts == ResourceKind.Wood)
-                Hints.Show(who + " chopped down the last tree in a forest. Too many workers on one forest will strip it bare.");
+                Hints.Island(who + " chopped down the last tree in a forest. Too many workers on one forest will strip it bare.");
             else
-                Hints.Show(who + " dug out the last rock in a hill. With no rocks in reach, the mine will close.");
+                Hints.Island(who + " dug out the last rock in a hill. With no rocks in reach, the mine will close.");
         }
 
         /// <summary>Is any flower garden planted on the island at all (eaten bare or not)?</summary>

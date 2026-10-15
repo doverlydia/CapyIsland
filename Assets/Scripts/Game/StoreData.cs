@@ -100,10 +100,13 @@ namespace CapyIsland.Game
             // The woolly capybara's home: the data has it, but no shop sold it, so the only woolly was
             // Captain Wasabi's. The Gold Store comes around the time she introduces them.
             AddTo("gold_store", "Panda House");
-            // Your home under the ground: the Fancy Store sells the Furniture Shop, and the
-            // Furniture Shop sells the den (your front door) and everything to put inside.
+            // Your home under the ground: the General Store sells the den (your front door), and the
+            // Furniture Shop waits inside it in a bubble the first time you go down (BurrowScreen);
+            // it sells everything to put in there. (The Fancy Store, which also lists the shop, was
+            // the original's donors-only store: nothing sells it.)
             AddTo("fancy_store", "Furniture Shop");
             RemoveFrom("fancy_store", "Monster Den");
+            AddTo("general_store", "Monster Den");
         }
 
         static void RemoveFrom(string list, string item)

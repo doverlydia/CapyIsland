@@ -22,9 +22,11 @@ namespace CapyIsland.Game
             if (_king == null) _king = FindFirstObjectByType<PlayerAvatar>();
             if (_king == null || Time.time < _nextBird) return;
             if (!HobbyLog.IsUnlocked(Hobby.Birding)) return;   // birds come once you have binoculars
-            _nextBird = Time.time + Random.Range(25f, 50f);
-            if (FindObjectsByType<Bird>(FindObjectsSortMode.None).Length >= 2) return;
-            TryLand(_king.transform.position);
+            // A birdwatching contest's ring is full of birds: one every few seconds, inside it.
+            bool contest = Gathering.Boosting(Hobby.Birding);
+            _nextBird = Time.time + (contest ? Random.Range(5f, 10f) : Random.Range(25f, 50f));
+            if (FindObjectsByType<Bird>(FindObjectsSortMode.None).Length >= (contest ? 5 : 2)) return;
+            TryLand(contest ? Gathering.Arena : (Vector2)_king.transform.position);
         }
 
         void TryLand(Vector2 around)

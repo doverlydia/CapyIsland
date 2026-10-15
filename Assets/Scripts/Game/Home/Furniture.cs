@@ -90,6 +90,14 @@ namespace CapyIsland.Game
             public List<Placed> placed = new();
             public int boughtDay = -1;
             public List<string> boughtToday = new();
+            public bool shopGiven;   // the Furniture Shop's bubble, waiting in a new burrow, was popped
+        }
+
+        /// <summary>The Furniture Shop has been handed over (from its bubble in your first burrow).</summary>
+        public static bool ShopGiven
+        {
+            get => D.shopGiven;
+            set { D.shopGiven = value; Save(); }
         }
 
         static Data _d;

@@ -57,8 +57,19 @@ namespace CapyIsland.Game
         static double Seconds => (DateTime.UtcNow - DateTime.UnixEpoch).TotalSeconds;
         static double Frac(double x) => x - Math.Floor(x);
 
+        /// <summary>
+        /// On a real player's island: their island's clock (Live hears it from their game), so if
+        /// it's night there it's night for you too. Null at home. Every flight clears it.
+        /// </summary>
+        public static double? Visiting;
+
+        /// <summary>This island's clock setting, for a visitor's game to follow.</summary>
+        public static double IslandOffset => Offset;
+
+        static double Current => Visiting ?? Offset;
+
         /// <summary>0 at midnight, 0.5 at noon.</summary>
-        public static float TimeOfDay => Override ?? _held ?? (float)Frac(Seconds / DaySeconds + Offset);
+        public static float TimeOfDay => Override ?? _held ?? (float)Frac(Seconds / DaySeconds + Current);
 
         static float? _held;
 
@@ -85,7 +96,7 @@ namespace CapyIsland.Game
         public static float Hour => TimeOfDay * 24f;
 
         /// <summary>Which island day it is (counts up by one at every midnight).</summary>
-        public static long Day => (long)Math.Floor(Seconds / DaySeconds + Offset);
+        public static long Day => (long)Math.Floor(Seconds / DaySeconds + Current);
 
         public static DayParts Now => PartAt(Hour);
 
@@ -129,6 +140,7 @@ namespace CapyIsland.Game
             _offset = null;
             _held = null;
             Override = null;
+            Visiting = null;
         }
     }
 }

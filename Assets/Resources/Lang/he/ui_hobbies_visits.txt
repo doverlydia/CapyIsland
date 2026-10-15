@@ -1513,3 +1513,21 @@
 
 @ Couldn't reach that server. Try again in a moment.
 = לא הצלחנו להגיע לשרת הזה. נסה שוב עוד רגע.
+
+@ Waiting for {0} to let you in…
+= מחכה ש{0} יכניס אותך…
+
+@ You can cancel any time ({0}s)
+= אפשר לבטל בכל רגע ({0} שנ׳)
+
+@ You're still waiting for {0} to answer.
+= אתה עדיין מחכה לתשובה של {0}.
+
+@ {0} is on your island right now. Say goodbye first!
+= {0} נמצא באי שלך עכשיו. קודם תיפרד!
+
+@ {0} stopped knocking.
+= {0} הפסיק לדפוק בדלת.
+
+@ {0} said not right now. Maybe another time!
+= {0} אמר שלא עכשיו. אולי בפעם אחרת!

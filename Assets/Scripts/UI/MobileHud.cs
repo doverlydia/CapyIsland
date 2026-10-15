@@ -95,22 +95,32 @@ namespace CapyIsland.UI
         GameObject _giftDot, _eventsDot;
 
         /// <summary>
-        /// A contest that ended while you were away: how you did, once, when the screen is free.
+        /// A contest that ended (while you were away, or just now): a word that its prize is
+        /// waiting on the Events screen, once each. The prize itself waits there until claimed.
         /// (The daily gift no longer opens by itself — its red dot says it's there.)
         /// </summary>
         IEnumerator Start()
         {
             HudTour.BeginIfFirstTime(this);
+            float wait = 1.5f;
             while (true)
             {
-                yield return new WaitForSecondsRealtime(1.5f);
-                if (Attention.TutorialRunning) continue;
-                if (Visit.Active || Visit.Travelling) yield break;   // results wait until you are home
-                var result = GameEvents.TakeResult();
-                if (result != null) Attention.Ask("contest", () => EventsScreen.ShowResult(result));
-                yield break;
+                yield return new WaitForSecondsRealtime(wait);
+                if (Attention.TutorialRunning || Visit.Active || Visit.Travelling) continue;
+                wait = 30f;
+                foreach (var r in GameEvents.Unclaimed())
+                {
+                    if (!_toldPrizes.Add(r.Contest)) continue;
+                    Attention.Ask("contest", () => Hints.Show(Loc.F("Your {0} prize is waiting! Claim it in Events.", Loc.T(EventsScreen.ContestName(r.Kind)))));
+                    break;
+                }
             }
         }
+
+        static readonly System.Collections.Generic.HashSet<long> _toldPrizes = new();   // once per launch, not per island
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+        static void ForgetTold() => _toldPrizes.Clear();
 
         GameObject _addFriend, _stopWalking;
         PlayerAvatar _king;
@@ -289,6 +299,7 @@ namespace CapyIsland.UI
             NewDot.Live(badge.transform, () => !Attention.TutorialRunning && NewStuff.Any("wardrobe/"));   // a new piece to try on
             ClockPill.Create(_safe).transform.SetSiblingIndex(afterBar + 1);
             VisitorsColumn.Create(_safe).transform.SetSiblingIndex(afterBar + 1);
+            GatheringPanel.Create(_safe).transform.SetSiblingIndex(afterBar + 1);
 
             var side = UiKit.Rect("SideButtons", _safe);
             side.anchorMin = side.anchorMax = side.pivot = new Vector2(1f, 1f);

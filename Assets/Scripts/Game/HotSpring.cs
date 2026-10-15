@@ -175,6 +175,9 @@ namespace CapyIsland.Game
             // In the water: only what is above the surface shows, with foam where it meets it.
             CapyOutfit.OverrideHat(Towel);
             yield return null;   // let the towel go on before the mask is set
+            // The outfit's sorting group would keep its layers out of reach of the water mask.
+            var group = body.GetComponent<UnityEngine.Rendering.SortingGroup>();
+            if (group != null) group.enabled = false;
             var mask = WaterLine(king, bodyRenderer, waterY, pool);
             var foam = Foam(bodyRenderer, waterY);
             Sfx.Play(SfxKind.Plop, 0.9f);
@@ -211,6 +214,7 @@ namespace CapyIsland.Game
             foreach (var f in foam) if (f != null) { DOTween.Kill(f.transform); Destroy(f); }
             foreach (var r in body.GetComponentsInChildren<SpriteRenderer>(true)) SetMasked(r, false);
             if (mask != null) Destroy(mask);
+            if (group != null) group.enabled = true;
             CapyOutfit.OverrideHat(null);
             var landing = new Vector3(edge.x + 0.6f, edge.y - 0.2f, seat.z);
             Sfx.Play(SfxKind.Plop, 0.6f);

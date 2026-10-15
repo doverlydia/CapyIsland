@@ -517,8 +517,8 @@
 @ {0} is yours!
 = {0} שלך!
 
-@ Pop the bubble and put {0} wherever you'd like their home to be.
-= פוצץ את הבועה ושים את {0} איפה שתרצה שיהיה הבית שלו.
+@ {0} has made a home right here.
+= {0} מצא לעצמו בית ממש כאן.
 
 # ---------------------------------------------------------------- cat presents (CatGifts.cs)
 
@@ -786,3 +786,21 @@
 
 @ Cockroach
 = ג'וק
+
+@ Name your cat
+= תן שם לחתול שלך
+
+@ A name
+= שם
+
+@ Rename
+= שנה שם
+
+@ Save
+= שמור
+
+@ Dress up
+= להלביש
+
+@ {0}'s wardrobe
+= הארון של {0}

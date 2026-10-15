@@ -1,0 +1,260 @@
+@ You're hosting already!
+= אתה כבר מארח!
+
+@ You're at someone else's party right now.
+= אתה במסיבה של מישהו אחר עכשיו.
+
+@ Host from your own island: fly home first.
+= אפשר לארח רק מהאי שלך: קודם טוס הביתה.
+
+@ You're on your way to visit someone right now.
+= אתה בדרך לבקר מישהו עכשיו.
+
+@ Let's get your own island settled first.
+= בוא קודם נסדר את האי שלך.
+
+@ You need a bug net to host a bug contest.
+= צריך רשת חרקים כדי לארח תחרות חרקים.
+
+@ You need binoculars to host a birdwatching contest.
+= צריך משקפת כדי לארח תחרות צפרות.
+
+@ You need a fishing rod to host a fishing contest.
+= צריך חכה כדי לארח תחרות דיג.
+
+@ Can't find you on the island!
+= לא מוצאים אותך באי!
+
+@ Stand at the water's edge to host a fishing contest there.
+= עמוד על שפת המים כדי לארח שם תחרות דיג.
+
+@ Stand among some trees to host a birdwatching contest there.
+= עמוד בין עצים כדי לארח שם תחרות צפרות.
+
+@ Stand near trees or flowers to host a bug contest there.
+= עמוד ליד עצים או פרחים כדי לארח שם תחרות חרקים.
+
+@ A contest needs at least 2 players, and nobody else is on this server right now. Switch to a public server to play with others.
+= בתחרות צריכים להיות לפחות 2 שחקנים, ואין עוד אף אחד בשרת הזה עכשיו. עבור לשרת ציבורי כדי לשחק עם אחרים.
+
+@ A contest needs at least 2 players, and nobody's online to invite right now. Try again in a little while.
+= בתחרות צריכים להיות לפחות 2 שחקנים, ואין עכשיו אף אחד מחובר להזמין. נסה שוב עוד מעט.
+
+@ Opening your island…
+= פותח את האי שלך…
+
+@ Party invitations sent to {0} islanders! Guests will turn up soon.
+= הזמנות למסיבה נשלחו ל-{0} תושבי איים! האורחים יגיעו בקרוב.
+
+@ Invitations sent to {0} islanders! Press Start once someone has arrived.
+= הזמנות נשלחו ל-{0} תושבי איים! לחץ על התחל כשמישהו יגיע.
+
+@ Wait for someone to arrive: a contest needs at least 2 players.
+= חכה שמישהו יגיע: בתחרות צריכים להיות לפחות 2 שחקנים.
+
+@ Go! Whoever catches the most in 5 minutes wins!
+= קדימה! מי שתופס הכי הרבה ב-5 דקות מנצח!
+
+@ <b>{0}</b> is having an island party! Come over?
+= <b>{0}</b> עורך מסיבת אי! רוצה לבוא?
+
+@ <b>{0}</b> is hosting a {1}! Join in?
+= <b>{0}</b> מארח {1}! רוצה להצטרף?
+
+@ Party!
+= מסיבה!
+
+@ {0} ended the party. Flying you home!
+= {0} סיים את המסיבה. טסים הביתה!
+
+@ {0} has come to your {1}!
+= {0} הגיע ל{1} שלך!
+
+@ party
+= מסיבה
+
+@ contest
+= תחרות
+
+@ You left the contest area, so you're out of this round. You keep everything you caught!
+= יצאת מאזור התחרות, אז אתה בחוץ בסיבוב הזה. כל מה שתפסת נשאר שלך!
+
+@ Island Party
+= מסיבת אי
+
+@ {0} fish
+= {0} דגים
+
+@ 1 bug
+= חרק אחד
+
+@ {0} bugs
+= {0} חרקים
+
+@ 1 bird
+= ציפור אחת
+
+@ {0} birds
+= {0} ציפורים
+
+@ You're hosting right now. End it first, then you can fly off.
+= אתה מארח עכשיו. קודם סיים, ואז תוכל לטוס.
+
+@ {0}'s party is over already. You can look around, or fly home.
+= המסיבה של {0} כבר נגמרה. אפשר להסתובב, או לטוס הביתה.
+
+@ You're at {0}'s island! Say hi with an emoji.
+= הגעת לאי של {0}! תגיד שלום עם אימוג'י.
+
+@ Come back to the contest area! {0}
+= חזור לאזור התחרות! {0}
+
+@ Stay out and you're out of this round.
+= אם תישאר בחוץ, תצא מהסיבוב הזה.
+
+@ On the way to {0}'s island…
+= בדרך לאי של {0}…
+
+@ Waiting for your guests…
+= מחכה לאורחים שלך…
+
+@ {0} guests here
+= {0} אורחים כאן
+
+@ At {0}'s party
+= במסיבה של {0}
+
+@ Watching this round: you'll be in the next one.
+= צופה בסיבוב הזה: תשתתף בבא.
+
+@ You're out of this round. You keep what you caught!
+= יצאת מהסיבוב הזה. מה שתפסת נשאר שלך!
+
+@ You: {0} · place {1}
+= אתה: {0} · מקום {1}
+
+@ Round over! Play again, or end the contest.
+= הסיבוב נגמר! שחק שוב, או סיים את התחרות.
+
+@ Round over! Waiting to see if there's another.
+= הסיבוב נגמר! מחכים לראות אם יהיה עוד אחד.
+
+@ Waiting for {0} to start…
+= מחכה ש{0} יתחיל…
+
+@ Waiting for players to arrive…
+= מחכה שהשחקנים יגיעו…
+
+@ {0} here: press Start when you're ready!
+= {0} כאן: לחץ על התחל כשאתה מוכן!
+
+@ left
+= עזב
+
+@ out
+= בחוץ
+
+@ Again
+= שוב
+
+@ Start
+= התחל
+
+@ End contest
+= סיים תחרות
+
+@ End party
+= סיים מסיבה
+
+@ End contest?
+= לסיים את התחרות?
+
+@ End party?
+= לסיים את המסיבה?
+
+@ Everyone heads home, and your island closes to visitors.
+= כולם חוזרים הביתה, והאי שלך נסגר למבקרים.
+
+@ End it
+= סיים
+
+@ Not yet
+= עוד לא
+
+@ Leave?
+= לעזוב?
+
+@ Fly home from {0}'s island?
+= לטוס הביתה מהאי של {0}?
+
+@ Nobody caught anything this time!
+= אף אחד לא תפס כלום הפעם!
+
+@ You won!
+= ניצחת!
+
+@ {0} wins!
+= {0} ניצח!
+
+@ Everyone keeps what they caught.
+= כל אחד שומר את מה שתפס.
+
+@ flew home
+= טס הביתה
+
+@ left the area
+= יצא מהאזור
+
+@ Play together
+= משחקים ביחד
+
+@ You're hosting: {0}. {1} here.
+= אתה מארח: {0}. {1} כאן.
+
+@ Invite everyone on this server to your island. A contest happens where you're standing: by the water for fishing, among trees for bugs and birds.
+= הזמן את כל מי שבשרת הזה לאי שלך. תחרות מתקיימת איפה שאתה עומד: ליד המים לדיג, בין העצים לחרקים ולציפורים.
+
+@ Fly over to {0}'s island
+= טוס לאי של {0}
+
+@ Your guests are on their way: show them around!
+= האורחים שלך בדרך: תראה להם את האי!
+
+@ Enjoy {0}'s party, and lend a hand!
+= תהנה מהמסיבה של {0}, ותן יד!
+
+@ Catch as many bugs as you can inside the glittering ring!
+= תפוס כמה שיותר חרקים בתוך הטבעת הנוצצת!
+
+@ Spot as many birds as you can inside the glittering ring!
+= צפה בכמה שיותר ציפורים בתוך הטבעת הנוצצת!
+
+@ Catch as many fish as you can inside the glittering ring!
+= תפוס כמה שיותר דגים בתוך הטבעת הנוצצת!
+
+@ Round over: see who won!
+= הסיבוב נגמר: בוא נראה מי ניצח!
+
+@ Wait for players, then press Start
+= חכה לשחקנים, ואז לחץ על התחל
+
+@ Wait in the glittering ring for the contest to start
+= חכה בטבעת הנוצצת עד שהתחרות תתחיל
+
+@ {0} is here too!
+= גם {0} כאן!
+
+@ Wave
+= נופף
+
+@ {0} is here too! Ask them to be friends?
+= גם {0} כאן! להציע חברות?
+
+@ You're on {0}'s island. Ask them to be friends?
+= אתה באי של {0}. להציע חברות?
+
+@ It's a tie at the top!
+= תיקו במקום הראשון!
+
+@ Your burrow is bare! Pop the bubble: there's a Furniture Shop inside.
+= המחילה שלך ריקה! פוצץ את הבועה: יש בתוכה חנות רהיטים.

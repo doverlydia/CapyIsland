@@ -78,6 +78,15 @@
 @ Visiting · {0}
 = ביקור · {0}
 
+@ Food order
+= הזמנת אוכל
+
+@ Today · {0}
+= היום · {0}
+
+@ Done! Collect your reward under Events
+= הושלם! אסוף את הפרס שלך באירועים
+
 @ Next goal
 = המטרה הבאה
 
@@ -579,3 +588,63 @@
 
 @ Your account and your island in the cloud are deleted.
 = החשבון שלך והאי שלך בענן נמחקו.
+
+@ Claim your contest prize in Events
+= אסוף את פרס התחרות שלך באירועים
+
+@ Your {0} prize is waiting! Claim it in Events.
+= הפרס שלך מ{0} מחכה! אסוף אותו באירועים.
+
+@ You came first with {0}.
+= הגעת למקום הראשון עם {0}.
+
+@ You came second with {0}.
+= הגעת למקום השני עם {0}.
+
+@ You came third with {0}.
+= הגעת למקום השלישי עם {0}.
+
+@ You finished number {0} with {1}.
+= סיימת במקום {0} עם {1}.
+
+@ Jan
+= ינו׳
+
+@ Feb
+= פבר׳
+
+@ Mar
+= מרץ
+
+@ Apr
+= אפר׳
+
+@ May
+= מאי
+
+@ Jun
+= יוני
+
+@ Jul
+= יולי
+
+@ Aug
+= אוג׳
+
+@ Sep
+= ספט׳
+
+@ Oct
+= אוק׳
+
+@ Nov
+= נוב׳
+
+@ Dec
+= דצמ׳
+
+@ A Furniture Shop!
+= חנות רהיטים!
+
+@ It's far too big for in here, so it's in your trail. Go outside and put it up somewhere on your island, then tap it to shop for your burrow.
+= היא גדולה מדי בשביל כאן, אז היא בשובל שלך. צא החוצה והקם אותה איפשהו באי, ואז הקש עליה כדי לקנות דברים למחילה שלך.

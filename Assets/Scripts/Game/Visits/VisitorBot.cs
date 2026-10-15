@@ -23,8 +23,18 @@ namespace CapyIsland.Game
     {
         public enum Role { Host, Guest }
 
-        /// <summary>The visitor or host currently on the island, if any.</summary>
+        /// <summary>The visitor or host currently on the island, if any (the latest to arrive, when there are several).</summary>
         public static VisitorBot Current { get; private set; }
+
+        /// <summary>Everyone else on the island right now: a party can bring several.</summary>
+        public static IReadOnlyList<VisitorBot> All => _all;
+        static readonly List<VisitorBot> _all = new();
+
+        /// <summary>Who this is on the live link: a player's id, or "bot:…" for an islander the host's game plays.</summary>
+        public string NetId;
+
+        /// <summary>Leaves without the "add them as a friend?" question or an ema (a party guest going home).</summary>
+        public bool QuietExit;
 
         /// <summary>A guest has logged off, with who it was.</summary>
         public static event Action<FriendProfile> GuestLeft;
@@ -34,6 +44,9 @@ namespace CapyIsland.Game
 
         /// <summary>The player sent an emoji (Live passes it on to a real friend).</summary>
         public static event Action<Emoji> PlayerEmoted;
+
+        /// <summary>An islander the game plays showed an emoji (Live passes it on to everyone at your party).</summary>
+        public static event Action<VisitorBot, Emoji> BotEmoted;
 
         /// <summary>
         /// A real friend's capybara (Live): it goes where they go and shows their emojis — no
@@ -67,9 +80,11 @@ namespace CapyIsland.Game
         static void ResetSession()
         {
             Current = null;
+            _all.Clear();
             GuestLeft = null;
             Emoted = null;
             PlayerEmoted = null;
+            BotEmoted = null;
         }
 
         /// <summary>A real friend's capybara, moved by them over the live link.</summary>
@@ -142,6 +157,7 @@ namespace CapyIsland.Game
             if (Wardrobe.Ready) CapyOutfit.Dress(body, bot._pieces, bot.Wearing);
 
             Current = bot;
+            _all.Add(bot);
             var fx = HarvestEffects.Instance;
             if (fx != null) fx.Poof(at, new Color(1f, 1f, 1f));
             go.transform.localScale *= 0.3f;
@@ -188,8 +204,46 @@ namespace CapyIsland.Game
 
         void OnDestroy()
         {
-            if (Current == this) Current = null;
+            _all.Remove(this);
+            if (Current == this) Current = _all.Count > 0 ? _all[_all.Count - 1] : null;
         }
+
+        /// <summary>Is this person (by profile id) on the island and not on their way out?</summary>
+        public static bool IsHere(string friendId)
+        {
+            foreach (var b in _all) if (b != null && b.Who != null && b.Who.id == friendId && !b._leaving) return true;
+            return false;
+        }
+
+        /// <summary>Finds whoever goes by this id on the live link.</summary>
+        public static VisitorBot ByNetId(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return null;
+            foreach (var b in _all) if (b != null && b.NetId == id) return b;
+            return null;
+        }
+
+        // ---------------------------------------------------------------- at a party or a contest
+
+        Vector2? _ringCentre;
+        float _ringRadius;
+
+        /// <summary>Stays inside a contest's area (world radius), pottering about, instead of following you or doing chores.</summary>
+        public void KeepTo(Vector2 centre, float worldRadius)
+        {
+            _ringCentre = centre;
+            _ringRadius = worldRadius;
+            _task = null;
+            _plantsLeft = 0;
+            _giftAt = -1f;
+            _nextThink = Time.time + 0.3f;
+        }
+
+        /// <summary>Stays until told to go (a party, a contest): no leaving on its own.</summary>
+        public void Linger() => _leaveAt = -1f;
+
+        /// <summary>Heads home after a while.</summary>
+        public void LeaveIn(float seconds) => _leaveAt = Time.time + Mathf.Max(0.1f, seconds);
 
         // Shown at the screen edge and on the map, so you can always find who is with you.
         void OnEnable() => MapMarkers.Register(this);
@@ -238,6 +292,7 @@ namespace CapyIsland.Game
         public void Emote(Emoji e)
         {
             Emoted?.Invoke(_bodyTransform != null ? _bodyTransform : transform, e);
+            if (!Remote) BotEmoted?.Invoke(this, e);
             if (_bodyTransform != null) _bodyTransform.DOPunchScale(new Vector3(0.12f, 0.16f, 0f), 0.35f, 6, 0.6f);
         }
 
@@ -250,7 +305,15 @@ namespace CapyIsland.Game
             var king = FindFirstObjectByType<PlayerAvatar>();
             var body = king != null ? king.transform.Find("Sprite") : null;
             Emoted?.Invoke(body != null ? body : king != null ? king.transform : null, e);
-            if (Current != null) Current.HearPlayer(e);
+            // Everyone near enough to see it answers (a crowd at a party: a few of them, not all at once).
+            int answered = 0;
+            foreach (var bot in new List<VisitorBot>(_all))
+            {
+                if (bot == null || bot.Remote || bot._leaving || answered >= 3) continue;
+                if (king != null && Vector2.Distance(king.transform.position, bot.transform.position) > 12f) continue;
+                bot.HearPlayer(e);
+                answered++;
+            }
             PlayerEmoted?.Invoke(e);
         }
 
@@ -286,6 +349,19 @@ namespace CapyIsland.Game
             var king = FindFirstObjectByType<PlayerAvatar>();
             Vector2 me = transform.position;
             Vector2 you = king != null ? (Vector2)king.transform.position : me;
+
+            // At a contest: somewhere inside its area, never wandering off after you.
+            if (_ringCentre.HasValue)
+            {
+                bool outside = BunniSpace.WorldDistance(me, _ringCentre.Value) > _ringRadius * 0.85f;
+                if (outside || UnityEngine.Random.value < 0.4f)
+                    for (int i = 0; i < 8; i++)
+                    {
+                        var spot = BunniSpace.RandomPointInCircle(_ringCentre.Value, _ringRadius * 0.75f);
+                        if (BunniSpace.PointOnLand(spot)) { Head(spot); break; }
+                    }
+                return;
+            }
 
             if (As == Role.Guest)
             {
@@ -460,6 +536,7 @@ namespace CapyIsland.Game
         {
             _leaving = true;
             Emote(Emoji.Wave);
+            if (QuietExit) _sentHome = true;   // no "add them?" question, no ema
             if (As == Role.Guest && !Remote)
             {
                 var did = new List<string>();

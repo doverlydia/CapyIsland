@@ -68,15 +68,22 @@ namespace CapyIsland.Game
             if (Travelling) return;
             if (to == null && !Active) return;
             var why = WhyCantFly();
-            if (why != null) { Hints.Show(why); return; }
-            // A real friend who's home: knock first, and visit live if they let you in.
-            if (Live.ShouldKnock(to)) { Live.Knock(to); return; }
+            if (why != null) { Hints.Show(why); Live.FlightFailed(to); return; }
+            // A real person's island: only with their yes. Knock, and fly once they let you in
+            // (Live flies you then); never just because the button was pressed again.
+            if (to != null && to.IsReal && !Live.MayLand(to))
+            {
+                if (Live.ShouldKnock(to)) { Live.Knock(to); return; }
+                var notNow = Live.WhyNotKnock(to);
+                if (notNow != null) Hints.Show(notNow);
+                return;
+            }
             Travelling = true;
             if (to != null && to.IsReal)
             {
                 // A real friend's island is fetched as they last saved it.
                 _realWorld = await RealFriends.FetchIsland(to);
-                if (_realWorld == null) { Travelling = false; return; }
+                if (_realWorld == null) { Travelling = false; Live.FlightFailed(to); return; }
             }
             string label = to != null ? "Flying to " + to.name + "'s island" : "Flying home";
             UI.FlightTransition.Play(label, () => Swap(to), () => Travelling = false);
@@ -88,6 +95,7 @@ namespace CapyIsland.Game
         public static string WhyCantFly()
         {
             if (Active) return null;
+            if (Gathering.Hosting) return "You're hosting right now. End it first, then you can fly off.";
             var tutorial = TutorialDirector.Instance;
             if (tutorial != null && !tutorial.Finished) return "Let's get your own island settled first. Then you can fly anywhere you like!";
             if (!Airport.Built) return "You'll need an airstrip before you can fly. Build one above!";
@@ -125,6 +133,15 @@ namespace CapyIsland.Game
         static void Prepare(FriendProfile to)
         {
             var friend = Friends.Find(to.id);
+            if (friend == null && to.IsReal)
+            {
+                // A real person who isn't a friend (someone from your private server who invited
+                // you): their island as they saved it, and nothing of it kept here.
+                Host = to;
+                HostWorld = _realWorld;
+                _realWorld = null;
+                return;
+            }
             if (friend == null)
             {
                 Host = to;

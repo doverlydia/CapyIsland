@@ -97,7 +97,8 @@ namespace CapyIsland.Game
 
         // The fight.
         BaitKind _bait;   // on the hook for this cast, or null
-        float BiteSpeed => _bait != null ? _bait.BiteSpeed : 1f;
+        // A running fishing contest makes the fish in its ring keener too (Gathering).
+        float BiteSpeed => (_bait != null ? _bait.BiteSpeed : 1f) * (Gathering.Boosting(Hobby.Fishing) ? 1.6f : 1f);
 
         float _needed, _remaining, _strength, _phaseUntil, _nextSplash, _slackFor;   // line still to reel in, in reel-seconds
 
@@ -126,6 +127,9 @@ namespace CapyIsland.Game
 
         /// <summary>True when the king stands close enough to open water to cast.</summary>
         public bool AtShore => _king != null && NearestWater(_king.transform.position, 2.6f).HasValue;
+
+        /// <summary>The nearest water within reach of a spot, if any (where a fishing contest can be held).</summary>
+        public static Vector2? WaterNear(Vector2 from, float within) => NearestWater(from, within);
 
         static Vector2? NearestWater(Vector2 from, float within)
         {
@@ -180,22 +184,25 @@ namespace CapyIsland.Game
 
             if (Time.time >= _nextSpawn)
             {
-                _nextSpawn = Time.time + 1.5f;
+                // A fishing contest's ring teems: twice the fish, turning up quicker, inside it.
+                bool contest = Gathering.Boosting(Hobby.Fishing);
+                _nextSpawn = Time.time + (contest ? 0.6f : 1.5f);
                 for (int i = _shadows.Count - 1; i >= 0; i--)
                     if (_shadows[i].Go == null || (!_shadows[i].Fleeing && Vector2.Distance(_shadows[i].Go.transform.position, you) > DespawnRange))
                         Remove(_shadows[i]);
-                if (_shadows.Count < ShadowCount) TrySpawn(you);
+                if (_shadows.Count < (contest ? ShadowCount * 2 : ShadowCount))
+                    TrySpawn(contest ? Gathering.Arena : you, contest ? BunniSpace.ToUnity(new Vector2(Gathering.ArenaRadius, 0f)).x : ShadowRange);
             }
 
             foreach (var s in _shadows) Swim(s);
             Tick(you);
         }
 
-        void TrySpawn(Vector2 around)
+        void TrySpawn(Vector2 around, float range)
         {
             for (int i = 0; i < 20; i++)
             {
-                var p = around + UnityEngine.Random.insideUnitCircle * ShadowRange;
+                var p = around + UnityEngine.Random.insideUnitCircle * range;
                 if (!OpenWater(p, 0.6f) || !NearShore(p, 5f)) continue;
                 var kind = HobbyData.RollFish(HobbyLog.Level(Hobby.Fishing));
                 var go = new GameObject("FishShadow_" + kind.Id);

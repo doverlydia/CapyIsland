@@ -9,11 +9,29 @@ namespace CapyIsland.Game
     /// sometimes it is junk only Salty Kombu would pay a coin for, and sometimes it is a disaster:
     /// a lit fizz bomb, a zombie capybara, a whole family of guinea pigs. A cat that trusts you more
     /// tends to bring better things, but never only good ones.
+    ///
+    /// A cat you've adopted also brings things on its own every so often, fish or no fish: humbler
+    /// finds, mostly junk and a few gems. A fish still buys the better present, and sooner.
     /// </summary>
     public static class CatGifts
     {
         /// <summary>How long after a fish the present arrives (real time, so it counts while away).</summary>
         static TimeSpan Delay() => TimeSpan.FromSeconds(UnityEngine.Random.Range(120f, 300f));
+
+        /// <summary>How long an adopted cat goes between presents it finds by itself.</summary>
+        static TimeSpan FreeDelay() => TimeSpan.FromMinutes(UnityEngine.Random.Range(15f, 30f));
+
+        /// <summary>An adopted cat with nothing on the way sets off to find you something.</summary>
+        public static void Tick(HobbyLog.Cat cat)
+        {
+            if (cat == null || !cat.adopted || cat.giftDueTicks != 0) return;
+            cat.giftDueTicks = (DateTime.Now + FreeDelay()).Ticks;
+            cat.freeGift = true;
+            HobbyLog.Save();
+        }
+
+        /// <summary>A fish-paid present is on its way (a find of its own doesn't count).</summary>
+        public static bool FishGiftComing(HobbyLog.Cat cat) => cat != null && cat.giftDueTicks != 0 && !cat.freeGift;
 
         /// <summary>The cat-only outfit pieces, found first.</summary>
         static readonly string[] CatPieces = { "Hat_Sock", "Neck_Bell" };
@@ -31,8 +49,11 @@ namespace CapyIsland.Game
         /// <summary>Called when a cat eats a fish: it will be back with something.</summary>
         public static void Fed(HobbyLog.Cat cat)
         {
-            if (cat == null || cat.giftDueTicks != 0) return;
-            cat.giftDueTicks = (DateTime.Now + Delay()).Ticks;
+            if (cat == null || FishGiftComing(cat)) return;
+            // A find of its own still on the way turns into the better present, and comes sooner.
+            long due = (DateTime.Now + Delay()).Ticks;
+            cat.giftDueTicks = cat.giftDueTicks != 0 ? Math.Min(cat.giftDueTicks, due) : due;
+            cat.freeGift = false;
             HobbyLog.Save();
         }
 
@@ -41,15 +62,17 @@ namespace CapyIsland.Game
         /// <summary>The cat has arrived at your feet: open the present.</summary>
         public static void Open(CatKind kind, HobbyLog.Cat cat, Vector2 at, Sprite catPicture)
         {
+            bool free = cat.freeGift;
             cat.giftDueTicks = 0;
+            cat.freeGift = false;
             cat.gifts++;
             HobbyLog.Save();
             Motes.Trigger("hobby_catgift");
 
-            string who = cat.adopted ? kind.Name : "The stray cat";
+            string who = cat.adopted ? CatCare.NameOf(kind) : "The stray cat";
             string title = "A present from " + (cat.adopted ? who : "the stray cat") + "!";
             // The very first present is a nice one, so the habit sticks.
-            var roll = cat.gifts == 1 && HobbyLog.TotalCatGifts() == 1 ? Kind.Outfit : Roll(cat.bond);
+            var roll = cat.gifts == 1 && HobbyLog.TotalCatGifts() == 1 ? Kind.Outfit : free ? RollFree(cat.bond) : Roll(cat.bond);
 
             switch (roll)
             {
@@ -67,7 +90,7 @@ namespace CapyIsland.Game
                     var catalog = ItemCatalog.Instance;
                     if (UnityEngine.Random.value < 0.5f || catalog == null)
                     {
-                        int gems = UnityEngine.Random.Range(5, 16);
+                        int gems = free ? UnityEngine.Random.Range(2, 7) : UnityEngine.Random.Range(5, 16);
                         UI.CardPopup.Show(title, $"A little pile of {gems} shiny gems. Good cat!", UI.IconPainter.Sparkle,
                             () => TreasureChest.SpawnValue(at, ResourceKind.Gem, gems, catalog != null ? catalog.ItemParent : null));
                     }
@@ -123,6 +146,26 @@ namespace CapyIsland.Game
                 (Kind.Zombie, 8f),
                 (Kind.Pests, 12f - 4f * trust),
             };
+            return Pick(weights);
+        }
+
+        /// <summary>What a cat finds by itself, without a fish: mostly junk, now and then something nice, rarely trouble.</summary>
+        static Kind RollFree(int bond)
+        {
+            float trust = Mathf.Clamp01(bond / (float)CatCare.MaxBond);
+            return Pick(new (Kind kind, float weight)[]
+            {
+                (Kind.Outfit, 3f + 4f * trust),
+                (Kind.Treasure, 14f + 8f * trust),
+                (Kind.Junk, 55f),
+                (Kind.Bomb, 4f),
+                (Kind.Zombie, 2f),
+                (Kind.Pests, 6f),
+            });
+        }
+
+        static Kind Pick((Kind kind, float weight)[] weights)
+        {
             float total = 0f;
             foreach (var w in weights) total += w.weight;
             float pick = UnityEngine.Random.value * total;

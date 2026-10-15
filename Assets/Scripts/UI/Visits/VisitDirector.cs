@@ -115,7 +115,7 @@ namespace CapyIsland.UI
         void MaybeKnock()
         {
             _nextRequest = Time.unscaledTime + Random.Range(360f, 720f);
-            if (VisitorBot.Current != null || !Attention.Free(8f)) return;
+            if (VisitorBot.Current != null || Gathering.Active || Live.Now != Live.Mode.None || !Attention.Free(8f)) return;
             if (Random.value > 0.6f) return;
 
             // Someone online on this server knocks; an online friend more often than a stranger.

@@ -48,8 +48,74 @@ namespace CapyIsland.UI
         void Refresh()
         {
             ClearChildren(_list);
+            Prizes();
             Contest();
             Goal();
+        }
+
+        // ---------------------------------------------------------------- prizes to claim
+
+        /// <summary>Contests that have ended with your prize still waiting, each with its own Claim.</summary>
+        void Prizes()
+        {
+            foreach (var r in GameEvents.Unclaimed())
+            {
+                var card = UiKit.Image(_list, "Prize", UiKit.Rounded(30), UiKit.Hex("FFF4D6")).rectTransform;
+                var h = card.gameObject.AddComponent<HorizontalLayoutGroup>();
+                h.padding = new RectOffset(22, 22, 18, 18);
+                h.spacing = 18f;
+                h.childAlignment = TextAnchor.MiddleLeft;
+                h.childControlWidth = h.childControlHeight = true;
+                h.childForceExpandWidth = h.childForceExpandHeight = false;
+                card.gameObject.AddComponent<LayoutElement>().minHeight = 130f;
+                RtlLayout.Add(h);
+
+                var disc = UiKit.Image(card, "Disc", UiKit.Circle, Theme(r.Kind));
+                var dle = disc.gameObject.AddComponent<LayoutElement>();
+                dle.preferredWidth = dle.preferredHeight = dle.minWidth = 84f;
+                var medalArt = r.Medal != null ? Wardrobe.Art(r.Medal) : null;
+                var icon = UiKit.Image(disc.transform, "Icon", medalArt != null ? medalArt : IconPainter.Trophy, Color.white);
+                icon.preserveAspect = true;
+                UiKit.Stretch(icon.rectTransform, 16f, 16f, 16f, 16f);
+
+                var words = UiKit.Rect("Words", card);
+                var wv = words.gameObject.AddComponent<VerticalLayoutGroup>();
+                wv.spacing = 4f;
+                wv.childControlWidth = wv.childControlHeight = true;
+                wv.childForceExpandWidth = true;
+                wv.childForceExpandHeight = false;
+                words.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1f;
+                Line(words, Loc.T(ContestName(r.Kind)) + " · " + Dates(r.Start, r.End), 30f, UiKit.Ink, true);
+                string place = r.Rank switch { 1 => "first", 2 => "second", 3 => "third", _ => null };
+                Line(words, place != null ? Loc.F("You came " + place + " with {0}.", r.Score) : Loc.F("You finished number {0} with {1}.", r.Rank, r.Score), 26f, UiKit.InkSoft);
+
+                var contest = r.Contest;
+                var claim = UiKit.Button(card, "Claim", "Claim", UiKit.ButtonStyle.Primary, () =>
+                {
+                    var paid = GameEvents.Claim(contest);
+                    if (paid == null) return;
+                    Sfx.Play(SfxKind.Chest, 0.7f);
+                    ShowResult(paid);
+                    Refresh();
+                }, 30f, IconPainter.Sparkle);
+                var cle = claim.transform.parent.gameObject.AddComponent<LayoutElement>();
+                cle.preferredWidth = 190f; cle.preferredHeight = 88f;
+                claim.transform.DOScale(1.05f, 0.6f).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine).SetUpdate(true);
+            }
+        }
+
+        static readonly string[] Months = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+
+        /// <summary>"Oct 9 – 11" (or "9 – 11 Oct" in Hebrew, day first), the month names translated.</summary>
+        static string Dates(System.DateTime start, System.DateTime end)
+        {
+            bool dayFirst = Loc.Current == Language.Hebrew;
+            string Day(System.DateTime d, bool withMonth) => !withMonth ? d.Day.ToString()
+                : dayFirst ? d.Day + " " + Loc.T(Months[d.Month - 1]) : Loc.T(Months[d.Month - 1]) + " " + d.Day;
+            bool sameMonth = start.Month == end.Month;
+            return dayFirst
+                ? Day(start, !sameMonth) + " – " + Day(end, true)
+                : Day(start, true) + " – " + Day(end, !sameMonth);
         }
 
         // ---------------------------------------------------------------- words
@@ -456,7 +522,7 @@ namespace CapyIsland.UI
 
         // ---------------------------------------------------------------- the result card
 
-        /// <summary>The card shown once when a contest you took part in has ended.</summary>
+        /// <summary>The card shown when you claim an ended contest's prize.</summary>
         public static void ShowResult(ContestResult r)
         {
             string place = r.Rank switch { 1 => "first", 2 => "second", 3 => "third", _ => null };

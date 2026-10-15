@@ -34,5 +34,22 @@ namespace CapyIsland.Game
         /// <summary>False once a hint posted with a condition no longer applies.</summary>
         public static bool StillTrue(string line) =>
             string.IsNullOrEmpty(line) || !_while.TryGetValue(line, out var f) || f == null || f();
+
+        static readonly HashSet<string> _island = new();
+
+        /// <summary>
+        /// Old Yuzu talking about the island itself (a hungry worker, a forest chopped bare,
+        /// nightfall). On someone else's island it isn't said at all: it's their island, and she
+        /// only keeps an eye on yours. Everything else (what you did, who came and went) is still
+        /// shown there, at the top of the screen instead of in her corner.
+        /// </summary>
+        public static void Island(string line, Func<bool> stillTrue = null)
+        {
+            if (string.IsNullOrEmpty(line)) return;
+            _island.Add(line);
+            Show(line, stillTrue);
+        }
+
+        public static bool IsAboutIsland(string line) => line != null && _island.Contains(line);
     }
 }

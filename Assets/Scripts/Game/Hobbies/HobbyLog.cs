@@ -21,8 +21,13 @@ namespace CapyIsland.Game
         [Serializable] public class Book { public string title; public string text; public long writtenTicks; }
         /// <summary>A sewn piece: <c>kind</c> is "hat" ("cape" for older ones, empty for the oldest shirts).</summary>
         [Serializable] public class Design { public string name; public string pixels; public int size; public string kind; }
-        /// <summary>An adopted cat lives around <c>home</c>; <c>unplaced</c> while it waits in a bubble or your trail for one.</summary>
+        /// <summary>
+        /// An adopted cat lives around <c>home</c>; <c>unplaced</c> while it waits in a bubble or your trail for one.
+        /// <c>name</c> is what you called it (empty: its own name). <c>freeGift</c>: the present on its way is one
+        /// it found by itself, not one a fish paid for. <c>outfit</c>: the wardrobe pieces it has on (CatWear).
+        /// </summary>
         [Serializable] public class Cat { public string id; public int bond; public bool adopted; public long lastFussTicks; public Vector2 home; public bool unplaced; public long giftDueTicks; public int gifts; public int fed;
+            public string name; public bool freeGift; public List<string> outfit = new();
             /// <summary>Has ever had a fish from you (older saves only know it from presents).</summary>
             public bool EverFed => fed > 0 || gifts > 0 || giftDueTicks != 0; }
         /// <summary><c>unplaced</c> while the plot waits in a bubble or your trail (false, so older saves stay put).</summary>

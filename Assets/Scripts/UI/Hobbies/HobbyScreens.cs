@@ -505,7 +505,7 @@ namespace CapyIsland.UI
                 bool adopted = state != null && state.adopted;
                 var tile = UiKit.Image(grid.transform, cat.Name, UiKit.Rounded(26), adopted ? UiKit.Hex("FDE8F0") : met ? Color.white : UiKit.SurfaceSunk);
                 Picture(tile.transform, HobbyData.Art("Cat_" + cat.Id), met);
-                Label(tile.transform, adopted ? cat.Name : met ? "Stray cat" : "???", met);
+                Label(tile.transform, adopted ? CatCare.NameOf(cat) : met ? "Stray cat" : "???", met);
                 Detail(tile.transform, adopted ? "Adopted!" : met ? $"Trust {state.bond}/{CatCare.MaxBond}" : Whereabouts.Cat, met);
                 if (adopted && NewStuff.Has("hobbies/Cats/" + cat.Id)) NewDot.Fixed(tile.transform, 30f);
             }

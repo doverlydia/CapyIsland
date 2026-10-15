@@ -40,6 +40,11 @@ namespace CapyIsland.Game
         static bool _joining;
         static readonly Dictionary<string, FriendProfile> _people = new();
 
+        // A party or contest you're hosting, as everyone on the server sees it (Gathering's
+        // invitation), and the last one heard from each of the others, so each is asked once.
+        static string _party = "";
+        static readonly Dictionary<string, string> _heardParty = new();
+
         // Once per launch (island swaps must not drop the server: SaveGame.ResetStatics).
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
         static void ResetSession()
@@ -47,7 +52,19 @@ namespace CapyIsland.Game
             _session = null;
             _joining = false;
             _people.Clear();
+            _party = "";
+            _heardParty.Clear();
             Changed = null;
+        }
+
+        /// <summary>
+        /// Invites everyone on your private server to your party or contest (empty: it's over).
+        /// Friends or not, they all see it; it's how people who aren't friends yet get asked.
+        /// </summary>
+        public static void SetParty(string invitation)
+        {
+            _party = invitation ?? "";
+            UpdateMe();
         }
 
         // ---------------------------------------------------------------- codes
@@ -190,6 +207,7 @@ namespace CapyIsland.Game
                 { "name", new PlayerProperty(PlayerProfile.Name) },
                 { "code", new PlayerProperty(RealFriends.Code ?? "") },
                 { "outfit", new PlayerProperty(string.Join(",", outfit)) },
+                { "party", new PlayerProperty(_party ?? "") },
             };
         }
 
@@ -213,9 +231,13 @@ namespace CapyIsland.Game
         /// <summary>Is this person on your private server right now?</summary>
         public static bool IsHere(FriendProfile who) => who?.member != null && _session != null && _people.ContainsKey(who.member);
 
+        /// <summary>Someone on your private server, by player id, or null.</summary>
+        public static FriendProfile Find(string member) => member != null && _people.TryGetValue(member, out var who) ? who : null;
+
         static void Rebuild()
         {
             _people.Clear();
+            var invitations = new List<(FriendProfile who, string party)>();
             var s = _session;
             if (s != null)
             {
@@ -225,18 +247,28 @@ namespace CapyIsland.Game
                     if (p.Id == me) continue;
                     var friend = RealFriends.Find(p.Id);
                     var who = friend ?? new FriendProfile { id = "u_" + p.Id, member = p.Id, seed = p.Id.GetHashCode() };
+                    string party = "";
                     if (p.Properties != null)
                     {
                         if (p.Properties.TryGetValue("name", out var n) && !string.IsNullOrEmpty(n.Value) && friend == null) who.name = n.Value;
                         if (p.Properties.TryGetValue("code", out var c) && !string.IsNullOrEmpty(c.Value)) who.code = c.Value;
                         if (p.Properties.TryGetValue("outfit", out var o) && friend == null)
                             who.outfit = new List<string>(Array.FindAll((o.Value ?? "").Split(','), id => Wardrobe.Find(id) != null));
+                        if (p.Properties.TryGetValue("party", out var pp)) party = pp.Value ?? "";
                     }
                     if (string.IsNullOrEmpty(who.name)) who.name = "Capy";
                     _people[p.Id] = who;
+                    // A new party from them: once each.
+                    _heardParty.TryGetValue(p.Id, out var heard);
+                    if (party != (heard ?? ""))
+                    {
+                        _heardParty[p.Id] = party;
+                        if (party.Length > 0) invitations.Add((who, party));
+                    }
                 }
             }
             Notify();
+            foreach (var (who, party) in invitations) Gathering.Invited(who, party);
         }
 
         static void Notify()

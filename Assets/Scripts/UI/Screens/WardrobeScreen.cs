@@ -9,6 +9,8 @@ namespace CapyIsland.UI
     /// <summary>
     /// Dress up your capybara: a big preview on top, a tab per slot, and a grid of pieces. Tap a
     /// piece you own to put it on (tap again to take it off); locked pieces say how to earn them.
+    ///
+    /// Opened for an adopted cat (<see cref="ShowFor"/>), the same closet dresses the cat instead.
     /// </summary>
     public class WardrobeScreen : UiScreen
     {
@@ -29,6 +31,7 @@ namespace CapyIsland.UI
         RectTransform _grid;
         GridLayoutGroup _gridLayout;
         TextMeshProUGUI _caption;
+        CatKind _cat;   // dressing this cat, or null for your capybara
 
         void Awake() => Instance = this;
 
@@ -36,7 +39,19 @@ namespace CapyIsland.UI
         {
             if (Instance == this) Instance = null;
             Wardrobe.Changed -= OnChanged;
+            CatWear.Changed -= OnChanged;
         }
+
+        /// <summary>Opens the closet to dress one of your cats.</summary>
+        public static void ShowFor(CatKind cat)
+        {
+            var w = Instance;
+            if (w == null || cat == null) return;
+            w._cat = cat;
+            w.Open();
+        }
+
+        WearItem Worn(WearSlot slot) => _cat != null ? CatWear.Worn(HobbyLog.CatState(_cat.Id), slot) : Wardrobe.Worn(slot);
 
         protected override void Build(RectTransform body)
         {
@@ -87,6 +102,7 @@ namespace CapyIsland.UI
             _gridLayout.childAlignment = TextAnchor.UpperCenter;
 
             Wardrobe.Changed += OnChanged;
+            CatWear.Changed += OnChanged;
         }
 
         void OnChanged()
@@ -94,8 +110,11 @@ namespace CapyIsland.UI
             if (IsOpen) Refresh();
         }
 
+        protected override void OnClose() => _cat = null;   // next time, it's yours again
+
         protected override void OnOpen()
         {
+            if (TitleLabel != null) TitleLabel.text = _cat != null ? CatCare.NameOf(_cat) + "'s wardrobe" : Title;
             // Open where the new piece is, if there is one.
             if (!NewStuff.Any("wardrobe/" + _slot + "/"))
                 foreach (var slot in Slots)
@@ -122,7 +141,7 @@ namespace CapyIsland.UI
 
         void DressPreview()
         {
-            var body = Wardrobe.BaseSprite;
+            var body = _cat != null ? HobbyData.Art("Cat_" + _cat.Id) : Wardrobe.BaseSprite;
             _base.sprite = body;
             _base.enabled = body != null;
             if (body == null) return;
@@ -132,16 +151,20 @@ namespace CapyIsland.UI
 
             foreach (var slot in Slots)
             {
-                var item = Wardrobe.Worn(slot);
+                var item = Worn(slot);
                 var art = Wardrobe.Art(item);
                 var layer = Layer(slot);
                 layer.enabled = art != null;
                 if (art == null) continue;
                 layer.sprite = art;
                 var r = layer.rectTransform;
-                r.anchorMin = r.anchorMax = item.Anchor;
+                // On a cat, each piece moves to the same spot on the cat (CatWear).
+                var anchor = item.Anchor;
+                float share = item.Width;
+                if (_cat != null) CatWear.Fit(item, body, false, out anchor, out share);
+                r.anchorMin = r.anchorMax = anchor;
                 r.pivot = new Vector2(0.5f, 0.5f);
-                float pw = item.Width * w;
+                float pw = share * w;
                 r.sizeDelta = new Vector2(pw, pw * art.rect.height / art.rect.width);
                 r.anchoredPosition = Vector2.zero;
                 r.localRotation = Quaternion.Euler(0f, 0f, item.Rotation);
@@ -174,7 +197,7 @@ namespace CapyIsland.UI
                 var art = Wardrobe.Art(item);
                 if (art == null) continue;   // still being drawn
                 bool owned = Wardrobe.Owns(item);
-                bool worn = Wardrobe.Worn(item.Slot)?.Id == item.Id;
+                bool worn = Worn(item.Slot)?.Id == item.Id;
 
                 var tile = UiKit.Image(_grid, item.Id, UiKit.Rounded(28), worn ? UiKit.Hex("FDE8F0") : owned ? Color.white : UiKit.SurfaceSunk, true);
                 var pic = UiKit.Image(tile.transform, "Art", art, owned ? Color.white : new Color(0.25f, 0.2f, 0.18f, 0.35f));
@@ -215,7 +238,8 @@ namespace CapyIsland.UI
                 {
                     if (!Wardrobe.Owns(chosen)) { Sfx.Play(SfxKind.Tap, 0.3f); return; }
                     Sfx.Play(SfxKind.Plop, 0.7f);
-                    Wardrobe.Toggle(chosen);
+                    if (_cat != null) CatWear.Toggle(HobbyLog.CatState(_cat.Id), chosen);
+                    else Wardrobe.Toggle(chosen);
                 });
                 tile.gameObject.AddComponent<PressSquash>();
                 if (NewStuff.Has("wardrobe/" + item.Slot + "/" + item.Id)) NewDot.Fixed(tile.transform, 30f);

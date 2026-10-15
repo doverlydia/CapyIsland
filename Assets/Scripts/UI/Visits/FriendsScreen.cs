@@ -72,8 +72,9 @@ namespace CapyIsland.UI
             }
 
             if (!Airport.Built && !Visit.Active) AirstripCard();
-            else if (_blocked != null) Notice(_blocked);
+            else if (_blocked != null && !Gathering.Hosting) Notice(_blocked);
             ServerMap();
+            if (!Visit.Active) HostCard();
 
             SectionLabel(_list, "Your friends");
             Requests();
@@ -440,6 +441,92 @@ namespace CapyIsland.UI
             hint.overflowMode = TextOverflowModes.Overflow;
         }
 
+        // ---------------------------------------------------------------- playing together
+
+        /// <summary>
+        /// Host something on your island for everyone on the server: a party, or a contest in a
+        /// hobby you have (held where you're standing). While you're hosting, the way to end it.
+        /// </summary>
+        void HostCard()
+        {
+            var card = UiKit.Image(_list, "Host", UiKit.Rounded(32), UiKit.Hex("FDEBF2")).rectTransform;
+            var v = card.gameObject.AddComponent<VerticalLayoutGroup>();
+            v.padding = new RectOffset(20, 20, 18, 20);
+            v.spacing = 12f;
+            v.childControlWidth = v.childControlHeight = true;
+            v.childForceExpandWidth = true;
+            v.childForceExpandHeight = false;
+
+            var title = UiKit.Text(card, "Title", "Play together", 32f, UiKit.Ink, true);
+            title.textWrappingMode = TextWrappingModes.NoWrap;
+
+            if (Gathering.Hosting)
+            {
+                var now = UiKit.Text(card, "Now", Loc.F("You're hosting: {0}. {1} here.", Loc.T(Gathering.NameOf(Gathering.Kind)), Gathering.Present()), 26f, UiKit.InkSoft);
+                now.overflowMode = TextOverflowModes.Overflow;
+                SmallButton(card, "End", Gathering.IsContest ? "End contest" : "End party", UiKit.ButtonStyle.Secondary, () =>
+                {
+                    Gathering.EndHosting();
+                    OnOpen();
+                });
+                return;
+            }
+
+            var about = UiKit.Text(card, "About",
+                "Invite everyone on this server to your island. A contest happens where you're standing: by the water for fishing, among trees for bugs and birds.",
+                24f, UiKit.InkSoft);
+            about.overflowMode = TextOverflowModes.Overflow;
+
+            var grid = UiKit.Rect("Choices", card);
+            var g = grid.gameObject.AddComponent<GridLayoutGroup>();
+            float width = Sheet.sizeDelta.x - 64f - 8f - 40f;
+            g.cellSize = new Vector2((width - 12f) / 2f, 84f);
+            g.spacing = new Vector2(12f, 12f);
+            g.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            g.constraintCount = 2;
+            grid.gameObject.AddComponent<LayoutElement>().preferredHeight = 84f * 2f + 12f;
+
+            HostButton(grid, GatheringKind.Party, IconPainter.Star);
+            HostButton(grid, GatheringKind.Fishing, IconPainter.Rod);
+            HostButton(grid, GatheringKind.Bugs, HobbyData.Art("Bug_Butterfly") ?? IconPainter.Sparkle);
+            HostButton(grid, GatheringKind.Birds, IconPainter.Bird);
+
+            // Why the last one couldn't be hosted, right here (not behind the menu).
+            if (!string.IsNullOrEmpty(_hostWhy))
+            {
+                var why = UiKit.Text(card, "Why", _hostWhy, 26f, UiKit.Danger, true, TextAlignmentOptions.Center);
+                why.overflowMode = TextOverflowModes.Overflow;
+            }
+        }
+
+        string _hostWhy;
+
+        protected override void OnClose() => _hostWhy = null;   // a fresh look next time
+
+        void HostButton(RectTransform grid, GatheringKind kind, Sprite icon)
+        {
+            bool locked = kind != GatheringKind.Party && !HobbyLog.IsUnlocked(Gathering.HobbyOf(kind));
+            string label = kind == GatheringKind.Party ? "Island party" : Gathering.NameOf(kind);
+            var b = UiKit.Button(grid, kind.ToString(), label, locked ? UiKit.ButtonStyle.Secondary : kind == GatheringKind.Party ? UiKit.ButtonStyle.Primary : UiKit.ButtonStyle.Spring,
+                () =>
+                {
+                    var why = Gathering.WhyCantHost(kind);
+                    if (why != null)
+                    {
+                        _hostWhy = why;
+                        float scroll = _scroll.verticalNormalizedPosition;
+                        OnOpen();
+                        Canvas.ForceUpdateCanvases();
+                        _scroll.verticalNormalizedPosition = scroll;
+                        return;
+                    }
+                    _hostWhy = null;
+                    Close();
+                    Gathering.Host(kind);
+                }, 24f, locked ? IconPainter.Lock : icon);
+            if (locked) Greyed(b);
+        }
+
         static void SmallButton(RectTransform parent, string name, string label, UiKit.ButtonStyle style, System.Action onClick)
         {
             var b = UiKit.Button(parent, name, label, style, onClick, 24f);
@@ -589,6 +676,16 @@ namespace CapyIsland.UI
             p._noLabel.text = no;
             p._onYes = onYes;
             p._onNo = onNo;
+        }
+
+        /// <summary>Takes the question away unanswered (whoever asked took it back): neither answer runs.</summary>
+        public static void Dismiss()
+        {
+            var p = Instance;
+            if (p == null || !p.IsOpen) return;
+            p._onYes = null;
+            p._onNo = null;
+            p.Close();
         }
 
         protected override void Build(RectTransform body)

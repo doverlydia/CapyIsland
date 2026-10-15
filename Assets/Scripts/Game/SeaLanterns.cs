@@ -153,7 +153,7 @@ namespace CapyIsland.Game
                 var fx = HarvestEffects.Instance;
                 if (fx != null) fx.Twinkle(_sr.bounds.center, 6);
                 if (!UI.LanternCutscene.Seen && !Attention.TutorialRunning) { UI.LanternCutscene.Show(); return; }
-                if (_grandmas) Hints.Show(StoryText.Mochi.LanternAgain);
+                if (_grandmas) Hints.Island(StoryText.Mochi.LanternAgain);
             }
         }
 

@@ -129,6 +129,11 @@ namespace CapyIsland.UI
                 Objectives.Source.Quest => (("QUEST · " + goal.From).ToUpperInvariant(), UiKit.Primary, IconPainter.Goals),
                 Objectives.Source.Done => ("ALL DONE", UiKit.Leaf, IconPainter.Check),
                 Objectives.Source.Visit => (("VISITING · " + goal.From).ToUpperInvariant(), UiKit.Hex("5B9BD5"), IconPainter.Plane),
+                Objectives.Source.Gift => ("DAILY GIFT", UiKit.Primary, IconPainter.Gift),
+                Objectives.Source.Order => ("FOOD ORDER", UiKit.Leaf, IconPainter.Goals),
+                Objectives.Source.Daily => ("TODAY · " + goal.From, UiKit.Spring, IconPainter.Star),
+                Objectives.Source.Contest => ("CONTEST", UiKit.Sun, IconPainter.Trophy),
+                Objectives.Source.Gathering => (Gathering.NameOf(Gathering.Kind).ToUpperInvariant(), UiKit.Hex("E58FB0"), Gathering.IsContest ? IconPainter.Trophy : IconPainter.Star),
                 _ => ("NEXT GOAL", UiKit.Danger, IconPainter.Heart),
             };
 

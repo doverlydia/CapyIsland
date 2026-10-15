@@ -34,12 +34,12 @@ namespace CapyIsland.Game
             {
                 var previous = _part;
                 _part = part;
-                if (!quiet) Hints.Show(PartLine(part, previous));
+                if (!quiet) Hints.Island(PartLine(part, previous));
             }
             if (raining != _raining)
             {
                 _raining = raining;
-                if (!quiet) Hints.Show(raining
+                if (!quiet) Hints.Island(raining
                     ? "It's raining! Some shy creatures only come out in the wet."
                     : part == DayParts.Night ? "The rain has stopped." : "The rain has stopped. Look, a rainbow!");
             }

@@ -152,6 +152,9 @@ namespace CapyIsland.Game
         // A hint is an event: if it fires again, it should show again.
         void SayHint(string line)
         {
+            // On someone else's island she doesn't remark on their island (their hungry workers,
+            // their forests): only on what's to do with you.
+            if (Visit.Active && Hints.IsAboutIsland(line)) return;
             if (dialogue != null) dialogue.Say(line, again: true);
         }
 

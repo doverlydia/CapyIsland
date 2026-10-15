@@ -163,7 +163,7 @@ namespace CapyIsland.Game
                         if (_fruit.Count == BunniRules.MaxFruitOnTree && !_anyShaken && !_shakeHinted)
                         {
                             _shakeHinted = true;
-                            Hints.Show("Tap fruit trees to shake them. All sorts of goodies fall out, sometimes even gems.");
+                            Hints.Island("Tap fruit trees to shake them. All sorts of goodies fall out, sometimes even gems.");
                         }
                     }
                     break;
@@ -201,7 +201,7 @@ namespace CapyIsland.Game
         public void PlayerShake()
         {
             _anyShaken = true;
-            Hints.Show("You shook a <b>" + StoryText.Name(StoreName) + "</b>");
+            Hints.Island("You shook a <b>" + StoryText.Name(StoreName) + "</b>");
             if (!_canShake) { if (_sway != null) _sway.Kick(3f, 0.3f, 40f); return; }
             EnterShake();
             RemoveFruit();
@@ -295,17 +295,17 @@ namespace CapyIsland.Game
             float r = Random.value;
             if (r < 0.33f)
             {
-                Hints.Show("A worker ran out of trees and chopped down a fruit tree! Uh oh, a zombie capybara climbed out!");
+                Hints.Island("A worker ran out of trees and chopped down a fruit tree! Uh oh, a zombie capybara climbed out!");
                 Hazards.Spawn(HazardKind.Monster, at);
             }
             else if (r < 0.66f)
             {
-                Hints.Show("A worker ran out of trees and chopped down a fruit tree! Uh oh, a guinea pig jumped out!");
+                Hints.Island("A worker ran out of trees and chopped down a fruit tree! Uh oh, a guinea pig jumped out!");
                 Hazards.Spawn(HazardKind.Deer, at);
             }
             else
             {
-                Hints.Show("A worker ran out of trees and chopped down a fruit tree, and a fizz bomb fell out! Stand back!");
+                Hints.Island("A worker ran out of trees and chopped down a fruit tree, and a fizz bomb fell out! Stand back!");
                 Hazards.Spawn(HazardKind.Bomb, at);
             }
 

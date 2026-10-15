@@ -119,14 +119,14 @@ namespace CapyIsland.Game
                     UI.Loc.F("Let <b>{0}</b> build on your island too? They can always help with chores.", guest.name),
                     "Build together", "Just chores",
                     () => Answer(guest, true), () => Answer(guest, false)),
-                () => !Visit.Active && VisitorBot.Current != null && VisitorBot.Current.Who.id == guest.id && !VisitorBot.Current.Leaving);
+                () => !Visit.Active && VisitorBot.IsHere(guest.id));
         }
 
         static void Answer(FriendProfile guest, bool yes)
         {
             GuestAllowed = yes;
             Changed?.Invoke();
-            if (guest.IsReal) Live.AnswerBuild(yes);
+            if (guest.IsReal) Live.AnswerBuild(guest, yes);
             if (yes) Hints.Show(UI.Loc.F("{0} can build on your island now.", guest.name));
         }
     }

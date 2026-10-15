@@ -21,9 +21,11 @@ namespace CapyIsland.Game
             if (_king == null) _king = FindFirstObjectByType<PlayerAvatar>();
             if (_king == null || Time.time < _next) return;
             if (!HobbyLog.IsUnlocked(Hobby.Bugs)) return;   // no net, no bugs to chase
-            _next = Time.time + Random.Range(18f, 35f);
-            if (FindObjectsByType<Bug>(FindObjectsSortMode.None).Length >= 3) return;
-            Spawn(_king.transform.position);
+            // A bug contest's ring is buzzing: bugs every few seconds, lots at once, all inside it.
+            bool contest = Gathering.Boosting(Hobby.Bugs);
+            _next = Time.time + (contest ? Random.Range(3f, 6f) : Random.Range(18f, 35f));
+            if (FindObjectsByType<Bug>(FindObjectsSortMode.None).Length >= (contest ? 8 : 3)) return;
+            Spawn(contest ? Gathering.Arena : (Vector2)_king.transform.position);
         }
 
         void Spawn(Vector2 around)

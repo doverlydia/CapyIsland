@@ -12,7 +12,7 @@ namespace CapyIsland.Game
     /// </summary>
     public static class Objectives
     {
-        public enum Source { Tutorial, Talk, Reward, Quest, Achievement, Done, Visit }
+        public enum Source { Tutorial, Talk, Reward, Quest, Achievement, Done, Visit, Gift, Order, Daily, Contest, Gathering }
 
         public struct Goal
         {
@@ -79,6 +79,7 @@ namespace CapyIsland.Game
 
         static Goal Pick()
         {
+            if (Gathering.Active || Gathering.JoiningSomething) return GatheringGoal();
             if (Visit.Active)
                 return new Goal { Source = Source.Visit, Title = "Help " + Visit.Host.name + ": feed hungry workers and chase off pests", From = Visit.Host.name };
 
@@ -121,11 +122,74 @@ namespace CapyIsland.Game
                     return new Goal { Source = Source.Talk, Title = "Drag " + giver.Speaker + " onto the grass to settle in", From = giver.Speaker,
                         Icon = giver.Portrait };
 
-            // Otherwise the next achievement still to earn.
+            // The story has nothing for you right now: the island's everyday things.
+            return Everyday() ?? new Goal { Source = Source.Done, Title = "Every goal complete. Enjoy your island!" };
+        }
+
+        /// <summary>
+        /// Between story steps, and after the story ends: presents waiting to be opened first (free
+        /// and immediate), then someone hungry, today's hobby goal, the next achievement, and the
+        /// running contest last, since there is always one.
+        /// </summary>
+        static Goal? Everyday()
+        {
+            if (GameEvents.PrizeWaiting)
+                return new Goal { Source = Source.Reward, Title = "Claim your contest prize in Events" };
+            var today = GameEvents.TodaysGoal;
+            if (today != null && GameEvents.RewardWaiting)
+                return new Goal { Source = Source.Reward, Title = "Today: " + today.Title, Step = "Done! Collect your reward under Events" };
+            if (DailyGifts.CanClaim)
+                return new Goal { Source = Source.Gift, Title = "Today's present is waiting for you." };
+
+            foreach (var (who, dish, where) in DishOrders.Open())
+            {
+                bool have = HobbyLog.Count("dish:" + dish.Id) > 0;
+                return new Goal { Source = Source.Order, Title = who + " would like " + dish.Name, Where = where,
+                    Icon = HobbyData.ItemArt("dish:" + dish.Id),
+                    Step = have ? "It's in your bag. Tap them to serve it." : "Cook it at your stove: " + DishOrders.RecipeOf(dish) };
+            }
+
+            if (today != null && !GameEvents.GoalClaimed)
+                return new Goal { Source = Source.Daily, Title = today.Text, From = Mathf.Min(GameEvents.GoalProgress, today.Need) + "/" + today.Need };
+
             foreach (var a in AllAchievements())
                 if (!a.Done) return new Goal { Source = Source.Achievement, Title = a.Goal };
 
-            return new Goal { Source = Source.Done, Title = "Every goal complete. Enjoy your island!" };
+            if (GameEvents.CanJoin)
+                return new Goal { Source = Source.Contest, Title = UI.EventsScreen.ContestName(GameEvents.CurrentKind),
+                    Step = string.Format("You're number {0}. {1} left.", GameEvents.Rank(), GameEvents.Left(GameEvents.ContestLeft)) };
+            return null;
+        }
+
+        /// <summary>At a party or a contest (yours or someone else's): what to do there.</summary>
+        static Goal GatheringGoal()
+        {
+            var goal = new Goal { Source = Source.Gathering, From = Gathering.HostName };
+            if (!Gathering.Active)
+            {
+                goal.Title = "Fly over to " + Gathering.HostName + "'s island";
+                return goal;
+            }
+            if (!Gathering.IsContest)
+            {
+                goal.Title = Gathering.Hosting ? "Your guests are on their way: show them around!" : "Enjoy " + Gathering.HostName + "'s party, and lend a hand!";
+                return goal;
+            }
+            var king = UnityEngine.Object.FindFirstObjectByType<PlayerAvatar>();
+            bool inRing = king != null && Gathering.InRing(king.transform.position);
+            if (!inRing) goal.Where = Gathering.Arena;
+            goal.Title = Gathering.Now switch
+            {
+                Gathering.Phase.Running => Gathering.Kind switch
+                {
+                    GatheringKind.Bugs => "Catch as many bugs as you can inside the glittering ring!",
+                    GatheringKind.Birds => "Spot as many birds as you can inside the glittering ring!",
+                    _ => "Catch as many fish as you can inside the glittering ring!",
+                },
+                Gathering.Phase.Results => "Round over: see who won!",
+                _ => Gathering.Hosting ? "Wait for players, then press Start" : "Wait in the glittering ring for the contest to start",
+            };
+            return goal;
         }
 
         /// <summary>
