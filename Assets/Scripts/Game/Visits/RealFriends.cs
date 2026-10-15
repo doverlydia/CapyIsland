@@ -104,7 +104,7 @@ namespace CapyIsland.Game
 
         static void Notify()
         {
-            Server.SeatRealFriends();
+            Server.Reseat();
             Changed?.Invoke();
         }
 
@@ -135,6 +135,7 @@ namespace CapyIsland.Game
                 PlayerProfile.Changed += NameChanged;
                 _ready = true;
                 Live.Install();
+                PrivateServer.Resume();   // back onto your private server, if you're on one
                 await Heartbeat();
                 Refresh();
             }

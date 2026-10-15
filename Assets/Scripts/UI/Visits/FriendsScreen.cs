@@ -26,11 +26,13 @@ namespace CapyIsland.UI
         {
             Instance = this;
             RealFriends.Changed += OnRealFriends;
+            PrivateServer.Changed += OnRealFriends;
         }
 
         void OnDestroy()
         {
             RealFriends.Changed -= OnRealFriends;
+            PrivateServer.Changed -= OnRealFriends;
             if (Instance == this) Instance = null;
         }
 
@@ -383,10 +385,39 @@ namespace CapyIsland.UI
             col.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1f;
             var name = UiKit.Text(col, "Name", Server.Name, 32f, UiKit.Ink, true);
             name.textWrappingMode = TextWrappingModes.NoWrap;
-            UiKit.Text(col, "Count", $"{Server.Online} of {Server.Slots} islands online", 26f, UiKit.InkSoft);
-            var swap = UiKit.Button(top, "Switch", "Switch server", UiKit.ButtonStyle.Secondary, () => { Server.Reconnect(); OnOpen(); }, 24f);
-            var sle = swap.transform.parent.gameObject.AddComponent<LayoutElement>();
-            sle.preferredWidth = 220f; sle.preferredHeight = 64f;
+            bool mine = PrivateServer.Active;
+            UiKit.Text(col, "Count", mine && !PrivateServer.Connected ? "Connecting…" : Loc.F("{0} of {1} islands online", Server.Online, Server.Slots), 26f, UiKit.InkSoft);
+
+            // Buttons: on a private server, its code to share and the way out; otherwise another
+            // public server, or a private one.
+            var buttons = UiKit.Rect("Buttons", top);
+            var bv = buttons.gameObject.AddComponent<VerticalLayoutGroup>();
+            bv.spacing = 8f;
+            bv.childControlWidth = bv.childControlHeight = true;
+            bv.childForceExpandWidth = true;
+            buttons.gameObject.AddComponent<LayoutElement>().preferredWidth = 230f;
+            if (mine)
+            {
+                string pretty = PrivateServer.Pretty(PrivateServer.Code);
+                SmallButton(buttons, "CopyCode", "Copy code", UiKit.ButtonStyle.Spring, () =>
+                {
+                    SaveCodeScreen.CopyText(pretty);
+                    Game.Sfx.Play(Game.SfxKind.Coin, 0.6f);
+                    Hints.Show(Loc.F("Copied {0}! Send it to friends so they can join.", pretty));
+                });
+                SmallButton(buttons, "Leave", "Leave server", UiKit.ButtonStyle.Secondary, () =>
+                    PromptScreen.Ask("Leave server?", null, Loc.F("Leave server {0}? You can come back any time with the code.", pretty),
+                        "Leave", "Stay", async () =>
+                        {
+                            await PrivateServer.Leave();
+                            if (this != null && IsOpen) OnOpen();
+                        }));
+            }
+            else
+            {
+                SmallButton(buttons, "Switch", "Switch server", UiKit.ButtonStyle.Secondary, () => { Server.Reconnect(); OnOpen(); });
+                SmallButton(buttons, "Private", "Private server", UiKit.ButtonStyle.Spring, PrivateServerScreen.Show);
+            }
 
             var grid = UiKit.Rect("Slots", head);
             var g = grid.gameObject.AddComponent<GridLayoutGroup>();
@@ -402,8 +433,30 @@ namespace CapyIsland.UI
             foreach (var seat in Server.Seats) bySlot[seat.Slot] = seat;
             for (int i = 0; i < Server.Slots; i++) Slot(grid, bySlot[i], cell);
 
-            var hint = UiKit.Text(head, "Hint", "Tap an island to fly there. Lend a hand, and add the ones you like as friends.", 24f, UiKit.InkSoft, false, TextAlignmentOptions.Center);
+            var hint = UiKit.Text(head, "Hint", mine
+                    ? "Everyone with this code lands here. Tap a friend's island to visit, or someone new to add them as a friend."
+                    : "Tap an island to fly there. Lend a hand, and add the ones you like as friends.",
+                24f, UiKit.InkSoft, false, TextAlignmentOptions.Center);
             hint.overflowMode = TextOverflowModes.Overflow;
+        }
+
+        static void SmallButton(RectTransform parent, string name, string label, UiKit.ButtonStyle style, System.Action onClick)
+        {
+            var b = UiKit.Button(parent, name, label, style, onClick, 24f);
+            var le = b.transform.parent.gameObject.AddComponent<LayoutElement>();
+            le.preferredHeight = 60f;
+        }
+
+        /// <summary>Someone on your private server who isn't your friend yet: ask to be friends.</summary>
+        static void OfferFriendship(FriendProfile who)
+        {
+            if (string.IsNullOrEmpty(who.code)) { Hints.Show("Couldn't find their friend code just now. Try again in a moment."); return; }
+            PromptScreen.Ask("Make a friend?", who, Loc.F("Ask {0} to be friends? Once they accept, you can visit each other.", who.name),
+                "Add friend", "Not now", async () =>
+                {
+                    string problem = await RealFriends.Add(who.code);
+                    Hints.Show(problem ?? Loc.F("Request sent to {0}. You'll be friends once they accept.", who.name));
+                });
         }
 
         void Slot(RectTransform grid, Server.Seat seat, float cell)
@@ -459,7 +512,12 @@ namespace CapyIsland.UI
             var who = seat.Who;
             var b = tile.gameObject.AddComponent<Button>();
             b.transition = Selectable.Transition.None;
-            if (_blocked != null && !here)
+            if (who.IsReal && !Friends.IsFriend(who.id))
+            {
+                // A real person on your private server, not a friend yet: visiting is for friends.
+                b.onClick.AddListener(() => OfferFriendship(who));
+            }
+            else if (_blocked != null && !here)
             {
                 // You can see who is about, but not fly there yet.
                 tile.gameObject.AddComponent<CanvasGroup>().alpha = 0.6f;

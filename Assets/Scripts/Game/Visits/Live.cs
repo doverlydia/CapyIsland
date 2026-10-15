@@ -101,6 +101,8 @@ namespace CapyIsland.Game
             Bubble.Collected += OnCollected;
             PlayerProfile.Changed -= RealFriends.NameChanged;   // your friend code follows your name
             PlayerProfile.Changed += RealFriends.NameChanged;
+            Wardrobe.Changed -= PrivateServer.UpdateMe;          // and your private server sees your outfit
+            Wardrobe.Changed += PrivateServer.UpdateMe;
         }
 
         static void OnPlayerEmoted(Emoji e) => Send(new Note { t = "emo", e = (int)e });
@@ -227,7 +229,7 @@ namespace CapyIsland.Game
             {
                 _link = new LiveLink(false);
                 _session = await MultiplayerService.Instance.JoinSessionByCodeAsync(code,
-                    new JoinSessionOptions().WithNetworkOptions(new NetworkOptions { RelayProtocol = RelayProtocol.WSS }).WithNetworkHandler(_link));
+                    new JoinSessionOptions { Type = "visit" }.WithNetworkOptions(new NetworkOptions { RelayProtocol = RelayProtocol.WSS }).WithNetworkHandler(_link));
                 float connectBy = Time.realtimeSinceStartup + 15f;
                 while (_link != null && !_link.Connected && Time.realtimeSinceStartup < connectBy) await Task.Yield();
                 if (_link == null || !_link.Connected) throw new Exception("no connection");
@@ -306,7 +308,7 @@ namespace CapyIsland.Game
                 if (SaveGame.Instance != null) SaveGame.Instance.SaveHomeNow();
                 await CloudSync.PublishNow();
                 _link = new LiveLink(true);
-                _session = await MultiplayerService.Instance.CreateSessionAsync(new SessionOptions { MaxPlayers = 2, IsPrivate = true }
+                _session = await MultiplayerService.Instance.CreateSessionAsync(new SessionOptions { MaxPlayers = 2, IsPrivate = true, Type = "visit" }
                     .WithRelayNetwork()
                     .WithNetworkOptions(new NetworkOptions { RelayProtocol = RelayProtocol.WSS })
                     .WithNetworkHandler(_link));
@@ -531,8 +533,8 @@ namespace CapyIsland.Game
 
         // Closing the game (or stopping Play): the link closes at once, so nothing is left
         // running when the game goes (an open driver kept the editor from reloading).
-        void OnApplicationQuit() => Live.Shutdown();
-        void OnDestroy() => Live.Shutdown();
+        void OnApplicationQuit() { Live.Shutdown(); PrivateServer.Shutdown(); }
+        void OnDestroy() { Live.Shutdown(); PrivateServer.Shutdown(); }
     }
 
     /// <summary>

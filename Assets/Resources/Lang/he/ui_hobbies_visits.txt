@@ -1444,3 +1444,72 @@
 
 @ {0} is offline right now. You can visit when they're online!
 = {0} לא מחוברים כרגע. אפשר לבקר כשהם מחוברים!
+
+@ Private server
+= שרת פרטי
+
+@ Private server · {0}
+= שרת פרטי · {0}
+
+@ Copy code
+= העתק קוד
+
+@ Leave server
+= עזוב שרת
+
+@ Leave server?
+= לעזוב את השרת?
+
+@ Leave server {0}? You can come back any time with the code.
+= לעזוב את השרת {0}? אפשר לחזור מתי שרוצים עם הקוד.
+
+@ Stay
+= להישאר
+
+@ Copied {0}! Send it to friends so they can join.
+= {0} הועתק! שלח אותו לחברים כדי שיצטרפו.
+
+@ Everyone with this code lands here. Tap a friend's island to visit, or someone new to add them as a friend.
+= כל מי שיש לו את הקוד הזה מגיע לכאן. הקש על אי של חבר כדי לבקר, או על מישהו חדש כדי להוסיף אותו כחבר.
+
+@ Couldn't find their friend code just now. Try again in a moment.
+= לא מצאנו את קוד החבר שלהם כרגע. נסה שוב עוד רגע.
+
+@ Ask {0} to be friends? Once they accept, you can visit each other.
+= לבקש מ{0} להיות חברים? ברגע שיאשרו, תוכלו לבקר זה את זה.
+
+@ A server just for you and your friends: everyone with the same code lands on it. Make one and send its code, or type a code you were sent.
+= שרת רק בשבילך ובשביל החברים שלך: כל מי שמקליד את אותו קוד מגיע אליו. צור אחד ושלח את הקוד שלו, או הקלד קוד ששלחו לך.
+
+@ Server code, like K7M-2QX
+= קוד שרת, כמו K7M-2QX
+
+@ Join
+= הצטרף
+
+@ Or
+= או
+
+@ Make my own server
+= צור שרת משלי
+
+@ Making your server…
+= יוצר את השרת שלך…
+
+@ Joining…
+= מצטרף…
+
+@ Your server is ready: {0}. The code is copied, send it to your friends!
+= השרת שלך מוכן: {0}. הקוד הועתק, שלח אותו לחברים שלך!
+
+@ You're on server {0}.
+= אתה בשרת {0}.
+
+@ A server code has 6 letters and numbers, like K7M-2QX.
+= לקוד שרת יש 6 אותיות ומספרים, כמו K7M-2QX.
+
+@ That server is full: 10 islands already.
+= השרת הזה מלא: כבר יש בו 10 איים.
+
+@ Couldn't reach that server. Try again in a moment.
+= לא הצלחנו להגיע לשרת הזה. נסה שוב עוד רגע.

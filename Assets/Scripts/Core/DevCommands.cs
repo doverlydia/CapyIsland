@@ -163,6 +163,29 @@ namespace CapyIsland.Core
 
         public static void Emote(int e) => Game.VisitorBot.PlayerEmote((Game.Emoji)e);
 
+        /// <summary>Pops the bubble nearest the king and plants what was in it, dx/dy from the king (like a drag and drop).</summary>
+        public static string PopAndPlant(float dx, float dy)
+        {
+            var king = FindFirstObjectByType<Game.PlayerAvatar>();
+            if (king == null) return "no king";
+            Game.Bubble best = null;
+            float bestDistance = 999f;
+            foreach (var b in FindObjectsByType<Game.Bubble>(FindObjectsSortMode.None))
+            {
+                if (b.Contents == null || b.Contents.GetComponent<Game.Placeable>() == null) continue;
+                float d = Vector2.Distance(b.transform.position, king.transform.position);
+                if (d < bestDistance) { bestDistance = d; best = b; }
+            }
+            if (best == null) return "no bubble";
+            var item = best.Contents;
+            string name = item.GetComponent<Game.CatalogItem>()?.StoreName;
+            typeof(Game.Bubble).GetMethod("Collect", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)?.Invoke(best, null);
+            Vector2 spot = (Vector2)king.transform.position + new Vector2(dx, dy);
+            item.transform.position = new Vector3(spot.x, spot.y, item.transform.position.z);
+            item.SendMessage("OnDropped");
+            return name + " placed=" + item.GetComponent<Game.Placeable>().Placed + " at " + spot;
+        }
+
         public static string Walk(float dx, float dy)
         {
             var king = FindFirstObjectByType<Game.PlayerAvatar>();

@@ -277,6 +277,7 @@ namespace CapyIsland.Game
             try
             {
                 await RealFriends.ForgetEveryone();
+                await PrivateServer.Leave();
                 await CloudSaveService.Instance.Data.Player.DeleteAllAsync(new PlayerDeleteAllOptions());
                 await CloudSaveService.Instance.Data.Player.DeleteAllAsync(new PlayerDeleteAllOptions(
                     new Unity.Services.CloudSave.Models.Data.Player.PublicWriteAccessClassOptions()));   // what friends could see

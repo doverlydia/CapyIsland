@@ -24,17 +24,26 @@ namespace CapyIsland.Game
             public bool IsYou => Who == null;
         }
 
-        static List<Seat> _seats;
+        static List<Seat> _seats, _privateSeats;
         static HashSet<string> _onlineFriends;
+        static string _name;
 
-        /// <summary>A name for the server, like "Capy Isles · Willow 27".</summary>
-        public static string Name { get; private set; }
+        /// <summary>A name for the server, like "Capy Isles · Willow 27" (or your private server's code).</summary>
+        public static string Name => PrivateServer.Active ? UI.Loc.F("Private server · {0}", PrivateServer.Pretty(PrivateServer.Code)) : _name;
 
-        /// <summary>Every occupied slot (including yours), in slot order. Empty slots are not listed.</summary>
+        /// <summary>
+        /// Every occupied slot (including yours), in slot order. Empty slots are not listed. On a
+        /// private server: you and the real people on it, and nobody made up.
+        /// </summary>
         public static IReadOnlyList<Seat> Seats
         {
             get
             {
+                if (PrivateServer.Active)
+                {
+                    if (_privateSeats == null) Reseat();
+                    return _privateSeats;
+                }
                 if (_seats == null) Roll();
                 return _seats;
             }
@@ -45,9 +54,26 @@ namespace CapyIsland.Game
         public static bool IsOnline(FriendProfile who)
         {
             if (who == null) return false;
-            if (who.IsReal) return RealFriends.IsOnline(who);
+            if (who.IsReal) return RealFriends.IsOnline(who) || PrivateServer.IsHere(who);
             foreach (var s in Seats) if (!s.IsYou && s.Who.id == who.id) return true;
             return false;
+        }
+
+        /// <summary>Who's where changed (a private server's members, real friends coming online).</summary>
+        public static void Reseat()
+        {
+            if (PrivateServer.Active)
+            {
+                _privateSeats = new List<Seat> { new Seat { Slot = 0 } };
+                foreach (var who in PrivateServer.Others())
+                {
+                    if (_privateSeats.Count >= Slots) break;
+                    _privateSeats.Add(new Seat { Slot = _privateSeats.Count, Who = who });
+                }
+                return;
+            }
+            _privateSeats = null;
+            SeatRealFriends();
         }
 
         /// <summary>
@@ -94,7 +120,7 @@ namespace CapyIsland.Game
         {
             var rng = new System.Random(Environment.TickCount);
             string[] groves = { "Willow", "Maple", "Juniper", "Mochi", "Hazel", "Bamboo", "Clover", "Pebble", "Saffron", "Lotus" };
-            Name = $"Capy Isles · {groves[rng.Next(groves.Length)]} {rng.Next(1, 99)}";
+            _name = $"Capy Isles · {groves[rng.Next(groves.Length)]} {rng.Next(1, 99)}";
 
             // How busy is it? Mostly a comfortable crowd, sometimes quiet, sometimes full.
             int[] weights = { 0, 0, 1, 2, 3, 4, 4, 3, 2, 2, 2 };   // index = islands online, 2..10
