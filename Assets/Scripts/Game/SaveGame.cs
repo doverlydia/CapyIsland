@@ -115,6 +115,9 @@ namespace CapyIsland.Game
             _nextSave = Time.unscaledTime + AutosaveSeconds;
         }
 
+        /// <summary>The game is saving normally (loaded, not paused for a test or a reload): CloudSync may send it up.</summary>
+        public bool SavingAllowed => CanSave;
+
         bool CanSave
         {
             get

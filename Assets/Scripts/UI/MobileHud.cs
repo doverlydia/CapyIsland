@@ -278,6 +278,7 @@ namespace CapyIsland.UI
             gameObject.AddComponent<DishOrders>();
             gameObject.AddComponent<SeaLibrary>();
             gameObject.AddComponent<ChefTofu>();
+            gameObject.AddComponent<CloudSync>();
             Airport.Restore(this);
 
             var tracker = ObjectiveTracker.Create(_safe);

@@ -575,3 +575,18 @@
 
 @ While it works, have a look around: scroll the mouse wheel to zoom in and out.
 = בזמן שהיא עובדת, תסתכל מסביב: גלגל את גלגלת העכבר כדי להתקרב ולהתרחק.
+
+@ Oh! I found your island in two places, and they're not the same. Which one shall we keep? The other one goes away for good.
+= אוי! מצאתי את האי שלך בשני מקומות, והם לא אותו דבר. איזה מהם נשמור? השני ייעלם לתמיד.
+
+@ On this device: {0} hearts, {1} wood, {2} gold.
+= במכשיר הזה: {0} לבבות, {1} עץ, {2} זהב.
+
+@ Saved online: {0} hearts, {1} wood, {2} gold.
+= שמור ברשת: {0} לבבות, {1} עץ, {2} זהב.
+
+@ Keep this device's
+= לשמור את של המכשיר הזה
+
+@ Keep the online one
+= לשמור את זה שברשת

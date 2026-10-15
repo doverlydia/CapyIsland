@@ -80,6 +80,16 @@ namespace CapyIsland.Game
                 "I swept the shrine again today. Every day, all these years.\n\nIf the spring wakes, let her see it. That is all I ask."),
         };
 
+        /// <summary>Old Yuzu, when your island turns up two different ways: on this device and in the cloud (CloudSync).</summary>
+        public static class Cloud
+        {
+            public const string TwoIslands = "Oh! I found your island in two places, and they're not the same. Which one shall we keep? The other one goes away for good.";
+            public const string Here = "On this device: {0} hearts, {1} wood, {2} gold.";
+            public const string Online = "Saved online: {0} hearts, {1} wood, {2} gold.";
+            public const string KeepHere = "Keep this device's";
+            public const string KeepOnline = "Keep the online one";
+        }
+
         /// <summary>Chef Tofu, the islands' cook before the Big Chill: a spirit still minding his stall by the spring.</summary>
         public static class Tofu
         {
