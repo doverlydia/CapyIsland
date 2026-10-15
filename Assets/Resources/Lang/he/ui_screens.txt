@@ -453,3 +453,78 @@
 
 @ Paste the save code you kept in a note. The island you're on now gives way to that one, so export this one first if you want to keep it.
 = הדבק את קוד השמירה ששמרת בפתק. האי שאתה נמצא בו עכשיו יוחלף באי מהקוד, אז ייצא את האי הזה קודם אם אתה רוצה לשמור אותו.
+
+@ Play on another device
+= לשחק במכשיר אחר
+
+@ Have an account already?
+= כבר יש לך חשבון?
+
+@ Make account
+= יצירת חשבון
+
+@ Make an account
+= יצירת חשבון
+
+@ Sign in
+= כניסה
+
+@ Signed in as {0}
+= מחובר בתור {0}
+
+@ Signed in as {0}.
+= מחובר בתור {0}.
+
+@ Username
+= שם משתמש
+
+@ Password
+= סיסמה
+
+@ Sign in with the username and password you made on your other device. If the islands are different, you'll choose which one to keep.
+= היכנס עם שם המשתמש והסיסמה שיצרת במכשיר האחר שלך. אם האיים שונים, תבחר איזה מהם לשמור.
+
+@ Pick a username and password for this island. Then sign in with them on another device, and your island is there too. Write the password down: it can't be reset.
+= בחר שם משתמש וסיסמה לאי הזה. אחר כך היכנס איתם במכשיר אחר, והאי שלך יהיה שם גם. רשום את הסיסמה: אי אפשר לאפס אותה.
+
+@ 8 to 30 characters, with a capital letter, a small letter, a number and a symbol.
+= 8 עד 30 תווים, עם אות גדולה, אות קטנה, מספר וסימן (באנגלית).
+
+@ Signing in…
+= מתחבר…
+
+@ Making your account…
+= יוצר את החשבון שלך…
+
+@ Your island now has an account: {0}. Sign in with it on your other device.
+= לאי שלך יש עכשיו חשבון: {0}. היכנס איתו במכשיר האחר שלך.
+
+@ A username needs 3 to 20 letters or numbers.
+= שם משתמש צריך 3 עד 20 אותיות או מספרים.
+
+@ A username can only use English letters, numbers and . - @ _
+= שם משתמש יכול להכיל רק אותיות באנגלית, מספרים ו־ . - @ _
+
+@ A password needs 8 to 30 characters.
+= סיסמה צריכה 8 עד 30 תווים.
+
+@ A password needs a capital letter, a small letter, a number and a symbol (like ! or #).
+= סיסמה צריכה אות גדולה, אות קטנה, מספר וסימן (כמו ! או #).
+
+@ Can't reach the internet right now. Try again in a moment.
+= אין חיבור לאינטרנט כרגע. נסה שוב עוד רגע.
+
+@ That username is taken. Try another one.
+= שם המשתמש הזה תפוס. נסה שם אחר.
+
+@ Type your username and password.
+= הקלד את שם המשתמש והסיסמה שלך.
+
+@ This device is already signed in to that account.
+= המכשיר הזה כבר מחובר לחשבון הזה.
+
+@ That username and password don't match.
+= שם המשתמש והסיסמה לא מתאימים.
+
+@ Something went wrong. Try again in a moment.
+= משהו השתבש. נסה שוב עוד רגע.

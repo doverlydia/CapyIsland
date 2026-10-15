@@ -25,6 +25,8 @@ namespace CapyIsland.UI
         protected override float MaxWidth => 900f;
 
         GameObject _confirm;
+        RectTransform _account;
+        GameObject _accountButton;
         GameObject _easyOptions;
         TextMeshProUGUI _sizeValue, _sizeSample;
         readonly List<(Language lang, Image pill, TextMeshProUGUI label)> _languages = new();
@@ -61,12 +63,14 @@ namespace CapyIsland.UI
         {
             Accessibility.Changed += Refresh;
             Loc.Changed += Refresh;
+            CloudSync.AccountChanged += Refresh;
         }
 
         void OnDisable()
         {
             Accessibility.Changed -= Refresh;
             Loc.Changed -= Refresh;
+            CloudSync.AccountChanged -= Refresh;
         }
 
         void OnDestroy()
@@ -192,6 +196,17 @@ namespace CapyIsland.UI
             var loadButton = UiKit.Button(bring, "Load", "Load", UiKit.ButtonStyle.Spring, () => SaveCodeScreen.ShowImport(true), 28f);
             var lle = loadButton.transform.parent.gameObject.AddComponent<LayoutElement>();
             lle.preferredWidth = 220f; lle.preferredHeight = 72f;
+
+            // ---- An account, to open this island on another device (CloudSync).
+            _account = Row(list, IconPainter.Star, "Play on another device");
+            var accountButton = UiKit.Button(_account, "Account", "Make account", UiKit.ButtonStyle.Spring, AccountScreen.ShowMake, 28f);
+            _accountButton = accountButton.transform.parent.gameObject;
+            var ale = _accountButton.AddComponent<LayoutElement>();
+            ale.preferredWidth = 220f; ale.preferredHeight = 72f;
+            var signIn = Row(list, IconPainter.Star, "Have an account already?");
+            var signInButton = UiKit.Button(signIn, "SignIn", "Sign in", UiKit.ButtonStyle.Secondary, AccountScreen.ShowSignIn, 28f);
+            var sle = signInButton.transform.parent.gameObject.AddComponent<LayoutElement>();
+            sle.preferredWidth = 220f; sle.preferredHeight = 72f;
 
             // ---- New island.
             var reset = Row(list, IconPainter.Star, "Start a new island");
@@ -370,6 +385,14 @@ namespace CapyIsland.UI
         {
             if (_easyOptions == null) return;
             foreach (var r in _refresh) r();
+            // The account row: an offer to make one, or whose island this is.
+            if (_account != null)
+            {
+                var label = _account.Find("Label")?.GetComponent<TextMeshProUGUI>();
+                bool named = CloudSync.Username != null;
+                if (label != null) label.text = named ? Loc.F("Signed in as {0}", CloudSync.Username) : "Play on another device";
+                _accountButton.SetActive(!named);
+            }
             _easyOptions.SetActive(Accessibility.Enabled);
             foreach (var (l, pill, label) in _languages)
             {

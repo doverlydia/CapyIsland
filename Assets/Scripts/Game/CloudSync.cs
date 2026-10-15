@@ -66,6 +66,7 @@ namespace CapyIsland.Game
             {
                 if (UnityServices.State == ServicesInitializationState.Uninitialized) await UnityServices.InitializeAsync();
                 if (!AuthenticationService.Instance.IsSignedIn) await AuthenticationService.Instance.SignInAnonymouslyAsync();
+                await RefreshPlayerInfo();
                 await CatchUp();
             }
             catch (Exception e)
@@ -84,6 +85,118 @@ namespace CapyIsland.Game
         // Put away (a phone going to the background, a browser tab hidden): send what's new.
         void OnApplicationPause(bool paused) { if (paused) _ = UploadIfChanged(); }
         void OnApplicationFocus(bool focused) { if (!focused) _ = UploadIfChanged(); }
+
+        // ---------------------------------------------------------------- accounts
+
+        /// <summary>Connected to the cloud (account features can be offered).</summary>
+        public static bool Online => UnityServices.State == ServicesInitializationState.Initialized && AuthenticationService.Instance.IsSignedIn;
+
+        /// <summary>The username this island's account goes by, or null while it's still the invisible one.</summary>
+        public static string Username { get; private set; }
+
+        static async Task RefreshPlayerInfo()
+        {
+            try
+            {
+                var info = await AuthenticationService.Instance.GetPlayerInfoAsync();
+                Username = string.IsNullOrEmpty(info?.Username) ? null : info.Username;
+            }
+            catch (Exception) { /* offline: keep what we knew */ }
+            AccountChanged?.Invoke();
+        }
+
+        public static event Action AccountChanged;
+
+        /// <summary>The rules Unity has for a username (3-20 letters, numbers and . - @ _), checked before asking it.</summary>
+        public static string CheckUsername(string name)
+        {
+            if (string.IsNullOrEmpty(name) || name.Length < 3 || name.Length > 20) return "A username needs 3 to 20 letters or numbers.";
+            foreach (char c in name)
+                if (!(c < 128 && (char.IsLetterOrDigit(c) || c == '.' || c == '-' || c == '@' || c == '_'))) return "A username can only use English letters, numbers and . - @ _";
+            return null;
+        }
+
+        /// <summary>The rules for a password (8-30 characters, with a capital, a small letter, a number and a symbol).</summary>
+        public static string CheckPassword(string pass)
+        {
+            if (string.IsNullOrEmpty(pass) || pass.Length < 8 || pass.Length > 30) return "A password needs 8 to 30 characters.";
+            bool upper = false, lower = false, digit = false, symbol = false;
+            foreach (char c in pass)
+            {
+                if (char.IsUpper(c)) upper = true;
+                else if (char.IsLower(c)) lower = true;
+                else if (char.IsDigit(c)) digit = true;
+                else symbol = true;
+            }
+            return upper && lower && digit && symbol ? null : "A password needs a capital letter, a small letter, a number and a symbol (like ! or #).";
+        }
+
+        /// <summary>
+        /// Gives the invisible account a username and password, so the same island can be opened on
+        /// another device. The island stays exactly where it is. Returns null, or what went wrong.
+        /// </summary>
+        public static async Task<string> MakeAccount(string user, string pass)
+        {
+            var why = CheckUsername(user) ?? CheckPassword(pass);
+            if (why != null) return why;
+            if (!Online) return "Can't reach the internet right now. Try again in a moment.";
+            try
+            {
+                await AuthenticationService.Instance.AddUsernamePasswordAsync(user, pass);
+                await RefreshPlayerInfo();
+                return null;
+            }
+            catch (AuthenticationException e) when (e.ErrorCode == AuthenticationErrorCodes.AccountAlreadyLinked || e.ErrorCode == CommonErrorCodes.Conflict)
+            {
+                return "That username is taken. Try another one.";
+            }
+            catch (RequestFailedException e) { return Problem(e); }
+        }
+
+        /// <summary>
+        /// Signs this device in to an account made on another device. This island is sent up first,
+        /// so it isn't lost; then the account's island is compared with it, and if they differ Old
+        /// Yuzu asks which to keep. Returns null, or what went wrong (and this device stays as it was).
+        /// </summary>
+        public static async Task<string> SignIn(string user, string pass)
+        {
+            if (string.IsNullOrWhiteSpace(user) || string.IsNullOrEmpty(pass)) return "Type your username and password.";
+            if (!Online || Instance == null) return "Can't reach the internet right now. Try again in a moment.";
+            if (user == Username) return "This device is already signed in to that account.";
+            var self = Instance;
+            self._ready = false;
+            self._blocked = true;
+            try
+            {
+                await self.UploadIfChanged(evenIfBlocked: true);
+                // Not clearing the stored session: if the new sign-in fails, the old one comes back.
+                AuthenticationService.Instance.SignOut(false);
+                await AuthenticationService.Instance.SignInWithUsernamePasswordAsync(user, pass);
+            }
+            catch (RequestFailedException e)
+            {
+                try { await AuthenticationService.Instance.SignInAnonymouslyAsync(); } catch (Exception) { }
+                self._blocked = false;
+                self._ready = true;
+                return e is AuthenticationException || e.ErrorCode != CommonErrorCodes.TransportError && e.ErrorCode != CommonErrorCodes.Timeout
+                    ? "That username and password don't match."
+                    : Problem(e);
+            }
+            // A different account: this device's link to the cloud starts over, and the two islands are compared.
+            PlayerPrefs.DeleteKey(StampPref);
+            PlayerPrefs.DeleteKey(HashPref);
+            PlayerPrefs.Save();
+            await RefreshPlayerInfo();
+            self._blocked = false;
+            try { await self.CatchUp(); }
+            catch (Exception e) { Debug.Log("[CloudSync] Signed in, but couldn't compare islands yet: " + e.Message); self._ready = true; }
+            return null;
+        }
+
+        static string Problem(RequestFailedException e) =>
+            e.ErrorCode == CommonErrorCodes.TransportError || e.ErrorCode == CommonErrorCodes.Timeout
+                ? "Can't reach the internet right now. Try again in a moment."
+                : "Something went wrong. Try again in a moment.";
 
         // ---------------------------------------------------------------- comparing
 
@@ -134,9 +247,10 @@ namespace CapyIsland.Game
 
         // ---------------------------------------------------------------- up and down
 
-        async Task UploadIfChanged()
+        async Task UploadIfChanged(bool evenIfBlocked = false)
         {
-            if (!_ready || _busy || _blocked || !CanSend) return;
+            if (_busy || !CanSend) return;
+            if (!evenIfBlocked && (!_ready || _blocked)) return;
             string local = SaveTransfer.Export();
             if (Hash(local) == PlayerPrefs.GetString(HashPref, "")) return;
             await Upload(local);
