@@ -17,7 +17,7 @@ namespace CapyIsland.Game
         /// the phone and the browser ask for tokens addressed to it, and Unity's Google sign-in
         /// is set to accept them. Not a secret.
         /// </summary>
-        const string WebClientId = "";
+        const string WebClientId = "738104470878-9o5j3se62451pau36se4gqtuaqktl41j.apps.googleusercontent.com";
 
         /// <summary>What came back: a token, or why not (Cancelled when the player just closed it).</summary>
         public struct Result
