@@ -7,6 +7,7 @@ using Unity.Services.Core;
 using UnityEngine;
 using PlayerSaveOptions = Unity.Services.CloudSave.Models.Data.Player.SaveOptions;
 using PlayerLoadOptions = Unity.Services.CloudSave.Models.Data.Player.LoadOptions;
+using PlayerDeleteAllOptions = Unity.Services.CloudSave.Models.Data.Player.DeleteAllOptions;
 
 namespace CapyIsland.Game
 {
@@ -238,6 +239,38 @@ namespace CapyIsland.Game
             PlayerPrefs.Save();
             try { await self.CatchUp(); }
             catch (Exception e) { Debug.Log("[CloudSync] Signed in, but couldn't compare islands yet: " + e.Message); self._ready = true; }
+            return null;
+        }
+
+        /// <summary>
+        /// Deletes this player's island from the cloud and the account itself (its username, its
+        /// Google link), for good. The island on this device stays. The cloud is left alone for the
+        /// rest of this session; the next time the game starts, a new invisible account begins.
+        /// Returns null, or what went wrong (and nothing was deleted, or only the cloud island).
+        /// </summary>
+        public static async Task<string> DeleteAccount()
+        {
+            if (!Online || Instance == null) return "Can't reach the internet right now. Try again in a moment.";
+            var self = Instance;
+            self._ready = false;
+            self._blocked = true;
+            try
+            {
+                await CloudSaveService.Instance.Data.Player.DeleteAllAsync(new PlayerDeleteAllOptions());
+                await AuthenticationService.Instance.DeleteAccountAsync();   // also signs out and forgets the session
+            }
+            catch (RequestFailedException e)
+            {
+                self._blocked = false;
+                self._ready = true;
+                return Problem(e);
+            }
+            PlayerPrefs.DeleteKey(StampPref);
+            PlayerPrefs.DeleteKey(HashPref);
+            PlayerPrefs.Save();
+            Username = null;
+            HasGoogle = false;
+            AccountChanged?.Invoke();
             return null;
         }
 

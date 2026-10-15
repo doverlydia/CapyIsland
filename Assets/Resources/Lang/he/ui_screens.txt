@@ -558,3 +558,24 @@
 
 @ Google sign-in didn't work. Try again in a moment.
 = הכניסה עם Google לא הצליחה. נסה שוב עוד רגע.
+
+@ Delete my account
+= מחיקת החשבון שלי
+
+@ Delete
+= מחיקה
+
+@ This deletes your island from the cloud, and your account with its username or Google sign-in, for good. It can't be undone. The island on this device stays; to erase it too, choose Start over.
+= פעולה זו מוחקת את האי שלך מהענן, ואת החשבון שלך עם שם המשתמש או הכניסה עם Google, לתמיד. אי אפשר לבטל את זה. האי במכשיר הזה נשאר; כדי למחוק גם אותו, בחר "התחל מחדש".
+
+@ Keep it
+= להשאיר
+
+@ Delete it
+= למחוק
+
+@ Deleting…
+= מוחק…
+
+@ Your account and your island in the cloud are deleted.
+= החשבון שלך והאי שלך בענן נמחקו.

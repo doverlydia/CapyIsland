@@ -26,7 +26,11 @@ namespace CapyIsland.UI
 
         GameObject _confirm;
         RectTransform _account;
-        GameObject _accountButton;
+        const string DeleteWarning = "This deletes your island from the cloud, and your account with its username or Google sign-in, for good. It can't be undone. The island on this device stays; to erase it too, choose Start over.";
+
+        GameObject _accountButton, _signIn, _delete, _deleteConfirm;
+        TextMeshProUGUI _deleteWarning;
+        Button _deleteGo;
         GameObject _easyOptions;
         TextMeshProUGUI _sizeValue, _sizeSample;
         readonly List<(Language lang, Image pill, TextMeshProUGUI label)> _languages = new();
@@ -207,6 +211,18 @@ namespace CapyIsland.UI
             var signInButton = UiKit.Button(signIn, "SignIn", "Sign in", UiKit.ButtonStyle.Secondary, AccountScreen.ShowSignIn, 28f);
             var sle = signInButton.transform.parent.gameObject.AddComponent<LayoutElement>();
             sle.preferredWidth = 220f; sle.preferredHeight = 72f;
+            _signIn = signIn.gameObject;
+
+            // ---- Deleting the account and the island in the cloud (CloudSync), right here.
+            _delete = Row(list, IconPainter.Star, "Delete my account").gameObject;
+            var deleteButton = UiKit.Button(_delete.transform, "Delete", "Delete", UiKit.ButtonStyle.Secondary, () =>
+            {
+                _deleteWarning.text = DeleteWarning;
+                _deleteConfirm.SetActive(true);
+            }, 28f);
+            var dle = deleteButton.transform.parent.gameObject.AddComponent<LayoutElement>();
+            dle.preferredWidth = 220f; dle.preferredHeight = 72f;
+            (_deleteConfirm, _deleteWarning, _deleteGo) = ConfirmBox(list, DeleteWarning, "Keep it", "Delete it", DeleteAccount);
 
             // ---- New island.
             var reset = Row(list, IconPainter.Star, "Start a new island");
@@ -214,36 +230,58 @@ namespace CapyIsland.UI
             var rle = resetButton.transform.parent.gameObject.AddComponent<LayoutElement>();
             rle.preferredWidth = 220f; rle.preferredHeight = 72f;
 
-            _confirm = UiKit.Rect("Confirm", list).gameObject;
-            var cv = _confirm.AddComponent<VerticalLayoutGroup>();
-            cv.spacing = 14f;
-            cv.padding = new RectOffset(24, 24, 20, 24);
-            cv.childControlWidth = cv.childControlHeight = true;
-            cv.childForceExpandWidth = true;
-            cv.childForceExpandHeight = false;
-            var bg = _confirm.AddComponent<Image>();
-            bg.sprite = UiKit.Rounded(30);
-            bg.type = Image.Type.Sliced;
-            bg.color = UiKit.Hex("FDE3DD");
-            var warn = UiKit.Text(_confirm.transform, "Warning",
-                "This erases your island, your capybaras and every goal you've earned. It can't be undone. Your wardrobe and daily streak stay with you.", 30f, UiKit.Ink);
-            warn.overflowMode = TextOverflowModes.Overflow;
-            var buttons = UiKit.Rect("Buttons", _confirm.transform);
-            var bh = buttons.gameObject.AddComponent<HorizontalLayoutGroup>();
-            bh.spacing = 16f;
-            bh.childControlWidth = bh.childControlHeight = true;
-            bh.childForceExpandWidth = true;
-            buttons.gameObject.AddComponent<LayoutElement>().preferredHeight = 80f;
-            UiKit.Button(buttons, "Keep", "Keep my island", UiKit.ButtonStyle.Secondary, () => _confirm.SetActive(false), 28f);
-            var erase = UiKit.Button(buttons, "Erase", "Erase it", UiKit.ButtonStyle.Primary, StartOver, 28f);
-            erase.GetComponent<Image>().color = UiKit.Danger;
-            _confirm.SetActive(false);
+            (_confirm, _, _) = ConfirmBox(list,
+                "This erases your island, your capybaras and every goal you've earned. It can't be undone. Your wardrobe and daily streak stay with you.",
+                "Keep my island", "Erase it", StartOver);
 
             // Credits.
             var credits = UiKit.Text(list, "Credits",
                 "<b>Capy Island</b>\nFonts: Fredoka and Nunito, under the SIL Open Font License.", 26f, UiKit.InkSoft, false, TextAlignmentOptions.Center);
             credits.overflowMode = TextOverflowModes.Overflow;
             credits.margin = new Vector4(0f, 24f, 0f, 0f);
+        }
+
+        /// <summary>A pink "are you sure?" box under a row: the warning, a way back, and the red button.</summary>
+        static (GameObject box, TextMeshProUGUI warning, Button go) ConfirmBox(RectTransform list, string warning, string keepLabel, string goLabel, Action onGo)
+        {
+            var box = UiKit.Rect("Confirm", list).gameObject;
+            var cv = box.AddComponent<VerticalLayoutGroup>();
+            cv.spacing = 14f;
+            cv.padding = new RectOffset(24, 24, 20, 24);
+            cv.childControlWidth = cv.childControlHeight = true;
+            cv.childForceExpandWidth = true;
+            cv.childForceExpandHeight = false;
+            var bg = box.AddComponent<Image>();
+            bg.sprite = UiKit.Rounded(30);
+            bg.type = Image.Type.Sliced;
+            bg.color = UiKit.Hex("FDE3DD");
+            var warn = UiKit.Text(box.transform, "Warning", warning, 30f, UiKit.Ink);
+            warn.overflowMode = TextOverflowModes.Overflow;
+            var buttons = UiKit.Rect("Buttons", box.transform);
+            var bh = buttons.gameObject.AddComponent<HorizontalLayoutGroup>();
+            bh.spacing = 16f;
+            bh.childControlWidth = bh.childControlHeight = true;
+            bh.childForceExpandWidth = true;
+            buttons.gameObject.AddComponent<LayoutElement>().preferredHeight = 80f;
+            UiKit.Button(buttons, "Keep", keepLabel, UiKit.ButtonStyle.Secondary, () => box.SetActive(false), 28f);
+            var go = UiKit.Button(buttons, "Go", goLabel, UiKit.ButtonStyle.Primary, onGo, 28f);
+            go.GetComponent<Image>().color = UiKit.Danger;
+            box.SetActive(false);
+            return (box, warn, go);
+        }
+
+        async void DeleteAccount()
+        {
+            if (!_deleteGo.interactable) return;
+            _deleteGo.interactable = false;
+            _deleteWarning.text = "Deleting…";
+            string problem = await CloudSync.DeleteAccount();
+            if (this == null) return;
+            _deleteGo.interactable = true;
+            if (problem != null) { _deleteWarning.text = problem; return; }
+            _deleteConfirm.SetActive(false);
+            Sfx.Play(SfxKind.Tap, 0.6f);
+            Hints.Show("Your account and your island in the cloud are deleted.");
         }
 
         static RectTransform Row(RectTransform list, Sprite icon, string label)
@@ -378,6 +416,7 @@ namespace CapyIsland.UI
         protected override void OnOpen()
         {
             _confirm.SetActive(false);
+            _deleteConfirm.SetActive(false);
             Refresh();
         }
 
@@ -394,6 +433,12 @@ namespace CapyIsland.UI
                         : CloudSync.HasGoogle ? "Signed in with Google"
                         : "Play on another device";
                 _accountButton.SetActive(!CloudSync.Linked);
+                // Accounts need the cloud: offline (or just deleted) they aren't offered.
+                bool online = CloudSync.Online;
+                _account.gameObject.SetActive(online);
+                _signIn.SetActive(online);
+                _delete.SetActive(online);
+                if (!online) _deleteConfirm.SetActive(false);
             }
             _easyOptions.SetActive(Accessibility.Enabled);
             foreach (var (l, pill, label) in _languages)
