@@ -33,6 +33,9 @@ one () {
     Gift_Roach) gen ArtSource/Hobby_Gift_Roach.png "$PROP" "a single comical cartoon cockroach, $VIEW, glossy dark reddish-brown shell, six little legs, two long curly antennae and a cheeky expression with big round eyes. Cute and funny rather than gross." ;;
     Gift_Boot) gen ArtSource/Hobby_Gift_Boot.png "$PROP" "a single soggy old brown leather boot, $VIEW, scuffed and floppy, a loose untied lace, a little strand of green seaweed hanging off it and a couple of water drops. Comical junk." ;;
     Gift_Fishbone) gen ArtSource/Hobby_Gift_Fishbone.png "$PROP" "a cartoon fish skeleton, $VIEW: a fish head with a big round eye, a clean white spine with ribs, and a tail fin, like a cat's leftovers. Comical." ;;
+    # Junk reeled in while fishing (Fishing.Junk); the boot above turns up there too.
+    Gift_Can) gen ArtSource/Hobby_Gift_Can.png "$PROP" "a single rusty old tin can, $VIEW, dented, its jagged lid bent open, a faded peeling label and a trickle of water and a strand of seaweed spilling out. Comical junk." ;;
+    Gift_Seaweed) gen ArtSource/Hobby_Gift_Seaweed.png "$PROP" "a single dripping clump of tangled green seaweed, $VIEW, glossy wet ribbons of kelp in a soggy heap with a couple of water drops and a tiny shell caught in it. Comical junk." ;;
     Hat_Sock) gen ArtSource/Wear_Hat_Sock.png "$BASE" "$ITEM A long fluffy striped knitted sock worn as a floppy hat, red and cream stripes with a mustard-yellow heel and toe, the toe flopping over to one side like a nightcap. Silly and cosy." ;;
     Neck_Bell) gen ArtSource/Wear_Neck_Bell.png "$BASE" "$ITEM A soft red cat collar shaped as a loop to go around a capybara's neck, seen from the front, with a round shiny golden jingle bell hanging at the front centre." ;;
   esac

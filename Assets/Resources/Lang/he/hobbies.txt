@@ -753,3 +753,36 @@
 
 @ Three spoons of sugar: a little sweetness for desserts.
 = שלוש כפות סוכר: קצת מתיקות לקינוחים.
+
+@ rusty tin can
+= פחית חלודה
+
+@ clump of seaweed
+= גוש אצות
+
+@ Rusty tin can
+= פחית חלודה
+
+@ Clump of seaweed
+= גוש אצות
+
+@ Soggy old boot
+= מגף ישן ורטוב
+
+@ Fish skeleton
+= שלד של דג
+
+@ Not quite the catch of the day.
+= לא בדיוק השלל של היום.
+
+@ Somebody's lunch, a very long time ago.
+= ארוחת הצהריים של מישהו, לפני הרבה מאוד זמן.
+
+@ Slimy, tangled and very, very green.
+= חלקלק, סבוך ומאוד, מאוד ירוק.
+
+@ It slipped off the hook and sank. Keep reeling!
+= זה החליק מהקרס ושקע. המשך לגלגל!
+
+@ Cockroach
+= ג'וק

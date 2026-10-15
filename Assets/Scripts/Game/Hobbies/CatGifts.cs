@@ -146,8 +146,8 @@ namespace CapyIsland.Game
             return daily;
         }
 
-        /// <summary>Junk rides in your trail like anything else, but only Salty Kombu wants it.</summary>
-        static void GiveJunk(string id, string name, Sprite art, Vector2 at)
+        /// <summary>Junk rides in your trail like anything else, but only Salty Kombu wants it (cats bring it, and fishing reels it in).</summary>
+        public static void GiveJunk(string id, string name, Sprite art, Vector2 at)
         {
             var go = HobbyItems.Make(char.ToUpper(name[0]) + name.Substring(1), art, 0.6f, 0.8f, 10f);
             go.AddComponent<CatJunk>().Name = name;

@@ -502,6 +502,15 @@ namespace CapyIsland.Game
             _overload = 0f;
             _phaseUntil = Time.time + UnityEngine.Random.Range(1.2f, 1.8f);   // an early pull, to teach the rhythm
 
+            // Now and then it isn't a fish at all. Junk doesn't fight: a short, steady reel.
+            _junk = HobbyLog.Fish.Count > 0 && UnityEngine.Random.value < JunkChance ? Junk[UnityEngine.Random.Range(0, Junk.Length)] : default;
+            if (_junk.id != null)
+            {
+                _strength = 0.35f * rod;
+                _needed = _remaining = 3.5f;
+                _phaseUntil = float.MaxValue;   // never pulls
+            }
+
             if (_bobberBody != null)
             {
                 _bobberBody.DOKill();
@@ -585,7 +594,8 @@ namespace CapyIsland.Game
                     // Out of the water: hanging nose-up from the hook, wriggling.
                     _hooked.Go.transform.position = p + Vector2.down * 0.32f;
                     _hooked.Sr.flipX = false;
-                    _hooked.Go.transform.localRotation = Quaternion.Euler(0f, 0f, -90f + wiggle);
+                    // (Junk just dangles, the right way up, swinging a little.)
+                    _hooked.Go.transform.localRotation = Quaternion.Euler(0f, 0f, _junk.id != null ? wiggle * 0.5f : -90f + wiggle);
                 }
                 else
                 {
@@ -611,7 +621,7 @@ namespace CapyIsland.Game
         void ShowLifted(Shadow s, bool up)
         {
             if (up == _lifted || s == null || s.Sr == null) return;
-            var picture = HobbyData.FishPicture(s.Kind);
+            var picture = _junk.id != null ? HobbyData.Art(_junk.id) : HobbyData.FishPicture(s.Kind);
             if (picture == null) return;
             _lifted = up;
             s.Sr.DOKill();
@@ -636,8 +646,44 @@ namespace CapyIsland.Game
             }
         }
 
+        /// <summary>How often a bite turns out to be junk (never your very first catch).</summary>
+        const float JunkChance = 0.1f;
+
+        /// <summary>
+        /// What else is down there: (art id, name, line). It goes to Salty Kombu for a coin, like
+        /// the junk cats drag in (CatGifts).
+        /// </summary>
+        static readonly (string id, string name, string line)[] Junk =
+        {
+            ("Gift_Boot", "soggy old boot", "Not quite the catch of the day."),
+            ("Gift_Can", "rusty tin can", "Somebody's lunch, a very long time ago."),
+            ("Gift_Seaweed", "clump of seaweed", "Slimy, tangled and very, very green."),
+        };
+
+        /// <summary>The junk on the hook this fight, or default (a fish).</summary>
+        (string id, string name, string line) _junk;
+
+        /// <summary>Reeled in junk: a laugh, a little experience, and the thing itself in a bubble for Salty Kombu.</summary>
+        void CatchJunk(Shadow s)
+        {
+            var junk = _junk;
+            const int xp = 2;
+            HobbyLog.AddXp(Hobby.Fishing, xp);
+            Remove(s);
+            Sfx.Play(SfxKind.Pop, 0.8f);
+            if (!_lifted) Ripple(_bobberAt, 2.2f);
+            var art = HobbyData.Art(junk.id);
+            var king = _king != null ? (Vector2)_king.transform.position : _bobberAt;
+            CatGifts.GiveJunk(junk.id, junk.name, art, king);
+            string line = junk.line + "\n" + string.Format("+{0} fishing XP", xp);
+            UI.CardPopup.Show("You caught " + HobbyData.WithArticle(junk.name) + "!", line, art);
+            EndLine();
+        }
+
         void Escape(string why)
         {
+            // A boot doesn't swim off; it just slips off the hook and sinks.
+            if (_junk.id != null) why = "It slipped off the hook and sank. Keep reeling!";
             Say(why);
             Sfx.Play(SfxKind.Pop, 0.4f);
             Flee(_hooked);
@@ -646,6 +692,7 @@ namespace CapyIsland.Game
 
         void Catch(Shadow s)
         {
+            if (_junk.id != null) { CatchJunk(s); return; }
             var kind = s.Kind;
             float size = Mathf.Round(UnityEngine.Random.Range(kind.Size.x, kind.Size.y));
             var (first, record) = HobbyLog.LogFish(kind.Id, size);
