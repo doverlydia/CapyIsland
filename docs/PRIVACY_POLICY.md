@@ -16,7 +16,6 @@ WHAT THE GAME DOESN'T DO
 - No ads, no tracking, and no analytics are built into the game.
 - No real-money purchases.
 - Your information is never sold or shared for marketing.
-- The "friends" and their islands in the game are made up by the game. They are not real players, and nothing about you is shown to other people.
 
 WHY
 
