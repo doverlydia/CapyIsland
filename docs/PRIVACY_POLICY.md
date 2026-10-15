@@ -33,7 +33,7 @@ Their servers may be in other countries than yours, including the United States.
 
 HOW LONG IT'S KEPT, AND DELETING IT
 
-Your island stays in the cloud until you delete it. Everything the game keeps about you is your island, which you can see in the game (and copy with Settings > Export).
+Your island stays in the cloud until you delete it. Apart from your player ID and account, everything the game keeps about you is your island, which you can see in the game (and copy with Settings > Export).
 
 - To delete your island from the cloud and your account (with its username or Google sign-in), open Settings in the game and choose "Delete my account". It happens straight away and can't be undone.
 - To delete the island on your device too, choose "Start over" in Settings, or uninstall the game (in a browser, clear the site's data).
