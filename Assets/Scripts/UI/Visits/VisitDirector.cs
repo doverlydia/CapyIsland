@@ -58,7 +58,14 @@ namespace CapyIsland.UI
             var king = FindFirstObjectByType<PlayerAvatar>();
             if (king == null || Visit.Travelling) return;
             _hostSpawned = true;
-            // An offline friend's island is still there to visit, but nobody is home.
+            // An offline friend's island is still there to visit, but nobody is home. A real
+            // friend is never played by the game: they're only here on a live visit (Live).
+            if (Visit.Host.IsReal)
+            {
+                if (Live.ArrivedAt(Visit.Host)) return;   // they're here, live
+                Hints.Show(Loc.F("{0} isn't home right now, but you can look around their island.", Visit.Host.name));
+                return;
+            }
             if (!Server.IsOnline(Visit.Host))
             {
                 Hints.Show(Visit.Host.name + " is offline right now, but you can still look around and lend a hand.");
@@ -113,6 +120,7 @@ namespace CapyIsland.UI
 
             // Someone online on this server knocks; an online friend more often than a stranger.
             var neighbours = Server.Neighbours();
+            neighbours.RemoveAll(n => n.IsReal);   // real friends come over themselves (Live)
             if (neighbours.Count == 0) return;
             var online = neighbours.FindAll(n => Friends.IsFriend(n.id));
             var who = online.Count > 0 && Random.value < 0.65f
@@ -132,6 +140,8 @@ namespace CapyIsland.UI
             VisitorBot.Spawn(who, VisitorBot.Role.Guest, at);
             Sfx.Play(SfxKind.Bridge, 0.6f);
             Hints.Show(who.name + " has landed on your island!");
+            // A friend may be let in to build too (an islander just carries on with chores).
+            if (Friends.IsFriend(who.id)) CoBuild.AskHost(who);
         }
 
         static void OnGuestLeft(FriendProfile who)

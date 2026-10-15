@@ -18,6 +18,12 @@ namespace CapyIsland.Game
         public long lastVisitTicks;
         /// <summary>Their island as you last left it (friends only), as JSON.</summary>
         public string world;
+        /// <summary>A real player's id (RealFriends), or empty for an islander the game made up.</summary>
+        public string member;
+        /// <summary>A real player's friend code, like "Miso#4821".</summary>
+        public string code;
+
+        public bool IsReal => !string.IsNullOrEmpty(member);
 
         public DateTime LastVisit => lastVisitTicks > 0 ? new DateTime(lastVisitTicks) : DateTime.MinValue;
     }
@@ -46,28 +52,30 @@ namespace CapyIsland.Game
         /// <summary>Every name a bot capybara can have (event leaderboards borrow them too).</summary>
         public static IReadOnlyList<string> NamePool => Names;
 
+        /// <summary>Every friend: the islanders the game made up and the real players (RealFriends), side by side.</summary>
         public static IReadOnlyList<FriendProfile> All
         {
             get
             {
                 Load();
-                return _all;
+                var all = new List<FriendProfile>(_all);
+                all.AddRange(RealFriends.All);
+                return all;
             }
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void ResetSession() => _all = null;
 
-        public static bool IsFriend(string id)
-        {
-            Load();
-            return _all.Exists(f => f.id == id);
-        }
+        public static bool IsFriend(string id) => Find(id) != null;
 
         public static FriendProfile Find(string id)
         {
             Load();
-            return _all.Find(f => f.id == id);
+            var bot = _all.Find(f => f.id == id);
+            if (bot != null) return bot;
+            foreach (var f in RealFriends.All) if (f.id == id) return f;
+            return null;
         }
 
         public static void Add(FriendProfile who)
@@ -81,6 +89,7 @@ namespace CapyIsland.Game
 
         public static void Remove(FriendProfile who)
         {
+            if (who.IsReal) { _ = RealFriends.Remove(who); return; }
             Load();
             _all.RemoveAll(f => f.id == who.id);
             Save();
@@ -128,6 +137,7 @@ namespace CapyIsland.Game
             Load();
             PlayerPrefs.SetString(Key, JsonUtility.ToJson(new Stored { friends = _all }));
             PlayerPrefs.Save();
+            RealFriends.SaveCache();   // a real friend's last-visit time
         }
 
         static void Load()

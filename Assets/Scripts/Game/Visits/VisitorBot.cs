@@ -32,6 +32,15 @@ namespace CapyIsland.Game
         /// <summary>An emoji someone showed, and who showed it (null for the player).</summary>
         public static event Action<Transform, Emoji> Emoted;
 
+        /// <summary>The player sent an emoji (Live passes it on to a real friend).</summary>
+        public static event Action<Emoji> PlayerEmoted;
+
+        /// <summary>
+        /// A real friend's capybara (Live): it goes where they go and shows their emojis — no
+        /// thinking of its own, no chores, no made-up replies.
+        /// </summary>
+        public bool Remote { get; private set; }
+
         public FriendProfile Who { get; private set; }
         public Role As { get; private set; }
 
@@ -60,6 +69,40 @@ namespace CapyIsland.Game
             Current = null;
             GuestLeft = null;
             Emoted = null;
+            PlayerEmoted = null;
+        }
+
+        /// <summary>A real friend's capybara, moved by them over the live link.</summary>
+        public static VisitorBot SpawnRemote(FriendProfile who, Role role, Vector2 at)
+        {
+            var bot = Spawn(who, role, at);
+            bot.Remote = true;
+            bot._replies.Clear();
+            bot._leaveAt = bot._giftAt = bot._nextPlant = -1f;
+            bot._plantsLeft = 0;
+            return bot;
+        }
+
+        /// <summary>Where the friend's capybara is now: it walks there (or jumps, if far behind).</summary>
+        public void RemoteAt(Vector2 at)
+        {
+            if (_leaving) return;
+            if (Vector2.Distance(transform.position, at) > 7f)
+            {
+                transform.position = new Vector3(at.x, at.y, transform.position.z);
+                _moving = false;
+                return;
+            }
+            _target = at;
+            _moving = true;
+        }
+
+        /// <summary>The friend went (flew home, closed the game): a wave and a poof.</summary>
+        public void RemoteLeave()
+        {
+            if (_leaving) return;
+            _sentHome = true;
+            LogOff();
         }
 
         // ---------------------------------------------------------------- arriving
@@ -174,6 +217,7 @@ namespace CapyIsland.Game
         /// <summary>The player sent an emoji: answer it, like a person would, after a beat.</summary>
         public void HearPlayer(Emoji e)
         {
+            if (Remote) return;   // a real friend answers for themselves
             Emoji reply = e switch
             {
                 Emoji.Heart => UnityEngine.Random.value < 0.6f ? Emoji.Heart : Emoji.Smile,
@@ -207,6 +251,7 @@ namespace CapyIsland.Game
             var body = king != null ? king.transform.Find("Sprite") : null;
             Emoted?.Invoke(body != null ? body : king != null ? king.transform : null, e);
             if (Current != null) Current.HearPlayer(e);
+            PlayerEmoted?.Invoke(e);
         }
 
         void Later(float seconds, Emoji e) => _replies.Enqueue((Time.time + seconds, e));
@@ -217,6 +262,7 @@ namespace CapyIsland.Game
         {
             while (_replies.Count > 0 && Time.time >= _replies.Peek().at) Emote(_replies.Dequeue().e);
             if (_leaving) return;
+            if (Remote) { Move(); return; }
 
             if (_leaveAt > 0f && Time.time >= _leaveAt) { LogOff(); return; }
 
@@ -414,7 +460,7 @@ namespace CapyIsland.Game
         {
             _leaving = true;
             Emote(Emoji.Wave);
-            if (As == Role.Guest)
+            if (As == Role.Guest && !Remote)
             {
                 var did = new List<string>();
                 if (_fed > 0) did.Add($"fed {_fed} worker{(_fed > 1 ? "s" : "")}");
@@ -454,7 +500,9 @@ namespace CapyIsland.Game
                 return;
             }
             Vector2 here = transform.position;
-            var step = Vector2.MoveTowards(here, _target, Speed * Time.deltaTime);
+            // A real friend's capybara keeps up with them: faster the further behind it is.
+            float speed = Remote ? Mathf.Max(Speed * 1.6f, Vector2.Distance(here, _target) * 4f) : Speed;
+            var step = Vector2.MoveTowards(here, _target, speed * Time.deltaTime);
             if (!BunniSpace.PointOnLand(step)) { _moving = false; return; }
             transform.position = new Vector3(step.x, step.y, transform.position.z);
             if ((step - _target).sqrMagnitude < 0.01f) _moving = false;

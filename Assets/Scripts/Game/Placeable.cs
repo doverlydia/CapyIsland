@@ -11,6 +11,12 @@ namespace CapyIsland.Game
     /// </summary>
     public class Placeable : MonoBehaviour
     {
+        /// <summary>The player put this down (dragged and dropped it on a clear spot).</summary>
+        public static event System.Action<Placeable> PlayerPlaced;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetPlacedEvent() => PlayerPlaced = null;
+
         [Header("Identity")]
         [SerializeField] string displayName = "Item";
 
@@ -144,7 +150,22 @@ namespace CapyIsland.Game
                 return;
             }
 
-            if (CanPlaceAt(transform.position)) { MarkPlaced(); return; }
+            // On a friend's island, only chores until they say you may build (CoBuild).
+            var catalogItem = GetComponent<CatalogItem>();
+            var notYours = catalogItem != null ? CoBuild.WhyCantPlace(catalogItem.StoreName) : null;
+            if (notYours != null)
+            {
+                MarkCarried();
+                Hints.Show(notYours);
+                return;
+            }
+
+            if (CanPlaceAt(transform.position))
+            {
+                MarkPlaced();
+                PlayerPlaced?.Invoke(this);
+                return;
+            }
 
             // Blocked: say why, rather than let it look as if the drop was ignored.
             if (!InZone(transform.position))

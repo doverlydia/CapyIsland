@@ -141,13 +141,19 @@ namespace CapyIsland.UI
 
         // ---------------------------------------------------------------- export
 
-        void Copy()
+        /// <summary>Puts text on the clipboard, the browser's included.</summary>
+        public static void CopyText(string text)
         {
 #if UNITY_WEBGL && !UNITY_EDITOR
-            CapyCopyText(_code);
+            CapyCopyText(text);
 #else
-            GUIUtility.systemCopyBuffer = _code;
+            GUIUtility.systemCopyBuffer = text;
 #endif
+        }
+
+        void Copy()
+        {
+            CopyText(_code);
             Sfx.Play(SfxKind.Coin, 0.6f);
             Say("Copied! Now paste it into a note.", UiKit.Leaf);
         }

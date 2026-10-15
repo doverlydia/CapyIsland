@@ -22,12 +22,30 @@ namespace CapyIsland.UI
         RectTransform _list;
         ScrollRect _scroll;
 
-        void Awake() => Instance = this;
+        void Awake()
+        {
+            Instance = this;
+            RealFriends.Changed += OnRealFriends;
+        }
 
         void OnDestroy()
         {
+            RealFriends.Changed -= OnRealFriends;
             if (Instance == this) Instance = null;
         }
+
+        /// <summary>A request came in, a friend came online: the open list shows it straight away.</summary>
+        void OnRealFriends()
+        {
+            if (this == null || !IsOpen) return;
+            if (_codeBox != null && _codeBox.isFocused) return;   // not under someone's fingers mid-typing
+            float scroll = _scroll.verticalNormalizedPosition;
+            OnOpen();
+            Canvas.ForceUpdateCanvases();
+            _scroll.verticalNormalizedPosition = scroll;
+        }
+
+        TMP_InputField _codeBox;
 
         protected override void Build(RectTransform body)
         {
@@ -56,6 +74,8 @@ namespace CapyIsland.UI
             ServerMap();
 
             SectionLabel(_list, "Your friends");
+            Requests();
+            CodeCard();
             if (Friends.All.Count == 0)
             {
                 var empty = UiKit.Text(_list, "Empty", "No friends yet. Visit someone on the server above, and add them from their island!", 28f, UiKit.InkSoft, false, TextAlignmentOptions.Center);
@@ -111,19 +131,146 @@ namespace CapyIsland.UI
             bool here = Visit.Active && Visit.Host.id == who.id;
             if (!here)
             {
-                var go = _blocked == null
-                    ? UiKit.Button(row, "Visit", "Visit", UiKit.ButtonStyle.Primary, () => { Close(); Visit.Fly(who); }, 28f, IconPainter.Plane)
-                    : UiKit.Button(row, "Visit", "Visit", UiKit.ButtonStyle.Secondary, Blocked, 28f, IconPainter.Lock);
-                if (_blocked != null) Greyed(go);
+                // Friends are visited while they're online; an offline one's button is grey and says so.
+                Button go;
+                if (_blocked != null) go = UiKit.Button(row, "Visit", "Visit", UiKit.ButtonStyle.Secondary, Blocked, 28f, IconPainter.Lock);
+                else if (!online) go = UiKit.Button(row, "Visit", "Visit", UiKit.ButtonStyle.Secondary, () =>
+                {
+                    Game.Sfx.Play(Game.SfxKind.Tap, 0.4f);
+                    Hints.Show(Loc.F("{0} is offline right now. You can visit when they're online!", who.name));
+                }, 28f, IconPainter.Plane);
+                else go = UiKit.Button(row, "Visit", "Visit", UiKit.ButtonStyle.Primary, () => { Close(); Visit.Fly(who); }, 28f, IconPainter.Plane);
+                if (_blocked != null || !online) Greyed(go);
                 var le = go.transform.parent.gameObject.AddComponent<LayoutElement>();
                 le.preferredWidth = 170f; le.preferredHeight = 72f;
+            }
+        }
+
+        // ---------------------------------------------------------------- friend codes
+
+        string _typed = "";      // the code being typed, kept when the list is rebuilt
+        string _addStatus;       // the last answer to Add, shown under the box
+        bool _adding;
+
+        /// <summary>Your friend code to share, and a box for a friend's.</summary>
+        void CodeCard()
+        {
+            var card = UiKit.Image(_list, "Codes", UiKit.Rounded(32), UiKit.Hex("EAF3FB")).rectTransform;
+            var v = card.gameObject.AddComponent<VerticalLayoutGroup>();
+            v.padding = new RectOffset(22, 22, 18, 20);
+            v.spacing = 12f;
+            v.childControlWidth = v.childControlHeight = true;
+            v.childForceExpandWidth = true;
+            v.childForceExpandHeight = false;
+
+            var mine = UiKit.Rect("Mine", card);
+            var mh = mine.gameObject.AddComponent<HorizontalLayoutGroup>();
+            mh.spacing = 14f;
+            mh.childAlignment = TextAnchor.MiddleLeft;
+            mh.childControlWidth = mh.childControlHeight = true;
+            mh.childForceExpandWidth = mh.childForceExpandHeight = false;
+            var col = UiKit.Rect("Column", mine);
+            var cv = col.gameObject.AddComponent<VerticalLayoutGroup>();
+            cv.childControlWidth = cv.childControlHeight = true;
+            cv.childForceExpandWidth = true;
+            col.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1f;
+            UiKit.Text(col, "Label", "Your friend code", 24f, UiKit.InkSoft);
+            string code = RealFriends.Code;
+            var codeText = UiKit.Text(col, "Code", code ?? "Connecting…", 36f, UiKit.Ink, true);
+            codeText.textWrappingMode = TextWrappingModes.NoWrap;
+            if (code != null)
+            {
+                var copy = UiKit.Button(mine, "Copy", "Copy", UiKit.ButtonStyle.Spring, () =>
+                {
+                    SaveCodeScreen.CopyText(code);
+                    Game.Sfx.Play(Game.SfxKind.Coin, 0.6f);
+                    Hints.Show("Copied! Send it to a friend so they can add you.");
+                }, 26f);
+                var cle = copy.transform.parent.gameObject.AddComponent<LayoutElement>();
+                cle.preferredWidth = 150f; cle.preferredHeight = 68f;
+            }
+
+            var add = UiKit.Rect("Add", card);
+            var ah = add.gameObject.AddComponent<HorizontalLayoutGroup>();
+            ah.spacing = 14f;
+            ah.childAlignment = TextAnchor.MiddleLeft;
+            ah.childControlWidth = ah.childControlHeight = true;
+            ah.childForceExpandWidth = ah.childForceExpandHeight = false;
+            var box = _codeBox = UiKit.Input(add, "FriendCode", "A friend's code, like Miso#1234", false, 80f);
+            box.characterLimit = 40;
+            box.text = _typed;
+            box.onValueChanged.AddListener(t => _typed = t);
+            box.gameObject.GetComponent<LayoutElement>().flexibleWidth = 1f;
+            var send = UiKit.Button(add, "AddFriend", "Add", UiKit.ButtonStyle.Primary, () => AddByCode(box.text), 28f, IconPainter.AddFriend);
+            var sle = send.transform.parent.gameObject.AddComponent<LayoutElement>();
+            sle.preferredWidth = 150f; sle.preferredHeight = 76f;
+
+            if (!string.IsNullOrEmpty(_addStatus))
+            {
+                var status = UiKit.Text(card, "Status", _addStatus, 24f, UiKit.InkSoft, false, TextAlignmentOptions.Center);
+                status.overflowMode = TextOverflowModes.Overflow;
+            }
+        }
+
+        async void AddByCode(string code)
+        {
+            if (_adding) return;
+            _adding = true;
+            string problem = await RealFriends.Add(code);
+            _adding = false;
+            if (this == null) return;
+            if (problem == null)
+            {
+                Game.Sfx.Play(Game.SfxKind.Chest, 0.5f);
+                _typed = "";
+                _addStatus = Loc.F("Request sent to {0}. You'll be friends once they accept.", code.Trim());
+            }
+            else _addStatus = problem;
+            if (IsOpen) OnOpen();
+        }
+
+        /// <summary>People asking to be your friend: yes or no, right here.</summary>
+        void Requests()
+        {
+            foreach (var (id, code) in RealFriends.Requests)
+            {
+                var row = UiKit.Image(_list, "Request", UiKit.Rounded(30), UiKit.Hex("FFF1D6")).rectTransform;
+                var h = row.gameObject.AddComponent<HorizontalLayoutGroup>();
+                h.padding = new RectOffset(22, 18, 16, 16);
+                h.spacing = 14f;
+                h.childAlignment = TextAnchor.MiddleLeft;
+                h.childControlWidth = h.childControlHeight = true;
+                h.childForceExpandWidth = h.childForceExpandHeight = false;
+                row.gameObject.AddComponent<LayoutElement>().minHeight = 110f;
+                var line = UiKit.Text(row, "Line", Loc.F("<b>{0}</b> wants to be your friend", code), 28f, UiKit.Ink);
+                line.overflowMode = TextOverflowModes.Overflow;
+                line.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1f;
+                string memberId = id;
+                var no = UiKit.Button(row, "No", "No", UiKit.ButtonStyle.Secondary, async () =>
+                {
+                    NewStuff.Clear("friends/ask_" + memberId);
+                    await RealFriends.Decline(memberId);
+                }, 26f);
+                var nle = no.transform.parent.gameObject.AddComponent<LayoutElement>();
+                nle.preferredWidth = 110f; nle.preferredHeight = 68f;
+                var yes = UiKit.Button(row, "Accept", "Accept", UiKit.ButtonStyle.Primary, async () =>
+                {
+                    NewStuff.Clear("friends/ask_" + memberId);
+                    if (await RealFriends.Accept(memberId)) { Game.Sfx.Play(Game.SfxKind.Chest, 0.5f); Hints.Show("You're friends now! Visit them from this list."); }
+                    else Hints.Show("Couldn't answer just now. Try again in a moment.");
+                }, 26f);
+                var yle = yes.transform.parent.gameObject.AddComponent<LayoutElement>();
+                yle.preferredWidth = 150f; yle.preferredHeight = 68f;
             }
         }
 
         /// <summary>Asks first, then removes a friend (and sends them home if they are visiting).</summary>
         void Unfriend(FriendProfile who)
         {
-            PromptScreen.Ask("Unfriend?", who, $"Remove {who.name} from your friends? Their island won't be kept any more.", "Unfriend", "Cancel", () =>
+            string line = who.IsReal
+                ? Loc.F("Remove {0} from your friends? You'll need their friend code to add them again.", who.name)
+                : $"Remove {who.name} from your friends? Their island won't be kept any more.";
+            PromptScreen.Ask("Unfriend?", who, line, "Unfriend", "Cancel", () =>
             {
                 Friends.Remove(who);
                 var bot = VisitorBot.Current;

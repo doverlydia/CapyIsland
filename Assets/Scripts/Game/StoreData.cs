@@ -218,7 +218,36 @@ namespace CapyIsland.Game
         /// one-of-a-kind buildings you already own would turn into second copies back home.
         /// </summary>
         public static bool ForSaleWhileVisiting(string name) =>
+            IsChoreItem(name)
+            // Building together (CoBuild): anything that doesn't move a story on.
+            || (CoBuild.Allowed && !StaysHome(name));
+
+        /// <summary>Help a visitor can always give: flower gardens for hungry workers, the Shoo Bomb for pests.</summary>
+        public static bool IsChoreItem(string name) =>
             name == "Deer Bomb" || name.EndsWith(" Garden", System.StringComparison.Ordinal);
+
+        /// <summary>
+        /// Never bought or put down on a friend's island, even when building together: things that
+        /// move someone's story or progress on (the tower, the church, new islands, the wedding
+        /// gifts, characters, shops, hobby kits, animals), and the real bomb, which would knock
+        /// their island back into bubbles. The Shoo Bomb only scares pests off, so it may.
+        /// </summary>
+        public static bool StaysHome(string name)
+        {
+            var def = Get(name);
+            if (!def.IsValid) return true;
+            switch (def.Kind)
+            {
+                case StoreItemKind.Gift: case StoreItemKind.Church: case StoreItemKind.Tower:
+                case StoreItemKind.BridgeGhost: case StoreItemKind.Character: case StoreItemKind.Store:
+                case StoreItemKind.Animal: case StoreItemKind.Tool: case StoreItemKind.Plot:
+                case StoreItemKind.Stove: case StoreItemKind.Sewing: case StoreItemKind.FurnitureShop:
+                case StoreItemKind.Seed: case StoreItemKind.Bomb:
+                    return true;
+                default:
+                    return false;
+            }
+        }
 
         /// <summary>
         /// How many things named this exist: planted or carried items, bubbles holding one, sale

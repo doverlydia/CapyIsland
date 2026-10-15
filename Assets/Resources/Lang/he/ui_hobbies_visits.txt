@@ -1297,3 +1297,150 @@
 
 @ You know every recipe Chef Tofu has. Bravo!
 = אתה מכיר כל מתכון שיש לשף טופו. כל הכבוד!
+
+@ Accept
+= לקבל
+
+@ Connecting…
+= מתחבר…
+
+@ Your friend code
+= קוד החבר שלך
+
+@ Copied! Send it to a friend so they can add you.
+= הועתק! שלח אותו לחבר כדי שיוכל להוסיף אותך.
+
+@ A friend's code, like Miso#1234
+= קוד של חבר, כמו Miso#1234
+
+@ Request sent to {0}. You'll be friends once they accept.
+= הבקשה נשלחה אל {0}. תהיו חברים ברגע שיאשרו.
+
+@ <b>{0}</b> wants to be your friend
+= <b>{0}</b> רוצה להיות חבר שלך
+
+@ You're friends now! Visit them from this list.
+= עכשיו אתם חברים! אפשר לבקר אותם מהרשימה הזאת.
+
+@ Couldn't answer just now. Try again in a moment.
+= לא הצלחנו לענות כרגע. נסה שוב עוד רגע.
+
+@ Remove {0} from your friends? You'll need their friend code to add them again.
+= להסיר את {0} מהחברים שלך? כדי להוסיף אותם שוב תצטרך את קוד החבר שלהם.
+
+@ {0}'s island isn't ready for visitors yet. Try again later!
+= האי של {0} עוד לא מוכן למבקרים. נסה שוב אחר כך!
+
+@ {0} wants to be your friend! Answer in Neighbours.
+= {0} רוצה להיות חבר שלך! אפשר לענות ב"שכנים".
+
+@ {0} isn't home right now, but you can look around their island.
+= {0} לא בבית כרגע, אבל אפשר להסתובב באי שלהם.
+
+@ A friend code looks like Miso#1234: a name, a # and some numbers.
+= קוד חבר נראה כמו Miso#1234: שם, # וכמה מספרים.
+
+@ That's your own friend code!
+= זה קוד החבר שלך!
+
+@ You're friends already!
+= אתם כבר חברים!
+
+@ You've asked already. They'll see it next time they play.
+= כבר שלחת בקשה. הם יראו אותה בפעם הבאה שישחקו.
+
+@ That's as many friends as anyone can have.
+= זה המספר המרבי של חברים שאפשר שיהיו.
+
+@ Nobody has that friend code. Check the name and the numbers.
+= לאף אחד אין את קוד החבר הזה. בדוק את השם ואת המספרים.
+
+@ Couldn't send the request. Try again in a moment.
+= לא הצלחנו לשלוח את הבקשה. נסה שוב עוד רגע.
+
+@ Knocking on {0}'s door…
+= דופק על הדלת של {0}…
+
+@ Couldn't reach them just now. Try again in a moment.
+= לא הצלחנו להגיע אליהם כרגע. נסה שוב עוד רגע.
+
+@ {0} didn't answer. Maybe they're busy. Try again later!
+= {0} לא ענו. אולי הם עסוקים. נסה שוב אחר כך!
+
+@ {0} is visiting someone else right now.
+= {0} מבקרים מישהו אחר כרגע.
+
+@ {0} already has a visitor. Try again a bit later!
+= אצל {0} כבר יש אורח. נסה שוב עוד קצת!
+
+@ {0} can't have visitors right now.
+= {0} לא יכולים לארח כרגע.
+
+@ Couldn't connect to their island. Try again in a moment.
+= לא הצלחנו להתחבר לאי שלהם. נסה שוב עוד רגע.
+
+@ {0} went offline. You can look around, or fly home.
+= {0} התנתקו. אפשר להסתובב, או לטוס הביתה.
+
+@ You're on {0}'s island together! Say hi with an emoji.
+= אתם יחד באי של {0}! תגיד שלום עם אימוג'י.
+
+@ {0} is on the way!
+= {0} בדרך!
+
+@ Couldn't open your island just now. Try again in a moment.
+= לא הצלחנו לפתוח את האי שלך כרגע. נסה שוב עוד רגע.
+
+@ {0} couldn't come after all.
+= {0} לא הצליחו להגיע בסוף.
+
+@ {0} flew home. See you next time!
+= {0} טסו הביתה. נתראה בפעם הבאה!
+
+@ This is {0}'s island. Add them as a friend, then you can ask to build together.
+= זה האי של {0}. הוסף אותם כחברים, ואז תוכל לבקש לבנות יחד.
+
+@ Ask {0} if you can build here first: tap their face in the corner.
+= קודם תשאל את {0} אם אפשר לבנות כאן: הקש על הפנים שלהם בפינה.
+
+@ {0} isn't home. Visit them while they're online to build together.
+= {0} לא בבית. בקר אותם כשהם מחוברים כדי לבנות יחד.
+
+@ Asking {0}…
+= שואל את {0}…
+
+@ {0} said yes! You can build on their island now.
+= {0} הסכימו! עכשיו אפשר לבנות באי שלהם.
+
+@ {0} would rather you just helped out for now.
+= {0} מעדיפים שבינתיים רק תעזור.
+
+@ Build together?
+= לבנות יחד?
+
+@ Let <b>{0}</b> build on your island too? They can always help with chores.
+= לתת ל<b>{0}</b> לבנות גם באי שלך? לעזור במטלות הם יכולים תמיד.
+
+@ Build together
+= לבנות יחד
+
+@ Just chores
+= רק מטלות
+
+@ {0} can build on your island now.
+= {0} יכולים לבנות באי שלך עכשיו.
+
+@ {0} has to go now. Flying you home!
+= {0} צריכים ללכת עכשיו. טסים הביתה!
+
+@ Building
+= בונים
+
+@ Asking…
+= שואל…
+
+@ That one stays on your own island. Put it down at home!
+= את זה משאירים באי שלך. הנח אותו בבית!
+
+@ {0} is offline right now. You can visit when they're online!
+= {0} לא מחוברים כרגע. אפשר לבקר כשהם מחוברים!

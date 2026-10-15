@@ -40,6 +40,22 @@ namespace CapyIsland.EditorTools
             Run(BuildTarget.WebGL, "Builds/WebGL");
         }
 
+        /// <summary>
+        /// A second player for testing friends and live visits: a Development build into
+        /// Builds/WebGLTest (served on localhost), with DevCommands so it can be driven from the
+        /// browser console. Never uploaded anywhere.
+        /// </summary>
+        [MenuItem("CapyIsland/Build/WebGL test player")]
+        public static void BuildWebGLTest()
+        {
+            CommonSettings();
+            PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Gzip;
+            PlayerSettings.WebGL.decompressionFallback = true;
+            PlayerSettings.WebGL.dataCaching = false;
+            PlayerSettings.WebGL.template = "APPLICATION:Default";
+            Run(BuildTarget.WebGL, "Builds/WebGLTest", BuildOptions.Development);
+        }
+
         [MenuItem("CapyIsland/Build/Android APK")]
         public static void BuildAndroid()
         {
@@ -82,7 +98,7 @@ namespace CapyIsland.EditorTools
             return null;
         }
 
-        static void Run(BuildTarget target, string path)
+        static void Run(BuildTarget target, string path, BuildOptions extra = BuildOptions.None)
         {
             // Settings changed in memory can be lost across the build's domain reload: write them now.
             AssetDatabase.SaveAssets();
@@ -92,7 +108,7 @@ namespace CapyIsland.EditorTools
                 locationPathName = path,
                 target = target,
                 targetGroup = BuildPipeline.GetBuildTargetGroup(target),
-                options = BuildOptions.None,
+                options = extra,
             };
             var report = BuildPipeline.BuildPlayer(options);
             var summary = report.summary;

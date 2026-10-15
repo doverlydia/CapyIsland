@@ -30,6 +30,9 @@ namespace CapyIsland.UI
             return c;
         }
 
+        void OnEnable() => CoBuild.Changed += Rebuild;
+        void OnDisable() => CoBuild.Changed -= Rebuild;
+
         void Update()
         {
             if (Time.unscaledTime < _next) return;
@@ -39,6 +42,25 @@ namespace CapyIsland.UI
             if (bot == _shown) return;
             _shown = bot;
             Rebuild();
+        }
+
+        /// <summary>Under your host's face: ask to build together, or a note that you may.</summary>
+        void BuildButton()
+        {
+            if (_shown == null || _shown.As != VisitorBot.Role.Host || !Visit.HostIsFriend) return;
+            if (CoBuild.Allowed)
+            {
+                var note = UiKit.Image(_face, "Building", UiKit.Rounded(14), UiKit.Hex("5DBB63"));
+                UiKit.Place(note.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, -40f), new Vector2(Size + 50f, 34f));
+                note.raycastTarget = false;
+                var t = UiKit.Text(note.transform, "Label", "Building", 20f, Color.white, true, TextAlignmentOptions.Center);
+                UiKit.Stretch(t.rectTransform, 4f, 0f, 4f, 0f);
+                return;
+            }
+            var b = UiKit.Button(_face, "BuildTogether", CoBuild.Asking ? "Asking…" : "Build together", UiKit.ButtonStyle.Spring, CoBuild.Ask, 18f, IconPainter.House);
+            var rt = (RectTransform)b.transform.parent;
+            UiKit.Place(rt, new Vector2(0.5f, 0f), new Vector2(0f, -46f), new Vector2(Size + 96f, 48f));
+            b.interactable = !CoBuild.Asking;
         }
 
         void Rebuild()
@@ -74,6 +96,8 @@ namespace CapyIsland.UI
             b.onClick.AddListener(Tapped);
             hit.gameObject.AddComponent<PressSquash>();
 
+            BuildButton();
+
             _face.localScale = Vector3.one * 0.3f;
             _face.DOScale(1f, 0.3f).SetEase(Ease.OutBack).SetUpdate(true);
         }
@@ -88,7 +112,8 @@ namespace CapyIsland.UI
             {
                 PromptScreen.Ask("Visitor", who, $"{who.name} is visiting your island and helping out.", "Ask to leave", "Let them stay", () =>
                 {
-                    bot.SendHome();
+                    if (bot.Remote) Live.AskToLeave();   // a real friend: their game flies them home
+                    else bot.SendHome();
                     Hints.Show($"{who.name} waves goodbye and heads home.");
                 });
                 return;

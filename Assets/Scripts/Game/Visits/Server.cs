@@ -45,8 +45,37 @@ namespace CapyIsland.Game
         public static bool IsOnline(FriendProfile who)
         {
             if (who == null) return false;
+            if (who.IsReal) return RealFriends.IsOnline(who);
             foreach (var s in Seats) if (!s.IsYou && s.Who.id == who.id) return true;
             return false;
+        }
+
+        /// <summary>
+        /// Real friends who are online always have a seat (taking a stranger's if the server is
+        /// full); ones who went offline leave theirs. Called whenever RealFriends changes.
+        /// </summary>
+        public static void SeatRealFriends()
+        {
+            if (_seats == null) return;
+            bool changed = _seats.RemoveAll(s => !s.IsYou && s.Who.IsReal && !RealFriends.IsOnline(s.Who)) > 0;
+            foreach (var f in RealFriends.All)
+            {
+                if (!RealFriends.IsOnline(f) || _seats.Exists(s => !s.IsYou && s.Who.id == f.id)) continue;
+                var used = new HashSet<int>();
+                foreach (var s in _seats) used.Add(s.Slot);
+                int slot = -1;
+                for (int i = 0; i < Slots; i++) if (!used.Contains(i)) { slot = i; break; }
+                if (slot < 0)
+                {
+                    var stranger = _seats.Find(s => !s.IsYou && !Friends.IsFriend(s.Who.id));
+                    if (stranger == null) continue;
+                    slot = stranger.Slot;
+                    _seats.Remove(stranger);
+                }
+                _seats.Add(new Seat { Slot = slot, Who = f });
+                changed = true;
+            }
+            if (changed) _seats.Sort((a, b) => a.Slot.CompareTo(b.Slot));
         }
 
         /// <summary>Everyone but you, friends first.</summary>
@@ -86,6 +115,7 @@ namespace CapyIsland.Game
             Shuffle(friends, rng);
             foreach (var f in friends)
             {
+                if (f.IsReal) continue;   // seated by SeatRealFriends, only while really online
                 if (_seats.Count >= online) break;
                 if (rng.NextDouble() > 0.6) continue;   // not everyone is on at once
                 _onlineFriends.Add(f.id);
@@ -102,6 +132,7 @@ namespace CapyIsland.Game
                 _seats.Add(new Seat { Slot = TakeSlot(), Who = who });
             }
             _seats.Sort((a, b) => a.Slot.CompareTo(b.Slot));
+            SeatRealFriends();
         }
 
         static void Shuffle<T>(List<T> list, System.Random rng)

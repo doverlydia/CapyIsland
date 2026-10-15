@@ -68,6 +68,7 @@ namespace CapyIsland.Game
                 if (UnityServices.State == ServicesInitializationState.Uninitialized) await UnityServices.InitializeAsync();
                 if (!AuthenticationService.Instance.IsSignedIn) await AuthenticationService.Instance.SignInAnonymouslyAsync();
                 await RefreshPlayerInfo();
+                RealFriends.Start();
                 await CatchUp();
             }
             catch (Exception e)
@@ -78,14 +79,32 @@ namespace CapyIsland.Game
 
         void Update()
         {
+            // Friends see you're here while the game is open (RealFriends).
+            RealFriends.Tick();
+            if (Time.unscaledTime >= _nextHeartbeat && RealFriends.Ready)
+            {
+                _nextHeartbeat = Time.unscaledTime + HeartbeatEvery;
+                _ = RealFriends.Heartbeat(visiting: Visit.Active);
+            }
             if (!_ready || _busy || _blocked || Time.unscaledTime < _nextUpload) return;
             _nextUpload = Time.unscaledTime + UploadEvery;
             _ = UploadIfChanged();
         }
 
-        // Put away (a phone going to the background, a browser tab hidden): send what's new.
-        void OnApplicationPause(bool paused) { if (paused) _ = UploadIfChanged(); }
+        const float HeartbeatEvery = 120f;
+        float _nextHeartbeat;
+
+        // Put away (a phone going to the background, a browser tab hidden): send what's new, and
+        // friends see you go. Back again: they see you come back.
+        void OnApplicationPause(bool paused)
+        {
+            if (paused) { _ = UploadIfChanged(); RealFriends.GoOffline(); }
+            else _nextHeartbeat = 0f;
+        }
+
         void OnApplicationFocus(bool focused) { if (!focused) _ = UploadIfChanged(); }
+
+        void OnApplicationQuit() => RealFriends.GoOffline();
 
         // ---------------------------------------------------------------- accounts
 
@@ -233,6 +252,7 @@ namespace CapyIsland.Game
             await RefreshPlayerInfo();
             self._blocked = false;
             if (AuthenticationService.Instance.PlayerId == before) { self._ready = true; return null; }   // the same account after all
+            RealFriends.Restart();   // that account's friends
             // A different account: this device's link to the cloud starts over, and the two islands are compared.
             PlayerPrefs.DeleteKey(StampPref);
             PlayerPrefs.DeleteKey(HashPref);
@@ -256,7 +276,10 @@ namespace CapyIsland.Game
             self._blocked = true;
             try
             {
+                await RealFriends.ForgetEveryone();
                 await CloudSaveService.Instance.Data.Player.DeleteAllAsync(new PlayerDeleteAllOptions());
+                await CloudSaveService.Instance.Data.Player.DeleteAllAsync(new PlayerDeleteAllOptions(
+                    new Unity.Services.CloudSave.Models.Data.Player.PublicWriteAccessClassOptions()));   // what friends could see
                 await AuthenticationService.Instance.DeleteAccountAsync();   // also signs out and forgets the session
             }
             catch (RequestFailedException e)
@@ -270,8 +293,21 @@ namespace CapyIsland.Game
             PlayerPrefs.Save();
             Username = null;
             HasGoogle = false;
+            RealFriends.Restart();   // no account, no friends (until the next start makes a new one)
             AccountChanged?.Invoke();
             return null;
+        }
+
+        /// <summary>Sends up what friends can see, right now (a friend is about to visit live).</summary>
+        public static async Task PublishNow()
+        {
+            if (!Online || Visit.Active) return;
+            try
+            {
+                await CloudSaveService.Instance.Data.Player.SaveAsync(RealFriends.PublicData(),
+                    new PlayerSaveOptions(new Unity.Services.CloudSave.Models.Data.Player.PublicWriteAccessClassOptions()));
+            }
+            catch (Exception e) { Debug.Log("[CloudSync] Couldn't share the island: " + e.Message); }
         }
 
         static string Problem(RequestFailedException e) =>
@@ -372,6 +408,9 @@ namespace CapyIsland.Game
                     { MetaKey, JsonUtility.ToJson(meta) },
                 }, new PlayerSaveOptions());
                 Remember(meta.stamp, island);
+                // What friends can see: your profile and island, in public data.
+                await CloudSaveService.Instance.Data.Player.SaveAsync(RealFriends.PublicData(),
+                    new PlayerSaveOptions(new Unity.Services.CloudSave.Models.Data.Player.PublicWriteAccessClassOptions()));
             }
             catch (Exception e)
             {
