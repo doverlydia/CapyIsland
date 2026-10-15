@@ -1,0 +1,2 @@
+# Called from C# by name (AndroidJavaClass / AndroidJavaProxy).
+-keep class com.capyisland.google.** { *; }

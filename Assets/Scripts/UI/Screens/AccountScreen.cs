@@ -6,8 +6,9 @@ using UnityEngine.UI;
 namespace CapyIsland.UI
 {
     /// <summary>
-    /// The account window from Settings (CloudSync): make an account — a username and password for
-    /// the island you're on, so another device can open it — or sign in to one made elsewhere.
+    /// The account window from Settings (CloudSync): make an account — Google, or a username and
+    /// password, for the island you're on, so another device can open it — or sign in to one made
+    /// elsewhere.
     /// </summary>
     public class AccountScreen : MonoBehaviour
     {
@@ -16,7 +17,7 @@ namespace CapyIsland.UI
         bool _signIn;
         TMP_InputField _user, _pass;
         TextMeshProUGUI _status;
-        Button _go;
+        Button _go, _google;
         bool _working;
 
         /// <summary>Gives this island a username and password.</summary>
@@ -65,10 +66,24 @@ namespace CapyIsland.UI
             var title = UiKit.Text(card.transform, "Title", _signIn ? "Sign in" : "Make an account", 48f, UiKit.Ink, true, TextAlignmentOptions.Center);
             title.overflowMode = TextOverflowModes.Overflow;
             var about = UiKit.Text(card.transform, "About", _signIn
-                    ? "Sign in with the username and password you made on your other device. If the islands are different, you'll choose which one to keep."
-                    : "Pick a username and password for this island. Then sign in with them on another device, and your island is there too. Write the password down: it can't be reset.",
+                    ? "Open the island from your other device. If the two islands are different, you'll choose which one to keep."
+                    : "Keep this island in an account, and open it on another device too.",
                 28f, UiKit.InkSoft, false, TextAlignmentOptions.Center);
             about.overflowMode = TextOverflowModes.Overflow;
+
+            // Google first, where it works (the phone and the browser; shown in the editor to see the layout).
+            if (GoogleLogin.Available || Application.isEditor)
+            {
+                var googleRow = UiKit.Rect("GoogleRow", card.transform);
+                var gh = googleRow.gameObject.AddComponent<HorizontalLayoutGroup>();
+                gh.childControlWidth = gh.childControlHeight = true;
+                gh.childForceExpandWidth = true;
+                googleRow.gameObject.AddComponent<LayoutElement>().preferredHeight = 96f;
+                _google = UiKit.Button(googleRow, "Google", "Continue with Google", UiKit.ButtonStyle.Secondary, GoGoogle, 32f);
+                var or = UiKit.Text(card.transform, "Or", _signIn ? "Or with your username and password:" : "Or pick a username and password:",
+                    26f, UiKit.InkSoft, true, TextAlignmentOptions.Center);
+                or.overflowMode = TextOverflowModes.Overflow;
+            }
 
             _user = UiKit.Input(card.transform, "Username", "Username", false, 96f);
             _user.characterLimit = 20;
@@ -78,7 +93,7 @@ namespace CapyIsland.UI
             _pass.ForceLabelUpdate();
             if (!_signIn)
             {
-                var rules = UiKit.Text(card.transform, "Rules", "8 to 30 characters, with a capital letter, a small letter, a number and a symbol.", 24f, UiKit.InkSoft, false, TextAlignmentOptions.Center);
+                var rules = UiKit.Text(card.transform, "Rules", "8 to 30 characters, with a capital letter, a small letter, a number and a symbol. Write it down: it can't be reset.", 24f, UiKit.InkSoft, false, TextAlignmentOptions.Center);
                 rules.overflowMode = TextOverflowModes.Overflow;
             }
 
@@ -112,19 +127,53 @@ namespace CapyIsland.UI
                 var why = CloudSync.CheckUsername(user) ?? CloudSync.CheckPassword(pass);
                 if (why != null) { Say(why, UiKit.Danger); return; }
             }
-            _working = true;
-            _go.interactable = false;
+            Busy(true);
             Say(_signIn ? "Signing in…" : "Making your account…", UiKit.InkSoft);
             string problem = _signIn ? await CloudSync.SignIn(user, pass) : await CloudSync.MakeAccount(user, pass);
             if (this == null) return;   // the game reloaded into the other island meanwhile
-            _working = false;
-            _go.interactable = true;
+            Busy(false);
             if (problem != null) { Say(problem, UiKit.Danger); return; }
             Sfx.Play(SfxKind.Chest, 0.6f);
             Hints.Show(_signIn
                 ? Loc.F("Signed in as {0}.", user)
                 : Loc.F("Your island now has an account: {0}. Sign in with it on your other device.", user));
             Destroy(gameObject);
+        }
+
+        /// <summary>
+        /// Continue with Google, from either window: a Google account new to the game takes this
+        /// island; one that already has an island opens it here (CloudSync.UseGoogle).
+        /// </summary>
+        async void GoGoogle()
+        {
+            if (_working) return;
+            Busy(true);
+            Say("Waiting for Google…", UiKit.InkSoft);
+            var answer = await GoogleLogin.Ask();
+            if (this == null) return;
+            if (answer.Token == null)
+            {
+                Busy(false);
+                Say(answer.Cancelled ? "" : answer.Problem, UiKit.Danger);
+                return;
+            }
+            Say("Signing in…", UiKit.InkSoft);
+            var (problem, switched) = await CloudSync.UseGoogle(answer.Token);
+            if (this == null) return;   // the game reloaded into the other island meanwhile
+            Busy(false);
+            if (problem != null) { Say(problem, UiKit.Danger); return; }
+            Sfx.Play(SfxKind.Chest, 0.6f);
+            Hints.Show(switched
+                ? "Signed in with Google."
+                : "Your island is now kept with your Google account. On your other device, choose Continue with Google.");
+            Destroy(gameObject);
+        }
+
+        void Busy(bool working)
+        {
+            _working = working;
+            _go.interactable = !working;
+            if (_google != null) _google.interactable = !working;
         }
 
         void Say(string line, Color colour)

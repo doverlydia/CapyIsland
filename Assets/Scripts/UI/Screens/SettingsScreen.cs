@@ -389,9 +389,11 @@ namespace CapyIsland.UI
             if (_account != null)
             {
                 var label = _account.Find("Label")?.GetComponent<TextMeshProUGUI>();
-                bool named = CloudSync.Username != null;
-                if (label != null) label.text = named ? Loc.F("Signed in as {0}", CloudSync.Username) : "Play on another device";
-                _accountButton.SetActive(!named);
+                if (label != null)
+                    label.text = CloudSync.Username != null ? Loc.F("Signed in as {0}", CloudSync.Username)
+                        : CloudSync.HasGoogle ? "Signed in with Google"
+                        : "Play on another device";
+                _accountButton.SetActive(!CloudSync.Linked);
             }
             _easyOptions.SetActive(Accessibility.Enabled);
             foreach (var (l, pill, label) in _languages)

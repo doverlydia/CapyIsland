@@ -91,8 +91,14 @@ namespace CapyIsland.Game
         /// <summary>Connected to the cloud (account features can be offered).</summary>
         public static bool Online => UnityServices.State == ServicesInitializationState.Initialized && AuthenticationService.Instance.IsSignedIn;
 
-        /// <summary>The username this island's account goes by, or null while it's still the invisible one.</summary>
+        /// <summary>The username this island's account goes by, or null while it has none.</summary>
         public static string Username { get; private set; }
+
+        /// <summary>This island's account opens with Google.</summary>
+        public static bool HasGoogle { get; private set; }
+
+        /// <summary>The account can be opened on another device (it has a username or Google), so it's no longer the invisible one.</summary>
+        public static bool Linked => Username != null || HasGoogle;
 
         static async Task RefreshPlayerInfo()
         {
@@ -100,6 +106,7 @@ namespace CapyIsland.Game
             {
                 var info = await AuthenticationService.Instance.GetPlayerInfoAsync();
                 Username = string.IsNullOrEmpty(info?.Username) ? null : info.Username;
+                HasGoogle = !string.IsNullOrEmpty(info?.GetGoogleId());
             }
             catch (Exception) { /* offline: keep what we knew */ }
             AccountChanged?.Invoke();
@@ -163,7 +170,47 @@ namespace CapyIsland.Game
             if (string.IsNullOrWhiteSpace(user) || string.IsNullOrEmpty(pass)) return "Type your username and password.";
             if (!Online || Instance == null) return "Can't reach the internet right now. Try again in a moment.";
             if (user == Username) return "This device is already signed in to that account.";
+            return await SwitchTo(() => AuthenticationService.Instance.SignInWithUsernamePasswordAsync(user, pass),
+                "That username and password don't match.");
+        }
+
+        /// <summary>
+        /// With a Google ID token (GoogleLogin): if that Google account is new to the game, this
+        /// island's account now opens with it, and the island stays where it is. If it already has an
+        /// island (made on another device), this device signs in to that one, as <see cref="SignIn"/>
+        /// does. Returns null, or what went wrong; <c>switched</c> says which of the two happened.
+        /// </summary>
+        public static async Task<(string problem, bool switched)> UseGoogle(string idToken)
+        {
+            if (!Online || Instance == null) return ("Can't reach the internet right now. Try again in a moment.", false);
+            if (!HasGoogle)
+            {
+                try
+                {
+                    await AuthenticationService.Instance.LinkWithGoogleAsync(idToken);
+                    await RefreshPlayerInfo();
+                    return (null, false);
+                }
+                catch (AuthenticationException e) when (e.ErrorCode == AuthenticationErrorCodes.AccountAlreadyLinked)
+                {
+                    // That Google account already has an island: open it instead.
+                }
+                catch (RequestFailedException e) { return (Problem(e), false); }
+            }
+            string problem = await SwitchTo(() => AuthenticationService.Instance.SignInWithGoogleAsync(idToken),
+                "Google sign-in didn't work. Try again in a moment.");
+            return (problem, problem == null);
+        }
+
+        /// <summary>
+        /// Signs this device in to another account. This island is sent up first, so it isn't lost;
+        /// if the sign-in fails, the old account comes back; if it works, the account's island is
+        /// compared with this one and Old Yuzu asks which to keep.
+        /// </summary>
+        static async Task<string> SwitchTo(Func<Task> signIn, string refused)
+        {
             var self = Instance;
+            string before = AuthenticationService.Instance.PlayerId;
             self._ready = false;
             self._blocked = true;
             try
@@ -171,7 +218,7 @@ namespace CapyIsland.Game
                 await self.UploadIfChanged(evenIfBlocked: true);
                 // Not clearing the stored session: if the new sign-in fails, the old one comes back.
                 AuthenticationService.Instance.SignOut(false);
-                await AuthenticationService.Instance.SignInWithUsernamePasswordAsync(user, pass);
+                await signIn();
             }
             catch (RequestFailedException e)
             {
@@ -179,15 +226,16 @@ namespace CapyIsland.Game
                 self._blocked = false;
                 self._ready = true;
                 return e is AuthenticationException || e.ErrorCode != CommonErrorCodes.TransportError && e.ErrorCode != CommonErrorCodes.Timeout
-                    ? "That username and password don't match."
+                    ? refused
                     : Problem(e);
             }
+            await RefreshPlayerInfo();
+            self._blocked = false;
+            if (AuthenticationService.Instance.PlayerId == before) { self._ready = true; return null; }   // the same account after all
             // A different account: this device's link to the cloud starts over, and the two islands are compared.
             PlayerPrefs.DeleteKey(StampPref);
             PlayerPrefs.DeleteKey(HashPref);
             PlayerPrefs.Save();
-            await RefreshPlayerInfo();
-            self._blocked = false;
             try { await self.CatchUp(); }
             catch (Exception e) { Debug.Log("[CloudSync] Signed in, but couldn't compare islands yet: " + e.Message); self._ready = true; }
             return null;

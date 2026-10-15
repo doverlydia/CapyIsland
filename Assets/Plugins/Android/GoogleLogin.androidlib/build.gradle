@@ -1,0 +1,36 @@
+// Sign in with Google on Android (Credential Manager), for GoogleLogin.cs.
+apply plugin: 'com.android.library'
+
+dependencies {
+    implementation 'androidx.credentials:credentials:1.3.0'
+    implementation 'androidx.credentials:credentials-play-services-auth:1.3.0'
+    implementation 'com.google.android.libraries.identity.googleid:googleid:1.1.1'
+}
+
+android {
+    namespace 'com.capyisland.google'
+    // The same SDK and build tools as the rest of Unity's project (its gradle.properties).
+    compileSdk((findProperty('unity.compileSdkVersion') ?: '36') as int)
+    buildToolsVersion = findProperty('unity.buildToolsVersion') ?: '36.0.0'
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src/main/java']
+        }
+    }
+
+    defaultConfig {
+        minSdk 25
+        consumerProguardFiles 'proguard.txt'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    lint {
+        abortOnError false
+    }
+}

@@ -481,14 +481,23 @@
 @ Password
 = סיסמה
 
-@ Sign in with the username and password you made on your other device. If the islands are different, you'll choose which one to keep.
-= היכנס עם שם המשתמש והסיסמה שיצרת במכשיר האחר שלך. אם האיים שונים, תבחר איזה מהם לשמור.
+@ Open the island from your other device. If the two islands are different, you'll choose which one to keep.
+= פתח את האי מהמכשיר האחר שלך. אם שני האיים שונים, תבחר איזה מהם לשמור.
 
-@ Pick a username and password for this island. Then sign in with them on another device, and your island is there too. Write the password down: it can't be reset.
-= בחר שם משתמש וסיסמה לאי הזה. אחר כך היכנס איתם במכשיר אחר, והאי שלך יהיה שם גם. רשום את הסיסמה: אי אפשר לאפס אותה.
+@ Keep this island in an account, and open it on another device too.
+= שמור את האי הזה בחשבון, ותוכל לפתוח אותו גם במכשיר אחר.
 
-@ 8 to 30 characters, with a capital letter, a small letter, a number and a symbol.
-= 8 עד 30 תווים, עם אות גדולה, אות קטנה, מספר וסימן (באנגלית).
+@ Continue with Google
+= המשך עם Google
+
+@ Or pick a username and password:
+= או בחר שם משתמש וסיסמה:
+
+@ Or with your username and password:
+= או עם שם המשתמש והסיסמה שלך:
+
+@ 8 to 30 characters, with a capital letter, a small letter, a number and a symbol. Write it down: it can't be reset.
+= 8 עד 30 תווים, עם אות גדולה, אות קטנה, מספר וסימן (באנגלית). רשום אותה: אי אפשר לאפס אותה.
 
 @ Signing in…
 = מתחבר…
@@ -528,3 +537,24 @@
 
 @ Something went wrong. Try again in a moment.
 = משהו השתבש. נסה שוב עוד רגע.
+
+@ Waiting for Google…
+= מחכה ל־Google…
+
+@ Signed in with Google
+= מחובר עם Google
+
+@ Signed in with Google.
+= מחובר עם Google.
+
+@ Your island is now kept with your Google account. On your other device, choose Continue with Google.
+= האי שלך שמור עכשיו בחשבון ה־Google שלך. במכשיר האחר, בחר "המשך עם Google".
+
+@ Google sign-in isn't available here.
+= כניסה עם Google לא זמינה כאן.
+
+@ Add a Google account to this phone first, in its settings.
+= הוסף קודם חשבון Google לטלפון הזה, בהגדרות שלו.
+
+@ Google sign-in didn't work. Try again in a moment.
+= הכניסה עם Google לא הצליחה. נסה שוב עוד רגע.
