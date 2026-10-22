@@ -1,0 +1,25 @@
+# Hebrew for the help pages about travel (UI/Help/HelpDemos.Travel.cs): the map and the bridges. The movies themselves only use words the game already has; these are the corrected steps for HelpTopics.
+
+@ Every island is on it. The ones a bridge joins to yours are open; a padlock means its bridge isn't open yet.
+= כל האיים נמצאים עליה. איים שגשר מחבר לאי שלך פתוחים; מנעול אומר שהגשר שלהם עוד לא פתוח.
+
+@ Press your own pin, the one that says You, drag it onto an open island and let go. You're there in a puff!
+= לחץ על הסיכה שלך, זו שכתוב עליה "זה אתה", גרור אותה לאי פתוח ועזוב. אתה שם בן רגע!
+
+@ Drop it on a padlocked island and it springs back: open that island's bridge first.
+= אם תעזוב אותה על אי נעול, היא קופצת בחזרה: קודם פתח את הגשר של האי הזה.
+
+@ Pay a spirit to raise a bridge to a new island.
+= שלם לרוח כדי שתרים גשר לאי חדש.
+
+@ New islands are reached by bridges. A spirit waiting on an island you can walk to will raise the next one.
+= לאיים חדשים מגיעים בגשרים. רוח שמחכה על אי שאפשר ללכת אליו תרים את הגשר הבא.
+
+@ Tap the spirit to see its price, then tap Purchase.
+= הקש על הרוח כדי לראות את המחיר שלה, ואז הקש על קנייה.
+
+@ Up comes the bridge, with a red gate over its middle. The new island may have the next spirit waiting.
+= הגשר עולה מהמים, ושער אדום ניצב באמצעו. ייתכן שעל האי החדש כבר מחכה הרוח הבאה.
+
+@ Some spirits set their price by how much you make and how much you hold.
+= יש רוחות שקובעות את המחיר לפי כמה אתה מייצר וכמה יש לך.

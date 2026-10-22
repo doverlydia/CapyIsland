@@ -258,3 +258,75 @@
 
 @ Your burrow is bare! Pop the bubble: there's a Furniture Shop inside.
 = המחילה שלך ריקה! פוצץ את הבועה: יש בתוכה חנות רהיטים.
+
+@ Chat?
+= לשוחח?
+
+@ Chat with <b>{0}</b>? You can turn it off any time: tap their face in the corner.
+= לשוחח עם <b>{0}</b>? אפשר לכבות את זה בכל רגע: הקש על הפרצוף בפינה.
+
+@ Allow chat
+= אפשר צ'אט
+
+@ You can chat with {0} now.
+= עכשיו אתה יכול לשוחח עם {0}.
+
+@ Chat with {0} is off.
+= הצ'אט עם {0} כבוי.
+
+@ {0} turned chat on. Tap the chat button to talk!
+= {0} הפעיל את הצ'אט. הקש על כפתור הצ'אט כדי לדבר!
+
+@ {0} turned chat off.
+= {0} כיבה את הצ'אט.
+
+@ Turn chat on
+= הפעל צ'אט
+
+@ Turn chat off
+= כבה צ'אט
+
+@ Chat
+= צ'אט
+
+@ Say something…
+= כתוב משהו…
+
+@ Send
+= שלח
+
+@ Nothing said yet. Say hello!
+= עוד לא נאמר כלום. תגיד שלום!
+
+@ Block?
+= לחסום?
+
+@ Block {0}? They won't be able to visit you, message you or send you friend requests. You can unblock them later in Friends.
+= לחסום את {0}? הוא לא יוכל לבקר אותך, לשלוח לך הודעות או לבקש להיות חבר שלך. אפשר לבטל את החסימה אחר כך בחברים.
+
+@ Block
+= חסום
+
+@ {0} is blocked.
+= {0} חסום.
+
+@ {0} is unblocked.
+= החסימה של {0} בוטלה.
+
+@ Blocked players
+= שחקנים חסומים
+
+@ Unblock
+= בטל חסימה
+
+@ Invite everyone on this server to your island. A contest takes the whole island you're on, or its shore for fishing. Start a fishing contest by the water.
+= הזמן את כל מי שבשרת לאי שלך. תחרות מתקיימת על כל האי שאתה עומד עליו, ובדיג על החוף שלו. תתחיל תחרות דיג ליד המים.
+
+@ From quests, daily gifts, hobbies and shaking fruit trees.
+= ממשימות, ממתנות יומיות, מתחביבים ומניעור עצי פרי.
+
+@ Everyone here can chat! You'll see what your friends say; others show as …
+= כולם כאן יכולים לשוחח! תראה מה החברים שלך אומרים; של אחרים יופיע …
+
+@ Asked
+= ביקשת

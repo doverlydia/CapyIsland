@@ -131,6 +131,8 @@ namespace CapyIsland.Game
             new() { Id = "Grey",    Name = "Pebble",    Personality = "A very serious cat. Secretly adores being petted." },
             new() { Id = "Siamese", Name = "Miso Jr.",  Personality = "Chatty. Has opinions about your fishing technique." },
             new() { Id = "White",   Name = "Snowball",  Personality = "Fluffy, gentle and fond of the hot spring." },
+            // Old Yuzu's cat: never a stray, he shows himself once she is warm again (Horaira).
+            new() { Id = Horaira.Id, Name = StoryText.Yuzu.HorairaName, Personality = "Old Yuzu's cat. Gentle, a little bit glowy, and never far from her side." },
         };
 
         public static CropKind Crop(string id) => System.Array.Find(Crops, c => c.Id == id);
@@ -163,6 +165,7 @@ namespace CapyIsland.Game
             if (item.StartsWith("dish:")) return Art("Dish_" + item.Substring(5));
             if (item == "mat:Silk") return Art("Bug_Silkworm");
             if (item.StartsWith("bait:")) return Art("Bait_" + item.Substring(5));
+            if (item == MermaidCharms.Item) return Art("Charm_Mermaid");
             return null;
         }
 
@@ -175,6 +178,7 @@ namespace CapyIsland.Game
             if (item == "dish:Bizarre") return "Bizarre Food";
             if (item == "mat:Silk") return "Silk";
             if (item.StartsWith("bait:")) return Baits.ById(item.Substring(5))?.Name ?? "Bait";
+            if (item == MermaidCharms.Item) return StoryText.Charm.Name;
             if (item.StartsWith("dish:")) return Dish(item.Substring(5))?.Name ?? "Dish";
             return item;
         }

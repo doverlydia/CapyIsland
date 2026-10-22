@@ -15,14 +15,20 @@ namespace CapyIsland.Game
     /// yes or no and turns up a little later (your game plays them, and Live shows them to
     /// everyone else). A party is just company: guests wander about and lend a hand.
     ///
-    /// <b>A contest</b> happens where you stand when you host it (a shore for fishing, among trees
-    /// for birds), inside a ring marked with glitter (ContestArena), where fish, bugs and birds turn
-    /// up far more often while it runs. Guests land there. When at least two are present the host
-    /// presses Start: five minutes, and whoever catches the most wins. Late arrivals join in with
-    /// what's left of the clock. Step out of the ring and you have ten seconds to come back, or
-    /// you're out of that round. Everyone keeps what they catch (the catches are real ones: they go
-    /// in the journal and count for the day's goal and the week's contest). Then the leaderboard,
-    /// and the host can run another round or end it.
+    /// <b>A contest</b> happens on the island you host it from: the whole island for bugs and
+    /// birds, its shore for fishing. Playtesters found a small ring too fiddly to stay in; an island
+    /// has edges everyone already understands, and a bridge is the obvious way out. The area
+    /// glows while it's on (EventGlow: the sea all along the island's coast, and for anything but
+    /// fishing its land too), so it stands out on the map as well, and fish, bugs and birds
+    /// turn up around you far more often while you're in it. Guests land there. When at least two
+    /// are present the host presses Start: five minutes, and whoever catches the most wins. Late
+    /// arrivals join in with what's left of the clock. Cross a bridge off the island (or, fishing,
+    /// wander inland away from the water) and you have ten seconds to come back, or you're out of
+    /// that round. Out isn't for good: come back into the area while the round still runs and
+    /// you're asked whether to join in again (once each time you come back), with what you'd
+    /// caught before still on the board. Everyone keeps what they catch (the catches are real
+    /// ones: they go in the journal and count for the day's goal and the week's contest). Then the
+    /// leaderboard, and the host can run another round or end it.
     ///
     /// The host's game keeps the clock and the scores and tells everyone (Live, "gs" notes);
     /// visitors tell it their catches. Only hobbies you have unlocked can be hosted, and a contest
@@ -32,8 +38,12 @@ namespace CapyIsland.Game
     {
         public const float ContestSeconds = 300f, OutGrace = 10f;
 
-        /// <summary>The contest ring's radius, in world units (about six steps across on screen each way).</summary>
-        public const float ArenaRadius = 150f;
+        /// <summary>
+        /// How close to the water (Unity units) still counts as "on the shore" for a fishing
+        /// contest: a little more than a cast's reach (Fishing.AtShore is 2.6), so stepping back to
+        /// untangle the line doesn't start the countdown.
+        /// </summary>
+        public const float ShoreBand = 4f;
 
         public enum Phase { Lobby, Running, Results }
 
@@ -58,6 +68,9 @@ namespace CapyIsland.Game
             public string kind, host;
             public int phase, round;
             public float x, y, left;
+            // The event's island plus one, so a host on an older build (no field, read as 0)
+            // can't be mistaken for island 0: then it's worked out from x, y instead.
+            public int island1;
             public bool over;
             public List<Player> players = new();
         }
@@ -75,7 +88,12 @@ namespace CapyIsland.Game
 
         public static GatheringKind Kind { get; private set; }
         public static Phase Now { get; private set; }
+
+        /// <summary>Where the host stood to start it: a meeting point on the event island (guests land near it).</summary>
         public static Vector2 Arena { get; private set; }
+
+        /// <summary>The island it's on (LandMap's index, the same on every player's game), or -1 when nothing's on.</summary>
+        public static int EventIsland { get; private set; } = -1;
         public static string HostName { get; private set; }
         public static int Round { get; private set; }
 
@@ -102,7 +120,7 @@ namespace CapyIsland.Game
             }
         }
 
-        /// <summary>When the out-of-the-ring countdown runs out (realtime), or 0 while you're inside.</summary>
+        /// <summary>When the left-the-contest-area countdown runs out (realtime), or 0 while you're in it.</summary>
         public static float OutAt { get; private set; }
 
         /// <summary>Anything about the gathering changed (the panel redraws).</summary>
@@ -132,6 +150,9 @@ namespace CapyIsland.Game
             Changed = null;
             Finished = null;
             OutAt = 0f;
+            EventIsland = -1;
+            _rejoinAsked = _backInArea = false;
+            _rejoinRound = -1;
         }
 
         static void Notify() => Changed?.Invoke();
@@ -194,30 +215,64 @@ namespace CapyIsland.Game
             var king = UnityEngine.Object.FindFirstObjectByType<PlayerAvatar>();
             if (king == null) return "Can't find you on the island!";
             Vector2 at = king.transform.position;
+            int island = IslandFor(at);
             switch (kind)
             {
                 case GatheringKind.Fishing:
+                    // A fishing contest is the shore of an island, so it starts from one (not a bridge).
                     if (!Fishing.WaterNear(at, 2.6f).HasValue) return "Stand at the water's edge to host a fishing contest there.";
+                    if (LandMap.Instance != null && LandMap.Instance.IslandAt(at) < 0)
+                        return "Step off the bridge onto an island's shore to host a fishing contest there.";
                     break;
                 case GatheringKind.Birds:
-                    if (TreesNear(at) < 2) return "Stand among some trees to host a birdwatching contest there.";
+                    if (CountNodes(island, NodeFamily.Tree) < 2) return "This island doesn't have enough trees for a birdwatching contest. Try one with more.";
                     break;
                 case GatheringKind.Bugs:
-                    if (TreesNear(at) + FlowersNear(at) < 2) return "Stand near trees or flowers to host a bug contest there.";
+                    if (CountNodes(island, NodeFamily.Tree) + CountNodes(island, NodeFamily.Flower) < 2)
+                        return "This island doesn't have enough trees or flowers for a bug contest. Try one with more.";
                     break;
             }
             return null;
         }
 
-        static int TreesNear(Vector2 at) => CountNodes(at, NodeFamily.Tree);
-        static int FlowersNear(Vector2 at) => CountNodes(at, NodeFamily.Flower);
-
-        static int CountNodes(Vector2 at, NodeFamily family)
+        /// <summary>Trees or flowers growing on an island.</summary>
+        static int CountNodes(int island, NodeFamily family)
         {
+            var land = LandMap.Instance;
             int n = 0;
             foreach (var node in UnityEngine.Object.FindObjectsByType<Harvestable>(FindObjectsSortMode.None))
-                if (node.Family == family && node.InWorld && BunniSpace.WorldDistance(node.transform.position, at) < ArenaRadius) n++;
+                if (node.Family == family && node.InWorld && (land == null || land.IslandAt(node.transform.position) == island)) n++;
             return n;
+        }
+
+        /// <summary>
+        /// The island a spot belongs to: the one under it, or, on a bridge, the nearest island's
+        /// land (so hosting from a bridge still picks somewhere sensible). 0 if all else fails.
+        /// </summary>
+        static int IslandFor(Vector2 at)
+        {
+            var land = LandMap.Instance;
+            if (land == null) return 0;
+            int here = land.IslandAt(at);
+            if (here >= 0) return here;
+            for (float r = 0.5f; r <= 30f; r += 0.5f)
+                for (int a = 0; a < 16; a++)
+                {
+                    float ang = a * Mathf.PI / 8f;
+                    int island = land.IslandAt(at + new Vector2(Mathf.Cos(ang), Mathf.Sin(ang) * 0.5f) * r);
+                    if (island >= 0) return island;
+                }
+            return 0;
+        }
+
+        /// <summary>The event island's name as the player reads it ("Pebble Cove").</summary>
+        public static string AreaName
+        {
+            get
+            {
+                var piece = LandMap.Instance != null && EventIsland >= 0 ? LandMap.Instance.Island(EventIsland) : null;
+                return piece != null ? StoryText.Name(piece.name) : "the island";
+            }
         }
 
         /// <summary>How many people could be asked: real players online, people on your private server, and the islanders about.</summary>
@@ -242,6 +297,7 @@ namespace CapyIsland.Game
             Now = Phase.Lobby;
             Round = 0;
             Arena = king != null ? (Vector2)king.transform.position : Vector2.zero;
+            EventIsland = IslandFor(Arena);
             HostName = PlayerProfile.Name;
             _players.Clear();
             _players.Add(new Player { id = Live.MyId, name = PlayerProfile.Name });
@@ -255,6 +311,7 @@ namespace CapyIsland.Game
             {
                 Hosting = false;
                 _players.Clear();
+                EventIsland = -1;
                 Notify();
                 Hints.Show("Couldn't open your island just now. Try again in a moment.");
                 return;
@@ -365,6 +422,9 @@ namespace CapyIsland.Game
             _botSkill.Clear();
             OutAt = 0f;
             Now = Phase.Lobby;
+            EventIsland = -1;
+            _rejoinAsked = false;
+            _rejoinRound = -1;
         }
 
         // ---------------------------------------------------------------- who's here (host)
@@ -394,7 +454,10 @@ namespace CapyIsland.Game
             Notify();
         }
 
-        /// <summary>A visitor's contest news: a catch, or that they left the ring for too long.</summary>
+        /// <summary>
+        /// A visitor's contest news: a catch, that they left the contest's area for too long
+        /// ("out"), or that they came back and chose to join the round again ("in").
+        /// </summary>
         public static void FromGuest(string id, string what)
         {
             if (!Hosting) return;
@@ -402,6 +465,7 @@ namespace CapyIsland.Game
             if (p == null) return;
             if (what == "catch" && Now == Phase.Running && p.playing && !p.isOut) p.score++;
             else if (what == "out" && Now == Phase.Running && p.playing) p.isOut = true;
+            else if (what == "in" && Now == Phase.Running && p.playing && p.isOut) p.isOut = false;
             else return;
             Broadcast();
             Notify();
@@ -470,11 +534,17 @@ namespace CapyIsland.Game
             Now = (Phase)s.phase;
             Round = s.round;
             Arena = new Vector2(s.x, s.y);
+            EventIsland = s.island1 > 0 ? s.island1 - 1 : IslandFor(Arena);
             EndsAt = Time.realtimeSinceStartup + s.left;
             _players.Clear();
             _players.AddRange(s.players);
+            // Just chose to join back in: news the host sent before it heard that mustn't put you
+            // straight back out (or drop the catches in between).
+            var me = Me;
+            if (me != null && me.isOut && Now == Phase.Running && Round == _rejoinRound
+                && Time.realtimeSinceStartup - _rejoinedAt < 5f) me.isOut = false;
 
-            if (first && IsContest) StepIntoRing();
+            if (first && IsContest) StepIntoArea();
             if (Now == Phase.Running && before != Phase.Running)
             {
                 OutAt = 0f;
@@ -485,17 +555,99 @@ namespace CapyIsland.Game
             Notify();
         }
 
-        /// <summary>Just landed at a contest: straight over to where it's happening.</summary>
-        static void StepIntoRing()
+        /// <summary>
+        /// Just landed at a contest: straight over to where it's happening, unless you're already
+        /// there. Near where the host started it if there's room, so everyone meets up.
+        /// </summary>
+        static void StepIntoArea()
         {
             var king = UnityEngine.Object.FindFirstObjectByType<PlayerAvatar>();
-            if (king == null || BunniSpace.WorldDistance(king.transform.position, Arena) < ArenaRadius * 0.7f) return;
+            if (king == null || InArea(king.transform.position)) return;
+            var p = SpotInArea(Arena, 5f);
+            king.transform.position = new Vector3(p.x, p.y, king.transform.position.z);
+        }
+
+        // ---------------------------------------------------------------- the event's area
+
+        /// <summary>
+        /// Is this spot part of the gathering's area? The event island for bugs, birds and a party;
+        /// for fishing, the island's shore: within <see cref="ShoreBand"/> of the water. A bridge
+        /// belongs to no island, so stepping onto one is leaving.
+        /// </summary>
+        public static bool InArea(Vector2 at) => AreaHas(at, EventIsland, Kind == GatheringKind.Fishing);
+
+        /// <summary>The same test for any island (a bot keeping to it uses this too).</summary>
+        public static bool AreaHas(Vector2 at, int island, bool shore)
+        {
+            var land = LandMap.Instance;
+            if (land == null || island < 0) return true;   // nothing to measure against: don't throw anyone out
+            if (land.IslandAt(at) != island) return false;
+            return !shore || Fishing.WaterNear(at, ShoreBand).HasValue;
+        }
+
+        /// <summary>On the event island at all (shore or not): where contest bugs and birds may turn up.</summary>
+        public static bool OnEventIsland(Vector2 at)
+        {
+            var land = LandMap.Instance;
+            return land == null || EventIsland < 0 || land.IslandAt(at) == EventIsland;
+        }
+
+        /// <summary>A spot in the area near <paramref name="near"/> (Unity units), or anywhere in it if there's none close.</summary>
+        public static Vector2 SpotInArea(Vector2 near, float within) =>
+            SpotIn(EventIsland, Kind == GatheringKind.Fishing, near, within);
+
+        /// <summary>
+        /// A spot on <paramref name="island"/> (on its shore, if <paramref name="shore"/>) near a
+        /// point, or anywhere on it when nothing close fits. Shore spots come from just inside the
+        /// island's own land circles, where the beach is.
+        /// </summary>
+        public static Vector2 SpotIn(int island, bool shore, Vector2 near, float within)
+        {
             for (int i = 0; i < 30; i++)
             {
-                var p = BunniSpace.RandomPointInCircle(Arena, ArenaRadius * 0.5f);
-                if (!BunniSpace.PointOnLand(p)) continue;
-                king.transform.position = new Vector3(p.x, p.y, king.transform.position.z);
-                return;
+                var p = near + UnityEngine.Random.insideUnitCircle * within;
+                if (AreaHas(p, island, shore)) return p;
+            }
+            var land = LandMap.Instance;
+            if (land == null || island < 0) return near;
+            var piece = land.Island(island);
+            if (shore && piece != null && piece.circles.Count > 0)
+            {
+                for (int i = 0; i < 80; i++)
+                {
+                    var c = piece.circles[UnityEngine.Random.Range(0, piece.circles.Count)];
+                    float ang = UnityEngine.Random.value * Mathf.PI * 2f;
+                    var w = new Vector2(c.x, c.y) + new Vector2(Mathf.Cos(ang), Mathf.Sin(ang)) * (c.z - UnityEngine.Random.Range(15f, 50f));
+                    var u = LandMap.WorldToUnity(w);
+                    if (AreaHas(u, island, true)) return u;
+                }
+            }
+            return land.RandomSpotOnIsland(island, 20f);
+        }
+
+        /// <summary>Where to head to get back into the area: the nearest water when you've wandered inland, else the meeting point.</summary>
+        public static Vector2 WayBack(Vector2 from)
+        {
+            if (Kind == GatheringKind.Fishing && OnEventIsland(from))
+            {
+                var water = Fishing.WaterNear(from, 12f);
+                if (water.HasValue) return water.Value;
+            }
+            return MeetingPoint;
+        }
+
+        static Vector3 _meetKey = new(float.NaN, 0f, 0f);
+        static Vector2 _meet;
+
+        /// <summary>Where the host started it, or (if that's off the area: a bridge) a spot in the area beside it. Worked out once.</summary>
+        static Vector2 MeetingPoint
+        {
+            get
+            {
+                var key = new Vector3(Arena.x, Arena.y, EventIsland * 10 + (int)Kind);
+                if (key == _meetKey) return _meet;
+                _meetKey = key;
+                return _meet = InArea(Arena) ? Arena : SpotInArea(Arena, 5f);
             }
         }
 
@@ -520,24 +672,25 @@ namespace CapyIsland.Game
             Notify();
         }
 
-        /// <summary>Should hobbies be generous here, now? (A running contest of that hobby, and you inside the ring.)</summary>
+        /// <summary>
+        /// Should hobbies be generous here, now? (A running contest of that hobby, and you in its
+        /// area.) The fish, bugs and birds then turn up around you, wherever you are on it.
+        /// </summary>
         public static bool Boosting(Hobby hobby)
         {
             if (!Active || !IsContest || Now != Phase.Running || HobbyOf(Kind) != hobby) return false;
             var king = UnityEngine.Object.FindFirstObjectByType<PlayerAvatar>();
-            return king != null && InRing(king.transform.position);
+            return king != null && InArea(king.transform.position);
         }
-
-        public static bool InRing(Vector2 at) => BunniSpace.WorldDistance(at, Arena) <= ArenaRadius;
 
         // ---------------------------------------------------------------- every frame (LiveRunner)
 
         internal static void Tick()
         {
-            if (!Active || !IsContest) ContestArena.Clear();
+            if (!Active || EventIsland < 0) EventGlow.Clear();
             if (!Active) return;
-            if (IsContest && !Visit.Travelling) ContestArena.Ensure(Arena, ArenaRadius, Kind, Now == Phase.Running);
-            WatchMyRing();
+            if (EventIsland >= 0 && !Visit.Travelling) EventGlow.Ensure(EventIsland, Kind, Now == Phase.Running);
+            WatchMyArea();
             if (!Hosting) return;
 
             // Islanders turning up.
@@ -569,18 +722,29 @@ namespace CapyIsland.Game
         static void BotArrives(FriendProfile who)
         {
             var king = UnityEngine.Object.FindFirstObjectByType<PlayerAvatar>();
-            Vector2 centre = IsContest ? Arena : king != null ? (Vector2)king.transform.position : Arena;
-            Vector2 at = centre;
-            for (int i = 0; i < 30; i++)
+            Vector2 at = Arena;
+            if (IsContest)
             {
-                var p = BunniSpace.RandomPointInCircle(centre, IsContest ? ArenaRadius * 0.6f : 90f);
-                if (BunniSpace.PointOnLand(p)) { at = p; break; }
+                // Somewhere in the contest's area (a fishing contest: on the shore), near the
+                // host's starting point if there's room, so they're easy to spot arriving.
+                at = SpotInArea(Arena, 6f);
+            }
+            else
+            {
+                // A party guest pops up beside you.
+                Vector2 centre = king != null ? (Vector2)king.transform.position : Arena;
+                at = centre;
+                for (int i = 0; i < 30; i++)
+                {
+                    var p = BunniSpace.RandomPointInCircle(centre, 90f);
+                    if (BunniSpace.PointOnLand(p)) { at = p; break; }
+                }
             }
             var bot = VisitorBot.Spawn(who, VisitorBot.Role.Guest, at);
             bot.NetId = "bot:" + who.id;
             bot.QuietExit = true;
             bot.Linger();
-            if (IsContest) bot.KeepTo(Arena, ArenaRadius);
+            if (IsContest) bot.KeepTo(EventIsland, Kind == GatheringKind.Fishing);
             else bot.LeaveIn(UnityEngine.Random.Range(240f, 540f));   // a party guest stays a good while, then heads off
             Live.AnnounceBot(bot);
             var p2 = _players.Find(x => x.id == bot.NetId);
@@ -634,15 +798,26 @@ namespace CapyIsland.Game
             Notify();
         }
 
-        /// <summary>Your own ring check: step out and the clock's on; ten seconds and you're out.</summary>
-        static void WatchMyRing()
+        /// <summary>
+        /// Your own area check: cross a bridge off the island (or, fishing, walk inland from the
+        /// shore) and the clock's on; ten seconds and you're out. Once out, coming back into the
+        /// area while the round runs offers a way back in. A party has no such rule.
+        /// </summary>
+        static void WatchMyArea()
         {
             if (!IsContest || Now != Phase.Running || Visit.Travelling) { OutAt = 0f; return; }
             var me = Me;
-            if (me == null || !me.playing || me.isOut || me.gone) { OutAt = 0f; return; }
+            if (me == null || !me.playing || me.gone) { OutAt = 0f; return; }
             var king = UnityEngine.Object.FindFirstObjectByType<PlayerAvatar>();
             if (king == null) return;
-            if (InRing(king.transform.position))
+            bool inside = InArea(king.transform.position);
+            if (me.isOut)
+            {
+                OutAt = 0f;
+                OfferRejoin(inside);
+                return;
+            }
+            if (inside)
             {
                 if (OutAt > 0f) { OutAt = 0f; Notify(); }
                 return;
@@ -657,9 +832,83 @@ namespace CapyIsland.Game
             if (Time.realtimeSinceStartup < OutAt) return;
             OutAt = 0f;
             me.isOut = true;
-            Hints.Show("You left the contest area, so you're out of this round. You keep everything you caught!");
+            _rejoinAsked = false;
+            Hints.Show(Kind == GatheringKind.Fishing
+                ? UI.Loc.F("You left the shore of {0}, so you're out of this round for now. Come back to join in again!", UI.Loc.T(AreaName))
+                : UI.Loc.F("You left {0}, so you're out of this round for now. Come back to join in again!", UI.Loc.T(AreaName)));
             if (Hosting) Broadcast();
             else Live.TellHost("out");
+            Notify();
+        }
+
+        // ---------------------------------------------------------------- back in after being out
+
+        const string RejoinKey = "contest:rejoin";
+        static bool _rejoinAsked;      // asked (or answered) since you last came back into the area
+        static bool _backInArea;       // out of the round, and standing in its area right now
+        static int _rejoinRound = -1;  // the round you last joined back into, and when
+        static float _rejoinedAt = -100f;
+
+        /// <summary>
+        /// Out of the round but back in its area while the clock still runs: asks, once, whether
+        /// to join in again. "Not now" holds until you leave the area and come back once more.
+        /// The question waits its turn behind anything else on screen (Attention).
+        /// </summary>
+        static void OfferRejoin(bool inside)
+        {
+            _backInArea = inside;
+            if (!inside) { _rejoinAsked = false; return; }
+            if (_rejoinAsked) return;
+            _rejoinAsked = true;
+            int round = Round;
+            string title = NameOf(Kind);
+            Attention.Ask(RejoinKey, () =>
+                    UI.PromptScreen.Ask(title, null,
+                        UI.Loc.F("You're back at the {0}! Join this round again? What you caught before still counts.", UI.Loc.T(title)),
+                        "Join in", "Not now", () => Rejoin(round), null, null, UI.GatheringPanel.IconOf(Kind)),
+                () => _backInArea && _rejoinAsked && StillOut(round), calm: 0.5f);
+        }
+
+        static bool StillOut(int round)
+        {
+            var me = Me;
+            return Active && IsContest && Now == Phase.Running && Round == round && me != null && me.playing && me.isOut;
+        }
+
+        /// <summary>
+        /// The gathering panel's "Join in" while you're out of the round: back in if you're in the
+        /// area, else a nudge to come back to it first.
+        /// </summary>
+        public static void TryRejoin()
+        {
+            if (!StillOut(Round)) return;
+            var king = UnityEngine.Object.FindFirstObjectByType<PlayerAvatar>();
+            if (king != null && !InArea(king.transform.position))
+            {
+                Hints.Show(Kind == GatheringKind.Fishing
+                    ? UI.Loc.F("Come back to the shore of {0} first, then join in again!", UI.Loc.T(AreaName))
+                    : UI.Loc.F("Come back to {0} first, then join in again!", UI.Loc.T(AreaName)));
+                return;
+            }
+            Rejoin(Round);
+        }
+
+        /// <summary>
+        /// In again, with the score you had (catches while you were out didn't count). The host
+        /// tells everyone; a visitor tells the host ("in"), and meanwhile counts itself in.
+        /// </summary>
+        static void Rejoin(int round)
+        {
+            if (!StillOut(round)) return;   // the round ended while you were deciding
+            var me = Me;
+            me.isOut = false;
+            OutAt = 0f;
+            _rejoinRound = round;
+            _rejoinedAt = Time.realtimeSinceStartup;
+            Sfx.Play(SfxKind.Chest, 0.5f);
+            Hints.Show("You're back in this round. Good luck!");
+            if (Hosting) Broadcast();
+            else Live.TellHost("in");
             Notify();
         }
 
@@ -668,7 +917,7 @@ namespace CapyIsland.Game
         static State Snapshot() => new()
         {
             kind = Kind.ToString(), host = HostName, phase = (int)Now, round = Round, x = Arena.x, y = Arena.y,
-            left = SecondsLeft, players = new List<Player>(_players),
+            island1 = EventIsland + 1, left = SecondsLeft, players = new List<Player>(_players),
         };
 
         static void Broadcast()

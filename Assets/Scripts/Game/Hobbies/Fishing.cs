@@ -54,6 +54,10 @@ namespace CapyIsland.Game
             public Vector2 Target;
             public float Speed, NextTurn;
             public bool Fleeing;
+            public MermaidCharms.Charm Charm;   // the singing shell it came to, which keeps it in the ring
+            public bool Shimmer;                // the shell's shimmering shadow: a charm-only fish
+            public SpriteRenderer Halo;         // the shimmer's glow in the water
+            public float NextSparkle, Born;
         }
 
         readonly List<Shadow> _shadows = new();
@@ -97,8 +101,13 @@ namespace CapyIsland.Game
 
         // The fight.
         BaitKind _bait;   // on the hook for this cast, or null
-        // A running fishing contest makes the fish in its ring keener too (Gathering).
-        float BiteSpeed => (_bait != null ? _bait.BiteSpeed : 1f) * (Gathering.Boosting(Hobby.Fishing) ? 1.6f : 1f);
+
+        /// <summary>The bait on the hook while a line is out (null when fishing plain or between casts).</summary>
+        public BaitKind BaitOnHook => Now == State.Idle ? null : _bait;
+        // A running fishing contest makes the fish along its shore keener too (Gathering).
+        // So does a singing Mermaid's Shell, for anyone whose bobber is in its ring (MermaidCharms).
+        float BiteSpeed => (_bait != null ? _bait.BiteSpeed : 1f) * (Gathering.Boosting(Hobby.Fishing) ? 1.6f : 1f)
+                           * (InCharm ? MermaidCharms.BiteBoost : 1f);
 
         float _needed, _remaining, _strength, _phaseUntil, _nextSplash, _slackFor;   // line still to reel in, in reel-seconds
 
@@ -108,12 +117,20 @@ namespace CapyIsland.Game
         // The rod in the capybara's paws while fishing (part of its body, so it turns with it).
         SpriteRenderer _rod, _kingBody;
 
-        void Awake() => Instance = this;
+        void Awake()
+        {
+            Instance = this;
+            // The shells you and your friends toss into the sea live alongside the fish.
+            if (GetComponent<MermaidCharms>() == null) gameObject.AddComponent<MermaidCharms>();
+        }
 
         void OnDestroy()
         {
             if (Instance == this) Instance = null;
             foreach (var s in _shadows) if (s.Go != null) Destroy(s.Go);
+            foreach (var go in _thrown) if (go != null) Destroy(go);   // their tweens go with them (SetLink)
+            _thrown.Clear();
+            if (_pose != null && _pose.IsActive()) _pose.Kill();
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -184,17 +201,21 @@ namespace CapyIsland.Game
 
             if (Time.time >= _nextSpawn)
             {
-                // A fishing contest's ring teems: twice the fish, turning up quicker, inside it.
+                // A fishing contest's shore teems: twice the fish, turning up quicker, around you
+                // wherever you fish along it.
                 bool contest = Gathering.Boosting(Hobby.Fishing);
                 _nextSpawn = Time.time + (contest ? 0.6f : 1.5f);
                 for (int i = _shadows.Count - 1; i >= 0; i--)
                     if (_shadows[i].Go == null || (!_shadows[i].Fleeing && Vector2.Distance(_shadows[i].Go.transform.position, you) > DespawnRange))
                         Remove(_shadows[i]);
                 if (_shadows.Count < (contest ? ShadowCount * 2 : ShadowCount))
-                    TrySpawn(contest ? Gathering.Arena : you, contest ? BunniSpace.ToUnity(new Vector2(Gathering.ArenaRadius, 0f)).x : ShadowRange);
+                    TrySpawn(you, ShadowRange);
             }
 
             foreach (var s in _shadows) Swim(s);
+            // The rod can be out between casts (a bait was just put on it); out of fishing mode it goes away.
+            if (!Mode && Now == State.Idle) PutRodAway();
+            Charms(you);
             Tick(you);
         }
 
@@ -228,13 +249,17 @@ namespace CapyIsland.Game
             if (s != _hooked && !s.Fleeing && Time.time >= s.NextTurn)
             {
                 s.NextTurn = Time.time + UnityEngine.Random.Range(2f, 5f);
+                // A fish listening to a shell's song stays in its ring (and one that strayed out
+                // heads back towards the shell).
+                var ring = s.Charm != null && (s.Charm.Singing || s.Shimmer) ? s.Charm : null;
                 for (int i = 0; i < 8; i++)
                 {
                     var t = at + UnityEngine.Random.insideUnitCircle * 2.5f;
+                    if (ring != null && !ring.Contains(t)) t = Vector2.Lerp(t, ring.At, 0.6f);
                     if (OpenWater(t, 0.4f)) { s.Target = t; break; }
                 }
             }
-            float speed = s.Fleeing ? 4f : s == _hooked && Now == State.Waiting ? 0.7f : s.Speed;
+            float speed = s.Fleeing ? 4f : s == _hooked && Now == State.Waiting ? 0.7f : s.Shimmer ? s.Speed * 0.6f : s.Speed;
             var next = Vector2.MoveTowards(at, s.Target, speed * Time.deltaTime);
             if (!s.Fleeing && BunniSpace.PointOnLand(next)) { s.NextTurn = 0f; return; }
             s.Go.transform.position = next;
@@ -249,6 +274,155 @@ namespace CapyIsland.Game
             if (s.Go != null) Destroy(s.Go);
             _shadows.Remove(s);
             if (_hooked == s) _hooked = null;
+        }
+
+        // ---------------------------------------------------------------- mermaid's shells
+
+        MermaidCharms.Charm _castCharm;   // the singing shell whose ring the bobber went into, or null
+        float _nextCharmLook;
+
+        /// <summary>The bobber is in a singing Mermaid's Shell's ring: bites come quicker.</summary>
+        public bool InCharm => _castCharm != null && _castCharm.Singing;
+
+        /// <summary>Where the player's capybara stands.</summary>
+        public Vector2 KingAt => _king != null ? (Vector2)_king.transform.position : Vector2.zero;
+
+        /// <summary>
+        /// Where a Mermaid's Shell lands if you toss it now: right by your bobber while you wait for
+        /// a bite (so you're fishing in its ring at once), otherwise a little way out to sea in front
+        /// of you. Null away from the water.
+        /// </summary>
+        public Vector2? CharmSpot()
+        {
+            if (_king == null) return null;
+            if (Now == State.Waiting || Now == State.Nibbling) return _bobberAt;
+            Vector2 you = _king.transform.position;
+            var water = NearestWater(you, 2.6f);
+            if (!water.HasValue) return null;
+            var p = CastPoint(3.5f, (water.Value - you).normalized);
+            return OpenWater(p, BobberMargin) ? p : null;
+        }
+
+        /// <summary>The fish to cast at: a shell's shimmering one if it's in reach, else the nearest.</summary>
+        Shadow AimShadow(Vector2 from, float within)
+        {
+            foreach (var s in _shadows)
+                if (s.Shimmer && !s.Fleeing && s.Go != null && Vector2.Distance(from, s.Go.transform.position) < within) return s;
+            return NearestShadow(from, within);
+        }
+
+        /// <summary>
+        /// The shells' part of the sea, every frame: each singing shell near you keeps a few fish in
+        /// its ring (another swims in after every catch), and once its tally reaches five, its
+        /// shimmering shadow comes up, glinting blue. When the song ends its fish are free to wander
+        /// off; a shimmering one stays until caught, or until it gives up and swims away.
+        /// </summary>
+        void Charms(Vector2 you)
+        {
+            foreach (var s in _shadows) if (s.Shimmer) Glint(s);
+            if (Time.time < _nextCharmLook) return;
+            _nextCharmLook = Time.time + 0.5f;
+
+            // A shimmering fish nobody caught in time swims off (a hooked one finishes its fight first).
+            foreach (var s in _shadows)
+                if (s.Shimmer && !s.Fleeing && s != _hooked && (s.Charm == null || !s.Charm.Shimmering)) FadeAway(s);
+
+            foreach (var c in MermaidCharms.All)
+            {
+                int inside = 0;
+                Shadow shimmer = null;
+                foreach (var s in _shadows)
+                {
+                    if (s.Charm != c || s.Go == null) continue;
+                    if (s.Shimmer) { if (!s.Fleeing) shimmer = s; continue; }
+                    if (!c.Singing) s.Charm = null;   // the song is over: off it swims, an ordinary fish again
+                    else if (!s.Fleeing) inside++;
+                }
+
+                if (Vector2.Distance(you, c.At) > DespawnRange - 3f) continue;   // too far off to see
+                if (c.Singing && inside < MermaidCharms.FishInside) SpawnInCharm(c, false);
+                if (c.Shimmering && shimmer == null) SpawnInCharm(c, true);
+            }
+        }
+
+        void SpawnInCharm(MermaidCharms.Charm c, bool shimmer)
+        {
+            for (int i = 0; i < 20; i++)
+            {
+                var r = UnityEngine.Random.insideUnitCircle * 0.85f;
+                var p = c.At + new Vector2(r.x * MermaidCharms.Radii.x, r.y * MermaidCharms.Radii.y);
+                if (!OpenWater(p, 0.6f)) continue;
+                var kind = shimmer ? HobbyData.RollCharmFish() : HobbyData.RollFish(HobbyLog.Level(Hobby.Fishing));
+                var go = new GameObject((shimmer ? "ShimmerShadow_" : "FishShadow_") + kind.Id);
+                go.transform.position = p;
+                var sr = go.AddComponent<SpriteRenderer>();
+                sr.sprite = UI.IconPainter.FishShadow;
+                sr.sortingOrder = ShadowOrder;
+                float scale = 0.45f + kind.Shadow * 0.22f;
+                go.transform.localScale = new Vector3(scale, scale * 0.8f, 1f);
+                var s = new Shadow { Go = go, Sr = sr, Kind = kind, Target = p, Speed = UnityEngine.Random.Range(0.4f, 0.9f), Charm = c, Shimmer = shimmer, Born = Time.time };
+                if (shimmer)
+                {
+                    // A soft blue light in the water around it, so it's spotted from across the ring.
+                    var halo = new GameObject("Halo").AddComponent<SpriteRenderer>();
+                    halo.transform.SetParent(go.transform, false);
+                    halo.transform.localScale = new Vector3(2.4f, 2.4f, 1f) / Mathf.Max(0.01f, UI.IconPainter.Glow.bounds.size.x);
+                    halo.sprite = UI.IconPainter.Glow;
+                    halo.sortingOrder = ShadowOrder - 1;
+                    s.Halo = halo;
+                    sr.color = new Color(0.45f, 0.8f, 1f, 0f);
+                    halo.color = new Color(0.5f, 0.85f, 1f, 0f);
+                    Ripple(p, 1.6f);
+                    Sfx.PlayAt(SfxKind.Plop, p, 0.6f, 0.1f);
+                }
+                else
+                {
+                    sr.color = new Color(0.08f, 0.14f, 0.22f, 0f);
+                    sr.DOFade(0.42f, 1.2f);
+                }
+                _shadows.Add(s);
+                return;
+            }
+        }
+
+        /// <summary>The shimmering shadow flashes blue and white, and throws off little sparkles.</summary>
+        void Glint(Shadow s)
+        {
+            if (s.Go == null || s.Fleeing || (s == _hooked && _lifted)) return;
+            float age = Mathf.Clamp01((Time.time - s.Born) / 1.2f);   // rising into view
+            float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * 5f + s.Speed * 7f);
+            var c = Color.Lerp(new Color(0.3f, 0.7f, 1f), new Color(0.85f, 0.97f, 1f), pulse);
+            c.a = Mathf.Lerp(0.55f, 0.9f, pulse) * age;
+            s.Sr.color = c;
+            if (s.Halo != null) s.Halo.color = new Color(0.5f, 0.85f, 1f, (0.25f + 0.2f * pulse) * age);
+            if (Time.time < s.NextSparkle) return;
+            s.NextSparkle = Time.time + UnityEngine.Random.Range(0.18f, 0.4f);
+            Sparkle((Vector2)s.Go.transform.position + UnityEngine.Random.insideUnitCircle * new Vector2(0.6f, 0.35f));
+        }
+
+        static void Sparkle(Vector2 at)
+        {
+            var art = UI.IconPainter.Sparkle;
+            if (art == null) return;
+            var go = new GameObject("Glint");
+            go.transform.position = at;
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = art;
+            sr.color = new Color(0.8f, 0.95f, 1f, 0.95f);
+            sr.sortingOrder = ShadowOrder + 20;
+            float size = UnityEngine.Random.Range(0.14f, 0.26f) / Mathf.Max(0.01f, art.bounds.size.x);
+            go.transform.localScale = Vector3.zero;
+            go.transform.DOScale(size, 0.25f).SetEase(Ease.OutBack);
+            go.transform.DOMoveY(at.y + 0.35f, 0.8f).SetEase(Ease.OutSine);
+            sr.DOFade(0f, 0.5f).SetDelay(0.3f).OnComplete(() => Destroy(go));
+        }
+
+        void FadeAway(Shadow s)
+        {
+            if (s == null || s.Go == null) return;
+            s.Fleeing = true;
+            if (s.Halo != null) s.Halo.DOFade(0f, 1.5f);
+            s.Sr.DOFade(0f, 1.5f).OnComplete(() => Remove(s));
         }
 
         // ---------------------------------------------------------------- the button
@@ -286,13 +460,9 @@ namespace CapyIsland.Game
         /// <summary>Turns to face the water and takes out the rod.</summary>
         void HoldRod(Vector2 towards)
         {
-            var body = _king.transform.Find("Sprite");
+            var body = FaceTowards(towards);
             if (body == null) return;
             _kingBody = body.GetComponent<SpriteRenderer>();
-            // The capybara's head is on the left of its picture: face the water by flipping to suit.
-            var scale = body.localScale;
-            scale.x = Mathf.Abs(scale.x) * (towards.x > 0f ? -1f : 1f);
-            body.localScale = scale;
 
             if (_rod == null)
             {
@@ -313,7 +483,28 @@ namespace CapyIsland.Game
 
         void PutRodAway()
         {
-            if (_rod != null) _rod.gameObject.SetActive(false);
+            if (_rod != null && _rod.gameObject.activeSelf) _rod.gameObject.SetActive(false);
+        }
+
+        /// <summary>
+        /// Turns the capybara to look along <paramref name="towards"/>. Its head is on the left of
+        /// its picture, so facing right is a flip. Returns its body (null without one).
+        /// </summary>
+        Transform FaceTowards(Vector2 towards)
+        {
+            var body = _king != null ? _king.transform.Find("Sprite") : null;
+            if (body == null) return null;
+            var scale = body.localScale;
+            scale.x = Mathf.Abs(scale.x) * (towards.x > 0f ? -1f : 1f);
+            body.localScale = scale;
+            return body;
+        }
+
+        /// <summary>Which way the capybara is looking: +1 to the right, -1 to the left.</summary>
+        float Facing()
+        {
+            var body = _king != null ? _king.transform.Find("Sprite") : null;
+            return body != null && body.localScale.x < 0f ? 1f : -1f;
         }
 
         /// <summary>Where the line leaves the rod.</summary>
@@ -330,7 +521,145 @@ namespace CapyIsland.Game
             if (_kingBody != null) _rod.sortingOrder = _kingBody.sortingOrder + 6;
             // It bends towards the fish as the line pulls tight.
             float bend = Now == State.Fight ? Tension * 22f + (Surging ? Mathf.Sin(Time.time * 30f) * 4f : 0f) : 0f;
+            // A bait just put on: the tip springs down and quivers back.
+            float since = Time.time - _twitchAt;
+            if (since < TwitchFor) bend += Mathf.Sin(since * 38f) * 10f * (1f - since / TwitchFor);
             _rod.transform.localRotation = Quaternion.Euler(0f, 0f, bend);
+        }
+
+        // ---------------------------------------------------------------- tackle, put on by hand
+
+        const float TwitchFor = 0.6f;
+        float _twitchAt = -10f;
+        readonly List<GameObject> _thrown = new();   // bait and the like in the air, tidied away with the fishing
+        Sequence _pose;
+
+        /// <summary>Where the capybara's front paws are, for what it throws.</summary>
+        public Vector2 PawAt => _king == null ? Vector2.zero : (Vector2)_king.transform.position + new Vector2(0.42f * Facing(), 0.72f);
+
+        /// <summary>
+        /// A bait chosen in the tackle panel goes on by hand, where you can see it. With the bobber
+        /// out and nothing on the hook yet, the capybara lobs it out to the float and it is on this
+        /// line from now: fish bite sooner straight away. Otherwise it is flicked up to the end of
+        /// the rod (taking the rod out if it was put away) and goes on as you next cast, the way
+        /// bait always has, one used up per cast. Returns true when it went on the line that's out.
+        /// </summary>
+        public bool PutOnBait(BaitKind b)
+        {
+            Baits.Select(b);
+            if (_king == null || b == null) return false;
+            var art = HobbyData.ItemArt(b.Item);
+            if (Now == State.Waiting && _bait == null && HobbyLog.Take(b.Item))
+            {
+                _bait = b;
+                _stateUntil = Mathf.Min(_stateUntil, Time.time + 2f / BiteSpeed);   // a curious fish sooner
+                Fly(art, PawAt, () => _bobberBody != null ? (Vector2)_bobberBody.position : _bobberAt, 1.3f, 0.6f, 0.5f, () =>
+                {
+                    if (Now == State.Idle) return;
+                    Sfx.PlayAt(SfxKind.Plop, _bobberAt, 0.6f, 0.1f);
+                    Ripple(_bobberAt, 1f);
+                    if (Now == State.Waiting && _bobberBody != null)
+                    {
+                        // The float bobs under with the weight of it.
+                        _bobberBody.DOKill();
+                        _bobberBody.localPosition = Vector3.zero;
+                        _bobberBody.DOLocalMoveY(-0.08f, 0.12f).SetLoops(2, LoopType.Yoyo);
+                    }
+                    _twitchAt = Time.time;
+                });
+                return true;
+            }
+            if (Now == State.Idle)
+            {
+                var water = NearestWater(_king.transform.position, 2.6f);
+                HoldRod(water.HasValue ? water.Value - KingAt : Vector2.right * Facing());
+            }
+            Fly(art, PawAt, () => _king != null ? RodTip() : PawAt, 0.9f, 0.45f, 0.45f, () =>
+            {
+                if (_king == null) return;
+                Vector2 tip = RodTip();
+                for (int i = 0; i < 3; i++) Twinkle(tip + UnityEngine.Random.insideUnitCircle * 0.2f);
+                Sfx.Play(SfxKind.Pop, 0.35f);
+                _twitchAt = Time.time;
+            });
+            return false;
+        }
+
+        /// <summary>
+        /// The capybara throws something out to a spot on the water (a Mermaid's Shell): it turns
+        /// to face it, unless it's busy with a line, leans back with its weight on its heels, then
+        /// flings its paws forward and settles. Returns where the thing leaves its paws, and in
+        /// <paramref name="release"/> how long until it does, for the flight to start there and then.
+        /// </summary>
+        public Vector2 ThrowTowards(Vector2 spot, out float release)
+        {
+            release = 0f;
+            if (_king == null) return spot;
+            var body = Now == State.Idle ? FaceTowards(spot - KingAt) : _king.transform.Find("Sprite");
+            if (body == null) return PawAt;
+            if (_pose != null && _pose.IsActive()) _pose.Kill(true);   // finishing it puts the body back
+            float dir = Facing(), rest = body.localScale.y;
+            const float windUp = 0.22f;
+            _pose = DOTween.Sequence()
+                .Append(body.DOLocalRotate(new Vector3(0f, 0f, 13f * dir), windUp).SetEase(Ease.OutQuad))    // lean back…
+                .Join(body.DOScaleY(rest * 0.93f, windUp))
+                .Append(body.DOLocalRotate(new Vector3(0f, 0f, -11f * dir), 0.09f).SetEase(Ease.InQuad))   // …and fling
+                .Join(body.DOScaleY(rest * 1.07f, 0.09f))
+                .Append(body.DOLocalRotate(Vector3.zero, 0.4f).SetEase(Ease.OutBack))
+                .Join(body.DOScaleY(rest, 0.4f).SetEase(Ease.OutBack))
+                .SetLink(body.gameObject);
+            release = windUp + 0.05f;
+            return PawAt + new Vector2(0.15f * dir, 0.25f);
+        }
+
+        /// <summary>
+        /// A small thing thrown by hand: its picture flies in an arc to a point that may be moving
+        /// (the end of a rod, a bobbing float), turning over as it goes, then
+        /// <paramref name="landed"/> runs and it is gone. Over everything but the line while it flies.
+        /// </summary>
+        void Fly(Sprite art, Vector2 from, Func<Vector2> to, float height, float time, float size, Action landed)
+        {
+            if (art == null) { landed?.Invoke(); return; }
+            var go = new GameObject("Thrown");
+            go.transform.position = from;
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = art;
+            sr.sortingOrder = 29995;
+            float unit = size / Mathf.Max(0.01f, Mathf.Max(art.bounds.size.x, art.bounds.size.y));
+            go.transform.localScale = Vector3.one * unit * 0.6f;
+            _thrown.Add(go);
+            float spin = (UnityEngine.Random.value < 0.5f ? 1f : -1f) * 300f;
+            DOVirtual.Float(0f, 1f, time, t =>
+            {
+                if (go == null) return;
+                go.transform.position = Vector2.Lerp(from, to(), t) + Vector2.up * (height * 4f * t * (1f - t));
+                go.transform.localRotation = Quaternion.Euler(0f, 0f, spin * t);
+                // Up towards you and away again: bigger at the top of the arc.
+                go.transform.localScale = Vector3.one * unit * (t < 0.4f ? Mathf.Lerp(0.6f, 1.1f, t / 0.4f) : Mathf.Lerp(1.1f, 0.7f, (t - 0.4f) / 0.6f));
+            }).SetEase(Ease.Linear).SetLink(go).OnComplete(() =>
+            {
+                _thrown.Remove(go);
+                if (go != null) Destroy(go);
+                landed?.Invoke();
+            });
+        }
+
+        /// <summary>A little star that pops out and fades, up in the air (by the rod's end).</summary>
+        static void Twinkle(Vector2 at)
+        {
+            var art = UI.IconPainter.Sparkle;
+            if (art == null) return;
+            var go = new GameObject("Twinkle");
+            go.transform.position = at;
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = art;
+            sr.color = new Color(1f, 0.95f, 0.7f, 1f);
+            sr.sortingOrder = 29996;
+            float size = UnityEngine.Random.Range(0.18f, 0.3f) / Mathf.Max(0.01f, art.bounds.size.x);
+            go.transform.localScale = Vector3.zero;
+            go.transform.DOScale(size, 0.2f).SetEase(Ease.OutBack).SetLink(go);
+            go.transform.DOLocalRotate(new Vector3(0f, 0f, 90f), 0.6f).SetLink(go);
+            sr.DOFade(0f, 0.35f).SetDelay(0.25f).SetLink(go).OnComplete(() => Destroy(go));
         }
 
         /// <summary>
@@ -343,7 +672,7 @@ namespace CapyIsland.Game
             Vector2 you = _king.transform.position;
             var water = NearestWater(you, 2.6f);
             if (!water.HasValue) { Holding = false; Say("Walk right up to the water's edge to fish."); return; }
-            var target = NearestShadow(you, 7f);
+            var target = AimShadow(you, 7f);
             _aimDir = ((target != null ? (Vector2)target.Go.transform.position : water.Value) - you).normalized;
             Cast();
         }
@@ -355,14 +684,16 @@ namespace CapyIsland.Game
         const float BobberMargin = 0.7f;
 
         /// <summary>The landing point a distance out along the aim, always in open water, clear of the beach.</summary>
-        Vector2 CastPoint(float distance)
+        Vector2 CastPoint(float distance) => CastPoint(distance, _aimDir);
+
+        Vector2 CastPoint(float distance, Vector2 aim)
         {
             Vector2 you = _king.transform.position;
-            var p = you + _aimDir * distance;
+            var p = you + aim * distance;
             if (OpenWater(p, BobberMargin)) return p;
             // Short of the water (or on the beach): further out along the aim until it is open water…
             for (float d = distance; d < 9f; d += 0.25f)
-                if (OpenWater(you + _aimDir * d, BobberMargin)) return you + _aimDir * d;
+                if (OpenWater(you + aim * d, BobberMargin)) return you + aim * d;
             // …else the nearest open water all round.
             for (float r = 1f; r <= 7f; r += 0.5f)
                 for (int a = 0; a < 16; a++)
@@ -390,9 +721,9 @@ namespace CapyIsland.Game
         {
             Vector2 you = _king.transform.position;
 
-            // Just in front of the nearest fish, or a comfortable way out to sea.
+            // Just in front of the nearest fish (a shell's shimmering one first), or a comfortable way out to sea.
             Vector2 spot;
-            var fish = NearestShadow(you, 6.5f);
+            var fish = AimShadow(you, 6.5f);
             if (fish != null)
             {
                 Vector2 at = fish.Go.transform.position;
@@ -407,13 +738,14 @@ namespace CapyIsland.Game
             MakeBobber(spot);
             Sfx.Play(SfxKind.Plop, 0.7f);
             Now = State.Waiting;
+            _castCharm = MermaidCharms.SingingAt(spot);   // before BiteSpeed: a shell's ring makes them keener
             _bait = Baits.UseOne();
             _warnedEarly = false;
             _giveUpAt = Time.time + 14f;
             _stateUntil = Time.time + 2f / BiteSpeed;
 
-            // The fish nearest the bobber comes over for a look.
-            _hooked = NearestShadow(spot, 3.5f);
+            // The fish you cast at comes over for a look (or whichever is nearest the bobber).
+            _hooked = fish != null && Vector2.Distance(fish.Go.transform.position, spot) < 3.5f ? fish : NearestShadow(spot, 3.5f);
             if (_hooked != null) _hooked.Target = spot + (Vector2)(_hooked.Go.transform.position - (Vector3)spot).normalized * 0.35f;
         }
 
@@ -510,7 +842,7 @@ namespace CapyIsland.Game
             _phaseUntil = Time.time + UnityEngine.Random.Range(1.2f, 1.8f);   // an early pull, to teach the rhythm
 
             // Now and then it isn't a fish at all. Junk doesn't fight: a short, steady reel.
-            _junk = HobbyLog.Fish.Count > 0 && UnityEngine.Random.value < JunkChance ? Junk[UnityEngine.Random.Range(0, Junk.Length)] : default;
+            _junk = HobbyLog.Fish.Count > 0 && !_hooked.Shimmer && UnityEngine.Random.value < JunkChance ? Junk[UnityEngine.Random.Range(0, Junk.Length)] : default;
             if (_junk.id != null)
             {
                 _strength = 0.35f * rod;
@@ -637,6 +969,7 @@ namespace CapyIsland.Game
                 s.Sr.sprite = picture;
                 s.Sr.color = Color.white;
                 s.Sr.sortingOrder = 29999;   // just under the line
+                if (s.Halo != null) s.Halo.enabled = false;
                 float width = 0.55f + s.Kind.Shadow * 0.12f;
                 s.Go.transform.localScale = Vector3.one * (width / Mathf.Max(0.01f, picture.bounds.size.x));
                 Sfx.PlayAt(SfxKind.Plop, _waterAt, 0.7f, 0.1f);
@@ -647,6 +980,7 @@ namespace CapyIsland.Game
                 s.Sr.sprite = UI.IconPainter.FishShadow;
                 s.Sr.color = new Color(0.08f, 0.14f, 0.22f, 0.42f);
                 s.Sr.sortingOrder = ShadowOrder;
+                if (s.Halo != null) s.Halo.enabled = true;
                 float scale = 0.45f + s.Kind.Shadow * 0.22f;
                 s.Go.transform.localScale = new Vector3(scale, scale * 0.8f, 1f);
                 Ripple(_waterAt, 1.1f);
@@ -676,6 +1010,7 @@ namespace CapyIsland.Game
             var junk = _junk;
             const int xp = 2;
             HobbyLog.AddXp(Hobby.Fishing, xp);
+            MermaidCharms.CaughtAt(_hookAt);   // a boot from a shell's ring still counts towards its five
             Remove(s);
             Sfx.Play(SfxKind.Pop, 0.8f);
             if (!_lifted) Ripple(_bobberAt, 2.2f);
@@ -706,6 +1041,9 @@ namespace CapyIsland.Game
             int xp = 6 * kind.Stars + (first ? 15 : 0) + (record ? 5 : 0);
             HobbyLog.AddXp(Hobby.Fishing, xp);
             Motes.Trigger("hobby_fish");
+            // In a shell's ring, every catch counts towards its shimmering shadow, for everyone there.
+            if (s.Shimmer) MermaidCharms.ShimmerLanded(s.Charm);
+            else MermaidCharms.CaughtAt(_hookAt);
 
             Remove(s);
             Sfx.Play(SfxKind.Chest, 0.8f);
@@ -721,6 +1059,7 @@ namespace CapyIsland.Game
             s.Fleeing = true;
             Vector2 at = s.Go.transform.position;
             s.Target = at + (at - _castFrom).normalized * 6f;
+            if (s.Halo != null) s.Halo.DOFade(0f, 1f);
             s.Sr.DOFade(0f, 1f).OnComplete(() => Remove(s));
         }
 
@@ -738,6 +1077,7 @@ namespace CapyIsland.Game
             _line = null;
             if (_hooked != null && !_hooked.Fleeing) _hooked.NextTurn = 0f;
             _hooked = null;
+            _castCharm = null;
         }
 
         static void Say(string line) => Said?.Invoke(line);
@@ -815,8 +1155,9 @@ namespace CapyIsland.Game
         /// <summary>
         /// The big splash of a bite: a white burst where it broke the surface, and droplets thrown
         /// up in every direction, falling back with little rings where they land in the water.
+        /// Smaller (<paramref name="size"/> under 1) for something tossed in, like a Mermaid's Shell.
         /// </summary>
-        static void Splash(Vector2 at)
+        internal static void Splash(Vector2 at, float size = 1f)
         {
             var dot = UI.UiKit.Circle;
             float unit = Mathf.Max(0.01f, dot.bounds.size.x);
@@ -828,10 +1169,11 @@ namespace CapyIsland.Game
             bs.color = new Color(1f, 1f, 1f, 0.75f);
             bs.sortingOrder = 29990;   // up out of the water, over the shore
             burst.transform.localScale = new Vector3(0.25f, 0.13f, 1f) / unit;
-            burst.transform.DOScale(new Vector3(1.5f, 0.75f, 1f) / unit, 0.4f).SetEase(Ease.OutCubic);
+            burst.transform.DOScale(new Vector3(1.5f, 0.75f, 1f) * size / unit, 0.4f).SetEase(Ease.OutCubic);
             bs.DOFade(0f, 0.4f).SetEase(Ease.InQuad).OnComplete(() => Destroy(burst));
 
-            for (int i = 0; i < 22; i++)
+            int drops = Mathf.RoundToInt(22 * size);
+            for (int i = 0; i < drops; i++)
             {
                 var drop = new GameObject("SplashDrop");
                 drop.transform.position = at + UnityEngine.Random.insideUnitCircle * 0.12f;
@@ -839,12 +1181,12 @@ namespace CapyIsland.Game
                 sr.sprite = dot;
                 sr.color = new Color(0.95f, 0.99f, 1f, 1f);
                 sr.sortingOrder = 29991;
-                float size = UnityEngine.Random.Range(0.1f, 0.24f);
-                drop.transform.localScale = Vector3.one * (size / unit);
+                float across = UnityEngine.Random.Range(0.1f, 0.24f);
+                drop.transform.localScale = Vector3.one * (across / unit);
                 // out to the sides (squashed: the water is seen from above at an angle), up and back down
-                var land = at + new Vector2(UnityEngine.Random.Range(-1.2f, 1.2f), UnityEngine.Random.Range(-0.45f, 0.35f));
+                var land = at + new Vector2(UnityEngine.Random.Range(-1.2f, 1.2f), UnityEngine.Random.Range(-0.45f, 0.35f)) * size;
                 float time = UnityEngine.Random.Range(0.5f, 0.85f);
-                drop.transform.DOJump(land, UnityEngine.Random.Range(0.5f, 1.6f), 1, time).SetEase(Ease.Linear)
+                drop.transform.DOJump(land, UnityEngine.Random.Range(0.5f, 1.6f) * size, 1, time).SetEase(Ease.Linear)
                     .OnComplete(() =>
                     {
                         if (!BunniSpace.PointOnLand(land)) Ripple(land, 0.35f);
@@ -854,7 +1196,7 @@ namespace CapyIsland.Game
             }
         }
 
-        static void Ripple(Vector2 at, float size)
+        internal static void Ripple(Vector2 at, float size)
         {
             var go = new GameObject("Ripple");
             go.transform.position = at;

@@ -5,7 +5,7 @@ namespace CapyIsland.Game
 {
     /// <summary>
     /// A bit of love (MapItems/Mote). When a mote fires, a glowing heart appears beside the king and
-    /// joins the trail, beating. Tap it to read what it was for; then it flies to the Tower of Love
+    /// joins the trail, beating. Tap it and it flies to the Tower of Love
     /// (15 units a frame) and adds to your score. With no Tower yet, it just dissolves.
     /// </summary>
     public class MoteHeart : MonoBehaviour, ITappable
@@ -13,8 +13,6 @@ namespace CapyIsland.Game
         static Sprite _sprite;
 
         string _mote;
-        string _description;
-        string _title;
         SpriteRenderer _renderer;
         Follower _follower;
         bool _flying;
@@ -64,8 +62,6 @@ namespace CapyIsland.Game
 
             var heart = go.AddComponent<MoteHeart>();
             heart._mote = def.Name;
-            heart._description = def.Description;
-            heart._title = def.Title;
             heart._renderer = sr;
             heart._follower = go.AddComponent<Follower>();
             heart._follower.PickUpIntoInventory();
@@ -102,7 +98,9 @@ namespace CapyIsland.Game
         {
             if (_flying) return;
             _flying = true;
-            UI.CardPopup.Show(_title ?? _mote, _description, _renderer != null ? _renderer.sprite : null, FlyHome);
+            // Straight home: no card. What each heart was for is listed at the Steam Tower.
+            Sfx.Play(SfxKind.Heart, 0.6f, 0f);
+            FlyHome();
         }
 
         void FlyHome()

@@ -55,6 +55,7 @@ namespace CapyIsland.Game
         public static WearItem Worn(HobbyLog.Cat cat, WearSlot slot)
         {
             if (cat?.outfit == null) return null;
+            if (slot == WearSlot.Hat && Horaira.WornHalo(cat) is { } halo) return halo;   // his own, owned or not
             foreach (var id in cat.outfit)
             {
                 var item = Wardrobe.Find(id);
@@ -68,6 +69,14 @@ namespace CapyIsland.Game
         {
             if (cat == null || item == null || !Wardrobe.Owns(item)) return;
             cat.outfit ??= new List<string>();
+            if (Horaira.Is(cat) && item.Id == Horaira.HaloId)
+            {
+                Horaira.ToggleHalo(cat);
+                HobbyLog.Save();
+                Changed?.Invoke();
+                return;
+            }
+            if (Horaira.Is(cat) && item.Slot == WearSlot.Hat) cat.bareHead = false;   // the hat comes off again: the halo's back
             bool wearing = cat.outfit.Contains(item.Id);
             cat.outfit.RemoveAll(id => Wardrobe.Find(id) is { } w && w.Slot == item.Slot);
             if (!wearing) cat.outfit.Add(item.Id);

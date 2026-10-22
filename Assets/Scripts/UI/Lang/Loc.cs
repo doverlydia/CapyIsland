@@ -206,6 +206,38 @@ namespace CapyIsland.UI
             return result;
         }
 
+        static readonly Dictionary<string, string> _other = new(StringComparer.OrdinalIgnoreCase);
+        static Language? _otherFor;
+
+        /// <summary>
+        /// A string in a language that need not be the one on screen (the help movie that shows the
+        /// language switch). Exact entries only; the other language's table is read once, on first use.
+        /// </summary>
+        public static string In(Language language, string english)
+        {
+            if (string.IsNullOrEmpty(english) || language == Language.English) return english;
+            if (language == Current) return T(english);
+            if (_otherFor != language)
+            {
+                _otherFor = language;
+                _other.Clear();
+                foreach (var asset in Resources.LoadAll<TextAsset>("Lang/" + Code(language)))
+                {
+                    string key = null;
+                    foreach (var raw in asset.text.Split('\n'))
+                    {
+                        var l = raw.TrimEnd('\r');
+                        if (l.StartsWith("@ ")) { key = Unescape(l.Substring(2)); continue; }
+                        if (!l.StartsWith("= ") || key == null) continue;
+                        var translation = Unescape(l.Substring(2));
+                        if (translation.Length > 0) _other[key] = translation;
+                        key = null;
+                    }
+                }
+            }
+            return _other.TryGetValue(english, out var hit) ? hit : english;
+        }
+
         /// <summary>Formats a template the same way the tables do: T("{0} wood") then fills it.</summary>
         public static string F(string englishTemplate, params object[] args) => string.Format(T(englishTemplate), args);
 
@@ -373,6 +405,8 @@ namespace CapyIsland.UI
             _current = null;
             _loadedFor = null;
             _cache.Clear();
+            _otherFor = null;
+            _other.Clear();
         }
     }
 }

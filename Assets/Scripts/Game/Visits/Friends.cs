@@ -111,7 +111,7 @@ namespace CapyIsland.Game
             foreach (var slot in new[] { WearSlot.Hat, WearSlot.Neck, WearSlot.Face, WearSlot.Back })
             {
                 if (rng.NextDouble() > (slot == WearSlot.Hat ? 0.75 : 0.35)) continue;
-                var options = Array.FindAll(Wardrobe.Items, i => i.Slot == slot);
+                var options = Array.FindAll(Wardrobe.Items, i => i.Slot == slot && i.Unlock != "horaira");   // his halo is only ever his gift
                 if (options.Length > 0) who.outfit.Add(options[rng.Next(options.Length)].Id);
             }
             return who;

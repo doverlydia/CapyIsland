@@ -348,8 +348,16 @@ namespace CapyIsland.UI
             var current = PlayerPrefs.GetString("CapyIsland.PlayerName", "");
             if (!string.IsNullOrWhiteSpace(current)) _name.text = current;
 
-            var go = UiKit.Button(panel, "Continue", "Continue", UiKit.ButtonStyle.Primary, Continue, 40f);
+            // Signing up comes first, so an island isn't lost with its phone (AccountScreen.ShowWelcome);
+            // going on as a guest is offered in there, under a warning.
+            var go = UiKit.Button(panel, "SignUp", "Sign up", UiKit.ButtonStyle.Primary, SignUp, 40f);
             go.transform.parent.gameObject.AddComponent<LayoutElement>().preferredHeight = 112f;
+            var risk = UiKit.Text(panel, "Risk", "Without an account, your island could be lost forever.", 28f, new Color(1f, 0.78f, 0.7f), false, TextAlignmentOptions.Center);
+            risk.overflowMode = TextOverflowModes.Overflow;
+            // The same way on as the sign-up window offers, right here, for those who'd rather not.
+            var guest = UiKit.Button(panel, "Guest", "Continue as guest", UiKit.ButtonStyle.Ghost, Continue, 30f);
+            guest.transform.parent.gameObject.AddComponent<LayoutElement>().preferredHeight = 76f;
+            foreach (var t in guest.GetComponentsInChildren<TextMeshProUGUI>()) t.color = new Color(0.88f, 0.95f, 0.94f);
 
             // Played before, on another device or before clearing the browser: bring that island back.
             // Up in the corner, out of the panel: the panel's height is fixed, and another row in it
@@ -465,6 +473,14 @@ namespace CapyIsland.UI
             }
             _panel.offsetMin = new Vector2(0f, shift);
             _panel.offsetMax = new Vector2(0f, shift);
+        }
+
+        /// <summary>Your name kept, then the sign-up window; it goes on with the opening either way.</summary>
+        void SignUp()
+        {
+            PlayerProfile.Name = _name != null ? _name.text : "";
+            if (CloudSync.Linked) { Continue(); return; }
+            AccountScreen.ShowWelcome(() => { if (this != null) Continue(); });
         }
 
         void Continue()

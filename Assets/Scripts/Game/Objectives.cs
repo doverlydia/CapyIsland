@@ -175,19 +175,23 @@ namespace CapyIsland.Game
                 goal.Title = Gathering.Hosting ? "Your guests are on their way: show them around!" : "Enjoy " + Gathering.HostName + "'s party, and lend a hand!";
                 return goal;
             }
+            // The contest is an island (a fishing contest, its shore): point the way back if you've left it.
             var king = UnityEngine.Object.FindFirstObjectByType<PlayerAvatar>();
-            bool inRing = king != null && Gathering.InRing(king.transform.position);
-            if (!inRing) goal.Where = Gathering.Arena;
+            if (king != null && !Gathering.InArea(king.transform.position)) goal.Where = Gathering.WayBack(king.transform.position);
+            string island = Gathering.AreaName;
+            bool fishing = Gathering.Kind == GatheringKind.Fishing;
             goal.Title = Gathering.Now switch
             {
                 Gathering.Phase.Running => Gathering.Kind switch
                 {
-                    GatheringKind.Bugs => "Catch as many bugs as you can inside the glittering ring!",
-                    GatheringKind.Birds => "Spot as many birds as you can inside the glittering ring!",
-                    _ => "Catch as many fish as you can inside the glittering ring!",
+                    GatheringKind.Bugs => "Catch as many bugs as you can on " + island + "!",
+                    GatheringKind.Birds => "Spot as many birds as you can on " + island + "!",
+                    _ => "Catch as many fish as you can along the shore of " + island + "!",
                 },
                 Gathering.Phase.Results => "Round over: see who won!",
-                _ => Gathering.Hosting ? "Wait for players, then press Start" : "Wait in the glittering ring for the contest to start",
+                _ => Gathering.Hosting ? "Wait for players, then press Start"
+                    : fishing ? "Wait by the shore of " + island + " for the contest to start"
+                    : "Wait on " + island + " for the contest to start",
             };
             return goal;
         }

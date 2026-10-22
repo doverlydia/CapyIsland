@@ -73,6 +73,8 @@ namespace CapyIsland.Game
             new() { Id = "Neck_MedalBug",   Name = "Gold Bug Medal",     Slot = WearSlot.Neck, Unlock = "contest_Bugs",  Anchor = new(0.48f, 0.365f), Width = 0.21f },
             new() { Id = "Neck_MedalBird",  Name = "Gold Birding Medal", Slot = WearSlot.Neck, Unlock = "contest_Birds", Anchor = new(0.48f, 0.365f), Width = 0.21f },
             new() { Id = "Back_Cape",       Name = "Royal Cape",      Slot = WearSlot.Back, Unlock = "monster_tame",  Anchor = new(0.6f, 0.45f), Width = 0.76f, Behind = true },
+            // Only Horaira brings this one (CatGifts): a halo like his own (Horaira).
+            new() { Id = Horaira.HaloId,    Name = "Horaira's Halo",  Slot = WearSlot.Hat,  Unlock = "horaira",       Anchor = new(0.45f, 0.985f), Width = 0.48f },   // wide: its glow and sparkles are part of the picture
         };
 
         static readonly HashSet<string> _owned = new();
@@ -178,6 +180,7 @@ namespace CapyIsland.Game
             if (item.Unlock == "daily") return "Day 7 daily gift";
             if (item.Unlock == "start") return "Yours from the start";
             if (item.Unlock == "cat_gift") return "A present from a cat";
+            if (item.Unlock == "horaira") return "A present from Horaira";
             if (item.Unlock == "sewn") return "You sewed this!";
             if (item.Unlock == "finale") return "Bring every warm heart home";
             if (item.Unlock == Motes.Wedding) return "Hold the wedding at the Blossom Chapel";

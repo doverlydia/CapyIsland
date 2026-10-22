@@ -73,7 +73,9 @@ ship () {
   for src in ArtSource/Wear_*.png; do
     [ -f "$src" ] || continue
     local name; name=$(basename "$src" .png); name=${name#Wear_}
-    node Tools/ChatGPT/trim.mjs "$src" "$tmp/$name.png" > /dev/null &&
+    # Horaira's halo has a soft glow baked into its master (glow.mjs, radius 34): trim only what's truly empty.
+    local alpha=""; [ "$name" = "Hat_Halo" ] && alpha="--alpha 6"
+    node Tools/ChatGPT/trim.mjs "$src" "$tmp/$name.png" $alpha > /dev/null &&
       node Tools/ChatGPT/downscale.mjs "$tmp/$name.png" "$out/$name.png" 192
     rm -f "$tmp/$name.png"
   done

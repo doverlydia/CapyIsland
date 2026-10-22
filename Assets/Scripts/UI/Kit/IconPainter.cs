@@ -197,6 +197,19 @@ namespace CapyIsland.UI
 
         public static Sprite Check => Cached("Check", (x, y) => Line(x, y, 0.15f, -0.62f, 0.02f, -0.18f, -0.44f, 0.66f, 0.5f));
 
+        /// <summary>A speech bubble with three dots in it: chat.</summary>
+        public static Sprite Chat => Cached("Chat", (x, y) =>
+        {
+            float bubble = Box(x, y, 0f, 0.12f, 0.8f, 0.56f, 0.3f);
+            float tail = Triangle(x, y, new Vector2(-0.46f, -0.3f), new Vector2(-0.08f, -0.3f), new Vector2(-0.56f, -0.78f), 0.02f);
+            float dots = Union(Union(Disc(x, y, -0.36f, 0.12f, 0.11f), Disc(x, y, 0f, 0.12f, 0.11f)), Disc(x, y, 0.36f, 0.12f, 0.11f));
+            return Cut(Union(bubble, tail), dots);
+        });
+
+        /// <summary>A ring with a slash through it: block.</summary>
+        public static Sprite Block => Cached("Block", (x, y) =>
+            Union(Mathf.Abs(Disc(x, y, 0f, 0f, 0.66f)) - 0.12f, Capsule(x, y, -0.46f, 0.46f, 0.46f, -0.46f, 0.12f)));
+
         public static Sprite Lock => Cached("Lock", (x, y) =>
         {
             float body = Box(x, y, 0f, -0.3f, 0.62f, 0.5f, 0.14f);

@@ -694,3 +694,9 @@
 
 @ Show
 = הצג
+
+@ The vegetable journal is complete!
+= יומן הירקות הושלם!
+
+@ You grew every vegetable there is! Here are {0} gems.
+= גידלת את כל הירקות שיש! הנה {0} יהלומים.

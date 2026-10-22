@@ -67,8 +67,9 @@ namespace CapyIsland.UI
 
         static void AnnounceJournal(Hobby h, WearItem hat)
         {
-            string page = h switch { Hobby.Birding => "bird", Hobby.Bugs => "bug", _ => "fish" };
-            string body = $"You found every {page} on the islands! Here are {JournalRewards.Gems} gems"
+            string page = h switch { Hobby.Birding => "bird", Hobby.Bugs => "bug", Hobby.Gardening => "vegetable", _ => "fish" };
+            string found = h == Hobby.Gardening ? "You grew every vegetable there is!" : $"You found every {page} on the islands!";
+            string body = $"{found} Here are {JournalRewards.Gems} gems"
                           + (hat != null ? $", and the <b>{hat.Name}</b> is waiting in your wardrobe." : ".");
             CardPopup.Show($"The {page} journal is complete!", body, hat != null ? Wardrobe.Art(hat) : IconPainter.Trophy);
         }
@@ -342,16 +343,19 @@ namespace CapyIsland.UI
             // then what you visit most), your picture for the profile and wardrobe, the goal card
             // for goals. Red dots (NewStuff) on each say when something new is waiting there.
             UiKit.RoundButton(side, "Settings", IconPainter.Gear, "Settings", UiKit.Hex("6B8FA8"), () => settings.Open());
-            var mapButton = UiKit.RoundButton(side, "Map", IconPainter.Map, "Map", UiKit.Spring, () => map.Open());
-            NewDot.Live(mapButton.transform, () => !Attention.TutorialRunning && NewStuff.Any("map/"));
-            var hobbiesButton = UiKit.RoundButton(side, "Hobbies", IconPainter.Rod, "Hobbies", UiKit.Hex("3E9C8F"), () => HobbiesScreen.Show());
-            NewDot.Live(hobbiesButton.transform, () => !Attention.TutorialRunning && NewStuff.Any("hobbies/"));
-            var collectionButton = UiKit.RoundButton(side, "Collection", IconPainter.Cards, "Collection", UiKit.Hex("A77BD6"), () => collection.Open());
-            NewDot.Live(collectionButton.transform, () => !Attention.TutorialRunning && CollectionScreen.AnyNews());
+            // "How do I…?": straight under Settings, where someone stuck looks first.
+            MakeScreen<HelpScreen>(screens, "HelpScreen");
+            UiKit.RoundButton(side, "Help", HelpArt.Question, "Help", HelpScreen.Accent, () => HelpScreen.Show());
             if (Visit.Active)
             {
-                // Away from home: the way back, and a way to keep this island.
+                // Away from home the column is short: only what helps on someone else's island
+                // (every trip reloads the scene, so this is decided afresh each time). Hobbies,
+                // Collection, Gifts, Friends and Events are about your own island, and only an
+                // island's owner hosts parties and contests there. The emoji and fishing buttons and
+                // the party panel live elsewhere and stay. The way back, their map (to find your way
+                // round, or the party's island), and Add last, so nothing shifts when it goes.
                 UiKit.RoundButton(side, "Home", IconPainter.House, "Home", UiKit.Hex("5B9BD5"), Visit.FlyHome);
+                UiKit.RoundButton(side, "Map", IconPainter.Map, "Map", UiKit.Spring, () => map.Open());   // no red dot: map news is about your islands
                 _addFriend = UiKit.RoundButton(side, "AddFriend", IconPainter.AddFriend, "Add", UiKit.Leaf, () =>
                 {
                     Visit.BefriendHost();
@@ -361,6 +365,12 @@ namespace CapyIsland.UI
             }
             else
             {
+                var mapButton = UiKit.RoundButton(side, "Map", IconPainter.Map, "Map", UiKit.Spring, () => map.Open());
+                NewDot.Live(mapButton.transform, () => !Attention.TutorialRunning && NewStuff.Any("map/"));
+                var hobbiesButton = UiKit.RoundButton(side, "Hobbies", IconPainter.Rod, "Hobbies", UiKit.Hex("3E9C8F"), () => HobbiesScreen.Show());
+                NewDot.Live(hobbiesButton.transform, () => !Attention.TutorialRunning && NewStuff.Any("hobbies/"));
+                var collectionButton = UiKit.RoundButton(side, "Collection", IconPainter.Cards, "Collection", UiKit.Hex("A77BD6"), () => collection.Open());
+                NewDot.Live(collectionButton.transform, () => !Attention.TutorialRunning && CollectionScreen.AnyNews());
                 var giftButton = UiKit.RoundButton(side, "Gifts", IconPainter.Gift, "Gifts", UiKit.Hex("E3A92B"), () => gifts.Open());
                 var dot = UiKit.Image(giftButton.transform, "Dot", UiKit.Circle, UiKit.Danger);
                 UiKit.Place(dot.rectTransform, new Vector2(1f, 1f), new Vector2(2f, 2f), new Vector2(34f, 34f));

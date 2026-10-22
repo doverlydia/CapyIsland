@@ -166,6 +166,16 @@ namespace CapyIsland.UI
             stickNote.overflowMode = TextOverflowModes.Overflow;
             stickNote.margin = new Vector4(16f, -6f, 16f, 0f);
 
+            // ---- Every "how do I…?" page (HelpScreen), for whoever came here looking for help.
+            var help = Row(list, HelpArt.Question, "How do I…?");
+            var helpButton = UiKit.Button(help, "Help", "Help", UiKit.ButtonStyle.Spring, () =>
+            {
+                Close();
+                HelpScreen.Show();
+            }, 28f);
+            var hle = helpButton.transform.parent.gameObject.AddComponent<LayoutElement>();
+            hle.preferredWidth = 220f; hle.preferredHeight = 72f;
+
             // ---- Teaching on or off ("End tutorial" switches it off; this brings it back).
             var guide = Row(list, IconPainter.Book, "Tutorial and tips");
             Toggle(guide, () => !Guidance.Off, v => Guidance.Off = !v);
@@ -233,6 +243,9 @@ namespace CapyIsland.UI
             (_confirm, _, _) = ConfirmBox(list,
                 "This erases your island, your capybaras and every goal you've earned. It can't be undone. Your wardrobe and daily streak stay with you.",
                 "Keep my island", "Erase it", StartOver);
+
+            // On someone else's island these would act on your own island and its save: they wait until you're home.
+            if (Visit.Active) foreach (var row in new[] { tour, keep, bring, reset }) row.gameObject.SetActive(false);
 
             // Credits.
             var credits = UiKit.Text(list, "Credits",
@@ -433,8 +446,8 @@ namespace CapyIsland.UI
                         : CloudSync.HasGoogle ? "Signed in with Google"
                         : "Play on another device";
                 _accountButton.SetActive(!CloudSync.Linked);
-                // Accounts need the cloud: offline (or just deleted) they aren't offered.
-                bool online = CloudSync.Online;
+                // Accounts need the cloud: offline (or just deleted) they aren't offered, nor on someone else's island.
+                bool online = CloudSync.Online && !Visit.Active;
                 _account.gameObject.SetActive(online);
                 _signIn.SetActive(online);
                 _delete.SetActive(online);

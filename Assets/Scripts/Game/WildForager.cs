@@ -64,8 +64,16 @@ namespace CapyIsland.Game
             _state = State.Born;
             _bornScale = 0.2f;
             transform.localScale = _fullScale * _bornScale;
+            // Never born at sea or on an island you can't reach yet (it would crawl to you through
+            // the water for ages): such a one starts beside your trees and rocks instead. This also
+            // brings back ones an older save left stranded.
+            var land = LandMap.Instance;
+            if (land != null && !Visit.Active && !land.IslandOpen(land.IslandAt(transform.position)))
+                transform.position = land.PestSpot();
             float a = Random.value * Mathf.PI * 2f;
             _bornTarget = (Vector2)transform.position + BunniSpace.ToUnity(new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * 70f);
+            // The first steps stay on its island, too.
+            if (land != null && land.IslandAt(_bornTarget) != land.IslandAt(transform.position)) _bornTarget = transform.position;
             _hintTimer = 30f;
             _hinted = false;
         }

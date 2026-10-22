@@ -1,0 +1,7 @@
+# Hebrew for the help movies about sewing and the shrine (UI/Help/HelpDemos.Crafts.cs): the wish typed onto an ema
+
+@ Sunny days
+= ימים שמשיים
+
+@ I wish for warm, sunny days.
+= אני מאחל ימים חמים ושמשיים.

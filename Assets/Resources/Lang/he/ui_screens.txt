@@ -648,3 +648,36 @@
 
 @ It's far too big for in here, so it's in your trail. Go outside and put it up somewhere on your island, then tap it to shop for your burrow.
 = היא גדולה מדי בשביל כאן, אז היא בשובל שלך. צא החוצה והקם אותה איפשהו באי, ואז הקש עליה כדי לקנות דברים למחילה שלך.
+
+@ Sign up
+= הרשמה
+
+@ Without an account, your island could be lost forever.
+= בלי חשבון, האי שלך עלול ללכת לאיבוד לתמיד.
+
+@ Keep your island safe
+= שמור על האי שלך
+
+@ Sign in, and the island you already have comes back.
+= היכנס, והאי שכבר יש לך יחזור.
+
+@ Sign up, and your island is kept safe in the cloud. Lose your phone or delete the game, and it all comes back when you sign in.
+= הירשם, והאי שלך יישמר בבטחה בענן. גם אם הטלפון יאבד או שהמשחק יימחק, הכול יחזור כשתיכנס.
+
+@ New here? Sign up
+= חדש כאן? הרשמה
+
+@ Have an account? Sign in
+= יש לך חשבון? כניסה
+
+@ As a guest, your island lives only on this device. If the game is deleted or the phone is lost, your island could be lost forever.
+= כאורח, האי שלך שמור רק במכשיר הזה. אם המשחק יימחק או שהטלפון יאבד, האי שלך עלול ללכת לאיבוד לתמיד.
+
+@ Continue as guest
+= המשך כאורח
+
+@ Your island is kept safe: {0}. Sign in with it on any device.
+= האי שלך שמור בבטחה: {0}. היכנס איתו בכל מכשיר.
+
+@ Tap the map to see every island, and travel there fast!
+= הקש על המפה כדי לראות את כל האיים, ולטוס אליהם מהר!

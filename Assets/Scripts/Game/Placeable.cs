@@ -109,7 +109,10 @@ namespace CapyIsland.Game
         /// The original's placement test (CircleOnMap): the footprint must be on land and clear of
         /// every other item's footprint — buildings, planted groves and every tree and flower in them.
         /// </summary>
-        public bool CanPlaceAt(Vector2 position) => InZone(position) && BunniSpace.CircleOnMap(position, innerRadius, this);
+        public bool CanPlaceAt(Vector2 position) => InZone(position) && BunniSpace.CircleOnMap(position, innerRadius, this) && WaresFit(position);
+
+        /// <summary>A shop also needs clear land in front of it for its wares (StoreBuilding.WaresFit).</summary>
+        bool WaresFit(Vector2 position) => !TryGetComponent<StoreBuilding>(out var shop) || shop.WaresFit(position);
 
         /// <summary>
         /// For one step of the opening: <see cref="ZoneFor"/> may only be planted inside this circle
@@ -170,6 +173,8 @@ namespace CapyIsland.Game
             // Blocked: say why, rather than let it look as if the drop was ignored.
             if (!InZone(transform.position))
                 Hints.Show("That's too far from the sleepy capybara. Plant the garden closer, so it can reach the flowers.");
+            else if (BunniSpace.CircleOnMap(transform.position, innerRadius, this) && !WaresFit(transform.position))
+                Hints.Show("A shop needs clear land in front of it for its wares. Try a more open spot.");
             else Hints.Show(BunniSpace.PointOnLand(transform.position)
                 ? "Not enough room there. Drop it where the circle turns green."
                 : "That's water! Things can only be planted on land.");

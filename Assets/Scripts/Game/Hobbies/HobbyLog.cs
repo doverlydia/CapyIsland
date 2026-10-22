@@ -28,6 +28,8 @@ namespace CapyIsland.Game
         /// </summary>
         [Serializable] public class Cat { public string id; public int bond; public bool adopted; public long lastFussTicks; public Vector2 home; public bool unplaced; public long giftDueTicks; public int gifts; public int fed;
             public string name; public bool freeGift; public List<string> outfit = new();
+            /// <summary>Horaira only: you took his halo off (Horaira.WornHalo).</summary>
+            public bool bareHead;
             /// <summary>Has ever had a fish from you (older saves only know it from presents).</summary>
             public bool EverFed => fed > 0 || gifts > 0 || giftDueTicks != 0; }
         /// <summary><c>unplaced</c> while the plot waits in a bubble or your trail (false, so older saves stay put).</summary>

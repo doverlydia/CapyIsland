@@ -30,8 +30,9 @@ namespace CapyIsland.Game
 
                 case "create_deer":
                     if (land == null) break;
-                    for (int i = 0; i < 3; i++) catalog.MakeItem("Deer", land.RandomSpotOnIsland(0, 20f));
-                    for (int i = 0; i < 3; i++) catalog.MakeItem("Deer", land.RandomSpotOnIsland(3, 20f));
+                    // Pests turn up on islands you can reach (LandMap.PestSpot), never across the sea.
+                    for (int i = 0; i < 3; i++) catalog.MakeItem("Deer", land.PestSpot(0));
+                    for (int i = 0; i < 3; i++) catalog.MakeItem("Deer", land.PestSpot(3));
                     break;
 
                 case "create_priest":
@@ -46,7 +47,7 @@ namespace CapyIsland.Game
                     if (land == null) break;
                     land.OpenBridge("monster_isle");
                     catalog.MakeItem("Monster House", land.RandomSpotOnIsland(5, 41f));
-                    for (int i = 0; i < 5; i++) catalog.MakeItem("Monster", land.RandomSpotOnIsland(5, 20f));
+                    for (int i = 0; i < 5; i++) catalog.MakeItem("Monster", land.PestSpot(5));
                     catalog.MakeItem("Large Gold Hill", land.RandomSpotOnIsland(6, 36f));
                     break;
 

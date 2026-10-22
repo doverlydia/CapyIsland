@@ -14,8 +14,8 @@ namespace CapyIsland.Game
 
     /// <summary>
     /// Baits: bought in packs from the fisherman, kept in the bag, and one used up with every
-    /// cast. You pick which one is on the hook from fishing mode; with none chosen (or none
-    /// left) you fish plain, as before.
+    /// cast. You pick which one is on the hook from the tackle panel in fishing mode; with none
+    /// chosen (or none left) you fish plain, as before.
     /// </summary>
     public static class Baits
     {
@@ -43,21 +43,6 @@ namespace CapyIsland.Game
                 var b = ById(PlayerPrefs.GetString(SelectedKey, ""));
                 return Count(b) > 0 ? b : null;
             }
-        }
-
-        /// <summary>On to the next bait you have (none in between), for the chip in fishing mode.</summary>
-        public static BaitKind Cycle()
-        {
-            var current = Current;
-            int start = current == null ? -1 : System.Array.IndexOf(All, current);
-            for (int step = 1; step <= All.Length; step++)
-            {
-                int i = start + step;
-                if (i >= All.Length) break;   // past the last one: back to none
-                if (Count(All[i]) > 0) { Select(All[i]); return All[i]; }
-            }
-            Select(null);
-            return null;
         }
 
         public static void Select(BaitKind b)

@@ -181,7 +181,10 @@ namespace CapyIsland.Game
         /// </summary>
         Vector2 WantedDirection()
         {
-            var keyboard = new Vector2(
+            // Typing in a box (chat, a name): those W, A, S and D keys are letters, not steps.
+            var selected = UnityEngine.EventSystems.EventSystem.current != null ? UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject : null;
+            bool typing = selected != null && selected.TryGetComponent<TMPro.TMP_InputField>(out var box) && box.isFocused;
+            var keyboard = typing ? Vector2.zero : new Vector2(
                 (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow) ? -1f : 0f) +
                 (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow) ? 1f : 0f),
                 (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow) ? -1f : 0f) +

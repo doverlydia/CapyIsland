@@ -89,6 +89,19 @@ namespace CapyIsland.Game
         }
 
         /// <summary>
+        /// Not the original's: Capy Island's groves grow closer together (playtesters found the
+        /// original's trees and rocks too scattered, 2026-10-22). A seed is tested with, and its child
+        /// takes, this share of the original's footprint, so neighbours stand nearer...
+        /// </summary>
+        public const float GroveSpacing = 0.6f;
+
+        /// <summary>
+        /// ...and the grove fills only this share of its outer circle, so it holds about as many
+        /// trees as the original's (0.65² of the area at 1/0.6² the packing), just in a tighter clump.
+        /// </summary>
+        public const float GroveSpread = 0.65f;
+
+        /// <summary>
         /// A placed parent tries this many children at once: outerRadius / 10 for forests and gardens,
         /// outerRadius / 5 for hills (HillItem.initStateMachine).
         /// </summary>
@@ -297,6 +310,12 @@ namespace CapyIsland.Game
                 if (item == ignore || !item.Placed) continue;
                 if (item.GetComponent<Harvestable>() != null) continue;   // counted above
                 if (WorldDistance(centreUnity, item.transform.position) < worldRadius + item.InnerRadius) return false;
+            }
+            // A shop's wares are map items too: nothing seeds or is put down on one.
+            foreach (var ware in SaleDisplay.All)
+            {
+                if (ware == ignore || !ware.Blocks) continue;
+                if (WorldDistance(centreUnity, ware.transform.position) < worldRadius + ware.InnerRadius) return false;
             }
             return true;
         }

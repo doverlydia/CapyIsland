@@ -25,6 +25,10 @@ namespace CapyIsland.Game
 
         public IReadOnlyList<SaleDisplay> Displays => _displays;
         public string ListKey => listKey;
+
+        /// <summary>Is this one of its own wares?</summary>
+        public bool Shows(SaleDisplay ware) => _displays.Contains(ware);
+
         public string HouseAnimal => houseAnimal;
 
         public void Configure(string list, string animal)
@@ -42,15 +46,20 @@ namespace CapyIsland.Game
         {
             Clear();
             var parent = transform.parent;
-            Vector2 at = transform.position;
+            foreach (var (name, spot) in WareSpots(transform.position))
+                _displays.Add(SaleDisplay.Create(name, spot, parent));
+        }
 
+        /// <summary>Where each ware would stand with the building at <paramref name="at"/>.</summary>
+        IEnumerable<(string name, Vector2 spot)> WareSpots(Vector2 at)
+        {
             if (!string.IsNullOrEmpty(houseAnimal))
             {
-                _displays.Add(SaleDisplay.Create(houseAnimal, at + BunniSpace.ToUnity(new Vector2(0f, -LayoutRadius)), parent));
-                return;
+                yield return (houseAnimal, at + BunniSpace.ToUnity(new Vector2(0f, -LayoutRadius)));
+                yield break;
             }
 
-            if (string.IsNullOrEmpty(listKey) || !StoreData.Lists.TryGetValue(listKey, out var all)) return;
+            if (string.IsNullOrEmpty(listKey) || !StoreData.Lists.TryGetValue(listKey, out var all)) yield break;
             // No real-money gems: the Bank has only its wood and gold counters.
             var names = System.Array.FindAll(all, x => x != "Buy Gems");
             int n = names.Length;
@@ -60,8 +69,23 @@ namespace CapyIsland.Game
                 float degrees = n > 1 ? i * 180f / (n - 1) : 90f;
                 float a = degrees * Mathf.Deg2Rad;
                 var world = new Vector2(Mathf.Cos(a), -Mathf.Sin(a)) * LayoutRadius;
-                _displays.Add(SaleDisplay.Create(names[i], at + BunniSpace.ToUnity(world), parent));
+                yield return (names[i], at + BunniSpace.ToUnity(world));
             }
+        }
+
+        /// <summary>
+        /// Would every ware have clear land with the building here? A shop can't go where its wares
+        /// would land in the sea or under a tree or another building, out of reach (Placeable.CanPlaceAt).
+        /// </summary>
+        public bool WaresFit(Vector2 at)
+        {
+            var self = GetComponent<Placeable>();
+            foreach (var (name, spot) in WareSpots(at))
+            {
+                if (!StoreData.IsUnlocked(name) || StoreData.IsSoldOut(name)) continue;   // not on show: no spot to keep
+                if (!BunniSpace.CircleOnMap(spot, SaleDisplay.FootprintOf(name) * 0.8f, self)) return false;
+            }
+            return true;
         }
 
         void Clear()

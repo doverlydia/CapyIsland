@@ -58,6 +58,7 @@ namespace CapyIsland.Game
             public int OpensAt => Mathf.Max(1, FarmIndex - 1);
 
             SpriteRenderer _lock;
+            CropTimer _timer;   // the time left, over a growing crop; made the first time one grows
 
             void Awake()
             {
@@ -102,6 +103,7 @@ namespace CapyIsland.Game
                 }
                 _data = null;
                 if (_crop != null) _crop.enabled = false;
+                if (_timer != null) _timer.Hide(quick: true);
             }
 
             void OnEnable() => TapTargets.Register(this);
@@ -162,7 +164,12 @@ namespace CapyIsland.Game
             void Refresh()
             {
                 var d = Data;
-                if (d == null || !_placeable.Placed) return;
+                if (d == null || !_placeable.Placed)
+                {
+                    // On a friend's island (no crop), or being carried to a new spot.
+                    if (_timer != null) _timer.Hide(quick: true);
+                    return;
+                }
                 if (FarmIndex >= 0) ShowLock();
                 _lastY = float.NaN;
                 bool planted = !string.IsNullOrEmpty(d.crop);
@@ -175,22 +182,48 @@ namespace CapyIsland.Game
                     float s = Mathf.Lerp(0.35f, 0.75f, p);
                     cropT.localScale = Vector3.one * s;
                 }
-                if (stage == _shownStage) return;
-                _shownStage = stage;
-                _crop.enabled = planted;
-                if (stage == "ready")
+                if (stage != _shownStage)
                 {
-                    _crop.sprite = HobbyData.Art("Crop_" + d.crop);
-                    cropT.localScale = Vector3.one * 0.7f;
-                    cropT.localPosition = new Vector3(0f, 0.15f, 0f);
-                    cropT.DOKill();
-                    cropT.DOLocalMoveY(0.3f, 0.6f).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine);
+                    _shownStage = stage;
+                    _crop.enabled = planted;
+                    if (stage == "ready")
+                    {
+                        _crop.sprite = HobbyData.Art("Crop_" + d.crop);
+                        cropT.localScale = Vector3.one * 0.7f;
+                        cropT.localPosition = new Vector3(0f, 0.15f, 0f);
+                        cropT.DOKill();
+                        cropT.DOLocalMoveY(0.3f, 0.6f).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine);
+                    }
+                    else
+                    {
+                        cropT.DOKill();
+                        cropT.localPosition = new Vector3(0f, 0.1f, 0f);
+                    }
                 }
-                else
+                // The time left floats over a growing crop; a ready one bobs instead, and an empty plot has nothing.
+                if (stage == "growing") ShowTimer(d);
+                else if (_timer != null) _timer.Hide();
+            }
+
+            /// <summary>The countdown over a growing crop: whole seconds left, floating just above the sprout.</summary>
+            void ShowTimer(HobbyLog.Plot d)
+            {
+                var kind = HobbyData.Crop(d.crop);
+                if (kind == null)
                 {
-                    cropT.DOKill();
-                    cropT.localPosition = new Vector3(0f, 0.1f, 0f);
+                    if (_timer != null) _timer.Hide(quick: true);
+                    return;
                 }
+                double total = kind.Minutes * 60.0;
+                double left = total - (DateTime.Now - new DateTime(d.plantedTicks)).TotalSeconds;
+                int secs = (int)Math.Ceiling(Math.Min(total, Math.Max(0.0, left)));
+
+                // The sprout grows, so the pill rides on its top (its picture's top edge, as drawn).
+                var cropT = _crop.transform;
+                var art = _crop.sprite;
+                float top = cropT.position.y + (art != null ? art.bounds.max.y * cropT.lossyScale.y : 0.3f);
+                if (_timer == null) _timer = CropTimer.Create(transform);
+                _timer.Show(new Vector3(transform.position.x, top, transform.position.z), secs);
             }
 
             public float TapDistance(Vector2 worldPoint)

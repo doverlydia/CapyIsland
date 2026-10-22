@@ -156,6 +156,15 @@ baits () {
   gen Bait_Lure "$PROP" "a single shiny golden fishing lure shaped like a little fish, with a soft sparkle and a small hook ring, a precious rare item."
 }
 
+# The Mermaid's Shell (a fishing charm you toss into the sea) and the three fish that only come to it.
+FISHREF="ArtSource/Hobby_Fish_snapper.png"
+charm () {
+  gen Charm_Mermaid "ArtSource/Hobby_Bait_Lure.png" "a small magical seashell charm: a pearly pink and soft aqua scallop shell, half open, cradling one round shining white pearl, a little sea-green ribbon tied in a bow at its hinge, and one tiny four-point sparkle beside it, a precious rare item."
+  gen Fish_lullaby "$FISHREF" "a single lullaby fish, a soft lilac and pearly pink fish with long flowing veil fins and a long tail that trail like silk ribbons, a rare magical catch, $FISHVIEW."
+  gen Fish_pearlhorse "$FISHREF" "a single cute pearly seahorse, pale pink-white with a soft opal shimmer, a chunky curled tail, a little crest of soft frills on its head and back, seen from the side facing left, chunky and simple, a rare magical catch."
+  gen Fish_tidecrown "$FISHREF" "a single crowned tidefin, a regal deep ocean-blue fish with shimmering turquoise scales, a tall golden dorsal fin shaped like a little crown, and flowing gold-edged fins and tail, a legendary magical catch, $FISHVIEW."
+}
+
 cats () {
   gen Cat_Ginger "$ANIMAL" "a cute chubby ginger tabby cat sitting upright, $VIEW, round head, small triangle ears, curled tail, simple dot eyes, friendly."
   gen Cat_Black "$ANIMAL" "a cute chubby black cat with bright yellow-green eyes sitting upright, $VIEW, round head, small triangle ears, curled tail, friendly."
@@ -194,6 +203,7 @@ case "${1:-}" in
   fish) fish ;;
   birds) birds ;;
   baits) baits ;;
+  charm) charm ;;
   cats) cats ;;
   all) props; crops; dishes; bugs; fish; birds; cats; ship ;;
   ship) ship ;;

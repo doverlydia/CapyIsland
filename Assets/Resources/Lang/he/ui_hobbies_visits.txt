@@ -1531,3 +1531,69 @@
 
 @ {0} said not right now. Maybe another time!
 = {0} אמר שלא עכשיו. אולי בפעם אחרת!
+
+@ Step off the bridge onto an island's shore to host a fishing contest there.
+= רד מהגשר אל החוף של אי כדי לארח שם תחרות דיג.
+
+@ This island doesn't have enough trees for a birdwatching contest. Try one with more.
+= באי הזה אין מספיק עצים לתחרות צפרות. נסה אי עם יותר עצים.
+
+@ This island doesn't have enough trees or flowers for a bug contest. Try one with more.
+= באי הזה אין מספיק עצים או פרחים לתחרות חרקים. נסה אי עם יותר.
+
+@ the island
+= האי
+
+@ You left the shore of {0}, so you're out of this round. You keep everything you caught!
+= עזבת את החוף של {0}, אז אתה בחוץ בסיבוב הזה. כל מה שתפסת נשאר שלך!
+
+@ You left {0}, so you're out of this round. You keep everything you caught!
+= עזבת את {0}, אז אתה בחוץ בסיבוב הזה. כל מה שתפסת נשאר שלך!
+
+@ Catch as many bugs as you can on {0}!
+= תפוס כמה שיותר חרקים ב-{0}!
+
+@ Spot as many birds as you can on {0}!
+= צפה בכמה שיותר ציפורים ב-{0}!
+
+@ Catch as many fish as you can along the shore of {0}!
+= תפוס כמה שיותר דגים לאורך החוף של {0}!
+
+@ Wait by the shore of {0} for the contest to start
+= חכה על החוף של {0} עד שהתחרות תתחיל
+
+@ Wait on {0} for the contest to start
+= חכה ב-{0} עד שהתחרות תתחיל
+
+@ Come back to the shore of {0}! {1}
+= חזור לחוף של {0}! {1}
+
+@ Come back to {0}! {1}
+= חזור ל-{0}! {1}
+
+@ Event
+= אירוע
+
+@ You left the shore of {0}, so you're out of this round for now. Come back to join in again!
+= עזבת את החוף של {0}, אז אתה בחוץ בסיבוב הזה בינתיים. חזור כדי להצטרף שוב!
+
+@ You left {0}, so you're out of this round for now. Come back to join in again!
+= עזבת את {0}, אז אתה בחוץ בסיבוב הזה בינתיים. חזור כדי להצטרף שוב!
+
+@ You're back at the {0}! Join this round again? What you caught before still counts.
+= חזרת ל{0}! להצטרף שוב לסיבוב הזה? מה שתפסת קודם עדיין נחשב.
+
+@ Join in
+= הצטרף
+
+@ Come back to the shore of {0} first, then join in again!
+= חזור קודם לחוף של {0}, ואז תוכל להצטרף שוב!
+
+@ Come back to {0} first, then join in again!
+= חזור קודם ל-{0}, ואז תוכל להצטרף שוב!
+
+@ You're back in this round. Good luck!
+= חזרת לסיבוב הזה. בהצלחה!
+
+@ You're out of this round for now. Come back to join in again!
+= אתה בחוץ בסיבוב הזה בינתיים. חזור כדי להצטרף שוב!

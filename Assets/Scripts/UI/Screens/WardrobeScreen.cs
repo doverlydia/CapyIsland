@@ -191,7 +191,11 @@ namespace CapyIsland.UI
         void BuildGrid()
         {
             ClearChildren(_grid);
-            foreach (var item in Wardrobe.AllItems)
+            // What you have first, then what's still to earn (each in its usual order).
+            var items = new List<WearItem>(Wardrobe.AllItems);
+            var ordered = items.FindAll(Wardrobe.Owns);
+            ordered.AddRange(items.FindAll(i => !Wardrobe.Owns(i)));
+            foreach (var item in ordered)
             {
                 if (item.Slot != _slot) continue;
                 var art = Wardrobe.Art(item);

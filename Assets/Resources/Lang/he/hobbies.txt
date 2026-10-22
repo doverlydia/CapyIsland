@@ -804,3 +804,177 @@
 
 @ {0}'s wardrobe
 = הארון של {0}
+
+@ Mermaid's Shell
+= צדף בת הים
+
+@ Toss it into the sea while you fish and it sings for a minute. Anyone fishing in its ring gets quicker bites, and after five catches something shimmering comes up to listen.
+= זרוק אותו לים בזמן הדיג והוא שר במשך דקה. כל מי שדג בתוך הטבעת שלו מקבל נשיכות מהירות יותר, ואחרי חמש תפיסות משהו נוצץ עולה להקשיב.
+
+@ Only comes to a Mermaid's Shell
+= מגיע רק לצדף בת הים
+
+@ Ahoy there! You're reeling them in like an old salt now. Here, three of my mermaid's shells, on the house.
+= אהוי! אתה כבר מגלגל אותם פנימה כמו מלח ותיק. הנה, שלושה מצדפי בת הים שלי, על חשבון הבית.
+
+@ Toss one into the water while you fish. It sings a little song, and the fish swim over to hear it. Fish inside its ring and they bite quicker.
+= זרוק אחד למים בזמן שאתה דג. הוא שר שיר קטן, והדגים שוחים אליו לשמוע. דוג בתוך הטבעת שלו והם ינשכו מהר יותר.
+
+@ Friends can fish in the ring too, and every catch counts. After five, something shimmering comes up to listen. Those fish never come any other way!
+= גם חברים יכולים לדוג בטבעת, וכל תפיסה נספרת. אחרי חמש, משהו נוצץ עולה להקשיב. הדגים האלה לא מגיעים בשום דרך אחרת!
+
+@ Reach fishing level 4 first, then Nori will sell you one.
+= הגע קודם לרמת דיג 4, ואז נורי ימכור לך אחד.
+
+@ Your shell is singing! Fish inside its ring for quicker bites.
+= הצדף שלך שר! דוג בתוך הטבעת שלו בשביל נשיכות מהירות יותר.
+
+@ {0} tossed a Mermaid's Shell into the sea! Fish inside its ring.
+= {0} זרק צדף בת הים לים! דוג בתוך הטבעת שלו.
+
+@ Something shimmering has come to listen to the shell! Look for the sparkling shadow.
+= משהו נוצץ בא להקשיב לצדף! חפש את הצל המנצנץ.
+
+@ Your shell is still singing. Wait until it goes quiet.
+= הצדף שלך עדיין שר. חכה עד שישתתק.
+
+@ Three shells are singing here already. Wait for one to go quiet.
+= כבר שלושה צדפים שרים כאן. חכה שאחד מהם ישתתק.
+
+@ Stand at the water's edge to toss it in.
+= עמוד על שפת המים כדי לזרוק אותו.
+
+@ No shells left. Skipper Nori sells them on the beach.
+= נגמרו לך הצדפים. הסקיפר נורי מוכר אותם בחוף.
+
+@ Shell ×{0}
+= צדף ×{0}
+
+@ Singing {0}s
+= שר עוד {0} שנ׳
+
+@ The shell's song is calling the fish
+= השיר של הצדף קורא לדגים
+
+@ Lullaby Fish
+= דג שיר ערש
+
+@ Pearl Seahorse
+= סוסון ים פנינה
+
+@ Crowned Tidefin
+= סנפיר הגאות המוכתר
+
+@ Old Yuzu's cat. Gentle, a little bit glowy, and never far from her side.
+= החתול של יוזו הזקנה. עדין, זוהר קצת, ואף פעם לא רחוק ממנה.
+
+@ <b>{0}</b> blinks at you slowly, the way cats say hello.
+= <b>{0}</b> ממצמץ אליך לאט, כמו שחתולים אומרים שלום.
+
+@ Ask Old Yuzu about him
+= לשאול את יוזו הזקנה עליו
+
+@ Old Yuzu smiles: "He's chosen you, little one."
+= יוזו הזקנה מחייכת: "הוא בחר בך, קטנטן."
+
+@ He'll still stay close to her side.
+= הוא עדיין יישאר קרוב אליה.
+
+@ A halo, just like his own! Old Yuzu says he only ever gives these to friends.
+= הילה, בדיוק כמו שלו! יוזו הזקנה אומרת שהוא נותן כאלה רק לחברים.
+
+@ Horaira's Halo
+= ההילה של הוריירה
+
+@ A present from Horaira
+= מתנה מהוריירה
+
+@ At Old Yuzu's side,
+= ליד יוזו הזקנה,
+
+@ once she's warm again
+= כשיהיה לה חם שוב
+
+@ Something was standing on a shop's wares, so it's back in a bubble. Put it down somewhere else!
+= משהו עמד על הסחורה של חנות, אז הוא חזר לבועה. הנח אותו במקום אחר!
+
+@ A shop needs clear land in front of it for its wares. Try a more open spot.
+= חנות צריכה שטח פנוי לפניה בשביל הסחורה שלה. נסה מקום פתוח יותר.
+
+@ Bait: bites ×{0}, easier reeling
+= פיתיון: נשיכות ×{0}, משיכה קלה יותר
+
+@ Bait: bites ×{0}
+= פיתיון: נשיכות ×{0}
+
+@ Bait: easier reeling
+= פיתיון: משיכה קלה יותר
+
+@ Shell: bites ×{0}
+= צדף: נשיכות ×{0}
+
+@ Contest: bites ×{0}
+= תחרות: נשיכות ×{0}
+
+@ All together: bites ×{0}
+= ביחד: נשיכות ×{0}
+
+@ Tackle
+= ציוד דיג
+
+@ Land this fish first!
+= קודם תוציא את הדג הזה!
+
+@ Put on
+= שים על הקרס
+
+@ On hook
+= על הקרס
+
+@ Just the hook
+= רק הקרס, בלי כלום
+
+@ Use
+= בחר
+
+@ In use
+= בשימוש
+
+@ A new bait goes on at your next cast.
+= פיתיון חדש יעלה על הקרס בזריקה הבאה שלך.
+
+@ Sings for a minute. Bites ×{0} in its ring
+= שר במשך דקה. נשיכות ×{0} בתוך הטבעת שלו
+
+@ Throw
+= זרוק
+
+@ Bites ×{0}, easier reeling
+= נשיכות ×{0}, משיכה קלה יותר
+
+@ Bites ×{0}
+= נשיכות ×{0}
+
+@ Easier reeling
+= משיכה קלה יותר
+
+@ {0} on the hook!
+= {0} על הקרס!
+
+@ {0} goes on at your next cast.
+= {0}: על הקרס בזריקה הבאה שלך.
+
+@ Bait goes on your hook as you cast, one per cast. Tap Tackle while fishing to choose.
+= הפיתיון עולה על הקרס כשאתה זורק את החכה, אחד בכל זריקה. בזמן הדיג הקש על "ציוד דיג" כדי לבחור.
+
+@ On the hook: {0}
+= על הקרס: {0}
+
+@ On the hook: nothing
+= על הקרס: כלום
+
+@ (from your next cast)
+= (מההטלה הבאה)
+
+@ Take off
+= להוריד

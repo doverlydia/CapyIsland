@@ -6,7 +6,7 @@ namespace CapyIsland.Game
     /// The island's air: what you see and hear between the things you do.
     ///
     ///  * Leaves and the odd petal drift across the view on the breeze, more when a gust comes
-    ///    through; faint streaks of wind ride the gusts.
+    ///    through; soft wisps of wind curl along with the gusts (<see cref="WindWisps"/>).
     ///  * After dark the birds fall quiet (fireflies, mist, smoke and the rest are in <see cref="Atmosphere"/>).
     ///  * Soft waves wash louder the nearer you are to the shore, and a gentle breeze rises with
     ///    each gust. Both are kept quiet and soft — a band of air, nothing hissy — so they sit
@@ -28,13 +28,14 @@ namespace CapyIsland.Game
 
         AudioSource _waves, _wind, _rain, _chirp;
         AudioClip[] _chirps;
-        ParticleSystem _leaves, _streaks, _drops, _splashes;
+        ParticleSystem _leaves, _drops, _splashes;
+        WindWisps _wisps;
         SpriteRenderer _rainbow;
         float _dropDebt, _splashDebt;
         Transform _root;
 
         float _seaNear;          // 0 inland … 1 at the water's edge
-        float _nextProbe, _nextChirp, _nextLeaf, _nextStreak;
+        float _nextProbe, _nextChirp, _nextLeaf;
 
         static readonly Color[] LeafColours =
         {
@@ -60,7 +61,7 @@ namespace CapyIsland.Game
 
             var fx = HarvestEffects.Instance;
             _leaves = MakeSystem("AirLeaves", fx != null ? fx.LeafSprite : null, life: 7f, spin: 160f, flutter: 0.6f);
-            _streaks = MakeSystem("WindStreaks", StreakSprite(), life: 1.3f, spin: 0f, flutter: 0f);
+            _wisps = new WindWisps(_root, SortingOrder);
             _drops = MakeSystem("RainDrops", StreakSprite(), life: 0.5f, spin: 0f, flutter: 0f, fade: false);
             _splashes = MakeSystem("RainSplashes", UI.IconPainter.Ring, life: 0.4f, spin: 0f, flutter: 0f, grow: true);
             _rainbow = MakeRainbow();
@@ -263,16 +264,8 @@ namespace CapyIsland.Game
 
             // (Fireflies live in Atmosphere now: they blink, gather and light the grass.)
 
-            // Wind streaks ride the gusts; in calm air only the odd wisp.
-            if (Time.time >= _nextStreak)
-            {
-                _nextStreak = Time.time + (gust > 0.15f ? Random.Range(0.08f, 0.2f) : Random.Range(2.5f, 5f));
-                var at = new Vector2(c.x + Random.Range(-w, w), c.y + Random.Range(-h, h) * 0.85f);
-                float len = Random.Range(1.2f, 2.4f);
-                var v = new Vector2(dir * Random.Range(5f, 8f), Random.Range(-0.2f, 0.2f));
-                var tint = new Color(1f, 1f, 1f, Mathf.Lerp(0.18f, 0.4f, gust));
-                Emit(_streaks, at, v, tint, new Vector3(len, len * 0.08f, 1f), 0f);
-            }
+            // Wisps of wind curl along with the gusts; in calm air only the odd one.
+            _wisps?.Tick(cam);
         }
 
         static void Emit(ParticleSystem ps, Vector2 at, Vector2 velocity, Color colour, Vector3 size, float rotation)
@@ -377,7 +370,7 @@ namespace CapyIsland.Game
             return Sprite.Create(tex, new Rect(0, 0, n, n), new Vector2(0.5f, 0.5f), 100f);
         }
 
-        /// <summary>A soft white dash, thick in the middle and thin at the ends: a breath of wind.</summary>
+        /// <summary>A soft white dash, thick in the middle and thin at the ends: a falling raindrop.</summary>
         static Sprite StreakSprite()
         {
             const int w = 128, h = 16;

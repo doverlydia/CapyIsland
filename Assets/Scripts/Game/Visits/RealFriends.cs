@@ -100,6 +100,9 @@ namespace CapyIsland.Game
             Requests.Clear();
             Changed = null;
             MessageReceived = null;
+            _blocked = null;
+            _sending.Clear();
+            _unblocking.Clear();
         }
 
         static void Notify()
@@ -170,6 +173,10 @@ namespace CapyIsland.Game
             _presence.Clear();
             Requests.Clear();
             SaveCache();
+            // Blocks belong to the account: the new one's come down from the service.
+            _blocked = new List<BlockedPlayer>();
+            _unblocking.Clear();
+            SaveBlocked();
             Notify();
             Start();
         }
@@ -229,10 +236,12 @@ namespace CapyIsland.Game
         {
             if (!_ready) return;
             var friends = FriendsService.Instance;
+            SyncBlocks();
             var list = new List<FriendProfile>();
             foreach (var r in friends.Friends)
             {
                 var m = r.Member;
+                if (IsBlocked(m.Id)) continue;
                 var old = Find(m.Id);
                 var who = old ?? new FriendProfile { id = "u_" + m.Id, member = m.Id, seed = m.Id.GetHashCode() };
                 if (string.IsNullOrEmpty(who.name)) who.name = BaseName(m.Profile?.Name ?? "Capy");
@@ -245,6 +254,7 @@ namespace CapyIsland.Game
             Requests.Clear();
             foreach (var r in friends.IncomingFriendRequests)
             {
+                if (IsBlocked(r.Member.Id)) continue;   // someone you blocked can't ask
                 string name = r.Member.Profile?.Name ?? "?";
                 Requests.Add((r.Member.Id, name));
                 if (before.Contains(r.Member.Id)) continue;
@@ -414,6 +424,158 @@ namespace CapyIsland.Game
             Refresh();
         }
 
+        // ---------------------------------------------------------------- blocking
+
+        const string BlockedKey = "CapyIsland.Blocked";
+
+        /// <summary>Someone you blocked, with the name they had then (the service doesn't always tell).</summary>
+        [Serializable]
+        public class BlockedPlayer
+        {
+            public string member;
+            public string name;
+        }
+
+        [Serializable] class BlockedCache { public List<BlockedPlayer> players = new(); }
+
+        static List<BlockedPlayer> _blocked;
+
+        /// <summary>Everyone you blocked, newest last.</summary>
+        public static IReadOnlyList<BlockedPlayer> Blocked { get { LoadBlocked(); return _blocked; } }
+
+        /// <summary>
+        /// Did you block this player? Then nothing of theirs reaches you: no knocks, invitations,
+        /// friend requests, visits, capybara, emojis or chat (Live, PrivateServer, Refresh).
+        /// </summary>
+        public static bool IsBlocked(string member)
+        {
+            if (string.IsNullOrEmpty(member)) return false;
+            LoadBlocked();
+            foreach (var b in _blocked) if (b.member == member) return true;
+            return false;
+        }
+
+        /// <summary>
+        /// Blocks a real player: they stop being your friend (and any request between you goes),
+        /// they're sent away if they're with you now, and nothing of theirs reaches you until you
+        /// unblock them in Neighbours. Kept on this device straight away, so it holds offline too.
+        /// </summary>
+        public static async Task Block(string member, string name)
+        {
+            if (string.IsNullOrEmpty(member) || IsBlocked(member)) return;
+            _unblocking.Remove(member);
+            _blocked.Add(new BlockedPlayer { member = member, name = string.IsNullOrEmpty(name) ? "Capy" : BaseName(name) });
+            SaveBlocked();
+            Load();
+            _list.RemoveAll(f => f.member == member);
+            Requests.RemoveAll(r => r.id == member);
+            NewStuff.Clear("friends/ask_" + member);
+            SaveCache();
+            Live.Blocked(member);
+            PrivateServer.Reread();
+            Notify();
+            if (!_ready) return;   // sent up once connected (SyncBlocks)
+            var friends = FriendsService.Instance;
+            _sending.Add(member);   // the refreshes the unfriending sets off mustn't send it twice
+            // Unfriended first, so unblocking later doesn't bring the friendship back by itself.
+            try { if (HasRelationship(member, RelationshipType.Friend)) await friends.DeleteFriendAsync(member); }
+            catch (Exception e) { Debug.Log("[RealFriends] Unfriending before a block: " + e.Message); }
+            try { if (HasRelationship(member, RelationshipType.FriendRequest)) await friends.DeleteIncomingFriendRequestAsync(member); }
+            catch (Exception) { }
+            try { if (HasRelationship(member, RelationshipType.FriendRequest)) await friends.DeleteOutgoingFriendRequestAsync(member); }
+            catch (Exception) { }
+            try { await friends.AddBlockAsync(member); }
+            catch (Exception e) { Debug.Log("[RealFriends] Block not sent (kept on this device): " + e.Message); }
+            _sending.Remove(member);
+            Refresh();
+        }
+
+        /// <summary>Unblocks someone: they can find you again (as a stranger: add them again to be friends).</summary>
+        public static async Task Unblock(string member)
+        {
+            LoadBlocked();
+            if (_blocked.RemoveAll(b => b.member == member) == 0) return;
+            SaveBlocked();
+            PrivateServer.Reread();
+            Notify();
+            _unblocking.Add(member);   // until the service has heard, its old block mustn't bring it back
+            if (!_ready) return;
+            try { if (HasRelationship(member, RelationshipType.Block)) await FriendsService.Instance.DeleteBlockAsync(member); }
+            catch (Exception e) { Debug.Log("[RealFriends] Unblock failed: " + e.Message); }
+            Refresh();
+        }
+
+        static bool HasRelationship(string member, RelationshipType type)
+        {
+            foreach (var r in FriendsService.Instance.Relationships)
+                if (r.Type == type && r.Member?.Id == member) return true;
+            return false;
+        }
+
+        /// <summary>
+        /// The service's blocks and this device's, made one list: blocks made on another device
+        /// arrive here, and ones made here while offline are sent up.
+        /// </summary>
+        static void SyncBlocks()
+        {
+            LoadBlocked();
+            var friends = FriendsService.Instance;
+            var known = new HashSet<string>();
+            bool changed = false;
+            foreach (var r in friends.Blocks)
+            {
+                var m = r.Member;
+                if (m == null || m.Role == MemberRole.Source) continue;   // only blocks you made
+                if (_unblocking.Contains(m.Id)) { UnblockLater(m.Id); continue; }
+                known.Add(m.Id);
+                if (IsBlocked(m.Id)) continue;
+                _blocked.Add(new BlockedPlayer { member = m.Id, name = BaseName(m.Profile?.Name ?? "Capy") });
+                changed = true;
+            }
+            foreach (var b in _blocked)
+                if (!known.Contains(b.member) && _sending.Add(b.member)) SendBlockLater(b.member);
+            if (changed) SaveBlocked();
+        }
+
+        static readonly HashSet<string> _sending = new();      // blocks on their way up, so each is sent once
+        static readonly HashSet<string> _unblocking = new();   // unblocked here, the service not told yet
+
+        static async void UnblockLater(string member)
+        {
+            if (!_sending.Add(member)) return;
+            try { await FriendsService.Instance.DeleteBlockAsync(member); _unblocking.Remove(member); }
+            catch (Exception e) { Debug.Log("[RealFriends] Unblock still not sent: " + e.Message); }
+            _sending.Remove(member);
+        }
+
+        static async void SendBlockLater(string member)
+        {
+            try { await FriendsService.Instance.AddBlockAsync(member); }
+            catch (Exception e) { Debug.Log("[RealFriends] Block still not sent: " + e.Message); }
+            _sending.Remove(member);
+        }
+
+        static void LoadBlocked()
+        {
+            if (_blocked != null) return;
+            _blocked = new List<BlockedPlayer>();
+            var json = PlayerPrefs.GetString(BlockedKey, "");
+            if (string.IsNullOrEmpty(json)) return;
+            try
+            {
+                var c = JsonUtility.FromJson<BlockedCache>(json);
+                if (c?.players != null) _blocked = c.players.FindAll(b => !string.IsNullOrEmpty(b.member));
+            }
+            catch (Exception) { }
+        }
+
+        static void SaveBlocked()
+        {
+            LoadBlocked();
+            PlayerPrefs.SetString(BlockedKey, JsonUtility.ToJson(new BlockedCache { players = _blocked }));
+            PlayerPrefs.Save();
+        }
+
         public static async Task Remove(FriendProfile who)
         {
             Load();
@@ -452,7 +614,7 @@ namespace CapyIsland.Game
             Message m = null;
             try { m = e.GetAs<Message>(); } catch (Exception ex) { Debug.Log("[RealFriends] Unreadable message: " + ex.Message); }
             Debug.Log("[RealFriends] Message from " + e.UserId + ": " + (m != null ? m.kind : "?"));
-            if (m != null) MessageReceived?.Invoke(e.UserId, m);
+            if (m != null && !IsBlocked(e.UserId)) MessageReceived?.Invoke(e.UserId, m);
         }
 
         // ---------------------------------------------------------------- your public side

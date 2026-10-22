@@ -13,6 +13,7 @@ namespace CapyIsland.Game
     public static class Whereabouts
     {
         public static string Fish(FishKind f) =>
+            f.CharmOnly ? Lines(StoryText.Charm.Where, Level(Hobby.Fishing, "Needs fishing level {0}", f.MinLevel)) :
             Lines("From any shore", When(f.Times, f.RainOnly), Level(Hobby.Fishing, "Needs fishing level {0}", f.MinLevel));
 
         public static string Bird(BirdKind b) =>
@@ -42,6 +43,9 @@ namespace CapyIsland.Game
                     Level(Hobby.Cooking, "Needs cooking level {0}", d.MinLevel));
 
         public const string Cat = "Wanders onto your island\nsome days";
+
+        /// <summary>Where to meet a cat: Horaira only shows himself at Old Yuzu's side, once she is warm again.</summary>
+        public static string CatHint(CatKind kind) => Horaira.Is(kind) ? "At Old Yuzu's side,\nonce she's warm again" : Cat;
 
         /// <summary>A discovery card: the shop that sells its item, or how else it turns up.</summary>
         public static string Card(CardDef card)

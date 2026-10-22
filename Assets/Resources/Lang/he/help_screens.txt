@@ -1,0 +1,25 @@
+# Hebrew for the help pages on Hobbies, Bigger text and language, and the other kinds of capybara (UI/Help/HelpDemos.Screens.cs, HelpTopics.cs)
+
+@ Tap the Hobbies button on the right. Swipe the big cards to see every hobby; the ones you haven't started say how to start them.
+= הקש על כפתור התחביבים בצד ימין. החלק את הכרטיסים הגדולים כדי לראות כל תחביב; בתחביבים שעוד לא התחלת כתוב איך מתחילים.
+
+@ On a hobby's card, tap Journal to see everything you've found so far, and what's still to find.
+= בכרטיס של תחביב, הקש על "יומן" כדי לראות את כל מה שמצאת עד עכשיו, ומה עוד נשאר למצוא.
+
+@ Tap Bag at the top to see what you've caught, grown and cooked.
+= הקש על "תיק" למעלה כדי לראות מה תפסת, גידלת ובישלת.
+
+@ Tap Settings (the gear at the top right) and turn on Easy Reading: every word in the game gets bigger.
+= הקש על הגדרות (גלגל השיניים למעלה מימין) והפעל קריאה נוחה: כל המילים במשחק יגדלו.
+
+@ Tap A+ or A− to choose how big. The sentence under them shows the size.
+= הקש על A+ או A− כדי לבחור את הגודל. המשפט שמתחתיהם מראה איך זה ייראה.
+
+@ With Easy Reading on, tap any words to read them in a large window. On a button or a speech bubble, press and hold the words instead.
+= כשקריאה נוחה פועלת, הקש על כל טקסט כדי לקרוא אותו בחלון גדול. על כפתור או בבועת דיבור, לחץ על המילים והחזק.
+
+@ Under Language, tap English or עברית to change the language.
+= תחת "שפה", הקש על English או על עברית כדי להחליף שפה.
+
+@ Then drag it onto a mine: it digs rock 4 times quicker than a capybara.
+= אחר כך גרור אותה למכרה: היא חופרת סלעים פי 4 מהר יותר מקפיברה.

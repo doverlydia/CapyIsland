@@ -22,14 +22,15 @@ namespace CapyIsland.Game
             if (_king == null) _king = FindFirstObjectByType<PlayerAvatar>();
             if (_king == null || Time.time < _nextBird) return;
             if (!HobbyLog.IsUnlocked(Hobby.Birding)) return;   // birds come once you have binoculars
-            // A birdwatching contest's ring is full of birds: one every few seconds, inside it.
+            // A birdwatching contest's island is full of birds: one every few seconds, around you,
+            // and only on that island (never across the water or out on a bridge).
             bool contest = Gathering.Boosting(Hobby.Birding);
             _nextBird = Time.time + (contest ? Random.Range(5f, 10f) : Random.Range(25f, 50f));
             if (FindObjectsByType<Bird>(FindObjectsSortMode.None).Length >= (contest ? 5 : 2)) return;
-            TryLand(contest ? Gathering.Arena : (Vector2)_king.transform.position);
+            TryLand(_king.transform.position, contest);
         }
 
-        void TryLand(Vector2 around)
+        void TryLand(Vector2 around, bool contest)
         {
             int level = HobbyLog.Level(Hobby.Birding);
             bool wader = Random.value < 0.25f;
@@ -46,6 +47,7 @@ namespace CapyIsland.Game
                 foreach (var node in FindObjectsByType<Harvestable>(FindObjectsSortMode.None))
                 {
                     if (node.Family != NodeFamily.Tree || !node.InWorld) continue;
+                    if (contest && !Gathering.OnEventIsland(node.transform.position)) continue;
                     float d = Vector2.Distance(node.transform.position, around);
                     if (d < 2.5f || d > 9f) continue;
                     float score = Mathf.Abs(d - 5f) + Random.value * 2f;
@@ -66,6 +68,7 @@ namespace CapyIsland.Game
                 {
                     var p = around + Random.insideUnitCircle.normalized * Random.Range(3.5f, 7f);
                     if (!BunniSpace.PointOnLand(p)) continue;
+                    if (contest && !Gathering.OnEventIsland(p)) continue;
                     perch = p;
                     order = YSorter.PropSortBase + Mathf.RoundToInt(-p.y * 100f) + 5;
                     break;

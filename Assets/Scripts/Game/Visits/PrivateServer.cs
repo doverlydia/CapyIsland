@@ -234,6 +234,12 @@ namespace CapyIsland.Game
         /// <summary>Someone on your private server, by player id, or null.</summary>
         public static FriendProfile Find(string member) => member != null && _people.TryGetValue(member, out var who) ? who : null;
 
+        /// <summary>Someone was blocked or unblocked: the list is read again (RealFriends).</summary>
+        internal static void Reread()
+        {
+            if (_session != null) Rebuild();
+        }
+
         static void Rebuild()
         {
             _people.Clear();
@@ -245,6 +251,7 @@ namespace CapyIsland.Game
                 foreach (var p in s.Players)
                 {
                     if (p.Id == me) continue;
+                    if (RealFriends.IsBlocked(p.Id)) continue;   // someone you blocked: not on your map, and no invitations
                     var friend = RealFriends.Find(p.Id);
                     var who = friend ?? new FriendProfile { id = "u_" + p.Id, member = p.Id, seed = p.Id.GetHashCode() };
                     string party = "";

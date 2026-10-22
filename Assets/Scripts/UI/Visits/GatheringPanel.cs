@@ -12,7 +12,7 @@ namespace CapyIsland.UI
     /// happening: who's here, the clock, the top of the scoreboard and your place. The host gets
     /// Start (once two are here), Again after a round, and End; a guest gets Leave.
     ///
-    /// Step out of a running contest's ring and a big countdown says to come back. When a round
+    /// Leave a running contest's island (or its shore, fishing) and a big countdown says to come back. When a round
     /// ends, everyone sees the leaderboard (ContestResults).
     /// </summary>
     public class GatheringPanel : MonoBehaviour
@@ -20,6 +20,11 @@ namespace CapyIsland.UI
         const float Width = 620f;
 
         RectTransform _card, _board, _buttons, _warning;
+
+        /// <summary>The panel's card while it's showing (fishing's words keep clear of it), else null.</summary>
+        public static RectTransform ShownCard { get; private set; }
+
+        void LateUpdate() => ShownCard = _card != null && _card.gameObject.activeInHierarchy ? _card : null;
         Image _disc, _icon;
         TextMeshProUGUI _caption, _line, _warnText;
         string _shown;
@@ -127,7 +132,7 @@ namespace CapyIsland.UI
             Refresh(force: false);
         }
 
-        /// <summary>Out of the ring with the clock running: come back!</summary>
+        /// <summary>Off the contest's island (or, fishing, its shore) with the clock running: come back!</summary>
         void Warning()
         {
             bool show = Gathering.OutAt > 0f && Gathering.Now == Gathering.Phase.Running && !UiScreen.AnyOpen;
@@ -138,8 +143,30 @@ namespace CapyIsland.UI
             }
             if (!show) return;
             int left = Mathf.Max(0, Mathf.CeilToInt(Gathering.OutAt - Time.realtimeSinceStartup));
-            _warnText.text = Loc.F("Come back to the contest area! {0}", left) + "\n<size=70%>" + Loc.T("Stay out and you're out of this round.") + "</size>";
+            string island = Loc.T(Gathering.AreaName);
+            string back = Gathering.Kind == GatheringKind.Fishing
+                ? Loc.F("Come back to the shore of {0}! {1}", island, left)
+                : Loc.F("Come back to {0}! {1}", island, left);
+            _warnText.text = back + "\n<size=70%>" + Loc.T("Stay out and you're out of this round.") + "</size>";
         }
+
+        /// <summary>Each kind of gathering's colour (the card's disc, the map's badge).</summary>
+        public static Color ColourOf(GatheringKind kind) => kind switch
+        {
+            GatheringKind.Fishing => UiKit.Hex("2DA39A"),
+            GatheringKind.Bugs => UiKit.Hex("6BAA4E"),
+            GatheringKind.Birds => UiKit.Hex("5B9BD5"),
+            _ => UiKit.Hex("E58FB0"),
+        };
+
+        /// <summary>Each kind of gathering's picture (the card's disc, the map's badge).</summary>
+        public static Sprite IconOf(GatheringKind kind) => kind switch
+        {
+            GatheringKind.Fishing => IconPainter.Rod,
+            GatheringKind.Bugs => HobbyData.Art("Bug_Butterfly") ?? IconPainter.Sparkle,
+            GatheringKind.Birds => IconPainter.Bird,
+            _ => IconPainter.Star,
+        };
 
         void Refresh(bool force)
         {
@@ -148,20 +175,8 @@ namespace CapyIsland.UI
             if (!on) { _shown = null; return; }
 
             var kind = Gathering.Kind;
-            _disc.color = kind switch
-            {
-                GatheringKind.Fishing => UiKit.Hex("2DA39A"),
-                GatheringKind.Bugs => UiKit.Hex("6BAA4E"),
-                GatheringKind.Birds => UiKit.Hex("5B9BD5"),
-                _ => UiKit.Hex("E58FB0"),
-            };
-            _icon.sprite = kind switch
-            {
-                GatheringKind.Fishing => IconPainter.Rod,
-                GatheringKind.Bugs => HobbyData.Art("Bug_Butterfly") ?? IconPainter.Sparkle,
-                GatheringKind.Birds => IconPainter.Bird,
-                _ => IconPainter.Star,
-            };
+            _disc.color = ColourOf(kind);
+            _icon.sprite = IconOf(kind);
 
             string caption = Loc.T(Gathering.NameOf(kind)).ToUpperInvariant();
             if (Gathering.Now == Gathering.Phase.Running)
@@ -204,7 +219,7 @@ namespace CapyIsland.UI
                     int place = board.FindIndex(p => p.id == Live.MyId) + 1;
                     var me = board.Find(p => p.id == Live.MyId);
                     if (me == null || !me.playing) return Loc.T("Watching this round: you'll be in the next one.");
-                    if (me.isOut) return Loc.T("You're out of this round. You keep what you caught!");
+                    if (me.isOut) return Loc.T("You're out of this round for now. Come back to join in again!");
                     return Loc.F("You: {0} · place {1}", Loc.T(Gathering.Counted(Gathering.Kind, me.score)), place);
                 }
                 case Gathering.Phase.Results:
@@ -252,6 +267,12 @@ namespace CapyIsland.UI
         void BuildButtons()
         {
             for (int i = _buttons.childCount - 1; i >= 0; i--) Destroy(_buttons.GetChild(i).gameObject);
+            // Out of the round that's on (and maybe said "Not now" when asked): a way back in.
+            if ((Gathering.Hosting || Gathering.Joined) && Gathering.IsContest && Gathering.Now == Gathering.Phase.Running)
+            {
+                var me = Gathering.Board.Find(p => p.id == Live.MyId);
+                if (me != null && me.playing && me.isOut) Small("Join in", UiKit.ButtonStyle.Primary, Gathering.TryRejoin);
+            }
             if (Gathering.Hosting)
             {
                 if (Gathering.IsContest && Gathering.Now != Gathering.Phase.Running)

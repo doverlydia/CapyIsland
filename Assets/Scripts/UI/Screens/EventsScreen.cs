@@ -375,7 +375,7 @@ namespace CapyIsland.UI
             foreach (char c in e.Name) hash = (hash ^ c) * 16777619;
             var bot = new FriendProfile { name = e.Name, seed = (int)(hash & 0x7fffffff), tint = (hash % 200) / 100f - 1f };
             var hats = new List<string>();
-            foreach (var w in Wardrobe.Items) if (w.Slot == WearSlot.Hat && Wardrobe.Art(w) != null) hats.Add(w.Id);
+            foreach (var w in Wardrobe.Items) if (w.Slot == WearSlot.Hat && w.Unlock != "horaira" && Wardrobe.Art(w) != null) hats.Add(w.Id);
             if (hats.Count > 0 && (hash >> 8) % 3 != 0) bot.outfit.Add(hats[(int)((hash >> 12) % (uint)hats.Count)]);
             return bot;
         }

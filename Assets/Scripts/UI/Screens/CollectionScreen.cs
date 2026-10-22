@@ -207,7 +207,7 @@ namespace CapyIsland.UI
                         HobbyLog.Cat state = null;
                         foreach (var c in HobbyLog.Cats) if (c.id == cat.Id) state = c;
                         bool adopted = state != null && state.adopted;
-                        Add(HobbyData.Art("Cat_" + cat.Id), adopted, cat.Name, adopted ? null : state != null && state.bond > 0 ? $"Trust {state.bond}/{CatCare.MaxBond}" : Whereabouts.Cat, "hobbies/Cats/" + cat.Id);
+                        Add(Horaira.Picture(cat), adopted, cat.Name, adopted ? null : state != null && state.bond > 0 ? $"Trust {state.bond}/{CatCare.MaxBond}" : Whereabouts.CatHint(cat), "hobbies/Cats/" + cat.Id);
                     }
                     break;
             }

@@ -14,6 +14,8 @@ namespace CapyIsland.Game
         public Color Body, Fin;
         public DayParts Times = DayParts.Any;   // when it swims near the shore
         public bool RainOnly;                   // only bites while it rains
+        /// <summary>Never in the ordinary sea: only the shimmering shadow a Mermaid's Shell calls up after five catches (MermaidCharms).</summary>
+        public bool CharmOnly;
     }
 
     public class BirdKind
@@ -51,6 +53,10 @@ namespace CapyIsland.Game
             new() { Id = "steameel",  Name = "Hot Spring Eel",  Shadow = 2, Stars = 4, MinLevel = 9,  Size = new(50, 110),  Body = C("8FC7B8"), Fin = C("4F8F7F"), Times = DayParts.Night },
             new() { Id = "rainbowtrout", Name = "Rainbow Trout", Shadow = 3, Stars = 3, MinLevel = 3, Size = new(40, 70), Body = C("9DB07A"), Fin = C("D98FA8"), RainOnly = true },
             new() { Id = "coelacanth",Name = "Coelacanth",      Shadow = 5, Stars = 5, MinLevel = 10, Size = new(150, 200), Body = C("4C5B7A"), Fin = C("A9B8D6"), Times = DayParts.Night | DayParts.Dawn },
+            // Only ever the shimmering shadow at a Mermaid's Shell, any time of day (MermaidCharms).
+            new() { Id = "lullaby",   Name = "Lullaby Fish",    Shadow = 3, Stars = 4, MinLevel = 4,  Size = new(30, 55),   Body = C("D9C2E8"), Fin = C("F2C6D8"), CharmOnly = true },
+            new() { Id = "pearlhorse",Name = "Pearl Seahorse",  Shadow = 2, Stars = 4, MinLevel = 4,  Size = new(12, 25),   Body = C("F4E4EA"), Fin = C("E9B9C8"), CharmOnly = true },
+            new() { Id = "tidecrown", Name = "Crowned Tidefin", Shadow = 4, Stars = 5, MinLevel = 4,  Size = new(90, 160),  Body = C("2E7FA6"), Fin = C("E8B23E"), CharmOnly = true },
         };
 
         public static readonly BirdKind[] Birds =
@@ -85,8 +91,11 @@ namespace CapyIsland.Game
         /// <summary>A fish worth putting in the sea for someone at this level: rarer ones less often.</summary>
         public static FishKind RollFish(int level)
         {
-            return Roll(Fish, f => f.MinLevel <= level && GameClock.Allows(f.Times) && (!f.RainOnly || Weather.IsRaining), f => f.Stars) ?? Fish[0];
+            return Roll(Fish, f => !f.CharmOnly && f.MinLevel <= level && GameClock.Allows(f.Times) && (!f.RainOnly || Weather.IsRaining), f => f.Stars) ?? Fish[0];
         }
+
+        /// <summary>What the shimmering shadow at a Mermaid's Shell turns out to be: one of the fish that only come to its song.</summary>
+        public static FishKind RollCharmFish() => Roll(Fish, f => f.CharmOnly, f => f.Stars) ?? Fish[0];
 
         /// <summary>A bird for this level and time of day, or null if none is about (most sleep at night).</summary>
         public static BirdKind RollBird(int level, bool wader)

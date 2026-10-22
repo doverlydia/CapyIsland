@@ -24,7 +24,7 @@ namespace CapyIsland.Game
             if (Visit.Active) return;   // cats live on your island
             foreach (var c in HobbyLog.Cats)
             {
-                if (!c.adopted) continue;
+                if (!c.adopted || Horaira.Is(c)) continue;   // Horaira turns up by Old Yuzu (EnsureHoraira)
                 var kind = HobbyData.CatById(c.id);
                 var cat = CatView.MakeAdopted(kind);
                 if (cat == null) continue;
@@ -69,6 +69,7 @@ namespace CapyIsland.Game
             {
                 _nextGiftCheck = Time.time + 2f;
                 CheckPresents();
+                EnsureHoraira();
             }
             if (Time.time >= _nextWhim)
             {
@@ -82,21 +83,49 @@ namespace CapyIsland.Game
             if (!Attention.Free(6f)) { _nextStray = Time.time + 5f; return; }
             _nextStray = Time.time + UnityEngine.Random.Range(90f, 180f);
 
-            // At most two strays about at once; never one that is already here.
+            // At most two strays about at once; never one that is already here. (Horaira is never a stray.)
             int strays = 0;
             var here = new HashSet<string>();
             foreach (var cat in FindObjectsByType<CatView>(FindObjectsSortMode.None))
             {
                 here.Add(cat.Kind.Id);
-                if (!HobbyLog.CatState(cat.Kind.Id).adopted) strays++;
+                if (!HobbyLog.CatState(cat.Kind.Id).adopted && !Horaira.Is(cat.Kind)) strays++;
             }
             if (strays >= 2) return;
             var options = new List<CatKind>();
-            foreach (var k in HobbyData.Cats) if (!here.Contains(k.Id) && !HobbyLog.CatState(k.Id).adopted) options.Add(k);
+            foreach (var k in HobbyData.Cats) if (!here.Contains(k.Id) && !HobbyLog.CatState(k.Id).adopted && !Horaira.Is(k)) options.Add(k);
             if (options.Count == 0) return;
             var kind = options[UnityEngine.Random.Range(0, options.Count)];
             if (Spawn(kind) != null) Hints.Show("A stray cat has wandered onto your island. Go and say hello!");
         }
+
+        CatView _horaira;
+
+        /// <summary>
+        /// Once Old Yuzu is warm again, Horaira is always about, at her side: yours if you adopted
+        /// him, otherwise hers, waiting for you to make friends. Old Yuzu tells you about him the
+        /// first time you come near.
+        /// </summary>
+        void EnsureHoraira()
+        {
+            if (_horaira == null && Horaira.Here && Horaira.Spot is Vector2 spot)
+            {
+                var kind = HobbyData.CatById(Horaira.Id);
+                var state = HobbyLog.CatState(Horaira.Id);
+                if (state.adopted)
+                {
+                    _horaira = CatView.MakeAdopted(kind);
+                    if (_horaira != null) _horaira.Settle(spot);
+                }
+                else if (HobbyData.Art("Cat_" + Horaira.Id) is Sprite art) _horaira = CatView.Make(kind, art, spot);
+            }
+            var king = FindFirstObjectByType<PlayerAvatar>();
+            if (_horaira != null && king != null) Horaira.MaybeMeet(_horaira.transform, king.transform.position);
+        }
+
+        /// <summary>What to call a cat in a line: its name once yours (or Horaira, whom everyone knows), else "the stray cat".</summary>
+        public static string Who(CatKind kind) =>
+            HobbyLog.CatState(kind.Id).adopted || Horaira.Is(kind) ? NameOf(kind) : "The stray cat";
 
         /// <summary>A cat whose present is due comes over with it — one at a time, and never mid-menu.</summary>
         static void CheckPresents()
@@ -239,6 +268,9 @@ namespace CapyIsland.Game
             /// <summary>Up to something: bringing a present, waiting with one, on your head, or begging.</summary>
             public bool Busy => Delivering || _present != null || _whim != Whim.None;
 
+            /// <summary>Its face for windows and cards (Horaira's with his halo on).</summary>
+            Sprite Face => Horaira.Is(Kind) ? Horaira.Picture(Kind) ?? _sr.sprite : _sr.sprite;
+
             public void BringPresent()
             {
                 Delivering = true;
@@ -256,7 +288,7 @@ namespace CapyIsland.Game
                 Sfx.Play(SfxKind.Heart, 0.6f);
                 float top = _sr.bounds.max.y - transform.position.y;
                 _present = WorldBubble.Show(transform, UI.IconPainter.Heart, top + 0.4f, OpenPresent, UI.UiKit.Hex("F2668B"));
-                Hints.Show((HobbyLog.CatState(Kind.Id).adopted ? NameOf(Kind) : "The stray cat") + " has brought you something! Tap it to see.");
+                Hints.Show(Who(Kind) + " has brought you something! Tap it to see.");
             }
 
             void OpenPresent()
@@ -266,7 +298,7 @@ namespace CapyIsland.Game
                 _present = null;
                 _nextMove = Time.time + UnityEngine.Random.Range(3f, 6f);
                 _sr.transform.DOPunchScale(new Vector3(0.15f, 0.2f, 0f), 0.4f, 6, 0.6f);
-                CatGifts.Open(Kind, HobbyLog.CatState(Kind.Id), transform.position, _sr.sprite);
+                CatGifts.Open(Kind, HobbyLog.CatState(Kind.Id), transform.position, Face);
             }
 
             // ---- whims: a ride on your head, or meowing for a fish
@@ -417,7 +449,8 @@ namespace CapyIsland.Game
             {
                 if (_sr == null || _sr.sprite == null) return;
                 var state = HobbyLog.CatState(Kind.Id);
-                if (_pieces.Count == 0 && (!state.adopted || state.outfit == null || state.outfit.Count == 0)) return;
+                bool dressed = state.adopted || Horaira.Is(Kind);   // Horaira wears his halo before he's yours
+                if (_pieces.Count == 0 && (!dressed || CatWear.Worn(state, WearSlot.Hat) == null && (state.outfit == null || state.outfit.Count == 0))) return;
                 if (_redress || _sr.sprite != _dressedFor || _sr.flipX != _dressedFlip)
                 {
                     _redress = false;
@@ -426,7 +459,7 @@ namespace CapyIsland.Game
                     bool walking = _walk != null && _sr.sprite == _walk;
                     foreach (WearSlot slot in Enum.GetValues(typeof(WearSlot)))
                     {
-                        var item = state.adopted ? CatWear.Worn(state, slot) : null;
+                        var item = dressed ? CatWear.Worn(state, slot) : null;
                         var art = Wardrobe.Art(item);
                         if (!_pieces.TryGetValue(slot, out var piece) || piece == null)
                         {
@@ -525,7 +558,13 @@ namespace CapyIsland.Game
             }
 
             /// <summary>Wandered off following you: it trots back home, or (across water) slips off and turns up there.</summary>
-            bool FarFromHome => _placeable != null && Vector2.Distance(transform.position, HobbyLog.CatState(Kind.Id).home) > 5f;
+            bool FarFromHome => HasHome && Vector2.Distance(transform.position, Home) > 5f;
+
+            /// <summary>Where it lives: where you settled it, or for Horaira, always at Old Yuzu's side.</summary>
+            Vector2 Home => Horaira.Is(Kind) && Horaira.Spot is Vector2 spot ? spot : HobbyLog.CatState(Kind.Id).home;
+
+            /// <summary>Has a home to keep near (adopted cats, and Horaira even before he's yours).</summary>
+            bool HasHome => _placeable != null || Horaira.Is(Kind);
 
             void SlipHome()
             {
@@ -535,7 +574,7 @@ namespace CapyIsland.Game
                 _sr.DOFade(0f, 0.5f).OnComplete(() =>
                 {
                     if (this == null) return;
-                    transform.position = HobbyLog.CatState(Kind.Id).home;
+                    transform.position = Home;
                     _sr.DOFade(1f, 0.5f).OnComplete(() => _fading = false);
                 });
             }
@@ -645,14 +684,14 @@ namespace CapyIsland.Game
                     if (FarFromHome)
                     {
                         // Left behind somewhere after a ride or a beg: off home it goes.
-                        _target = HobbyLog.CatState(Kind.Id).home;
+                        _target = Home;
                         _moving = true;
                         _homeBy = Time.time + 5f;
                     }
                     else if (UnityEngine.Random.value < 0.55f)
                     {
-                        var from = _placeable != null ? HobbyLog.CatState(Kind.Id).home : (Vector2)transform.position;
-                        var t = from + UnityEngine.Random.insideUnitCircle * (_placeable != null ? 1.6f : 2.5f);
+                        var from = HasHome ? Home : (Vector2)transform.position;
+                        var t = from + UnityEngine.Random.insideUnitCircle * (HasHome ? 1.6f : 2.5f);
                         if (BunniSpace.PointOnLand(t)) { _target = t; _moving = true; }
                     }
                 }
@@ -681,12 +720,15 @@ namespace CapyIsland.Game
                 bool begging = _whim == Whim.Begging;
                 bool tired = DateTime.Now - new DateTime(state.lastFussTicks) < FussCooldown;
                 string hearts = $"Trust {state.bond}/{MaxBond}";
+                bool horaira = Horaira.Is(Kind);
                 var pages = new[]
                 {
                     begging
-                        ? $"<b>{(state.adopted ? NameOf(Kind) : "The cat")}</b> meows at you. Then at your bag. Then at you again, louder."
+                        ? $"<b>{(state.adopted || horaira ? NameOf(Kind) : "The cat")}</b> meows at you. Then at your bag. Then at you again, louder."
                         : state.adopted
                         ? $"<b>{NameOf(Kind)}</b> purrs and bumps your hand.\n<size=80%>{Kind.Personality}</size>"
+                        : horaira
+                        ? $"<b>{NameOf(Kind)}</b> blinks at you slowly, the way cats say hello.\n<size=80%>{Kind.Personality}</size>"
                         : $"A stray cat. It watches you carefully.\n<size=80%>{Kind.Personality}</size>",
                 };
                 var choices = new List<UI.SpeechDialog.Choice>
@@ -708,11 +750,12 @@ namespace CapyIsland.Game
                 if (state.adopted)
                 {
                     choices.Add(new UI.SpeechDialog.Choice("Dress up", () => UI.WardrobeScreen.ShowFor(Kind)));
-                    choices.Add(new UI.SpeechDialog.Choice("Rename", () => Rename(state)));
+                    if (!horaira) choices.Add(new UI.SpeechDialog.Choice("Rename", () => Rename(state)));   // he keeps the name he had
                 }
+                if (horaira && Horaira.Here) choices.Add(new UI.SpeechDialog.Choice("Ask Old Yuzu about him", Horaira.Remember));
                 choices.Add(new UI.SpeechDialog.Choice("Leave", null));
-                string title = state.adopted ? NameOf(Kind) : "Stray cat";
-                UI.SpeechDialog.ShowChoices(_sr.sprite, title + "  ·  " + hearts,
+                string title = state.adopted || horaira ? NameOf(Kind) : "Stray cat";
+                UI.SpeechDialog.ShowChoices(Face, title + "  ·  " + hearts,
                     tired && !begging ? new[] { pages[0], "It's had plenty of fuss for now. Come back in a little while." } : pages,
                     null, choices);
             }
@@ -758,7 +801,15 @@ namespace CapyIsland.Game
                 if (pet != null) pet.Settle(transform.position);
                 var fx = HarvestEffects.Instance;
                 if (fx != null) fx.Twinkle(transform.position + Vector3.up * 0.4f, 8);
-                UI.CardPopup.Show(Kind.Name + " is yours!",
+                if (Horaira.Is(Kind))
+                {
+                    // Still her cat as much as yours: he stays at her side (CatView.Home).
+                    var care = FindFirstObjectByType<CatCare>();
+                    if (care != null) care._horaira = pet;
+                    UI.CardPopup.Show(Kind.Name + " is yours!",
+                        "Old Yuzu smiles: \"He's chosen you, little one.\"\nHe'll still stay close to her side.", Face);
+                }
+                else UI.CardPopup.Show(Kind.Name + " is yours!",
                     Kind.Personality + "\n" + Kind.Name + " has made a home right here.", _sr.sprite);
                 _sr.DOKill();
                 Destroy(gameObject);

@@ -225,14 +225,17 @@ namespace CapyIsland.Game
 
         // ---------------------------------------------------------------- at a party or a contest
 
-        Vector2? _ringCentre;
-        float _ringRadius;
+        int _keepIsland = -1;
+        bool _keepShore;
 
-        /// <summary>Stays inside a contest's area (world radius), pottering about, instead of following you or doing chores.</summary>
-        public void KeepTo(Vector2 centre, float worldRadius)
+        /// <summary>
+        /// Stays on a contest's island (on its shore, for fishing), pottering about, instead of
+        /// following you or doing chores. If it ever finds itself off it, it heads back.
+        /// </summary>
+        public void KeepTo(int island, bool shore)
         {
-            _ringCentre = centre;
-            _ringRadius = worldRadius;
+            _keepIsland = island;
+            _keepShore = shore;
             _task = null;
             _plantsLeft = 0;
             _giftAt = -1f;
@@ -350,16 +353,13 @@ namespace CapyIsland.Game
             Vector2 me = transform.position;
             Vector2 you = king != null ? (Vector2)king.transform.position : me;
 
-            // At a contest: somewhere inside its area, never wandering off after you.
-            if (_ringCentre.HasValue)
+            // At a contest: a few steps at a time about its island (or shore), never wandering off
+            // after you. Off it somehow: back to a spot on it, the nearest that fits.
+            if (_keepIsland >= 0)
             {
-                bool outside = BunniSpace.WorldDistance(me, _ringCentre.Value) > _ringRadius * 0.85f;
+                bool outside = !Gathering.AreaHas(me, _keepIsland, _keepShore);
                 if (outside || UnityEngine.Random.value < 0.4f)
-                    for (int i = 0; i < 8; i++)
-                    {
-                        var spot = BunniSpace.RandomPointInCircle(_ringCentre.Value, _ringRadius * 0.75f);
-                        if (BunniSpace.PointOnLand(spot)) { Head(spot); break; }
-                    }
+                    Head(Gathering.SpotIn(_keepIsland, _keepShore, me, outside ? 8f : 3.5f));
                 return;
             }
 

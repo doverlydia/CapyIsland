@@ -99,7 +99,9 @@ namespace CapyIsland.Game
             // hi, at, emo, bye, gone (someone left: from); ask / build / nobuild (building
             // together); put (something placed), pop (a bubble collected), bubble (a found thing
             // given back as a bubble); leave (the host asks a visitor to go); gs (a gathering's
-            // state, host to all), gn (a visitor's contest news for the host: data says what)
+            // state, host to all), gn (a visitor's contest news for the host: data says what);
+            // chat (a typed line: data, with the sender's name), chaton / chatoff (the host lets a
+            // visitor chat, or stops them: VisitChat)
             public string t;
             public string from, to;   // whose note it is, and (host to one) who it's for
             public float x, y;
@@ -254,6 +256,52 @@ namespace CapyIsland.Game
             if (peer != null) SendTo(peer, new Note { t = yes ? "build" : "nobuild" });
         }
 
+        /// <summary>Chatting: the host lets one visitor chat, or stops them (VisitChat).</summary>
+        public static void AnswerChat(FriendProfile guest, bool on)
+        {
+            if (Now != Mode.Hosting) return;
+            var peer = PeerOf(guest);
+            if (peer != null) SendTo(peer, new Note { t = on ? "chaton" : "chatoff" });
+        }
+
+        /// <summary>
+        /// A line you typed: a visitor's goes to the host; the host's goes only to the visitors
+        /// it lets chat. VisitChat has cleaned it already.
+        /// </summary>
+        public static void SendChat(string text)
+        {
+            if (Now == Mode.Visiting) { Send(new Note { t = "chat", name = PlayerProfile.Name, data = text }); return; }
+            if (Now != Mode.Hosting) return;
+            foreach (var p in _peers.Values)
+                if (!p.Bot && p.Arrived && VisitChat.GuestAllowed(p.Who)) SendTo(p, new Note { t = "chat", name = PlayerProfile.Name, data = text });
+        }
+
+        /// <summary>
+        /// You just blocked someone (RealFriends.Block): wherever they are in your live visit, they
+        /// go. Your visitor is sent home; the host you're visiting means flying home yourself; a
+        /// fellow guest at someone's party simply disappears from your screen.
+        /// </summary>
+        public static void Blocked(string member)
+        {
+            if (string.IsNullOrEmpty(member)) return;
+            if (Now == Mode.Knocking && _host != null && _host.member == member) { CancelKnock(); return; }
+            _expected.RemoveAll(x => x.who.member == member);
+            if (Now == Mode.Hosting)
+            {
+                if (_peers.TryGetValue(member, out var guest) && !guest.Bot) AskToLeave(guest.Who);
+                return;
+            }
+            if (Now != Mode.Visiting) return;
+            if (_host != null && _host.member == member)
+            {
+                Gathering.Ended();
+                _ = End();
+                if (Visit.Active) Visit.FlyHome();
+                return;
+            }
+            if (_peers.ContainsKey(member)) Left(member, said: false);
+        }
+
         /// <summary>The host asks one visitor to go: they fly home.</summary>
         public static void AskToLeave(FriendProfile guest)
         {
@@ -360,6 +408,7 @@ namespace CapyIsland.Game
             _host = to;
             Now = Mode.Visiting;
             _peers.Clear();
+            VisitChat.Reset();   // chat waits for this host's say-so
             _ = RealFriends.Heartbeat(visiting: true);
             Visit.Fly(to);   // fetches their island as they've just saved it
         }
@@ -451,6 +500,7 @@ namespace CapyIsland.Game
 
         static void OnFriendMessage(string from, RealFriends.Message m)
         {
+            if (RealFriends.IsBlocked(from)) return;   // no knocks, answers or invitations from someone you blocked
             var who = RealFriends.Find(from);
             if (who == null || m == null) return;
             switch (m.kind)
@@ -588,6 +638,21 @@ namespace CapyIsland.Game
         /// <summary>A visitor tells the host something about the contest ("catch", "out").</summary>
         public static void TellHost(string what) => Send(new Note { t = "gn", data = what });
 
+        // ---------------------------------------------------------------- mermaid's shells
+
+        /// <summary>
+        /// A Mermaid's Shell tossed into the sea, or a catch in its ring (MermaidCharms): everyone
+        /// on the island hears, so they all see the ring and share its tally. <paramref name="to"/>
+        /// (hosting): just one newcomer, catching up on the shells already singing.
+        /// </summary>
+        public static void SendCharm(string what, Vector2 at, string data, string to = null)
+        {
+            if (!Connected || !OnSharedIsland) return;
+            var n = new Note { t = "charm", name = what, x = at.x, y = at.y, data = data };
+            if (to != null) { if (_peers.TryGetValue(to, out var p)) SendTo(p, n); }
+            else Send(n);
+        }
+
         // ---------------------------------------------------------------- ending
 
         /// <summary>
@@ -607,6 +672,7 @@ namespace CapyIsland.Game
                 if (p.Puppet != null && !p.Bot) p.Puppet.RemoteLeave();
             _peers.Clear();
             _byConn.Clear();
+            VisitChat.Reset();
             Gathering.Ended();   // a party or contest ends with the link (yours, or the one you were at)
             await Task.Yield();   // let the goodbye go out
             await Close();
@@ -625,6 +691,7 @@ namespace CapyIsland.Game
             _peers.Clear();
             _byConn.Clear();
             _expected.Clear();
+            VisitChat.Reset();
         }
 
         static async Task Close()
@@ -669,6 +736,7 @@ namespace CapyIsland.Game
                     _ = End();
                     return;
                 }
+                if (Gathering.Hosting) OpenChatToAll();
                 SendBots();
             }
 
@@ -681,6 +749,18 @@ namespace CapyIsland.Game
             if ((at - _lastSent).sqrMagnitude < 0.0025f && Time.frameCount % 30 != 0) return;
             _lastSent = at;
             Send(new Note { t = "at", x = at.x, y = at.y });
+        }
+
+        /// <summary>
+        /// Hosting a party or contest: everyone here may chat, nobody is asked (VisitChat.Welcome).
+        /// Checked every frame, so it covers a newcomer the moment they land, a guest already here
+        /// when the party started, and someone back after a dropped link; each one's game hears it
+        /// once. Whoever the host turned off stays off.
+        /// </summary>
+        static void OpenChatToAll()
+        {
+            foreach (var p in _peers.Values)
+                if (!p.Bot && p.Arrived && p.Who != null && VisitChat.Welcome(p.Who)) SendTo(p, new Note { t = "chaton" });
         }
 
         static bool AnyRealPeer()
@@ -748,6 +828,7 @@ namespace CapyIsland.Game
             {
                 Send(new Note { t = "gone", from = id });
                 Gathering.Gone(id);
+                VisitChat.GuestGone(id);
                 if (said && p.Who != null && !p.Bot) Hints.Show(UI.Loc.F("{0} flew home. See you next time!", p.Who.name));
             }
             else if (!p.Bot && p.Who != null && said) Hints.Show(UI.Loc.F("{0} flew home. See you next time!", p.Who.name));
@@ -768,6 +849,13 @@ namespace CapyIsland.Game
             string id = n.t == "hi" ? n.from : _byConn.TryGetValue(c, out var known) ? known : n.from;
             if (string.IsNullOrEmpty(id)) return;
             n.from = id;
+            if (RealFriends.IsBlocked(id))
+            {
+                // Someone you blocked came in (on a party's open code): sent home as if asked to
+                // go, and nothing of theirs is shown here or passed on.
+                if (n.t == "hi") SendTo(c, new Note { t = "leave" });
+                return;
+            }
             _peers.TryGetValue(id, out var peer);
             switch (n.t)
             {
@@ -786,9 +874,25 @@ namespace CapyIsland.Game
                         Sfx.Play(SfxKind.Bridge, 0.6f);
                         Hints.Show(UI.Loc.F("{0} has landed on your island!", peer.Who.name));
                         if (!Gathering.Hosting) CoBuild.AskHost(peer.Who);
+                        if (!Gathering.Hosting) VisitChat.AskHost(peer.Who);   // after the building question (Attention: one at a time)
                         Gathering.Arrived(id, peer.Who);
+                        MermaidCharms.Greet(id);   // the shells already singing in your sea
                     }
+                    // Back after a dropped link with chat already on: their game hears it again.
+                    if (VisitChat.GuestAllowed(peer.Who)) SendTo(peer, new Note { t = "chaton" });
                     Relay(n, c);
+                    break;
+                }
+                case "chat":
+                {
+                    // Only from a visitor you let chat; passed on only to the others you let chat.
+                    if (peer == null || peer.Bot || !VisitChat.GuestAllowed(peer.Who)) return;
+                    string text = VisitChat.Clean(n.data);
+                    if (text.Length == 0) return;
+                    VisitChat.Received(id, peer.Who.name, text);
+                    foreach (var p in _peers.Values)
+                        if (p != peer && !p.Bot && p.Arrived && VisitChat.GuestAllowed(p.Who))
+                            SendTo(p, new Note { t = "chat", from = id, name = peer.Who.name, data = text });
                     break;
                 }
                 case "at":
@@ -818,6 +922,10 @@ namespace CapyIsland.Game
                 case "gn":
                     Gathering.FromGuest(id, n.data);
                     break;
+                case "charm":
+                    if (OnSharedIsland) MermaidCharms.FromNet(n.name, new Vector2(n.x, n.y), n.data);
+                    Relay(n, c);
+                    break;
                 case "bye":
                     Left(id, said: true);
                     _byConn.Remove(c);
@@ -832,6 +940,8 @@ namespace CapyIsland.Game
             string id = string.IsNullOrEmpty(n.from) ? _host.member : n.from;
             bool fromHost = id == _host.member;
             if (id == MyId) return;   // our own, back again
+            // A fellow guest you blocked: not shown here at all (their capybara, waves, lines).
+            if (!fromHost && RealFriends.IsBlocked(id) && n.t != "gone" && n.t != "bye") return;
             _peers.TryGetValue(id, out var peer);
             switch (n.t)
             {
@@ -872,6 +982,14 @@ namespace CapyIsland.Game
                 case "nobuild":
                     CoBuild.Granted(n.t == "build");
                     break;
+                case "chaton":
+                case "chatoff":
+                    if (fromHost) VisitChat.Granted(n.t == "chaton", _host.name);
+                    break;
+                case "chat":
+                    // The host only sends lines while you may chat; checked here too.
+                    if (VisitChat.Allowed) VisitChat.Received(id, fromHost ? _host.name : peer?.Who?.name ?? n.name, n.data);
+                    break;
                 case "leave":
                 {
                     var host = _host;
@@ -883,6 +1001,9 @@ namespace CapyIsland.Game
                 }
                 case "gs":
                     Gathering.FromHost(n.data);
+                    break;
+                case "charm":
+                    if (OnSharedIsland) MermaidCharms.FromNet(n.name, new Vector2(n.x, n.y), n.data);
                     break;
                 case "gone":
                     Left(id, said: true);

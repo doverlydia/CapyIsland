@@ -1,0 +1,1012 @@
+# Hebrew for the "How do I…?" help screen (UI/Help/*.cs): titles, lines, steps and search words
+
+@ How do I…?
+= איך עושים…?
+
+@ Help
+= עזרה
+
+@ Search, like “gold” or “zoom”
+= חיפוש, למשל „זהב” או „זום”
+
+@ Nothing found. Try another word, like wood, map or food.
+= לא נמצא כלום. נסה מילה אחרת, כמו עץ, מפה או אוכל.
+
+@ Not started yet
+= עוד לא התחלת
+
+@ You haven't started this yet. Here's how, for when you're ready.
+= עוד לא התחלת את זה. ככה עושים את זה, לכשתהיה מוכן.
+
+@ All topics
+= כל הנושאים
+
+@ Getting around
+= להסתובב באי
+
+@ Workers
+= פועלים
+
+@ Wood, gold and gems
+= עץ, זהב ויהלומים
+
+@ Building and shops
+= בנייה וחנויות
+
+@ Islands and travel
+= איים ומסעות
+
+@ Goals and gifts
+= מטרות ומתנות
+
+@ Settings and your account
+= הגדרות והחשבון שלך
+
+@ Walk around
+= ללכת ברחבי האי
+
+@ Tap a spot, or hold your finger down to steer.
+= הקש על מקום, או החזק את האצבע כדי לנווט.
+
+@ move walk go run steer joystick keyboard tap finger
+= לזוז ללכת הליכה לרוץ ריצה לנווט ג'ויסטיק מקלדת להקיש הקשה אצבע תזוזה
+
+@ Tap any spot on the land and your capybara walks there.
+= הקש על כל מקום ביבשה, והקפיברה שלך תלך לשם.
+
+@ Or press and hold on the ground: your capybara walks toward your finger and follows it.
+= או לחץ והחזק על הקרקע: הקפיברה שלך תלך לכיוון האצבע ותעקוב אחריה.
+
+@ Like a joystick better? Turn on Walk with a joystick in Settings.
+= מעדיף ג'ויסטיק? הפעל את "הליכה עם ג'ויסטיק" בהגדרות.
+
+@ On a computer, the arrow keys or W, A, S and D walk too.
+= במחשב אפשר ללכת גם עם מקשי החיצים או W, A, S ו-D.
+
+@ Your capybara can't swim: to reach another island, its bridge has to be open.
+= הקפיברה שלך לא יודעת לשחות: כדי להגיע לאי אחר, הגשר אליו צריך להיות פתוח.
+
+@ Open Settings
+= פתח את ההגדרות
+
+@ Zoom in and out
+= להתקרב ולהתרחק
+
+@ Pinch with two fingers, or scroll the mouse wheel.
+= צבוט בשתי אצבעות, או גלגל את גלגלת העכבר.
+
+@ zoom pinch closer far bigger smaller camera view see mouse wheel scroll look
+= זום להתקרב להתרחק קרוב רחוק גדול קטן להגדיל להקטין מצלמה תצוגה לראות עכבר גלגלת צביטה
+
+@ Put two fingers on the screen and spread them apart to zoom in.
+= שים שתי אצבעות על המסך והרחק אותן זו מזו כדי להתקרב.
+
+@ Pinch them together to zoom out and see more of the island.
+= קרב אותן זו לזו כדי להתרחק ולראות יותר מהאי.
+
+@ On a computer, scroll the mouse wheel.
+= במחשב, גלגל את גלגלת העכבר.
+
+@ The view always follows your capybara. To see somewhere else, walk there, or peek at it on the Map.
+= התצוגה תמיד עוקבת אחרי הקפיברה שלך. כדי לראות מקום אחר, לך לשם, או הצץ בו במפה.
+
+@ They point at things you can't see yet.
+= הם מצביעים על דברים שעוד לא רואים.
+
+@ arrow edge point find where off screen stop walking
+= חץ חצים קצה מצביע למצוא איפה מחוץ למסך לעצור עצור הליכה
+
+@ An arrow at the edge of the screen points at something you can't see yet.
+= חץ בקצה המסך מצביע על משהו שעוד לא רואים.
+
+@ The picture inside shows what it is: a bubble, someone with a quest, pests or a visitor.
+= התמונה בתוכו מראה מה זה: בועה, מישהו עם משימה, מזיקים או אורח.
+
+@ Tap the arrow and your capybara walks there. Tap Stop walking to stop on the way.
+= הקש על החץ והקפיברה שלך תלך לשם. הקש על "עצור" כדי לעצור בדרך.
+
+@ Want words under the arrows? Turn on Names on edge arrows in Settings.
+= רוצה מילים מתחת לחצים? הפעל את "שמות על החצים בקצה המסך" בהגדרות.
+
+@ Put a capybara to work
+= להעביד קפיברה
+
+@ Drag a capybara from your trail onto a sawmill or a mine.
+= גרור קפיברה מהשובל שלך אל מנסרה או מכרה.
+
+@ worker work job capybara drag station sawmill mine assign buy house
+= פועל פועלים עבודה לעבוד קפיברה לגרור גרירה תחנה מנסרה מכרה להציב לקנות בית
+
+@ Get a capybara: tap the one standing in front of your Capy House. Each one costs 10 wood and 10 gold.
+= השג קפיברה: הקש על זו שעומדת מול בית הקפיברות שלך. כל אחת עולה 10 עץ ו-10 זהב.
+
+@ It follows you in your trail. Press it and drag it onto a sawmill or a mine.
+= היא הולכת אחריך בשובל. לחץ עליה וגרור אותה אל מנסרה או מכרה.
+
+@ While you drag, every sawmill and mine shows a ring and how many workers it has, like 1/4. Green has room.
+= בזמן הגרירה, כל מנסרה ומכרה מראים טבעת וכמה פועלים יש בהם, למשל 1/4. ירוק אומר שיש מקום.
+
+@ Let go on it. Your capybara chops the trees, or digs the rocks, in that place's circle and carries them home.
+= עזוב עליה. הקפיברה שלך תכרות את העצים, או תחצוב את הסלעים, שבתוך העיגול של המקום, ותביא אותם הביתה.
+
+@ To move a worker, just pick it up again. Drop it anywhere else and it follows you.
+= כדי להעביר פועל, פשוט הרם אותו שוב. אם תשחרר אותו במקום אחר, הוא ילך אחריך.
+
+@ Feed your workers
+= להאכיל את הפועלים
+
+@ Plant flowers near the place they work.
+= שתול פרחים ליד המקום שבו הם עובדים.
+
+@ food feed eat hungry flowers garden daisy tulip rose snack fruit
+= אוכל להאכיל לאכול רעב רעבה רעבים פרחים גינה חינניות צבעונים ורדים חטיף פרי פירות
+
+@ Working makes capybaras hungry. A hungry worker stops and looks for food near its own sawmill or mine.
+= עבודה מרעיבה קפיברות. פועל רעב עוצר ומחפש אוכל ליד המנסרה או המכרה שלו.
+
+@ Capybaras eat flowers. Plant a garden close to the place they work, so they can reach it.
+= קפיברות אוכלות פרחים. שתול גינה קרוב למקום שבו הן עובדות, כדי שיוכלו להגיע אליה.
+
+@ Fruit trees nearby feed them too: they shake the fruit down.
+= גם עצי פרי בסביבה מאכילים אותן: הן מנערות מהם את הפירות.
+
+@ Tulips fill them up more than daisies, and roses most of all.
+= צבעונים משביעים יותר מחינניות, וורדים הכי הרבה.
+
+@ Gardens grow back by themselves, but a big crew needs a big garden.
+= גינות צומחות מחדש מעצמן, אבל צוות גדול צריך גינה גדולה.
+
+@ Is my worker hungry?
+= הפועל שלי רעב?
+
+@ Look for a sleeping capybara dreaming of flowers.
+= חפש קפיברה ישנה שחולמת על פרחים.
+
+@ hungry sleep asleep tired dream bubble stopped lazy not working
+= רעב רעבה ישן ישנה שינה עייף חלום בועה עצר עצרה עצלן לא עובד לא עובדת
+
+@ A hungry capybara with nothing to eat falls asleep beside its sawmill or mine.
+= קפיברה רעבה שאין לה מה לאכול נרדמת ליד המנסרה או המכרה שלה.
+
+@ Over its head, a dream bubble shows a garden. Tap it and Old Yuzu tells you what it needs.
+= מעל הראש שלה, בועת חלום מראה גינה. הקש עליה וסבתא יוזו תגיד לך מה היא צריכה.
+
+@ Press and hold the capybara counter at the top of the screen to see how many are asleep.
+= לחץ והחזק על מונה הקפיברות בראש המסך כדי לראות כמה ישנות.
+
+@ Plant a garden near it and it wakes up for a snack.
+= שתול גינה לידה והיא תתעורר לחטיף.
+
+@ A worker also naps when there's nothing left to chop or dig in its circle.
+= פועל נרדם גם כשלא נשאר מה לכרות או לחצוב בעיגול שלו.
+
+@ Other kinds of capybara
+= סוגים אחרים של קפיברות
+
+@ Burrow, woolly and zombie capybaras.
+= קפיברות מחילות, צמריריות וזומבי.
+
+@ burrow woolly zombie pirate kinds types faster worker house lodge hole cure bath
+= מחילה צמרירית זומבי פיראט סוגים מהיר מהירה פועל בית אכסניה חור לרפא ריפוי אמבטיה
+
+@ Each capybara home sells its own capybara: tap the one standing in front of it.
+= כל בית קפיברות מוכר את הקפיברה שלו: הקש על זו שעומדת מולו.
+
+@ Burrow Capybaras walk and work twice as fast. Their Burrow Hole is sold at the Bronze Store.
+= קפיברות מחילות הולכות ועובדות פי שניים מהר. המחילה שלהן נמכרת בחנות הארד.
+
+@ Woolly Capybaras live in a Woolly Lodge, sold at the Gold Store.
+= קפיברות צמריריות גרות באכסניה צמרירית, שנמכרת בחנות הזהב.
+
+@ A zombie capybara stayed out in the cold too long. Tap it and give it a warm bath for 20 gems, and it works for you.
+= קפיברת זומבי נשארה בחוץ בקור יותר מדי זמן. הקש עליה ותן לה אמבטיה חמה תמורת 20 יהלומים, והיא תעבוד בשבילך.
+
+@ Get more wood
+= להשיג עוד עץ
+
+@ A forest, a sawmill next to it, and capybaras to work it.
+= יער, מנסרה לידו, וקפיברות שיעבדו בה.
+
+@ wood logs chop trees forest sawmill more money
+= עץ עצים בולי לכרות כריתה יער מנסרה עוד יותר כסף
+
+@ Plant a forest, then a sawmill near it. Its workers only chop trees inside its circle.
+= שתול יער, ואז מנסרה לידו. הפועלים שלה כורתים רק עצים שבתוך העיגול שלה.
+
+@ Put capybaras to work at the sawmill. Every tree they bring home pays wood: pine 3, maple 7, ironwood 15.
+= הצב קפיברות לעבוד במנסרה. כל עץ שהן מביאות משלם עץ: אורן 3, אדר 7, עץ ברזל 15.
+
+@ Up to 4 capybaras can work at one sawmill. More sawmills, more wood!
+= עד 4 קפיברות יכולות לעבוד במנסרה אחת. יותר מנסרות, יותר עץ!
+
+@ Feed them: plant a garden near the sawmill too.
+= האכל אותן: שתול גם גינה ליד המנסרה.
+
+@ A Legendary Sawmill pays double for everything brought to it.
+= מנסרה אגדית משלמת כפול על כל מה שמביאים אליה.
+
+@ Get more trees
+= להשיג עוד עצים
+
+@ Forests spread by themselves, and shops sell more.
+= יערות מתפשטים מעצמם, והחנויות מוכרות עוד.
+
+@ trees forest grow regrow spread bare chopped pine maple ironwood sapling more
+= עצים עץ יער יערות לצמוח לגדול צומח מחדש מתפשט קירח נכרת אורן אדר עץ ברזל שתיל עוד
+
+@ A forest's big tree keeps planting little trees around it, as long as there's room.
+= העץ הגדול של היער ממשיך לשתול עצים קטנים סביבו, כל עוד יש מקום.
+
+@ Too many workers on one small forest can chop it bare. Spread your workers out, or plant more forests.
+= יותר מדי פועלים על יער קטן אחד יכולים לכרות את כולו. פזר את הפועלים, או שתול עוד יערות.
+
+@ If the big tree itself is chopped down, the forest turns back into a bubble. Pop it and plant it again.
+= אם העץ הגדול עצמו נכרת, היער חוזר להיות בועה. פוצץ אותה ושתול אותו שוב.
+
+@ Buy forests at the shops: pine at the General Store, maple at the Bronze Store, ironwood for gems.
+= קנה יערות בחנויות: אורנים בחנות הכלבו, אדרים בחנות הארד, ועצי ברזל תמורת יהלומים.
+
+@ Ironwood grows back fastest. Maple is quicker than pine.
+= עץ ברזל צומח מחדש הכי מהר. אדר מהיר יותר מאורן.
+
+@ Get more gold
+= להשיג עוד זהב
+
+@ Dig hills with a mine, sell spare things, and collect gifts.
+= חצוב גבעות עם מכרה, מכור דברים מיותרים ואסוף מתנות.
+
+@ gold money coins rich mine hill rock dig earn more
+= זהב כסף מטבעות עשיר מכרה גבעה סלע סלעים לחצוב להרוויח עוד
+
+@ Plant a hill, then a mine near it. The General Store sells both.
+= שתול גבעה, ואז מכרה לידה. חנות הכלבו מוכרת את שניהם.
+
+@ Put capybaras to work at the mine. Every rock pays gold: gray hill 2, black hill 7, gold hill 20.
+= הצב קפיברות לעבוד במכרה. כל סלע משלם זהב: גבעה אפורה 2, גבעה שחורה 7, גבעת זהב 20.
+
+@ Sell things you don't need to Salty Kombu.
+= מכור לקומבו המלוח דברים שאתה לא צריך.
+
+@ Collect your daily gift, shake fruit trees for treasure chests, and finish quests.
+= אסוף את המתנה היומית, נער עצי פרי בשביל תיבות אוצר, וסיים משימות.
+
+@ Once you have the Bank, you can trade gems for gold.
+= כשיהיה לך בנק, תוכל להחליף יהלומים בזהב.
+
+@ Get gems
+= להשיג יהלומים
+
+@ gems diamonds jewels rare treasure earn spend
+= יהלומים יהלום אבני חן נדיר אוצר להרוויח לבזבז
+
+@ Daily gifts: day 5 of your streak brings 10 gems.
+= מתנות יומיות: היום החמישי ברצף מביא 10 יהלומים.
+
+@ Hobbies: fill a whole journal for 40 gems, and win contests in Events.
+= תחביבים: מלא יומן שלם וקבל 40 יהלומים, ונצח בתחרויות באירועים.
+
+@ Some of Miso's quests and some cat presents give gems.
+= חלק מהמשימות של מיסו וחלק מהמתנות של החתולים נותנים יהלומים.
+
+@ Shake fruit trees: a treasure chest can have gems inside.
+= נער עצי פרי: בתיבת אוצר יכולים להיות יהלומים.
+
+@ Spend gems on roses, ironwood, gold hills, legendary buildings, and trades at the Bank.
+= אפשר לקנות ביהלומים ורדים, עצי ברזל, גבעות זהב, מבנים אגדיים והחלפות בבנק.
+
+@ Sell things
+= למכור דברים
+
+@ Drag what you don't need onto Salty Kombu.
+= גרור את מה שאתה לא צריך אל קומבו המלוח.
+
+@ sell trade money spare get rid sailor kombu deal
+= למכור מכירה סחר כסף מיותר להיפטר מלח ימאי קומבו עסקה
+
+@ Salty Kombu, the old sailor, buys things you don't need. He turns up in a bubble on Pebble Cove during one of Miso's quests.
+= קומבו המלוח, המלח הזקן, קונה דברים שאתה לא צריך. הוא מגיע בבועה למפרץ החלוקים באחת המשימות של מיסו.
+
+@ Drag something from your trail, or a worker, and drop it on him.
+= גרור משהו מהשובל שלך, או פועל, ושחרר אותו עליו.
+
+@ He makes you an offer. Tap Deal to sell it, or No Deal to keep it.
+= הוא יציע לך מחיר. הקש על "עסקה" כדי למכור, או על "אין עסקה" כדי לשמור.
+
+@ He pays about half of what it cost, in treasure chests that open by themselves.
+= הוא משלם בערך חצי ממה שזה עלה, בתיבות אוצר שנפתחות מעצמן.
+
+@ He won't buy shops, homes, or things there's only one of.
+= הוא לא קונה חנויות, בתים או דברים שיש רק אחד מהם.
+
+@ Shake fruit trees
+= לנער עצי פרי
+
+@ Tap a fruit tree: fruit, chests and surprises fall out.
+= הקש על עץ פרי: נופלים ממנו פירות, תיבות והפתעות.
+
+@ fruit tree apple pear plum shake chest treasure tap
+= פרי פירות עץ תפוח אגס שזיף לנער ניעור תיבה אוצר להקיש
+
+@ Tap a fruit tree with fruit on it to shake it.
+= הקש על עץ פרי שיש עליו פירות כדי לנער אותו.
+
+@ Fruit falls out for hungry workers. Sometimes a treasure chest drops instead, or a bubble.
+= נופלים ממנו פירות לפועלים רעבים. לפעמים נופלת במקומם תיבת אוצר, או בועה.
+
+@ Bubbles from fruit trees don't last: pop them quickly!
+= בועות מעצי פרי לא נשארות הרבה זמן: פוצץ אותן מהר!
+
+@ Treasure chests open by themselves and add to your wood, gold or gems.
+= תיבות אוצר נפתחות מעצמן ומוסיפות לך עץ, זהב או יהלומים.
+
+@ Keep forests near your sawmills: a sawmill with no trees left starts chopping fruit trees down.
+= שמור על יערות ליד המנסרות: מנסרה שלא נשארו לה עצים מתחילה לכרות עצי פרי.
+
+@ Trade gems at the Bank
+= להחליף יהלומים בבנק
+
+@ Swap gems for wood or gold.
+= החלף יהלומים בעץ או בזהב.
+
+@ bank trade swap exchange gems wood gold
+= בנק להחליף החלפה המרה יהלומים עץ זהב
+
+@ The Bank is sold at the Steel Store for 5 gems.
+= הבנק נמכר בחנות הפלדה תמורת 5 יהלומים.
+
+@ Plant it, then tap Buy Wood or Buy Gold in front of it.
+= הצב אותו, ואז הקש על "קנה עץ" או "קנה זהב" שמולו.
+
+@ Pick a trade: 5 gems for 250, up to 30 gems for 2000.
+= בחר החלפה: 5 יהלומים תמורת 250, ועד 30 יהלומים תמורת 2000.
+
+@ What you bought comes in a treasure chest that opens by itself.
+= מה שקנית מגיע בתיבת אוצר שנפתחת מעצמה.
+
+@ Pop bubbles
+= לפוצץ בועות
+
+@ Tap a bubble to get what's inside.
+= הקש על בועה כדי לקבל את מה שבתוכה.
+
+@ bubble pop tap free present collect pick up
+= בועה בועות לפוצץ להקיש חינם מתנה לאסוף להרים
+
+@ A bubble holds something for you: a forest, a building, a capybara…
+= בבועה מחכה לך משהו: יער, מבנה, קפיברה…
+
+@ Tap it to pop it. What was inside joins your trail.
+= הקש עליה כדי לפוצץ אותה. מה שהיה בתוכה מצטרף לשובל שלך.
+
+@ Edge arrows and the Map show where bubbles are.
+= החצים בקצה המסך והמפה מראים איפה יש בועות.
+
+@ A forest or hill that was harvested all the way turns back into a bubble, so you can plant it again.
+= יער או גבעה שנקצרו עד הסוף חוזרים להיות בועה, כדי שתוכל לשתול אותם שוב.
+
+@ Put things on your island
+= להציב דברים על האי
+
+@ Drag them out of your trail onto the grass.
+= גרור אותם מהשובל שלך אל הדשא.
+
+@ place plant put build drop trail inventory circle green red room
+= להציב לשתול לשים לבנות לשחרר שובל מלאי עיגול ירוק אדום מקום
+
+@ Things you buy or find follow you in a line behind your capybara: that's your trail.
+= דברים שאתה קונה או מוצא הולכים אחריך בשורה מאחורי הקפיברה שלך: זה השובל שלך.
+
+@ Press one and drag it out onto the grass.
+= לחץ על אחד מהם וגרור אותו אל הדשא.
+
+@ A circle shows under it. Green means there's room. Red means something is in the way, so move it a little.
+= מתחתיו מופיע עיגול. ירוק אומר שיש מקום. אדום אומר שמשהו מפריע, אז הזז אותו קצת.
+
+@ Let go to plant it. Once it's planted it stays, so pick the spot well!
+= עזוב כדי להציב אותו. מה שהוצב נשאר במקומו, אז בחר את המקום היטב!
+
+@ Things only go on land, never in the water.
+= אפשר להציב דברים רק ביבשה, אף פעם לא במים.
+
+@ Buy from a shop
+= לקנות בחנות
+
+@ Tap what a shop has set out in front of it.
+= הקש על מה שהחנות הציגה מולה.
+
+@ buy shop store purchase price cost spend
+= לקנות קנייה חנות חנויות מחיר עולה עלות לבזבז
+
+@ A shop sets out what it sells on the ground in front of it.
+= חנות מציגה את מה שהיא מוכרת על הקרקע מולה.
+
+@ Tap a thing to see what it is and what it costs. Faded things cost more than you have right now.
+= הקש על פריט כדי לראות מה הוא וכמה הוא עולה. פריטים דהויים עולים יותר ממה שיש לך עכשיו.
+
+@ Tap Purchase. It joins your trail, ready to plant.
+= הקש על "קנייה". הפריט מצטרף לשובל שלך, מוכן להצבה.
+
+@ Unlock more shops
+= לפתוח עוד חנויות
+
+@ Every shop sells the next one.
+= כל חנות מוכרת את החנות הבאה.
+
+@ unlock shop store new more next bronze silver steel gold general
+= לפתוח חנות חנויות חדשה עוד הבאה ארד כסף פלדה זהב כלבו
+
+@ Your first shop, the General Store, comes from one of Miso's quests.
+= החנות הראשונה שלך, חנות הכלבו, מגיעה מאחת המשימות של מיסו.
+
+@ Every shop sells the next one: General Store, then Bronze, Silver, Steel and Gold Store.
+= כל חנות מוכרת את הבאה: חנות הכלבו, ואחריה חנות הארד, הכסף, הפלדה והזהב.
+
+@ Buy the next shop, then plant it on your island to open it.
+= קנה את החנות הבאה, ואז הצב אותה על האי כדי לפתוח אותה.
+
+@ The Steel Store also sells the Legendary Gem Store and the Bank.
+= חנות הפלדה מוכרת גם את חנות היהלומים האגדית ואת הבנק.
+
+@ Some things wait on a shop's shelf until a quest asks for them.
+= יש דברים שמחכים על המדף עד שמשימה מבקשת אותם.
+
+@ Pests and bombs
+= מזיקים ופצצות
+
+@ Guinea pigs and zombie capybaras, and how to send them off.
+= שרקנים וקפיברות זומבי, ואיך לגרש אותם.
+
+@ pests guinea pig zombie bomb shoo fizz eat flowers wreck
+= מזיקים מזיק שרקן שרקנים זומבי פצצה פצצות קישטה תסס אוכלים פרחים הורסים לגרש
+
+@ Guinea pigs nibble your flowers. Zombie capybaras wreck trees and rocks.
+= שרקנים מכרסמים לך את הפרחים. קפיברות זומבי הורסות עצים וסלעים.
+
+@ Plant a Shoo Bomb right next to them. It fizzes, then sends them packing and leaves everything else alone.
+= הצב פצצת קישטה ממש לידם. היא תוססת, ואז מגרשת אותם ולא נוגעת בשום דבר אחר.
+
+@ A Fizz Bomb clears pests too, but it also turns everything nearby back into bubbles, workers too.
+= גם פצצת תסס מנקה מזיקים, אבל היא גם הופכת את כל מה שקרוב בחזרה לבועות, כולל פועלים.
+
+@ Or tap a zombie capybara and give it a warm bath for 20 gems: then it works for you.
+= או הקש על קפיברת זומבי ותן לה אמבטיה חמה תמורת 20 יהלומים: אז היא תעבוד בשבילך.
+
+@ Your burrow
+= המחילה שלך
+
+@ A cosy home under the ground to decorate.
+= בית נעים מתחת לאדמה שאפשר לקשט.
+
+@ burrow home house den furniture decorate room inside
+= מחילה בית מאורה רהיטים לקשט קישוט חדר בפנים
+
+@ Buy the Burrow Door at the General Store and plant it.
+= קנה את דלת המחילה בחנות הכלבו והצב אותה.
+
+@ Tap it to slide down into your burrow.
+= הקש עליה כדי להחליק למטה אל המחילה שלך.
+
+@ The first time, a Furniture Shop waits in a bubble. Put it up outside, then tap it to shop.
+= בפעם הראשונה מחכה לך חנות רהיטים בבועה. הצב אותה בחוץ, ואז הקש עליה כדי לקנות.
+
+@ Tap a piece in your storage to place it, and drag pieces to move them.
+= הקש על רהיט במחסן כדי להציב אותו, וגרור רהיטים כדי להזיז אותם.
+
+@ Fast travel with the map
+= מסע מהיר עם המפה
+
+@ Drag yourself on the map to jump there.
+= גרור את עצמך על המפה כדי לקפוץ לשם.
+
+@ map travel fast teleport jump island go pin far
+= מפה מסע לנסוע מהיר שיגור לקפוץ אי ללכת סיכה רחוק
+
+@ Tap the Map button on the right.
+= הקש על כפתור המפה בצד ימין.
+
+@ Find your own pin, the one that says You.
+= מצא את הסיכה שלך, זו שכתוב עליה "זה אתה".
+
+@ Press it, drag it onto any island you've opened, and let go. You're there in a puff!
+= לחץ עליה, גרור אותה לכל אי שפתחת, ועזוב. אתה שם בן רגע!
+
+@ Tap anywhere else on the map to take a quick look there.
+= הקש על כל מקום אחר במפה כדי להציץ בו לרגע.
+
+@ A padlock means that island's bridge isn't open yet.
+= מנעול אומר שהגשר לאי הזה עוד לא פתוח.
+
+@ Open the map
+= פתח את המפה
+
+@ Open new islands
+= לפתוח איים חדשים
+
+@ Pay the spirit by the water to raise a bridge.
+= שלם לרוח שליד המים כדי להרים גשר.
+
+@ island bridge new open spirit ghost cross unlock
+= אי איים גשר גשרים חדש לפתוח רוח רוחות לחצות
+
+@ Most new islands are reached by a bridge, and a spirit waits by the water to raise it.
+= לרוב האיים החדשים מגיעים בגשר, ורוח מחכה ליד המים כדי להרים אותו.
+
+@ Tap the spirit to see the price, then pay to raise the bridge.
+= הקש על הרוח כדי לראות את המחיר, ואז שלם כדי להרים את הגשר.
+
+@ Walk across, or drag yourself there on the map.
+= לך לאורך הגשר, או גרור את עצמך לשם במפה.
+
+@ A few bridges open by themselves as the story goes on.
+= כמה גשרים נפתחים מעצמם ככל שהסיפור מתקדם.
+
+@ New islands bring new things to find.
+= איים חדשים מביאים דברים חדשים למצוא.
+
+@ day night time clock rain weather shooting star dark
+= יום לילה זמן שעה שעון גשם מזג אוויר כוכב נופל חושך
+
+@ A day on the island lasts 24 minutes. The clock under your picture shows the time.
+= יום על האי נמשך 24 דקות. השעון שמתחת לתמונה שלך מראה את השעה.
+
+@ Some fish, birds and bugs only come out at certain times, or in the rain. Your journal says when.
+= חלק מהדגים, הציפורים והחרקים יוצאים רק בשעות מסוימות, או בגשם. היומן שלך אומר מתי.
+
+@ At night, tap a shooting star for a little gold.
+= בלילה, הקש על כוכב נופל וקבל קצת זהב.
+
+@ What should I do next?
+= מה לעשות עכשיו?
+
+@ Your next goal is always at the top of the screen.
+= המטרה הבאה שלך תמיד מופיעה בראש המסך.
+
+@ goal quest next do task stuck what mission help
+= מטרה מטרות משימה משימות הבא לעשות תקוע מה עזרה
+
+@ The goal card at the top always shows your next step. Tap it to see every goal and quest.
+= כרטיס המטרה למעלה תמיד מראה את הצעד הבא שלך. הקש עליו כדי לראות את כל המטרות והמשימות.
+
+@ A yellow ! over someone means they have a quest for you, or a reward. Tap them to talk.
+= סימן ! צהוב מעל מישהו אומר שיש לו משימה בשבילך, או פרס. הקש עליו כדי לדבר.
+
+@ On the Goals screen, Show me walks you to the right spot.
+= במסך המטרות, "הראה לי" מוביל אותך למקום הנכון.
+
+@ Open Goals
+= פתח את המטרות
+
+@ Warm hearts
+= לבבות חמים
+
+@ Every goal you reach makes a heart for the Steam Tower.
+= כל מטרה שאתה משיג יוצרת לב בשביל מגדל האדים.
+
+@ heart warm achievement tower steam score
+= לב לבבות חם חמים הישג הישגים מגדל אדים ניקוד
+
+@ Every achievement you earn makes a glowing warm heart that follows you.
+= כל הישג שאתה משיג יוצר לב חם וזוהר שהולך אחריך.
+
+@ Tap it to read what it was for. Then it flies home to the Steam Tower.
+= הקש עליו כדי לקרוא על מה קיבלת אותו. אחר כך הוא עף הביתה למגדל האדים.
+
+@ Tap the Steam Tower to see your achievements, and how many hearts are still to bring home.
+= הקש על מגדל האדים כדי לראות את ההישגים שלך, וכמה לבבות עוד צריך להביא הביתה.
+
+@ See achievements
+= הצג הישגים
+
+@ A present every day you play.
+= מתנה בכל יום שאתה משחק.
+
+@ gift daily present streak every day reward free
+= מתנה מתנות יומי יומית רצף כל יום פרס חינם
+
+@ There's a present every day you play. A red dot on the Gifts button means one is waiting.
+= יש מתנה בכל יום שאתה משחק. נקודה אדומה על כפתור המתנות אומרת שמתנה מחכה לך.
+
+@ Tap Gifts, then collect today's present.
+= הקש על "מתנות", ואז אסוף את המתנה של היום.
+
+@ Come back every day: the gifts grow bigger, and day 7 brings something to wear.
+= חזור כל יום: המתנות גדלות, והיום השביעי מביא משהו ללבוש.
+
+@ Miss a day and the streak starts again from day 1.
+= אם תפספס יום, הרצף יתחיל שוב מיום 1.
+
+@ Open Gifts
+= פתח את המתנות
+
+@ Contests and events
+= תחרויות ואירועים
+
+@ A new contest every three days, and a goal every day.
+= תחרות חדשה כל שלושה ימים, ומטרה כל יום.
+
+@ contest event competition prize win medal daily leaderboard
+= תחרות תחרויות אירוע אירועים פרס פרסים לנצח מדליה יומי טבלה
+
+@ A contest runs for three days at a time: most fish, bugs or birds wins.
+= כל תחרות נמשכת שלושה ימים: מי שתופס הכי הרבה דגים, חרקים או ציפורים מנצח.
+
+@ You take part with the hobbies you have. The top three win gems, and first place a medal to wear.
+= אתה משתתף עם התחביבים שיש לך. שלושת הראשונים זוכים ביהלומים, והמקום הראשון גם במדליה ללבוש.
+
+@ There's a special goal every day too.
+= יש גם מטרה מיוחדת בכל יום.
+
+@ Prizes wait in Events until you claim them.
+= פרסים מחכים באירועים עד שתאסוף אותם.
+
+@ Open Events
+= פתח את האירועים
+
+@ Dress up your capybara
+= להלביש את הקפיברה שלך
+
+@ Tap your picture at the top left, then Change outfit.
+= הקש על התמונה שלך למעלה משמאל, ואז על "החלף בגדים".
+
+@ clothes outfit hat wardrobe dress wear costume look
+= בגדים בגד תלבושת כובע כובעים ארון להתלבש ללבוש תחפושת מראה
+
+@ Tap a piece you have to put it on. Tap it again to take it off.
+= הקש על פריט שיש לך כדי ללבוש אותו. הקש עליו שוב כדי להוריד אותו.
+
+@ New pieces come from goals, daily gifts, full journals, contests, and hats you sew yourself.
+= פריטים חדשים מגיעים ממטרות, ממתנות יומיות, מיומנים מלאים, מתחרויות, ומכובעים שאתה תופר בעצמך.
+
+@ Your cats can dress up too: tap a cat you've adopted, then Dress up.
+= גם החתולים שלך יכולים להתלבש: הקש על חתול שאימצת, ואז על "להלביש".
+
+@ Open my profile
+= פתח את הפרופיל שלי
+
+@ Fishing, bugs, birds, gardening, cooking, sewing, cats and more.
+= דיג, חרקים, ציפורים, גינון, בישול, תפירה, חתולים ועוד.
+
+@ hobby hobbies journal level bag collection
+= תחביב תחביבים יומן שלב רמה תיק אוסף
+
+@ Tap the Hobbies button on the right to see every hobby and how to start it.
+= הקש על כפתור התחביבים בצד ימין כדי לראות כל תחביב ואיך מתחילים אותו.
+
+@ Each hobby you take up has a journal of everything you've found, and a level that grows as you play.
+= לכל תחביב שאתה מתחיל יש יומן של כל מה שמצאת, ורמה שעולה ככל שאתה משחק.
+
+@ What you catch and grow goes in your bag.
+= מה שאתה תופס ומגדל נכנס לתיק שלך.
+
+@ Open Hobbies
+= פתח את התחביבים
+
+@ Go fishing
+= לדוג
+
+@ Buy a rod from Skipper Nori on the beach.
+= קנה חכה מהסקיפר נורי בחוף.
+
+@ fish fishing rod bait cast reel catch sea water nori
+= דג דגים דיג לדוג חכה פיתיון להטיל לגלגל לתפוס ים מים נורי
+
+@ Buy a Fishing Rod from Skipper Nori on the beach.
+= קנה חכה מהסקיפר נורי בחוף.
+
+@ When a fish bites, hold to reel it in, and let go when the line turns red!
+= כשדג נתפס, החזק כדי למשוך אותו, ועזוב כשהחוט נהיה אדום!
+
+@ Nori's bait brings bites sooner, or makes the line strain less.
+= הפיתיון של נורי מביא דגים מהר יותר, או מקל על החוט.
+
+@ Catch bugs
+= לתפוס חרקים
+
+@ Buy a Bug Net at the Bronze Store.
+= קנה רשת חרקים בחנות הארד.
+
+@ bug bugs insect butterfly net catch beetle
+= חרק חרקים פרפר רשת לתפוס חיפושית
+
+@ Watch birds
+= לצפות בציפורים
+
+@ Buy Binoculars at the Silver Store.
+= קנה משקפת בחנות הכסף.
+
+@ bird birds watch binoculars spot birdwatching
+= ציפור ציפורים לצפות צפייה משקפת לזהות
+
+@ Birds land in trees and on the shore. Tap one from a few steps away to spot it.
+= ציפורים נוחתות על עצים ועל החוף. הקש על אחת מכמה צעדים כדי לצפות בה.
+
+@ Grow vegetables
+= לגדל ירקות
+
+@ Plant seeds on Sunflower Farm.
+= שתול זרעים בחוות החמניות.
+
+@ garden gardening farm vegetables seeds plant grow harvest crops plot
+= גינה גינון חווה ירקות זרעים לשתול לגדל קציר לקצור יבול ערוגה
+
+@ Pay the spirit at the south end of Pebble Cove to raise the bridge to Sunflower Farm.
+= שלם לרוח בקצה הדרומי של מפרץ החלוקים כדי להרים את הגשר לחוות החמניות.
+
+@ Buy seeds at the barn on the farm, then drag them from your trail onto an empty plot.
+= קנה זרעים באסם שבחווה, ואז גרור אותם מהשובל שלך אל ערוגה ריקה.
+
+@ They grow while you're away. Tap the plot to harvest!
+= הם גדלים גם כשאתה לא במשחק. הקש על הערוגה כדי לקצור!
+
+@ More plots and seeds open as your gardening level grows.
+= עוד ערוגות וזרעים נפתחים ככל שרמת הגינון שלך עולה.
+
+@ Buy a stove from Chef Tofu by the hot spring.
+= קנה כיריים מהשף טופו ליד המעיין החם.
+
+@ cook cooking food dish recipe stove kitchen tofu chef order
+= לבשל בישול אוכל מנה מתכון כיריים מטבח טופו שף הזמנה
+
+@ Buy a stove from Chef Tofu by the hot spring, put it down, and tap it.
+= קנה כיריים מהשף טופו ליד המעיין החם, הצב אותן, והקש עליהן.
+
+@ Chef Tofu sells recipes, eggs and milk.
+= השף טופו מוכר מתכונים, ביצים וחלב.
+
+@ Islanders with a dish in a bubble over their head will pay for it!
+= תושבים עם מנה בבועה מעל הראש ישלמו לך עליה!
+
+@ Sew hats
+= לתפור כובעים
+
+@ Buy a Sewing Machine at the Steel Store.
+= קנה מכונת תפירה בחנות הפלדה.
+
+@ sew sewing hat make design cotton silk machine clothes
+= לתפור תפירה כובע להכין עיצוב כותנה משי מכונה בגדים
+
+@ Buy a Sewing Machine at the Steel Store, put it down, and tap it.
+= קנה מכונת תפירה בחנות הפלדה, הצב אותה, והקש עליה.
+
+@ A hat needs cotton from your garden, or silk from silkworms.
+= לכובע צריך כותנה מהגינה שלך, או משי מתולעי משי.
+
+@ Decorate it, and it goes in your wardrobe!
+= קשט אותו, והוא ייכנס לארון הבגדים שלך!
+
+@ Make friends with cats
+= להתיידד עם חתולים
+
+@ Pet stray cats until they trust you, then adopt them.
+= לטף חתולי רחוב עד שהם סומכים עליך, ואז אמץ אותם.
+
+@ cat cats kitten stray pet adopt name presents fish
+= חתול חתולים חתלתול רחוב ללטף לאמץ שם מתנות דג
+
+@ Stray cats wander onto your island every so often. Tap one to say hello.
+= מדי פעם חתולי רחוב משוטטים לאי שלך. הקש על אחד כדי להגיד שלום.
+
+@ Pet it, or give it a fish from your bag. Each cat can be fussed once every few minutes.
+= לטף אותו, או תן לו דג מהתיק שלך. אפשר לפנק כל חתול פעם בכמה דקות.
+
+@ Once it trusts you, tap it to adopt it. Then you can name it and dress it up.
+= כשהוא סומך עליך, הקש עליו כדי לאמץ אותו. אז תוכל לתת לו שם ולהלביש אותו.
+
+@ Cats bring presents. Junk they bring can be sold to Salty Kombu.
+= חתולים מביאים מתנות. גרוטאות שהם מביאים אפשר למכור לקומבו המלוח.
+
+@ Hang a wish at the shrine
+= לתלות משאלה במקדש
+
+@ Write an ema at Old Mochi's shrine.
+= כתוב אמה במקדש של סבא מוצ'י.
+
+@ ema wish shrine write mochi plaque note friends
+= אמה משאלה משאלות מקדש לכתוב מוצ'י לוח פתק חברים
+
+@ Old Mochi keeps the shrine on the hill. Tap the shrine to see the ema rack.
+= סבא מוצ'י שומר על המקדש שעל הגבעה. הקש על המקדש כדי לראות את מתלה האמה.
+
+@ Hang a new ema with your wish on it. It's an offering of one gold coin.
+= תלה אמה חדשה עם המשאלה שלך. זו מנחה של מטבע זהב אחד.
+
+@ Friends who visit can read it, and you can hang one on theirs.
+= חברים שמבקרים יכולים לקרוא אותה, ואתה יכול לתלות אחת אצלם.
+
+@ Visit other islands
+= לבקר באיים אחרים
+
+@ Build an airstrip, then fly to friends.
+= בנה מסלול המראה, ואז טוס לחברים.
+
+@ visit fly friends neighbours plane airstrip island travel help
+= ביקור לבקר לטוס טיסה חברים שכנים מטוס מסלול המראה אי מסע לעזור
+
+@ First build an airstrip: tap Friends, then Build an airstrip. Pop its bubble and put it down.
+= קודם בנה מסלול המראה: הקש על "חברים", ואז על "בנה מסלול המראה". פוצץ את הבועה שלו והצב אותו.
+
+@ Tap Friends and tap an island to fly there.
+= הקש על "חברים" ועל אי כדי לטוס אליו.
+
+@ Lend a hand there: plant flower gardens for hungry workers, and chase pests off with Shoo Bombs.
+= עזור שם: שתול גינות פרחים לפועלים רעבים, וגרש מזיקים עם פצצות קישטה.
+
+@ Tap Home on the right to fly back.
+= הקש על "הביתה" בצד ימין כדי לטוס חזרה.
+
+@ Open Friends
+= פתח את החברים
+
+@ Add a friend
+= להוסיף חבר
+
+@ Share your friend code.
+= שתף את קוד החבר שלך.
+
+@ friend code add request share real online knock
+= חבר חברים קוד להוסיף בקשה לשתף אמיתי מחובר לדפוק
+
+@ Tap Friends to find your friend code, like Miso#1234. Copy it and send it to a friend.
+= הקש על "חברים" כדי למצוא את קוד החבר שלך, למשל Miso#1234. העתק אותו ושלח אותו לחבר.
+
+@ Type a friend's code in the box to send a request. You're friends once they say yes.
+= הקלד בתיבה את הקוד של חבר כדי לשלוח בקשה. תהיו חברים ברגע שהוא יאשר.
+
+@ You can visit a friend while they're online: you knock, and they let you in.
+= אפשר לבקר חבר כשהוא מחובר: אתה דופק, והוא מכניס אותך.
+
+@ On someone else's island, tap Add on the right to make them your friend.
+= על האי של מישהו אחר, הקש על "הוסף" בצד ימין כדי שיהיה החבר שלך.
+
+@ Parties, contests, building together, and emojis.
+= מסיבות, תחרויות, בנייה ביחד ואימוג'ים.
+
+@ together party contest build co-op emoji wave heart chat
+= ביחד יחד מסיבה תחרות לבנות שיתוף אימוג'י נפנוף לב צ'אט
+
+@ On a friend's island, tap Build together under their picture to ask if you can build there too.
+= על האי של חבר, הקש על "לבנות יחד" מתחת לתמונה שלו כדי לבקש לבנות גם שם.
+
+@ In Friends, Play together starts an island party, or a fishing, bug or bird contest.
+= ב"חברים", "משחקים ביחד" מתחיל מסיבה על האי, או תחרות דיג, חרקים או ציפורים.
+
+@ Tap the smiley button to send a wave, a heart or a smile.
+= הקש על כפתור הסמיילי כדי לשלוח נפנוף, לב או חיוך.
+
+@ Make an account to play on another device.
+= צור חשבון כדי לשחק במכשיר אחר.
+
+@ account sign up login save backup cloud google password device phone
+= חשבון הרשמה להירשם כניסה להתחבר שמירה גיבוי ענן גוגל סיסמה מכשיר טלפון
+
+@ Your island saves by itself as you play.
+= האי שלך נשמר מעצמו בזמן שאתה משחק.
+
+@ To play on another phone or computer, make an account: in Settings, find Play on another device and tap Make account.
+= כדי לשחק בטלפון או במחשב אחר, צור חשבון: בהגדרות, מצא את "לשחק במכשיר אחר" והקש על "יצירת חשבון".
+
+@ Continue with Google, or pick a username and password.
+= המשך עם Google, או בחר שם משתמש וסיסמה.
+
+@ On the other device, open Settings and tap Sign in.
+= במכשיר השני, פתח את ההגדרות והקש על "כניסה".
+
+@ Accounts need the internet: offline, these rows are hidden.
+= חשבונות צריכים אינטרנט: בלי חיבור, השורות האלה מוסתרות.
+
+@ Export a save code, and load it back later.
+= ייצא קוד שמירה, וטען אותו בחזרה אחר כך.
+
+@ save code copy export import load backup restore
+= שמירה לשמור קוד עותק להעתיק ייצוא יבוא טעינה לטעון גיבוי לשחזר
+
+@ In Settings, tap Export next to Keep a copy of your island. It copies a code: paste it into a note.
+= בהגדרות, הקש על "ייצוא" ליד "שמור עותק של האי שלך". זה מעתיק קוד: הדבק אותו בפתק.
+
+@ To bring it back, tap Load next to Bring back a saved island, and paste the code.
+= כדי להחזיר אותו, הקש על "טען" ליד "להחזיר אי שמור", והדבק את הקוד.
+
+@ Loading replaces the island you have now.
+= טעינה מחליפה את האי שיש לך עכשיו.
+
+@ Bigger text and language
+= טקסט גדול ושפה
+
+@ Easy Reading, and English or Hebrew.
+= קריאה נוחה, ואנגלית או עברית.
+
+@ text size big read reading language hebrew english easy sound music
+= טקסט גודל גדול לקרוא קריאה שפה עברית אנגלית נוחה קל צליל קול מוזיקה
+
+@ In Settings, turn on Easy Reading for bigger text.
+= בהגדרות, הפעל "קריאה נוחה" כדי לקבל טקסט גדול יותר.
+
+@ Easy Reading also lets you tap any text to read it in a large window.
+= עם קריאה נוחה אפשר גם להקיש על כל טקסט כדי לקרוא אותו בחלון גדול.
+
+@ Pick your language in Settings too.
+= גם את השפה בוחרים בהגדרות.
+
+@ Settings also has the sound, and Show me around to see the tour again.
+= בהגדרות יש גם את הצלילים, ואת "הראו לי מסביב" כדי לראות שוב את הסיור.
+
+@ From fishing level 4, toss a Mermaid's Shell into the sea. Everyone fishing inside its ring, friends too, gets more fish, and after five catches a shimmering fish appears.
+= מרמה 4 בדיג, זרוק צדף בת הים לים. כל מי שדג בתוך הטבעת שלו, גם חברים, מקבל יותר דגים, ואחרי חמש תפיסות מופיע דג נוצץ.
+
+@ Buy a forest: tap one where a shop sets it out, then tap Purchase. It joins your trail.
+= קנה יער: הקש על יער במקום שבו חנות מציגה אותו, ואז הקש על "קנייה". הוא מצטרף לשובל שלך.
+
+@ Drag it out and plant it near a sawmill. Its workers only chop trees inside its circle.
+= גרור אותו החוצה ושתול אותו ליד מנסרה. הפועלים שלה כורתים רק עצים שבתוך העיגול שלה.
+
+@ Put capybaras to work at the sawmill. Every tree they carry home adds to your wood at the top: pine 3, maple 7, ironwood 15.
+= הצב קפיברות לעבוד במנסרה. כל עץ שהן סוחבות הביתה מוסיף לעץ שלך למעלה: אורן 3, אדר 7, עץ ברזל 15.
+
+@ Up to 4 capybaras can work at one sawmill. More sawmills, more wood! The Bronze Store sells them.
+= עד 4 קפיברות יכולות לעבוד במנסרה אחת. יותר מנסרות, יותר עץ! חנות הארד מוכרת אותן.
+
+@ Drag one out of your trail and plant it near a sawmill. Little trees sprout around the big one straight away.
+= גרור יער מהשובל שלך ושתול אותו ליד מנסרה. עצים קטנים נובטים מיד סביב העץ הגדול.
+
+@ The big tree keeps planting more little trees around it, as long as there's room.
+= העץ הגדול ממשיך לשתול עוד עצים קטנים סביבו, כל עוד יש מקום.
+
+@ Workers chop the little trees first. Too many workers on one small forest can chop it bare: spread them out, or plant more forests.
+= הפועלים כורתים קודם את העצים הקטנים. יותר מדי פועלים על יער קטן אחד יכולים לכרות את כולו: פזר אותם, או שתול עוד יערות.
+
+@ Buy a hill at the General Store: tap it, then tap Purchase. It joins your trail.
+= קנה גבעה בחנות הכלבו: הקש עליה, ואז הקש על "קנייה". היא מצטרפת לשובל שלך.
+
+@ Plant it near a mine (the General Store sells those too). Its workers only dig rocks inside its circle.
+= שתול אותה ליד מכרה (גם אותו מוכרת חנות הכלבו). הפועלים שלו חופרים רק סלעים שבתוך העיגול שלו.
+
+@ Put capybaras to work at the mine. Every rock they bring back adds to your gold at the top: gray hill 2, black hill 7, gold hill 20.
+= הצב קפיברות לעבוד במכרה. כל סלע שהן מביאות מוסיף לזהב שלך למעלה: גבעה אפורה 2, גבעה שחורה 7, גבעת זהב 20.
+
+@ Plant it. It sets out two trades on the ground in front of it: wood on one side, gold on the other.
+= הצב אותו. הוא מציג על האדמה שמולו שתי החלפות: עץ בצד אחד, זהב בצד השני.
+
+@ Tap one and pick a trade: 5 gems for 250, up to 30 gems for 2000. The ones you can't pay for yet are greyed out.
+= הקש על אחת מהן ובחר החלפה: 5 יהלומים תמורת 250, ועד 30 יהלומים תמורת 2000. אלה שעוד אין לך מספיק בשבילן מופיעות באפור.
+
+@ Bugs settle on flowers, trees and grass near you. Tap one from a few steps away to swing your net.
+= חרקים נוחתים על פרחים, עצים ודשא לידך. הקש על אחד מכמה צעדים כדי להניף את הרשת.
+
+@ Don't walk right up to one, or it flies away!
+= אל תלך ממש עד אליו, אחרת הוא יעוף!
+
+@ Birds land in trees near you. Tap one from a few steps away to spot it.
+= ציפורים נוחתות על עצים לידך. הקש על אחת מכמה צעדים כדי לצפות בה.
+
+@ Pet it (+1 trust), or give it a fish you caught (+3 trust). Each cat can be fussed once every few minutes.
+= לטף אותו (+1 אמון), או תן לו דג שתפסת (+3 אמון). אפשר לפנק כל חתול פעם בכמה דקות.
+
+@ Your harvest goes in your bag: open Hobbies, then Bag.
+= הקציר נכנס לתיק שלך: פתח את תחביבים ואז את התיק.
+
+@ Islanders with a dish in a bubble over their head will pay for it: tap the bubble to hand it over.
+= תושבים עם מנה בבועה מעל הראש ישלמו לך עליה: הקש על הבועה כדי למסור אותה.
+
+@ Pick a hat: a Beanie needs 3 cotton from your garden; a Fedora needs silk from silkworms.
+= בחר כובע: כובע צמר צריך 3 כותנה מהגינה שלך; פדורה צריכה משי מתולעי משי.
+
+@ Paint it: pick a colour, then brush, fill or stick on stickers.
+= צבע אותו: בחר צבע, ואז צייר במכחול, מלא או הדבק מדבקות.
+
+@ Tap Sew & wear: it goes in your wardrobe and on your head!
+= הקש על "תפור ולבש": הוא נכנס לארון הבגדים שלך ועל הראש שלך!
+
+@ Tap an ema on the rack to read it.
+= הקש על אמה במתלה כדי לקרוא אותה.
+
+@ Skipper Nori sits on the beach with his wares on the sand. Tap the Fishing Rod, then Purchase.
+= הסקיפר נורי יושב בחוף, והסחורה שלו פרושה על החול. הקש על החכה ואז על קנייה.
+
+@ Tap Events on the right. Swipe up to see the podium and where you are.
+= הקש על אירועים בצד ימין. החלק למעלה כדי לראות את הפודיום ואת המקום שלך.
+
+@ Off you go, explorer
+= צא לדרך, חוקר
+
+@ Tap it and it flies home to the Steam Tower.
+= הקש עליו והוא עף הביתה למגדל האדים.

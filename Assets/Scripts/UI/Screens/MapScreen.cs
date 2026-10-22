@@ -10,7 +10,8 @@ namespace CapyIsland.UI
 {
     /// <summary>
     /// The whole archipelago at a glance: a live picture of every island taken by a second camera,
-    /// with markers over it for you, bubbles, pests, anyone with news and the tower. Islands you
+    /// with markers over it for you, bubbles, pests, anyone with news and the tower, and a badge on
+    /// the island where a party or contest is going on (its shore glows in the picture). Islands you
     /// cannot reach yet wear a padlock. Drag to look around; tap a spot to send the camera there.
     /// </summary>
     public class MapScreen : UiScreen
@@ -36,6 +37,10 @@ namespace CapyIsland.UI
         RectTransform _king;
         readonly List<RectTransform> _locks = new();
 
+        // A party or contest going on: a badge on its island, and its legend entry.
+        RectTransform _eventBadge, _legendEvent;
+        string _eventShown;   // what the badge was made for ("Fishing@3"), so it's remade when that changes
+
         void Awake() => Instance = this;
 
         void OnDestroy()
@@ -54,7 +59,7 @@ namespace CapyIsland.UI
         {
             // The map frame, with a legend strip under it.
             var frame = UiKit.Image(body, "Frame", UiKit.Rounded(30), UiKit.Hex("8FD3E0"));
-            UiKit.Stretch(frame.rectTransform, 0f, 84f, 0f, 0f);
+            UiKit.Stretch(frame.rectTransform, 0f, 118f, 0f, 0f);
 
             _scroll = UiKit.ScrollList(frame.transform, "Scroll", out var listContent, 0f, stacked: false);
             UiKit.Stretch((RectTransform)_scroll.transform, 6f, 6f, 6f, 6f);
@@ -72,12 +77,21 @@ namespace CapyIsland.UI
             _markerLayer = UiKit.Rect("Markers", listContent);
             UiKit.Stretch(_markerLayer);
 
-            // Legend.
-            var legend = UiKit.Rect("Legend", body);
-            legend.anchorMin = Vector2.zero;
-            legend.anchorMax = new Vector2(1f, 0f);
-            legend.pivot = new Vector2(0.5f, 0f);
-            legend.sizeDelta = new Vector2(0f, 64f);
+            // Legend: the dots on one line, how to use the map on the line under it (on one line
+            // together, an upright phone cut the end off).
+            var strip = UiKit.Rect("LegendStrip", body);
+            strip.anchorMin = Vector2.zero;
+            strip.anchorMax = new Vector2(1f, 0f);
+            strip.pivot = new Vector2(0.5f, 0f);
+            strip.sizeDelta = new Vector2(0f, 104f);
+            var v = strip.gameObject.AddComponent<VerticalLayoutGroup>();
+            v.spacing = 2f;
+            v.childAlignment = TextAnchor.MiddleCenter;
+            v.childControlWidth = v.childControlHeight = true;
+            v.childForceExpandWidth = true;
+            v.childForceExpandHeight = false;
+            var legend = UiKit.Rect("Legend", strip);
+            legend.gameObject.AddComponent<LayoutElement>().preferredHeight = 60f;
             var h = legend.gameObject.AddComponent<HorizontalLayoutGroup>();
             h.spacing = 26f;
             h.childAlignment = TextAnchor.MiddleCenter;
@@ -87,12 +101,15 @@ namespace CapyIsland.UI
             LegendItem(legend, UiKit.Spring, "Bubble");
             LegendItem(legend, UiKit.Danger, "Pest");
             LegendItem(legend, UiKit.Sun, "News");
-            var hint = UiKit.Text(legend, "Hint", "Tap to look · drag yourself to travel", 24f, UiKit.InkSoft);
-            hint.textWrappingMode = TextWrappingModes.NoWrap;
+            // Only while a party or contest is on: the island with the glowing shore.
+            _legendEvent = LegendItem(legend, UiKit.Hex("E58FB0"), "Event");
+            _legendEvent.gameObject.SetActive(false);
+            var hint = UiKit.Text(strip, "Hint", "Tap to look · drag yourself to travel", 24f, UiKit.InkSoft, false, TextAlignmentOptions.Center);
             hint.overflowMode = TextOverflowModes.Overflow;
+            hint.gameObject.AddComponent<LayoutElement>().preferredHeight = 36f;
         }
 
-        static void LegendItem(RectTransform parent, Color colour, string label)
+        static RectTransform LegendItem(RectTransform parent, Color colour, string label)
         {
             var row = UiKit.Rect(label, parent);
             var h = row.gameObject.AddComponent<HorizontalLayoutGroup>();
@@ -106,6 +123,7 @@ namespace CapyIsland.UI
             var t = UiKit.Text(row, "Label", label, 26f, UiKit.Ink, true);
             t.textWrappingMode = TextWrappingModes.NoWrap;
             t.overflowMode = TextOverflowModes.Overflow;
+            return row;
         }
 
         protected override void OnOpen()
@@ -115,8 +133,9 @@ namespace CapyIsland.UI
             Layout();
             RebuildLocks();
             RebuildNames();
+            _eventShown = "?";   // placed afresh
             CentreOnKing();
-            Game.NewStuff.Clear("map/");   // the new island is on show
+            if (!Visit.Active) Game.NewStuff.Clear("map/");   // the new island is on show (yours: a friend's map leaves it waiting)
             // The first time you look at the map, and only then: how to travel on it.
             if (!Game.Guidance.Off && !HudTour.Seen("map"))
             {
@@ -137,6 +156,7 @@ namespace CapyIsland.UI
             Layout();
             RebuildLocks();
             RebuildNames();
+            _eventShown = "?";
         }
 
         // ---------------------------------------------------------------- the picture
@@ -211,6 +231,7 @@ namespace CapyIsland.UI
                 if (!_camera.enabled) _camera.enabled = true;
             }
             UpdateMarkers();
+            UpdateEventBadge();
             EdgeScroll();
         }
 
@@ -366,6 +387,80 @@ namespace CapyIsland.UI
                 badge.transform.SetAsFirstSibling();
                 _locks.Add(badge.rectTransform);
             }
+        }
+
+        // ---------------------------------------------------------------- a party or contest
+
+        /// <summary>
+        /// While a party or contest is on, a badge on its island says what's happening there
+        /// ("Fishing Contest"), for the host and every guest alike, and its legend entry shows.
+        /// The event glows in the picture too (EventGlow: a fishing contest lights only the water
+        /// along that island's shore), but from this far out a word helps. The badge breathes
+        /// gently so the eye finds it.
+        /// </summary>
+        void UpdateEventBadge()
+        {
+            bool on = Gathering.Active && Gathering.EventIsland >= 0;
+            string key = on ? Gathering.Kind + "@" + Gathering.EventIsland : null;
+            if (_legendEvent != null && _legendEvent.gameObject.activeSelf != on) _legendEvent.gameObject.SetActive(on);
+            if (key != _eventShown)
+            {
+                _eventShown = key;
+                if (_eventBadge != null) Destroy(_eventBadge.gameObject);
+                _eventBadge = on ? MakeEventBadge(Gathering.Kind, Gathering.EventIsland) : null;
+                if (on && _legendEvent != null && _legendEvent.childCount > 0 && _legendEvent.GetChild(0).TryGetComponent<Image>(out var dot))
+                    dot.color = GatheringPanel.ColourOf(Gathering.Kind);
+            }
+            if (_eventBadge != null)
+                _eventBadge.localScale = Vector3.one * (1f + 0.05f * Mathf.Sin(Time.unscaledTime * 3f));
+        }
+
+        RectTransform MakeEventBadge(GatheringKind kind, int island)
+        {
+            var land = LandMap.Instance;
+            var piece = land != null ? land.Island(island) : null;
+            if (piece == null || piece.circles.Count == 0) return null;
+            // The island's middle (its land circles, weighted by size), since the whole island is
+            // the event. A fishing contest is only its shore, so that badge sits on the shore
+            // where the host started it, by the glowing water, not over the island's grass.
+            Vector2 sum = Vector2.zero;
+            float weight = 0f;
+            foreach (var c in piece.circles) { float a = c.z * c.z; sum += new Vector2(c.x, c.y) * a; weight += a; }
+            var middle = LandMap.WorldToUnity(sum / Mathf.Max(0.0001f, weight));
+            if (kind == GatheringKind.Fishing && land.IslandAt(Gathering.Arena) == island) middle = Gathering.Arena;
+
+            var colour = GatheringPanel.ColourOf(kind);
+            var pill = UiKit.Image(_markerLayer, "Event", UiKit.Rounded(30), UiKit.Surface);
+            pill.raycastTarget = false;
+            var r = pill.rectTransform;
+            r.anchorMin = r.anchorMax = r.pivot = new Vector2(0.5f, 0.5f);
+            r.anchoredPosition = ToMap(middle);
+            var h = pill.gameObject.AddComponent<HorizontalLayoutGroup>();
+            h.padding = new RectOffset(8, 22, 8, 8);
+            h.spacing = 10f;
+            h.childAlignment = TextAnchor.MiddleLeft;
+            h.childControlWidth = h.childControlHeight = true;
+            h.childForceExpandWidth = h.childForceExpandHeight = false;
+            RtlLayout.Add(h);
+            var fit = pill.gameObject.AddComponent<ContentSizeFitter>();
+            fit.horizontalFit = fit.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            var disc = UiKit.Image(r, "Disc", UiKit.Circle, colour);
+            disc.raycastTarget = false;
+            var dle = disc.gameObject.AddComponent<LayoutElement>();
+            dle.preferredWidth = dle.preferredHeight = dle.minWidth = 58f;
+            var icon = UiKit.Image(disc.transform, "Icon", GatheringPanel.IconOf(kind), Color.white);
+            icon.preserveAspect = true;
+            icon.raycastTarget = false;
+            UiKit.Stretch(icon.rectTransform, 10f, 10f, 10f, 10f);
+            var label = UiKit.Text(r, "Label", Gathering.NameOf(kind), 30f, Color.Lerp(colour, UiKit.Ink, 0.25f), true);
+            label.textWrappingMode = TextWrappingModes.NoWrap;
+            label.overflowMode = TextOverflowModes.Overflow;
+            label.raycastTarget = false;
+
+            // Over the island names and padlocks, under the pins.
+            r.SetSiblingIndex(Mathf.Min(_markerLayer.childCount - 1, _names.Count + _locks.Count));
+            return r;
         }
 
         // ---------------------------------------------------------------- names

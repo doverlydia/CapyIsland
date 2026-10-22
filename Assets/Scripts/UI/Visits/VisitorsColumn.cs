@@ -10,8 +10,8 @@ namespace CapyIsland.UI
     /// <summary>
     /// Who else is on this island right now, as round faces under the clock (your host first, then
     /// up to a couple more; a party's crowd beyond that is a "+N"). At home, tap a visitor to ask
-    /// them to leave; on someone else's island, tap your host to add them as a friend (or unfriend
-    /// them).
+    /// them to leave (or, a real player, to turn chat on or off, or block them); on someone else's
+    /// island, tap your host to add them as a friend (or unfriend or block them).
     /// </summary>
     public class VisitorsColumn : MonoBehaviour
     {
@@ -154,32 +154,46 @@ namespace CapyIsland.UI
             Sfx.Play(SfxKind.Tap, 0.5f);
             if (bot.As == VisitorBot.Role.Guest)
             {
-                // A fellow guest at someone else's island: wave, or make friends.
+                // A fellow guest at someone else's island: wave, or make friends (or block them).
                 if (Visit.Active)
                 {
+                    var blockGuest = BlockChoice(who);
                     if (Friends.IsFriend(who.id))
-                        PromptScreen.Ask("Your friend", who, Loc.F("{0} is here too!", who.name), "Wave", "Close", () => VisitorBot.PlayerEmote(Emoji.Wave));
+                        PromptScreen.Ask("Your friend", who, Loc.F("{0} is here too!", who.name), "Wave", "Close", () => VisitorBot.PlayerEmote(Emoji.Wave), null, blockGuest);
                     else
-                        PromptScreen.Ask("Make a friend?", who, Loc.F("{0} is here too! Ask them to be friends?", who.name), "Add friend", "Not now", () => Befriend(who));
+                        PromptScreen.Ask("Make a friend?", who, Loc.F("{0} is here too! Ask them to be friends?", who.name), "Add friend", "Not now", () => Befriend(who), null, blockGuest);
                     return;
                 }
-                PromptScreen.Ask("Visitor", who, $"{who.name} is visiting your island and helping out.", "Ask to leave", "Let them stay", () =>
+                // Your visitor: a real player can also have chat turned on or off, or be blocked
+                // (which sends them home too).
+                List<(string, System.Action)> more = null;
+                if (bot.Remote && who.IsReal)
+                {
+                    bool chatting = VisitChat.GuestAllowed(who);
+                    more = new List<(string, System.Action)>
+                    {
+                        (chatting ? "Turn chat off" : "Turn chat on", () => VisitChat.SetGuest(who, !chatting)),
+                        ("Block", () => BlockPrompt.Ask(who)),
+                    };
+                }
+                PromptScreen.Ask("Visitor", who, Loc.F("{0} is visiting your island and helping out.", who.name), "Ask to leave", "Let them stay", () =>
                 {
                     if (bot.Remote) Live.AskToLeave(who);   // a real player: their game flies them home
                     else bot.SendHome();
-                    Hints.Show($"{who.name} waves goodbye and heads home.");
-                });
+                    Hints.Show(Loc.F("{0} waves goodbye and heads home.", who.name));
+                }, null, more);
                 return;
             }
             // On their island.
+            var blockHost = BlockChoice(who);
             if (Friends.IsFriend(who.id))
                 PromptScreen.Ask("Your friend", who, $"You're on {who.name}'s island.", "Unfriend", "Close", () =>
                 {
                     Friends.Remove(who);
                     Hints.Show(who.name + " is no longer your friend.");
-                });
+                }, null, blockHost);
             else if (who.IsReal)
-                PromptScreen.Ask("Make a friend?", who, Loc.F("You're on {0}'s island. Ask them to be friends?", who.name), "Add friend", "Not now", () => Befriend(who));
+                PromptScreen.Ask("Make a friend?", who, Loc.F("You're on {0}'s island. Ask them to be friends?", who.name), "Add friend", "Not now", () => Befriend(who), null, blockHost);
             else
                 PromptScreen.Ask("Make a friend?", who, $"You're on {who.name}'s island. Add them as a friend to visit again — their island will be kept.", "Add friend", "Not now", () =>
                 {
@@ -187,6 +201,10 @@ namespace CapyIsland.UI
                     Hints.Show(who.name + " is your friend now!");
                 });
         }
+
+        /// <summary>A "Block" choice for a real player's card (none for an islander the game made up).</summary>
+        static List<(string, System.Action)> BlockChoice(FriendProfile who) =>
+            who != null && who.IsReal ? new List<(string, System.Action)> { ("Block", () => BlockPrompt.Ask(who)) } : null;
 
         /// <summary>A real player gets a friend request (they say yes on their side); an islander is simply added.</summary>
         static async void Befriend(FriendProfile who)

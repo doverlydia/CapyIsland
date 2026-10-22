@@ -32,7 +32,7 @@ namespace CapyIsland.UI
             var scroll = UiKit.ScrollList(body, "List", out var list, 18f);
             UiKit.Stretch((RectTransform)scroll.transform);
 
-            var intro = UiKit.Text(list, "Intro", "Bait goes on your hook as you cast, one per cast. Tap the bait button while fishing to choose.", 28f, UiKit.InkSoft);
+            var intro = UiKit.Text(list, "Intro", "Bait goes on your hook as you cast, one per cast. Tap Tackle while fishing to choose.", 28f, UiKit.InkSoft);
             intro.overflowMode = TextOverflowModes.Overflow;
 
             foreach (var bait in Baits.All)

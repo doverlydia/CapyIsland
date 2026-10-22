@@ -1,0 +1,33 @@
+# Hebrew for the friends and account help pages (UI/Help/HelpDemos.Friends.cs).
+# The movies only show words that already have entries elsewhere; these are the corrected steps
+# proposed for HelpTopics ("visit", "friendcode", "together", "account", "savecode").
+
+@ First build an airstrip: tap Friends, then Build on Build an airstrip (300 wood and 300 gold). Pop its bubble and drag the airstrip to a clear spot.
+= קודם בנה מסלול המראה: הקש על "חברים", ואז על "בנה" ליד "בנה מסלול המראה" (300 עץ ו-300 זהב). פוצץ את הבועה שלו וגרור את המסלול למקום פנוי.
+
+@ Tap Friends, scroll down to your friends and tap Visit next to one who's online. You can also tap an island at the top.
+= הקש על "חברים", גלול למטה אל החברים שלך והקש על "בקר" ליד חבר מחובר. אפשר גם להקיש על אי למעלה.
+
+@ Tap Friends and scroll down to find your friend code, like Miso#1234. Tap Copy and send it to a friend.
+= הקש על "חברים" וגלול למטה כדי למצוא את קוד החבר שלך, למשל Miso#1234. הקש על "העתק" ושלח אותו לחבר.
+
+@ Type a friend's code in the box and tap Add to send a request. You're friends once they accept.
+= הקלד בתיבה את הקוד של חבר והקש על "הוסף" כדי לשלוח בקשה. תהיו חברים ברגע שהוא יאשר.
+
+@ To visit a friend who's online, tap Visit: you knock, and they let you in.
+= כדי לבקר חבר מחובר, הקש על "בקר": אתה דופק, והוא מכניס אותך.
+
+@ In Friends, Play together starts an island party, or a fishing, bug or birdwatching contest for a hobby you have.
+= ב"חברים", "משחקים ביחד" מתחיל מסיבת אי, או תחרות דיג, חרקים או צפרות בתחביב שיש לך.
+
+@ When someone else is on the island, tap the smiley button to send a wave, a heart or a smile.
+= כשמישהו נוסף נמצא על האי, הקש על כפתור הסמיילי כדי לשלוח נפנוף, לב או חיוך.
+
+@ If the two islands are different, you choose which one to keep.
+= אם שני האיים שונים, תבחר איזה מהם לשמור.
+
+@ In Settings, tap Export next to Keep a copy of your island, then Copy, and paste the code into a note.
+= בהגדרות, הקש על "ייצוא" ליד "שמור עותק של האי שלך", ואז על "העתק", והדבק את הקוד בפתק.
+
+@ To bring it back, tap Load next to Bring back a saved island, tap Paste, then Load.
+= כדי להחזיר אותו, הקש על "טען" ליד "להחזיר אי שמור", הקש על "הדבק" ואז על "טען".

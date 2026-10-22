@@ -105,6 +105,8 @@ namespace CapyIsland.Game
                 // Mills and houses have no outer radius; show their footprint instead, so a blocked
                 // spot still turns red.
                 float radius = placeable.OuterRadius > 0f ? placeable.OuterRadius : placeable.InnerRadius;
+                // A grove only fills the inner part of its circle (BunniRules.GroveSpread): show that.
+                if (placeable.OuterRadius > 0f && placeable.GetComponent<Harvestable>() != null) radius *= BunniRules.GroveSpread;
                 size = BunniSpace.ToUnity(new Vector2(radius, radius) * 2f);
                 clear = placeable.CanPlaceAt(at);
                 var tag = placeable.GetComponent<CatalogItem>();

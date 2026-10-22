@@ -88,6 +88,7 @@ namespace CapyIsland.UI
             var friends = new System.Collections.Generic.List<FriendProfile>(Friends.All);
             friends.Sort((x, y) => Server.IsOnline(y).CompareTo(Server.IsOnline(x)));
             foreach (var f in friends) Row(f, friend: true);
+            BlockedList();
 
             _scroll.verticalNormalizedPosition = 1f;
         }
@@ -249,6 +250,10 @@ namespace CapyIsland.UI
                 line.overflowMode = TextOverflowModes.Overflow;
                 line.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1f;
                 string memberId = id;
+                string asker = code;
+                var block = UiKit.Button(row, "Block", null, UiKit.ButtonStyle.Ghost, () => BlockPrompt.Ask(memberId, asker, null, Reopen), 26f, IconPainter.Block);
+                var ble = block.transform.parent.gameObject.AddComponent<LayoutElement>();
+                ble.preferredWidth = 68f; ble.preferredHeight = 68f;
                 var no = UiKit.Button(row, "No", "No", UiKit.ButtonStyle.Secondary, async () =>
                 {
                     NewStuff.Clear("friends/ask_" + memberId);
@@ -273,6 +278,8 @@ namespace CapyIsland.UI
             string line = who.IsReal
                 ? Loc.F("Remove {0} from your friends? You'll need their friend code to add them again.", who.name)
                 : $"Remove {who.name} from your friends? Their island won't be kept any more.";
+            // A real player can be blocked from here too (which also unfriends them).
+            var more = who.IsReal ? new System.Collections.Generic.List<(string, Action)> { ("Block", () => BlockPrompt.Ask(who, Reopen)) } : null;
             PromptScreen.Ask("Unfriend?", who, line, "Unfriend", "Cancel", () =>
             {
                 Friends.Remove(who);
@@ -280,7 +287,48 @@ namespace CapyIsland.UI
                 if (bot != null && bot.Who.id == who.id && bot.As == VisitorBot.Role.Guest) bot.SendHome();
                 Hints.Show(who.name + " is no longer your friend.");
                 OnOpen();
-            });
+            }, null, more);
+        }
+
+        void Reopen()
+        {
+            if (this != null && IsOpen) OnOpen();
+        }
+
+        /// <summary>At the bottom: everyone you blocked, each with a way to unblock them.</summary>
+        void BlockedList()
+        {
+            var blocked = RealFriends.Blocked;
+            if (blocked.Count == 0) return;
+            SectionLabel(_list, "Blocked players");
+            foreach (var b in new System.Collections.Generic.List<RealFriends.BlockedPlayer>(blocked))
+            {
+                var row = UiKit.Image(_list, "Blocked", UiKit.Rounded(30), UiKit.SurfaceSunk).rectTransform;
+                var h = row.gameObject.AddComponent<HorizontalLayoutGroup>();
+                h.padding = new RectOffset(22, 18, 14, 14);
+                h.spacing = 14f;
+                h.childAlignment = TextAnchor.MiddleLeft;
+                h.childControlWidth = h.childControlHeight = true;
+                h.childForceExpandWidth = h.childForceExpandHeight = false;
+                row.gameObject.AddComponent<LayoutElement>().minHeight = 96f;
+                var icon = UiKit.Image(row, "Icon", IconPainter.Block, UiKit.InkSoft);
+                icon.preserveAspect = true;
+                var ile = icon.gameObject.AddComponent<LayoutElement>();
+                ile.preferredWidth = ile.preferredHeight = 44f;
+                var name = UiKit.Text(row, "Name", b.name, 30f, UiKit.InkSoft, true);
+                name.textWrappingMode = TextWrappingModes.NoWrap;
+                name.GetComponent<LocText>().NoTranslate = true;   // a player's name, as they wrote it
+                name.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1f;
+                string member = b.member, shown = b.name;
+                var unblock = UiKit.Button(row, "Unblock", "Unblock", UiKit.ButtonStyle.Secondary, async () =>
+                {
+                    await RealFriends.Unblock(member);
+                    Hints.Show(Loc.F("{0} is unblocked.", shown));
+                    Reopen();
+                }, 26f);
+                var ule = unblock.transform.parent.gameObject.AddComponent<LayoutElement>();
+                ule.preferredWidth = 170f; ule.preferredHeight = 68f;
+            }
         }
 
         /// <summary>A locked Visit was tapped: say why, right here, and point at the fix.</summary>
@@ -473,7 +521,7 @@ namespace CapyIsland.UI
             }
 
             var about = UiKit.Text(card, "About",
-                "Invite everyone on this server to your island. A contest happens where you're standing: by the water for fishing, among trees for bugs and birds.",
+                "Invite everyone on this server to your island. A contest takes the whole island you're on, or its shore for fishing. Start a fishing contest by the water.",
                 24f, UiKit.InkSoft);
             about.overflowMode = TextOverflowModes.Overflow;
 
@@ -543,7 +591,7 @@ namespace CapyIsland.UI
                 {
                     string problem = await RealFriends.Add(who.code);
                     Hints.Show(problem ?? Loc.F("Request sent to {0}. You'll be friends once they accept.", who.name));
-                });
+                }, null, new System.Collections.Generic.List<(string, Action)> { ("Block", () => BlockPrompt.Ask(who)) });
         }
 
         void Slot(RectTransform grid, Server.Seat seat, float cell)
@@ -638,7 +686,11 @@ namespace CapyIsland.UI
         }
     }
 
-    /// <summary>A small card with someone's face, a line, and two choices.</summary>
+    /// <summary>
+    /// A small card with someone's face, a line, and two choices. The line wraps as far as it
+    /// needs and the card grows to hold it, so a long question is never cut short. The header
+    /// shows a plane (most questions are about visits) unless the asker gives another icon.
+    /// </summary>
     public class PromptScreen : UiScreen
     {
         public static PromptScreen Instance { get; private set; }
@@ -648,9 +700,13 @@ namespace CapyIsland.UI
         protected override Color AccentColour => UiKit.Hex("5B9BD5");
         protected override float MaxWidth => 820f;
 
+        /// <summary>The line's box at its smallest (a short question): the card's usual size.</summary>
+        const float LineHeight = 130f;
+
         string _title = "Visitor";
         RectTransform _avatarSlot;
         TextMeshProUGUI _line;
+        float _lineHeight = LineHeight;
         Button _yes, _no;
         TextMeshProUGUI _yesLabel, _noLabel;
         Action _onYes, _onNo;
@@ -663,20 +719,59 @@ namespace CapyIsland.UI
         }
 
         public static void Ask(string title, FriendProfile who, string line, string yes, string no, Action onYes, Action onNo = null)
+            => Ask(title, who, line, yes, no, onYes, onNo, null);
+
+        /// <summary>
+        /// The same card with a few more choices in a row of smaller buttons above the two big
+        /// ones (a visitor's face tapped: chat on or off, block). Any of them closes the card
+        /// first, so it may open another question straight away.
+        /// </summary>
+        public static void Ask(string title, FriendProfile who, string line, string yes, string no, Action onYes, Action onNo,
+            System.Collections.Generic.IList<(string label, Action act)> more, Sprite icon = null)
         {
             var p = Instance;
             if (p == null) return;
             p._title = title;
+            p._moreCount = more?.Count ?? 0;
             p.Open(() => { var cb = p._onNo; p._onNo = null; p._onYes = null; cb?.Invoke(); });
             if (p.TitleLabel != null) p.TitleLabel.text = title;
+            p.SetIcon(icon != null ? icon : IconPainter.Plane);
             ClearChildren(p._avatarSlot);
             if (who != null) UiKit.Avatar(p._avatarSlot, who, 150f).anchoredPosition = Vector2.zero;
+            else
+            {
+                // Nobody's face to show (a contest asking): its icon, large, rather than a gap.
+                var disc = UiKit.Image(p._avatarSlot, "Disc", UiKit.Circle, UiKit.SurfaceSunk);
+                UiKit.Stretch(disc.rectTransform);
+                var pic = UiKit.Image(disc.transform, "Icon", icon != null ? icon : IconPainter.Plane, UiKit.Spring);
+                pic.preserveAspect = true;
+                UiKit.Stretch(pic.rectTransform, 34f, 34f, 34f, 34f);
+            }
             p._line.text = line;
+            p.MeasureLine();   // the card grows to the line now, not a frame later
             p._yesLabel.text = yes;
             p._noLabel.text = no;
             p._onYes = onYes;
             p._onNo = onNo;
+            ClearChildren(p._more);
+            p._more.gameObject.SetActive(p._moreCount > 0);
+            if (more != null)
+                foreach (var (label, act) in more)
+                {
+                    var then = act;
+                    UiKit.Button(p._more, label, label, UiKit.ButtonStyle.Secondary, () =>
+                    {
+                        p._onYes = null;
+                        p._onNo = null;
+                        p.Close();
+                        then?.Invoke();
+                    }, 26f);
+                }
         }
+
+        RectTransform _more;
+        int _moreCount;
+        const float MoreHeight = 76f, MoreGap = 16f;
 
         /// <summary>Takes the question away unanswered (whoever asked took it back): neither answer runs.</summary>
         public static void Dismiss()
@@ -697,8 +792,10 @@ namespace CapyIsland.UI
             _line.rectTransform.anchorMin = new Vector2(0f, 1f);
             _line.rectTransform.anchorMax = new Vector2(1f, 1f);
             _line.rectTransform.pivot = new Vector2(0.5f, 1f);
-            _line.rectTransform.sizeDelta = new Vector2(-20f, 130f);
+            _line.rectTransform.sizeDelta = new Vector2(-20f, LineHeight);
             _line.rectTransform.anchoredPosition = new Vector2(0f, -176f);
+            // Never "…": the box grows to the words instead (MeasureLine).
+            _line.overflowMode = TextOverflowModes.Overflow;
 
             var buttons = UiKit.Rect("Buttons", body);
             buttons.anchorMin = new Vector2(0f, 0f);
@@ -720,12 +817,55 @@ namespace CapyIsland.UI
             }, 32f);
             _noLabel = _no.GetComponentInChildren<TextMeshProUGUI>();
             _yesLabel = _yes.GetComponentInChildren<TextMeshProUGUI>();
+
+            // The extra choices, when there are any: just above the two big buttons.
+            _more = UiKit.Rect("More", body);
+            _more.anchorMin = new Vector2(0f, 0f);
+            _more.anchorMax = new Vector2(1f, 0f);
+            _more.pivot = new Vector2(0.5f, 0f);
+            _more.sizeDelta = new Vector2(0f, MoreHeight);
+            _more.anchoredPosition = new Vector2(0f, 96f + MoreGap);
+            var mh = _more.gameObject.AddComponent<HorizontalLayoutGroup>();
+            mh.spacing = 14f;
+            mh.childControlWidth = mh.childControlHeight = true;
+            mh.childForceExpandWidth = mh.childForceExpandHeight = true;
+            _more.gameObject.SetActive(false);
         }
 
         protected override void Fit()
         {
             base.Fit();
-            if (Sheet != null) Sheet.sizeDelta = new Vector2(Sheet.sizeDelta.x, Mathf.Min(Sheet.sizeDelta.y, 128f + 24f + 420f + 32f));
+            float extra = _moreCount > 0 ? MoreHeight + MoreGap : 0f;
+            extra += _lineHeight - LineHeight;   // a long line: the card grows by what it needs
+            if (Sheet != null) Sheet.sizeDelta = new Vector2(Sheet.sizeDelta.x, Mathf.Min(Sheet.sizeDelta.y, 128f + 24f + 420f + 32f + extra));
+        }
+
+        /// <summary>
+        /// Gives the line the height its words need (never less than the usual box) and refits the
+        /// card around it. Checked again every frame while open: the Hebrew translation and Easy
+        /// Reading's bigger letters are applied as the label is drawn, after the text is set.
+        /// </summary>
+        void MeasureLine()
+        {
+            if (_line == null) return;
+            float want = Mathf.Max(LineHeight, Mathf.Ceil(_line.preferredHeight) + 6f);
+            if (Mathf.Abs(want - _lineHeight) < 1f) return;
+            _lineHeight = want;
+            _line.rectTransform.sizeDelta = new Vector2(-20f, want);
+            Fit();
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+            if (IsOpen) MeasureLine();
+        }
+
+        /// <summary>The header's picture for this question (a plane, unless the asker chose another).</summary>
+        void SetIcon(Sprite icon)
+        {
+            var image = Sheet != null ? Sheet.Find("Header/Icon")?.GetComponent<Image>() : null;
+            if (image != null && icon != null) image.sprite = icon;
         }
     }
 }

@@ -106,6 +106,39 @@ namespace CapyIsland.Game
             };
         }
 
+        /// <summary>
+        /// The Mermaid's Shell (MermaidCharms): a charm Skipper Nori sells. Tossed into the sea it
+        /// sings for a minute, and everyone fishing inside its ring — friends too — gets the fish.
+        /// </summary>
+        public static class Charm
+        {
+            public const string Name = "Mermaid's Shell";
+            public const string Blurb = "Toss it into the sea while you fish and it sings for a minute. Anyone fishing in its ring gets quicker bites, and after five catches something shimmering comes up to listen.";
+
+            /// <summary>For the journal's greyed tiles: the fish that only come to a shell.</summary>
+            public const string Where = "Only comes to a Mermaid's Shell";
+
+            /// <summary>Skipper Nori, the first time your fishing reaches the shell's level: three to start you off.</summary>
+            public static readonly string[] Gift =
+            {
+                "Ahoy there! You're reeling them in like an old salt now. Here, three of my mermaid's shells, on the house.",
+                "Toss one into the water while you fish. It sings a little song, and the fish swim over to hear it. Fish inside its ring and they bite quicker.",
+                "Friends can fish in the ring too, and every catch counts. After five, something shimmering comes up to listen. Those fish never come any other way!",
+            };
+
+            public const string NeedLevel = "Reach fishing level 4 first, then Nori will sell you one.";
+            public const string Tossed = "Your shell is singing! Fish inside its ring for quicker bites.";
+            public const string FriendTossed = "{0} tossed a Mermaid's Shell into the sea! Fish inside its ring.";
+            public const string Shimmer = "Something shimmering has come to listen to the shell! Look for the sparkling shadow.";
+            public const string StillSinging = "Your shell is still singing. Wait until it goes quiet.";
+            public const string TooMany = "Three shells are singing here already. Wait for one to go quiet.";
+            public const string NoWater = "Stand at the water's edge to toss it in.";
+            public const string NoneLeft = "No shells left. Skipper Nori sells them on the beach.";
+            public const string Chip = "Shell ×{0}";
+            public const string ChipSinging = "Singing {0}s";
+            public const string Waiting = "The shell's song is calling the fish";
+        }
+
         /// <summary>Old Mochi, the shrine keeper's spirit.</summary>
         public static class Mochi
         {
@@ -592,6 +625,26 @@ namespace CapyIsland.Game
                 "My old knees are complaining again. I'd forgotten how much I missed them.",
             };
             public const string Engaged = "Miso told me everything! The Blossom Chapel is waiting, whenever you're ready.";
+
+            /// <summary>
+            /// Horaira, her cat, who passed away long ago and shows himself, halo and all, once she
+            /// is warm again (<see cref="Horaira"/>). In memory of a real cat called Horaira.
+            /// </summary>
+            public const string HorairaName = "Horaira";
+            public static readonly string[] HorairaMeet =
+            {
+                "Oh! You can see him too? That's Horaira. He was my cat, a long, long time ago.",
+                "He left this world before the Big Chill, but he never really left me. All those cold years he curled up beside my ice and kept watch. Now that I'm warm again, he's come out to say hello.",
+            };
+            public static readonly string[] HorairaMemories =
+            {
+                "Horaira loved chewing on fingers. Gently, mind you. He never once bit hard.",
+                "He'd flop over on the cushions with his paws in the air and look up at you like that. Who could ever say no to that face?",
+                "He could sit and stare at a fan for hours, as if it were his very own toy. I never did work out what he saw in it.",
+                "He was so tiny when he came to me. White as snow, with a little ginger cap, as if the sun were resting on his head.",
+                "Be gentle with every cat you meet, little one. Horaira would want that.",
+                "He's watching over all of us now. Over you too.",
+            };
             public const string Married = "Seeing you two together... it was worth every frozen year.";
 
             /// <summary>Every heart home: the finale, and her everyday words after it.</summary>

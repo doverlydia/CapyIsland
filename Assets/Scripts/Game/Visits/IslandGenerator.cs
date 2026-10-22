@@ -161,11 +161,13 @@ namespace CapyIsland.Game
                 int children = def.Kind == StoreItemKind.Forest ? Random.Range(5, 9) : def.Kind == StoreItemKind.Hill ? Random.Range(2, 4) : Random.Range(3, 6);
                 for (int i = 0; i < children; i++)
                 {
-                    var spot = BunniSpace.RandomPointInCircle(at, def.Outer * 0.9f);
-                    if (!land.CircleOnLand(spot, def.Inner) || Overlaps(spot, def.Inner * 0.8f, taken)) continue;
-                    taken.Add(new Spot { at = spot, radius = def.Inner * 0.8f });
+                    // As tight as groves at home (BunniRules.GroveSpacing / GroveSpread).
+                    float inner = def.Inner * BunniRules.GroveSpacing;
+                    var spot = BunniSpace.RandomPointInCircle(at, def.Outer * BunniRules.GroveSpread);
+                    if (!land.CircleOnLand(spot, inner) || Overlaps(spot, inner, taken)) continue;
+                    taken.Add(new Spot { at = spot, radius = inner });
                     float final = Random.Range(0.6f, 1f);
-                    d.children.Add(new NodeSave { origin = name, pos = spot, inner = def.Inner, scale = final, finalScale = final });
+                    d.children.Add(new NodeSave { origin = name, pos = spot, inner = inner, scale = final, finalScale = final });
                 }
             }
         }

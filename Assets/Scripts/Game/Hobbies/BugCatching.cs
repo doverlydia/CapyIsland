@@ -21,14 +21,15 @@ namespace CapyIsland.Game
             if (_king == null) _king = FindFirstObjectByType<PlayerAvatar>();
             if (_king == null || Time.time < _next) return;
             if (!HobbyLog.IsUnlocked(Hobby.Bugs)) return;   // no net, no bugs to chase
-            // A bug contest's ring is buzzing: bugs every few seconds, lots at once, all inside it.
+            // A bug contest's island is buzzing: bugs every few seconds, lots at once, around you,
+            // and only on that island (never across the water or out on a bridge).
             bool contest = Gathering.Boosting(Hobby.Bugs);
             _next = Time.time + (contest ? Random.Range(3f, 6f) : Random.Range(18f, 35f));
             if (FindObjectsByType<Bug>(FindObjectsSortMode.None).Length >= (contest ? 8 : 3)) return;
-            Spawn(contest ? Gathering.Arena : (Vector2)_king.transform.position);
+            Spawn(_king.transform.position, contest);
         }
 
-        void Spawn(Vector2 around)
+        void Spawn(Vector2 around, bool contest)
         {
             int level = HobbyLog.Level(Hobby.Bugs);
             var homes = new[] { BugHome.Flower, BugHome.Tree, BugHome.Ground };
@@ -44,6 +45,7 @@ namespace CapyIsland.Game
                 foreach (var node in FindObjectsByType<Harvestable>(FindObjectsSortMode.None))
                 {
                     if (node.Family != family || !node.InWorld) continue;
+                    if (contest && !Gathering.OnEventIsland(node.transform.position)) continue;
                     float d = Vector2.Distance(node.transform.position, around);
                     if (d < 2f || d > 8f) continue;
                     float score = Mathf.Abs(d - 4f) + Random.value * 2f;
@@ -64,6 +66,7 @@ namespace CapyIsland.Game
                 {
                     var p = around + Random.insideUnitCircle.normalized * Random.Range(2.5f, 6f);
                     if (!BunniSpace.PointOnLand(p)) continue;
+                    if (contest && !Gathering.OnEventIsland(p)) continue;
                     at = p;
                     order = YSorter.PropSortBase + Mathf.RoundToInt(-p.y * 100f) + 5;
                     break;

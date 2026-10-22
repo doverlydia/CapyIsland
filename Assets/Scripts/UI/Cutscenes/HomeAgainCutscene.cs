@@ -10,7 +10,7 @@ namespace CapyIsland.UI
     /// <summary>
     /// The finale, once every warm heart is home (the wedding's last of all): evening at the
     /// spring. The lanterns along the path light one by one, everyone gathers (Old Yuzu, Miso,
-    /// Captain Wasabi, Salty Kombu, a capybara soaking, a cat), little bubbles rise from the
+    /// Captain Wasabi, Salty Kombu, a capybara soaking, Horaira her cat), little bubbles rise from the
     /// steam and pop into fireflies, and Old Yuzu has the last word. Then the title from the
     /// opening comes back: Capy Island, and under it, instead of the Big Chill, "Home Again".
     /// </summary>
@@ -52,7 +52,8 @@ namespace CapyIsland.UI
             var yuzu = Cast(Art("Cutscenes/Cutscene_IntroYuzu"), new Vector2(0.47f, 0.13f), 0.24f);
             var miso = Icon("Coriander") is Sprite m ? Cast(m, new Vector2(0.56f, 0.11f), 0.21f) : null;
             var kombu = Icon("Pirate Pete") is Sprite k ? Cast(k, new Vector2(0.65f, 0.13f), 0.22f) : null;
-            var cat = HobbyData.Art("Cat_Ginger") is Sprite c ? Cast(c, new Vector2(0.43f, 0.04f), 0.08f) : null;
+            // Horaira, at her feet: he wouldn't miss it either.
+            var cat = (HobbyData.Art("Cat_Horaira") ?? HobbyData.Art("Cat_Ginger")) is Sprite c ? Cast(c, new Vector2(0.43f, 0.04f), 0.08f) : null;
             yield return Wait(1f);
 
             Track(dusk.DOFade(0.55f, 3f).SetEase(Ease.InOutSine).SetUpdate(true));

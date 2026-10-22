@@ -146,9 +146,10 @@ namespace CapyIsland.Game
             // A saved grove brings its own children back.
             if (SaveGame.Restoring) return;
 
-            // The first burst: outerRadius/10 attempts (/5 for hills), each tested with the parent's own radius.
+            // The first burst: outerRadius/10 attempts (/5 for hills), each tested with the parent's
+            // own radius (both drawn in closer than the original's, BunniRules.GroveSpacing).
             int attempts = BunniRules.InitialChildAttempts(outerRadius, Family);
-            for (int i = 0; i < attempts; i++) TrySpawnChild(childInnerSize: innerSize);
+            for (int i = 0; i < attempts; i++) TrySpawnChild(childInnerSize: innerSize * BunniRules.GroveSpacing);
         }
 
         /// <summary>Bubbled again: forget everything, ready to be replanted fresh.</summary>
@@ -258,18 +259,20 @@ namespace CapyIsland.Game
                 _seedCounter = 0;
                 // A seeded child's inner size is the parent's own radius — the original passes
                 // the parent's inner circle through, so seeded children run slightly larger.
-                TrySpawnChild(childInnerSize: _innerRadius);
+                TrySpawnChild(childInnerSize: _innerRadius * BunniRules.GroveSpacing);
             }
         }
 
         /// <summary>
         /// One seed: a random point in the outer circle, kept only if a circle the size of this
-        /// parent fits there on land without touching anything. A miss simply does nothing.
+        /// parent fits there on land without touching anything. A miss simply does nothing. Capy
+        /// Island's groves are tighter than the original's: a smaller circle, a nearer spot
+        /// (<see cref="BunniRules.GroveSpacing"/>, <see cref="BunniRules.GroveSpread"/>).
         /// </summary>
         void TrySpawnChild(float childInnerSize)
         {
-            var at = BunniSpace.RandomPointInCircle(transform.position, outerRadius);
-            float testRadius = innerSize * _finalScale;
+            var at = BunniSpace.RandomPointInCircle(transform.position, outerRadius * BunniRules.GroveSpread);
+            float testRadius = innerSize * _finalScale * BunniRules.GroveSpacing;
             if (!BunniSpace.CircleOnMap(at, testRadius)) return;
 
             BuildChild(at, childInnerSize, transform.parent);

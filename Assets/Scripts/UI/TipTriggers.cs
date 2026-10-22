@@ -8,7 +8,8 @@ namespace CapyIsland.UI
     /// for that one tip. The game teaches by doing, so there are few, and none during the opening:
     ///
     ///  * the opening is done → the goal card (your next goal is always there)
-    ///  * the map is first opened → how to travel on it (from MapScreen)
+    ///  * the map is first opened → how to travel on it (from MapScreen); until then, a finger now
+    ///    and then points at the Map button (<see cref="MapNudge"/>)
     ///  * the first hobby is unlocked → Events, and the clock (creatures keep hours)
     ///  * the first visitor lands → Friends and the emoji button
     ///  * a lot of reaching for the screen edge to walk → Old Yuzu mentions tapping, and the joystick
@@ -33,6 +34,7 @@ namespace CapyIsland.UI
                 HudTour.Tip("events", "clock");
             if (VisitorBot.Current != null) HudTour.Tip("friends", "hello");
             WalkTip();
+            MapNudge.Tick();
 
             // Never in the middle of a drag or a pinch.
             var input = FindFirstObjectByType<CameraRig.CameraInputController>();

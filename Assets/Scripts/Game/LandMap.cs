@@ -220,6 +220,44 @@ namespace CapyIsland.Game
         }
 
         /// <summary>
+        /// The island is yours to walk on: the first island, or joined to it by open bridges. Islands
+        /// across the water with their bridge still unbuilt are not.
+        /// </summary>
+        public bool IslandOpen(int island)
+        {
+            int count = 0;
+            foreach (var p in pieces) if (!p.isBridge) count++;
+            if (island < 0 || island >= count) return false;
+            if (_component == null) BuildComponents();
+            return _component[island] == _component[0];
+        }
+
+        /// <summary>
+        /// Where a pest (a zombie capybara, a guinea pig) turns up: on an island you can reach, so
+        /// it never has to crawl to you through the sea. <paramref name="prefer"/> is used when it is
+        /// open; otherwise the spot is beside a tree or a rock on any open island (what pests come
+        /// for), or anywhere on one.
+        /// </summary>
+        public Vector2 PestSpot(int prefer = -1, float worldRadius = 20f)
+        {
+            if (IslandOpen(prefer)) return RandomSpotOnIsland(prefer, worldRadius);
+            var nodes = new List<Harvestable>();
+            foreach (var h in UnityEngine.Object.FindObjectsByType<Harvestable>(FindObjectsSortMode.None))
+                if (h.InWorld && (h.Family == NodeFamily.Tree || h.Family == NodeFamily.Rock) && IslandOpen(IslandAt(h.transform.position))) nodes.Add(h);
+            for (int i = 0; i < 40 && nodes.Count > 0; i++)
+            {
+                var node = nodes[UnityEngine.Random.Range(0, nodes.Count)];
+                Vector2 at = node.transform.position;
+                var u = at + BunniSpace.ToUnity(UnityEngine.Random.insideUnitCircle.normalized * UnityEngine.Random.Range(60f, 140f));
+                if (IslandAt(u) == IslandAt(at) && BunniSpace.CircleOnMap(u, worldRadius)) return u;
+            }
+            var open = new List<int>();
+            for (int i = 0; Island(i) != null; i++) if (IslandOpen(i)) open.Add(i);
+            int pick = open.Count > 0 ? open[UnityEngine.Random.Range(0, open.Count)] : 0;
+            return RandomSpotOnIsland(pick, worldRadius);
+        }
+
+        /// <summary>
         /// The middle of an island (its land circles, weighted by area), or the nearest spot to it
         /// where a circle of <paramref name="worldRadius"/> fits on the island and
         /// <paramref name="fits"/> agrees (say, nothing already standing there).

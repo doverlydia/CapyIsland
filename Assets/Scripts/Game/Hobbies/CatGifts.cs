@@ -69,8 +69,18 @@ namespace CapyIsland.Game
             HobbyLog.Save();
             Motes.Trigger("hobby_catgift");
 
-            string who = cat.adopted ? CatCare.NameOf(kind) : "The stray cat";
-            string title = "A present from " + (cat.adopted ? who : "the stray cat") + "!";
+            string who = CatCare.Who(kind);
+            string title = "A present from " + (cat.adopted || Horaira.Is(kind) ? who : "the stray cat") + "!";
+
+            // Horaira's first present is a halo just like his: no other cat has one to give.
+            var halo = Wardrobe.Find(Horaira.HaloId);
+            if (Horaira.Is(kind) && halo != null && !Wardrobe.Owns(halo) && Wardrobe.Art(halo) != null)
+            {
+                Wardrobe.Give(halo, announce: false);
+                UI.CardPopup.Show(title, "A halo, just like his own! Old Yuzu says he only ever gives these to friends.\n<size=85%>It's in your wardrobe now.</size>", Wardrobe.Art(halo));
+                Sfx.Play(SfxKind.Chest, 0.8f);
+                return;
+            }
             // The very first present is a nice one, so the habit sticks.
             var roll = cat.gifts == 1 && HobbyLog.TotalCatGifts() == 1 ? Kind.Outfit : free ? RollFree(cat.bond) : Roll(cat.bond);
 

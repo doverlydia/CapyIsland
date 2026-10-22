@@ -8,7 +8,8 @@ namespace CapyIsland.Game
     /// them.
     ///
     /// Pure presentation — the original had no wind. Trees and flowers read it through
-    /// <see cref="Sway"/>; nothing in the rules does.
+    /// <see cref="Sway"/>, and the gusts show as curling wisps (<see cref="WindWisps"/>); nothing in
+    /// the rules reads it.
     /// </summary>
     public class Wind : MonoBehaviour
     {

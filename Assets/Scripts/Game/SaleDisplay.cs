@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace CapyIsland.Game
@@ -39,6 +40,24 @@ namespace CapyIsland.Game
         float _alpha = -1f;
 
         public string StoreName => storeName;
+
+        /// <summary>Every ware on the ground, for the placement test (BunniSpace.CircleOnMap).</summary>
+        public static readonly List<SaleDisplay> All = new();
+
+        /// <summary>
+        /// Its footprint, in world units: like any item on the original's map, a ware keeps its own
+        /// inner circle clear (TestCollision.CircleOnMap counts every map item), so trees can't seed
+        /// over it and nothing can be put down on it.
+        /// </summary>
+        public float InnerRadius => FootprintOf(storeName);
+
+        /// <summary>The footprint a ware of this item keeps clear (its store item's inner radius, kept to a sensible size).</summary>
+        public static float FootprintOf(string storeName) =>
+            StoreData.TryGet(storeName, out var def) && def.Inner > 0f ? Mathf.Clamp(def.Inner, 18f, 45f) : 24f;
+
+        /// <summary>On show (not gated, not sold out): only then does it keep its spot clear.</summary>
+        public bool Blocks => isActiveAndEnabled && StoreData.IsUnlocked(storeName) && !SoldOut;
+
         public string Title => StoryText.Name(storeName);
         public string Description
         {
@@ -110,8 +129,50 @@ namespace CapyIsland.Game
             _icon.transform.localScale = Vector3.one * s;
         }
 
+        bool _cleared;
+
+        /// <summary>
+        /// Islands from before wares kept their spot clear can have a tree or a rock grown over one,
+        /// or something put down on top of it, so it can't be seen or bought. Once it's on show, it
+        /// clears its spot: a tree or rock that seeded there is gone, and a grove or anything else
+        /// put down there goes back into a bubble, to be put somewhere else.
+        /// </summary>
+        void ClearSpot()
+        {
+            if (SaveGame.Restoring || Visit.Active) return;
+            _cleared = true;
+            Vector2 at = transform.position;
+            bool moved = false;
+            foreach (var node in FindObjectsByType<Harvestable>(FindObjectsSortMode.None))
+            {
+                if (!node.InWorld || !node.BlocksPlacement) continue;
+                if (!Covers(node.transform.position, node.InnerRadius)) continue;
+                var placeable = node.GetComponent<Placeable>();
+                if (placeable != null && placeable.Placed) { BubbleSpawner.ReturnToBubble(placeable); moved = true; }
+                else if (!node.IsParent) Destroy(node.gameObject);
+            }
+            foreach (var item in FindObjectsByType<Placeable>(FindObjectsSortMode.None))
+            {
+                if (!item.Placed || item.GetComponent<Harvestable>() != null || item.GetComponent<CatalogItem>() == null) continue;
+                if (item.GetComponent<StoreBuilding>() is { } shop && shop.Shows(this)) continue;   // its own shop
+                if (!Covers(item.transform.position, item.InnerRadius)) continue;
+                BubbleSpawner.ReturnToBubble(item);
+                moved = true;
+            }
+            if (moved) Hints.Island("Something was standing on a shop's wares, so it's back in a bubble. Put it down somewhere else!");
+        }
+
+        /// <summary>
+        /// Really on top of this ware (its middle within the bigger of the two footprints), not just
+        /// a little close: a garden planted beside a ware stays where it is.
+        /// </summary>
+        bool Covers(Vector2 other, float otherRadius) =>
+            BunniSpace.WorldDistance(transform.position, other) < Mathf.Max(InnerRadius, otherRadius) * 0.9f;
+
         void Update()
         {
+            if (!_cleared && Blocks && Time.frameCount > 2) ClearSpot();
+
             // The original sets alpha every frame from availability.
             float target;
             bool locked = Locked != null;
@@ -138,8 +199,8 @@ namespace CapyIsland.Game
 
         public bool Buy() => Purchasing.TryBuy(storeName, transform.position);
 
-        void OnEnable() => TapTargets.Register(this);
-        void OnDisable() => TapTargets.Unregister(this);
+        void OnEnable() { TapTargets.Register(this); All.Add(this); }
+        void OnDisable() { TapTargets.Unregister(this); All.Remove(this); }
 
         public float TapDistance(Vector2 worldPoint)
         {

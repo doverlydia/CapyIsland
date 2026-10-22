@@ -40,6 +40,24 @@ namespace CapyIsland.UI
         /// <summary>Not offered to the reader (the reader's own text, tiny counters).</summary>
         public bool NoRead;
 
+        /// <summary>
+        /// What a player typed (chat): drawn as it is, never looked up in the tables — "Yes" from a
+        /// friend stays "Yes". Hebrew in it is still laid out right to left.
+        /// </summary>
+        public bool NoTranslate
+        {
+            get => _noTranslate;
+            set
+            {
+                if (_noTranslate == value) return;
+                _noTranslate = value;
+                _langVersion = -1;   // drawn afresh on the next refresh
+            }
+        }
+        bool _noTranslate;
+
+        string Translate(string s) => _noTranslate ? s : Loc.T(s);
+
         TMP_Text _t;
         string _source;
         string _display;
@@ -98,7 +116,7 @@ namespace CapyIsland.UI
             {
                 _source = src;
                 _langVersion = Loc.Version;
-                var translated = Loc.T(src);
+                var translated = Translate(src);
                 bool rtl = Loc.HasHebrew(translated);   // "עברית" on the language picker, even in English
                 _display = rtl ? Loc.Visual(translated) : translated;
                 SetDirection(rtl);
@@ -115,7 +133,7 @@ namespace CapyIsland.UI
         {
             if (string.Equals(text, _source) && _langVersion == Loc.Version) return _display;
             // Set after this frame's refresh: translate now; the direction catches up next frame.
-            var translated = Loc.T(text);
+            var translated = Translate(text);
             return _t != null && _t.isRightToLeftText ? Loc.Visual(translated) : translated;
         }
 

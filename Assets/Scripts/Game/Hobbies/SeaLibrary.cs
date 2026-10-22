@@ -85,25 +85,26 @@ namespace CapyIsland.Game
         }
 
         /// <summary>
-        /// His wares on the sand in front of him, like a shop's: the fishing rod and each bait, in an
-        /// arc on the land side (away from the water).
+        /// His wares on the sand in front of him, like a shop's: the fishing rod, each bait and the
+        /// Mermaid's Shell, in an arc on the land side (away from the water).
         /// </summary>
         void LayOutWares(Vector2 nori)
         {
             var landward = -_shoreDir;
             var side = new Vector2(-landward.y, landward.x);
-            int count = 1 + Baits.All.Length;
+            int count = 1 + Baits.All.Length + 1;
             for (int i = 0; i < count; i++)
             {
                 // from one side round to the other, through straight ahead
                 float t = count > 1 ? i / (float)(count - 1) : 0.5f;
-                float a = Mathf.Lerp(-60f, 60f, t) * Mathf.Deg2Rad;
+                float a = Mathf.Lerp(-70f, 70f, t) * Mathf.Deg2Rad;
                 var offset = (landward * Mathf.Cos(a) + side * Mathf.Sin(a)) * 1.9f;
                 offset.y *= 0.65f;   // the island is seen from above at an angle: circles are squashed
                 var at = nori + offset;
                 for (int k = 0; k < 6 && !BunniSpace.PointOnLand(at); k++) at += landward * 0.3f;
                 if (i == 0) SaleDisplay.Create("Fishing Rod", at, _root.transform);
-                else BaitStand.Create(Baits.All[i - 1], at, _root.transform);
+                else if (i <= Baits.All.Length) BaitStand.Create(Baits.All[i - 1], at, _root.transform);
+                else MermaidCharms.MakeStand(at, _root.transform);
             }
         }
 
