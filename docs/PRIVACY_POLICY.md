@@ -1,5 +1,5 @@
 PRIVACY POLICY — Capy Island
-Last updated: 15 October 2026 (parties and contests added)
+Last updated: 22 October 2026 (chat and blocking added)
 
 Capy Island is a free game made by Lydia Dover ("I", "me"). This policy explains what information the game keeps, why, and what you can do about it. If you have a question, leave a comment on this page.
 
@@ -11,6 +11,7 @@ WHAT THE GAME KEEPS
   - Username and password: they are handled by Unity Authentication. I never see your password.
   - Continue with Google: Google confirms who you are and Unity Authentication links your Google account's ID to your island, so you can sign in on another device. The game doesn't keep your name, email or anything else from your Google account.
 - Your friends list: the friends you add with a friend code, and friend requests you send or receive.
+- Your block list: the players you've blocked. It is kept with your account, so it follows you to another device.
 
 WHAT OTHER PLAYERS CAN SEE
 
@@ -18,10 +19,12 @@ Playing with others is only with people you choose: someone who has your friend 
 
 - Your friend code: the name you give in the game and a few numbers (like Miso#4821). Anyone you give it to can send you a friend request. You decide whether to accept.
 - Your friends can see: your in-game name, your capybara's outfit, how far your island has grown, whether you're playing right now, and a copy of your island so they can visit it.
-- On a live visit, everyone on the island with you sees your capybara walking about, the emojis you send, and what you put down on the island you're on. There is no typed chat.
+- On a live visit, everyone on the island with you sees your capybara walking about, the emojis you send, and what you put down on the island you're on.
+- Chat: on a visit, chat is off until the island's owner turns it on for a visitor, and the owner can turn it off again at any time. At a party or contest everyone there may chat, and the host can turn it off for anyone. A line is at most 80 letters, and some rude words are hidden. You only see the words of your own friends: a line from anyone else shows as "…" with their name. Chat goes from game to game while you play together and is never saved: the game shows only the last few lines, and only while you're together.
 - On a private server, everyone who entered the same server code sees your in-game name, your outfit and that you're online, and can send you a friend request.
 - Parties and contests: when you host one, everyone on your server is invited to your island: your friends, and everyone on your private server (friends or not). Whoever comes sees a copy of your island, the other guests, and (in a contest) everyone's name and score. When you're invited, you choose whether to go. Guests also see each other's friend code, so they can send each other a friend request.
 - Nothing about you is shown to anyone else: only to your friends and to people on a private server with you.
+- Blocking: you can block any player you meet in the game. It ends your friendship, sends them away if they're on your island, and stops their friend requests, knocks, invitations and chat. To unblock someone, use the list at the bottom of Neighbours.
 
 WHAT THE GAME DOESN'T DO
 
@@ -44,16 +47,16 @@ Their servers may be in other countries than yours, including the United States.
 
 HOW LONG IT'S KEPT, AND DELETING IT
 
-Your island stays in the cloud until you delete it. Apart from your player ID, account and friends list, everything the game keeps about you is your island, which you can see in the game (and copy with Settings > Export).
+Your island stays in the cloud until you delete it. Apart from your player ID, account, friends list and block list, everything the game keeps about you is your island, which you can see in the game (and copy with Settings > Export).
 
 - To remove a friend, tap the X next to them in Neighbours. To leave a private server, choose "Leave server".
-- To delete your island from the cloud and your account (with its username or Google sign-in, the copy your friends can visit, and all your friendships), open Settings in the game and choose "Delete my account". It happens straight away and can't be undone.
+- To delete your island from the cloud and your account (with its username or Google sign-in, the copy your friends can visit, all your friendships and your block list), open Settings in the game and choose "Delete my account". It happens straight away and can't be undone.
 - To delete the island on your device too, choose "Start over" in Settings, or uninstall the game (in a browser, clear the site's data).
 - If you can't open the game any more, leave a comment on this page and I'll help you delete it.
 
 CHILDREN
 
-Capy Island can be played without giving any personal information. Children under 13 (or the age your country sets) should only make an account, or share friend codes and server codes, with a parent's or guardian's permission. There is no typed chat, and only people a child shares a code with can play with them. Someone who hosts a party or contest on a private server invites everyone on it, so a private server's code should only be shared with people the child knows. A parent can delete a child's account and island at any time with "Delete my account" in Settings.
+Capy Island can be played without giving any personal information. Children under 13 (or the age your country sets) should only make an account, or share friend codes and server codes, with a parent's or guardian's permission. Only people a child shares a code with can play with them. Chat is off on a child's island until they turn it on for a visitor, a child only ever sees their own friends' words, and they can block anyone. Someone who hosts a party or contest on a private server invites everyone on it, so a private server's code should only be shared with people the child knows. A parent can delete a child's account and island at any time with "Delete my account" in Settings.
 
 SECURITY
 
