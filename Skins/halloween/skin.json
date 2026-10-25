@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "tint": "#FBE7DA",
+  "sprites": [
+    "Toro", "Lantern_Float", "Torii_Front", "Torii_Side",
+    "Deco_GrassTuft", "Deco_Wildflowers",
+    "Land_00_CapyIsland_Grass", "Land_01_HeartoftheIsles_Grass", "Land_02_GingerCove_Grass",
+    "Land_03_VerdantBay_Grass", "Land_04_WeddingIsle_Grass", "Land_05_PirateCove_Grass",
+    "Land_06_MonsterIsle_Grass", "Land_07_first_bridge_Grass", "Land_08_second_bridge_Grass",
+    "Land_09_pete_isle_Grass", "Land_10_pirate_cove_Grass", "Land_11_wedding_isle_Grass",
+    "Land_12_monster_isle_Grass", "Land_13_FarmIsle_Grass", "Land_14_farm_bridge_Grass"
+  ],
+  "decor": [
+    { "file": "decor/Pumpkins.png", "count": 8, "height": 0.9 },
+    { "file": "decor/Haystack.png", "count": 4, "height": 1.1 },
+    { "file": "decor/Scarecrow.png", "count": 3, "height": 1.8 }
+  ],
+  "falling": { "file": "decor/Leaf.png", "count": 18, "size": 0.03, "speed": 0.06, "sway": 0.05, "spin": true },
+  "greeting": {
+    "title": "Happy Halloween!",
+    "body": "Pumpkins have rolled up on the shore and the lanterns are grinning in the dark. Old Yuzu says it's the one week a year a ghost feels right at home!",
+    "titleHe": "האלווין שמח!",
+    "bodyHe": "דלעות התגלגלו אל החוף, והפנסים מחייכים בחושך. סבתא יוזו אומרת שזה השבוע היחיד בשנה שבו רוח רפאים מרגישה ממש בבית!",
+    "picture": "decor/Pumpkins.png"
+  }
+}
