@@ -15,7 +15,7 @@
     { "file": "decor/Haystack.png", "count": 4, "height": 1.1 },
     { "file": "decor/Scarecrow.png", "count": 3, "height": 1.8 }
   ],
-  "falling": { "file": "decor/Leaf.png", "count": 18, "size": 0.03, "speed": 0.06, "sway": 0.05, "spin": true },
+  "falling": { "file": "decor/Leaf.png", "count": 8, "size": 0.03, "speed": 0.025, "sway": 0.012, "spin": true },
   "greeting": {
     "title": "Happy Halloween!",
     "body": "Pumpkins have rolled up on the shore and the lanterns are grinning in the dark. Old Yuzu says it's the one week a year a ghost feels right at home!",
