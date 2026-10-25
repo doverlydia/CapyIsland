@@ -131,7 +131,6 @@ namespace CapyIsland.Game
 
         static readonly List<Player> _players = new();
         static readonly List<(FriendProfile who, float at)> _botsComing = new();
-        static readonly Dictionary<string, float> _botNextCatch = new();
         static readonly Dictionary<string, float> _botSkill = new();
         static readonly HashSet<string> _invitesSeen = new();
         static string _code;
@@ -144,7 +143,6 @@ namespace CapyIsland.Game
             Hosting = Joined = JoiningSomething = false;
             _players.Clear();
             _botsComing.Clear();
-            _botNextCatch.Clear();
             _botSkill.Clear();
             _invitesSeen.Clear();
             Changed = null;
@@ -371,7 +369,7 @@ namespace CapyIsland.Game
                 p.isOut = false;
                 p.playing = !p.gone;
             }
-            foreach (var p in _players) if (p.bot && p.playing) NextBotCatch(p.id, first: true);
+            foreach (var p in _players) if (p.bot && p.playing) BotPlays(p.id);
             OutAt = 0f;
             Sfx.Play(SfxKind.Chest, 0.8f);
             Hints.Show(UI.Loc.F("Go! Whoever catches the most in 5 minutes wins!"));
@@ -418,7 +416,6 @@ namespace CapyIsland.Game
         {
             _players.Clear();
             _botsComing.Clear();
-            _botNextCatch.Clear();
             _botSkill.Clear();
             OutAt = 0f;
             Now = Phase.Lobby;
@@ -714,7 +711,6 @@ namespace CapyIsland.Game
             }
 
             if (Now != Phase.Running) return;
-            BotCatches();
             if (Time.realtimeSinceStartup >= EndsAt) { Finish(); return; }
             if (Time.realtimeSinceStartup >= _nextBroadcast) Broadcast();   // keeps everyone's clock right
         }
@@ -743,14 +739,20 @@ namespace CapyIsland.Game
             var bot = VisitorBot.Spawn(who, VisitorBot.Role.Guest, at);
             bot.NetId = "bot:" + who.id;
             bot.QuietExit = true;
-            bot.Linger();
-            if (IsContest) bot.KeepTo(EventIsland, Kind == GatheringKind.Fishing);
+            if (IsContest)
+            {
+                bot.KeepTo(EventIsland, Kind == GatheringKind.Fishing);
+                // Here for the round: through to its end once it's on, or a good while in the lobby
+                // waiting for it to start (nobody waits for ever).
+                if (Now == Phase.Running) bot.Linger();
+                else bot.LeaveIn(UnityEngine.Random.Range(LobbyWait.x, LobbyWait.y));
+            }
             else bot.LeaveIn(UnityEngine.Random.Range(240f, 540f));   // a party guest stays a good while, then heads off
             Live.AnnounceBot(bot);
             var p2 = _players.Find(x => x.id == bot.NetId);
             if (p2 == null) _players.Add(p2 = new Player { id = bot.NetId, name = who.name, bot = true });
             p2.gone = false;
-            if (Now == Phase.Running) { p2.playing = true; p2.score = 0; p2.isOut = false; NextBotCatch(p2.id, first: true); }
+            if (Now == Phase.Running) { p2.playing = true; p2.score = 0; p2.isOut = false; BotPlays(p2.id); }
             Sfx.Play(SfxKind.Bridge, 0.5f);
             Hints.Show(UI.Loc.F("{0} has come to your {1}!", who.name, UI.Loc.T(Kind == GatheringKind.Party ? "party" : "contest")));
             Broadcast();
@@ -765,33 +767,46 @@ namespace CapyIsland.Game
             _ => 28f,
         };
 
-        static void NextBotCatch(string id, bool first)
+        /// <summary>
+        /// An islander starts on the round: off to the water's edge, a flower or a tree, really
+        /// fishing, netting or looking (BotHobby), and it scores as each catch is held up, where
+        /// everyone can see it. Some are better at it than others.
+        /// </summary>
+        /// <summary>How long (seconds) an islander waits in the lobby for a round, and stays on after one.</summary>
+        static readonly Vector2 LobbyWait = new(300f, 480f), AfterRound = new(90f, 200f);
+
+        static void BotPlays(string id)
         {
+            var bot = VisitorBot.ByNetId(id);
+            if (bot == null || bot.Pastime == null) return;
+            bot.Linger();   // through to the end of the round
             if (!_botSkill.TryGetValue(id, out var skill)) _botSkill[id] = skill = UnityEngine.Random.Range(0.7f, 1.35f);
-            float wait = BotPace / skill * UnityEngine.Random.Range(0.6f, 1.5f);
-            if (first) wait += UnityEngine.Random.Range(3f, 10f);   // getting going
-            _botNextCatch[id] = Time.realtimeSinceStartup + wait;
+            bot.Pastime.Pursue(HobbyOf(Kind), BotPace / skill, () => BotCaught(id), EventIsland);
         }
 
-        static void BotCatches()
+        static void BotCaught(string id)
         {
-            foreach (var p in _players)
-            {
-                if (!p.bot || !p.playing || p.gone || p.isOut) continue;
-                if (!_botNextCatch.TryGetValue(p.id, out var at) || Time.realtimeSinceStartup < at) continue;
-                p.score++;
-                NextBotCatch(p.id, first: false);
-                var bot = VisitorBot.ByNetId(p.id);
-                if (bot != null) bot.Emote(UnityEngine.Random.value < 0.5f ? Emoji.Star : Emoji.Smile);
-                Broadcast();
-                Notify();
-            }
+            if (!Hosting || Now != Phase.Running) return;
+            var p = _players.Find(x => x.id == id);
+            if (p == null || !p.playing || p.gone || p.isOut) return;
+            p.score++;
+            Broadcast();
+            Notify();
         }
 
         static void Finish()
         {
             Now = Phase.Results;
             OutAt = 0f;
+            // The islanders put their rods and nets away and potter about a little; start another
+            // round soon and they'll play it, or by and by they head home on their own (islanders
+            // are company for a contest, not helpers to keep for ever).
+            foreach (var p in _players)
+            {
+                if (!p.bot || !(VisitorBot.ByNetId(p.id) is { } bot)) continue;
+                if (bot.Pastime != null) bot.Pastime.Stop();
+                bot.LeaveIn(UnityEngine.Random.Range(AfterRound.x, AfterRound.y));
+            }
             Broadcast();
             Sfx.Play(SfxKind.Chest, 0.9f);
             Finished?.Invoke(Board);

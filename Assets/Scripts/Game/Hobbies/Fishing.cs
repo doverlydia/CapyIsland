@@ -37,7 +37,7 @@ namespace CapyIsland.Game
 
         const int ShadowCount = 5;
         const float ShadowRange = 10f, DespawnRange = 18f;
-        const int ShadowOrder = -125;   // over the shallows, under the sand
+        internal const int ShadowOrder = -125;   // over the shallows, under the sand
 
         // The tension zones, shared with the button so the two always agree.
         public const float YellowAt = 0.5f, RedAt = 0.8f;
@@ -169,7 +169,7 @@ namespace CapyIsland.Game
         }
 
         /// <summary>Open water: this point and a little ring around it are all sea.</summary>
-        static bool OpenWater(Vector2 p, float margin)
+        internal static bool OpenWater(Vector2 p, float margin)
         {
             if (BunniSpace.PointOnLand(p)) return false;
             for (int a = 0; a < 6; a++)
@@ -736,6 +736,7 @@ namespace CapyIsland.Game
             _bobberAt = spot;
             HoldRod(spot - you);
             MakeBobber(spot);
+            Live.SendHobby(null, "cast", spot, null, 0);   // friends here see your line go out (BotHobby)
             Sfx.Play(SfxKind.Plop, 0.7f);
             Now = State.Waiting;
             _castCharm = MermaidCharms.SingingAt(spot);   // before BiteSpeed: a shell's ring makes them keener
@@ -856,6 +857,7 @@ namespace CapyIsland.Game
                 _bobberBody.localPosition = new Vector3(0f, -0.25f, 0f);
                 _bobberBody.localScale = new Vector3(0.26f, 0.16f, 1f);
             }
+            Live.SendHobby(null, "bite", _bobberAt, kind.Id, 1);
             Sfx.Play(SfxKind.Pop, 0.9f);
             Sfx.PlayAt(SfxKind.Plop, _bobberAt, 0.9f, 0.1f);
             Splash(_bobberAt);
@@ -1008,6 +1010,7 @@ namespace CapyIsland.Game
         void CatchJunk(Shadow s)
         {
             var junk = _junk;
+            Live.SendHobby(null, "land", _bobberAt, junk.id, 0);
             const int xp = 2;
             HobbyLog.AddXp(Hobby.Fishing, xp);
             MermaidCharms.CaughtAt(_hookAt);   // a boot from a shell's ring still counts towards its five
@@ -1026,6 +1029,7 @@ namespace CapyIsland.Game
         {
             // A boot doesn't swim off; it just slips off the hook and sinks.
             if (_junk.id != null) why = "It slipped off the hook and sank. Keep reeling!";
+            Live.SendHobby(null, "lose", _bobberAt, null, 0);
             Say(why);
             Sfx.Play(SfxKind.Pop, 0.4f);
             Flee(_hooked);
@@ -1036,6 +1040,7 @@ namespace CapyIsland.Game
         {
             if (_junk.id != null) { CatchJunk(s); return; }
             var kind = s.Kind;
+            Live.SendHobby(null, "land", _bobberAt, kind.Id, 0);
             float size = Mathf.Round(UnityEngine.Random.Range(kind.Size.x, kind.Size.y));
             var (first, record) = HobbyLog.LogFish(kind.Id, size);
             int xp = 6 * kind.Stars + (first ? 15 : 0) + (record ? 5 : 0);
@@ -1065,6 +1070,7 @@ namespace CapyIsland.Game
 
         void EndLine()
         {
+            if (Now != State.Idle) Live.SendHobby(null, "stop", _bobberAt, null, 0);   // (a catch being shown finishes first)
             PutRodAway();
             Now = State.Idle;
             _lifted = false;

@@ -87,7 +87,10 @@ namespace CapyIsland.Game
         };
 
         /// <summary>Its pictures face right (all of them face left but the robin's).</summary>
-        static bool FacesRight(BirdKind k) => k.Id == "robin";
+        internal static bool FacesRight(BirdKind k) => k.Id == "robin";
+
+        /// <summary>How wide it stands, in world units (an islander's bird matches the island's).</summary>
+        internal static float WidthOf(BirdKind k) => StyleOf(k).Width;
 
         // ---------------------------------------------------------------- arriving
 
@@ -406,6 +409,7 @@ namespace CapyIsland.Game
                 Hints.Answer("That bird is too far away to see properly. Creep a little closer.");
                 return;
             }
+            Live.SendHobby(null, "seen", transform.position, Kind.Id, 0);   // a friend here sees you looking
             bool first = HobbyLog.LogBird(Kind.Id);
             int xp = 5 * Kind.Stars + (first ? 12 : 0);
             HobbyLog.AddXp(Hobby.Birding, xp);

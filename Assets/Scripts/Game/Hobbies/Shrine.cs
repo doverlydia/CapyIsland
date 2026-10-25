@@ -154,6 +154,7 @@ namespace CapyIsland.Game
             go.AddComponent<YSorter>();
             go.AddComponent<Floaty>();
             go.AddComponent<Tappable>().Init(sr, () => Talk(sr.sprite));
+            NpcTag.Add(go, StoryText.Keeper, null, () => sr.sprite);   // named on the map
         }
 
         // ---------------------------------------------------------------- talking to Mochi

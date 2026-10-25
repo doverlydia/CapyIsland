@@ -12,6 +12,36 @@ namespace CapyIsland.Game
         public const string Bizarre = "Bizarre";
 
         /// <summary>
+        /// A cockroach a cat brought you, riding in your trail (so Salty Kombu can still buy it).
+        /// Open the stove with some along and they're on the shelf: nobody's recipe wants them…
+        /// officially. Not a bag item; this is only the kitchen's name for them.
+        /// </summary>
+        public const string Roach = "mat:Roach";
+
+        /// <summary>The cats' cockroaches in your trail right now.</summary>
+        public static System.Collections.Generic.List<CatJunk> TrailRoaches()
+        {
+            var list = new System.Collections.Generic.List<CatJunk>();
+            foreach (var j in Object.FindObjectsByType<CatJunk>(FindObjectsSortMode.None))
+                if (j.Name == "cockroach" && j.isActiveAndEnabled && j.TryGetComponent<Follower>(out var f) && f.Carried) list.Add(j);
+            return list;
+        }
+
+        static void TakeTrailRoaches(int n)
+        {
+            var roaches = TrailRoaches();
+            for (int i = 0; i < n && i < roaches.Count; i++) Object.Destroy(roaches[i].gameObject);
+        }
+
+        /// <summary>The secret: exactly three cockroaches in one pot, and they come out as crispy fishing bait.</summary>
+        public static bool IsRoachPot(System.Collections.Generic.IReadOnlyList<string> pot)
+        {
+            if (pot == null || pot.Count != 3) return false;
+            foreach (var p in pot) if (p != Roach) return false;
+            return true;
+        }
+
+        /// <summary>
         /// The dish a pot of ingredients makes, or null if it makes nothing anyone has a recipe for
         /// (which, cooked anyway, comes out as Bizarre Food). Fish are all just "fish:any". A dish
         /// you don't know yet still matches, up to your level: cook it well and you've worked out
@@ -43,7 +73,22 @@ namespace CapyIsland.Game
         /// </summary>
         public static string Finish(System.Collections.Generic.IReadOnlyList<string> pot, DishKind dish, bool burnt, int stars)
         {
-            foreach (var item in pot) HobbyLog.Take(item);
+            int roaches = 0;
+            foreach (var item in pot)
+            {
+                if (item == Roach) roaches++;
+                else HobbyLog.Take(item);
+            }
+            TakeTrailRoaches(roaches);   // out of your trail, into the pot
+            if (IsRoachPot(pot))
+            {
+                // Burnt or not, they come out crispy: one bait each, straight into the tackle box.
+                HobbyLog.AddToBag(Baits.Roach.Item, 3);
+                if (Baits.Current == null) Baits.Select(Baits.Roach);
+                HobbyLog.AddXp(Hobby.Cooking, 5);
+                Sfx.Play(SfxKind.Chest, 0.7f);
+                return Baits.Roach.Item;
+            }
             bool good = dish != null && !burnt;
             string id = "dish:" + (good ? dish.Id : Bizarre);
             if (good) HobbyLog.LearnRecipe(dish.Id, save: false);

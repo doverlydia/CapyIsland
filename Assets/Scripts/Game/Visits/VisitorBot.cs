@@ -57,6 +57,9 @@ namespace CapyIsland.Game
         public FriendProfile Who { get; private set; }
         public Role As { get; private set; }
 
+        /// <summary>Fishing, bug catching and birdwatching where you can see it (BotHobby).</summary>
+        public BotHobby Pastime { get; private set; }
+
         const float Speed = 3.6f;
 
         SpriteRenderer _body;
@@ -73,7 +76,7 @@ namespace CapyIsland.Game
         Vector2 _progressAt;
         readonly HashSet<Component> _skip = new();   // chores it could not get to
         int _fed, _pests, _planted, _plantsLeft = 2;
-        float _nextPlant;
+        float _nextPlant, _nextPastime;
         readonly Queue<(float at, Emoji e)> _replies = new();
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -155,6 +158,8 @@ namespace CapyIsland.Game
             bot.NameTag(who.name);
             go.AddComponent<YSorter>();
             if (Wardrobe.Ready) CapyOutfit.Dress(body, bot._pieces, bot.Wearing);
+            bot.Pastime = go.AddComponent<BotHobby>();
+            bot._nextPastime = Time.time + UnityEngine.Random.Range(20f, 40f);
 
             Current = bot;
             _all.Add(bot);
@@ -254,6 +259,7 @@ namespace CapyIsland.Game
         {
             _keepIsland = island;
             _keepShore = shore;
+            Pastime.Stop();
             _task = null;
             _plantsLeft = 0;
             _giftAt = -1f;
@@ -306,7 +312,7 @@ namespace CapyIsland.Game
             _nextEmote = Mathf.Max(_nextEmote, Time.time + 10f);
             // Being greeted makes people come over.
             var king = FindFirstObjectByType<PlayerAvatar>();
-            if (king != null && Vector2.Distance(king.transform.position, transform.position) > 3f)
+            if (king != null && !Pastime.Busy && Vector2.Distance(king.transform.position, transform.position) > 3f)
                 Head((Vector2)king.transform.position + UnityEngine.Random.insideUnitCircle * 1.8f);
         }
 
@@ -367,6 +373,7 @@ namespace CapyIsland.Game
         void Think()
         {
             _nextThink = Time.time + UnityEngine.Random.Range(1.2f, 2.6f);
+            if (Pastime.Busy) return;   // fishing, netting, looking: it sees to its own walking
             var king = FindFirstObjectByType<PlayerAvatar>();
             Vector2 me = transform.position;
             Vector2 you = king != null ? (Vector2)king.transform.position : me;
@@ -389,6 +396,15 @@ namespace CapyIsland.Game
             }
 
             float distance = Vector2.Distance(me, you);
+
+            // Nothing to do: now and then a little fishing, bug catching or birdwatching nearby,
+            // where you can see it.
+            if (Time.time >= _nextPastime)
+            {
+                _nextPastime = Time.time + UnityEngine.Random.Range(25f, 45f);
+                if (distance < 14f && Pastime.Potter()) return;
+            }
+
             if (distance > 4.5f) Head(you + UnityEngine.Random.insideUnitCircle * 2f);
             else if (UnityEngine.Random.value < 0.45f) Head(me + UnityEngine.Random.insideUnitCircle * 3f);
         }
@@ -405,12 +421,55 @@ namespace CapyIsland.Game
             _task = Nearest(from, FindObjectsByType<Worker>(FindObjectsSortMode.None), w => w.IsHungry && w.IsAssigned);
             if (_task == null) _task = Nearest(from, FindObjectsByType<DeerAnimal>(FindObjectsSortMode.None), _ => true);
             if (_task == null) _task = Nearest(from, FindObjectsByType<MonsterAnimal>(FindObjectsSortMode.None), m => !m.Tame);
+            if (_task == null) _task = SleepyBubble(from);
             if (_task == null && _plantsLeft > 0 && Time.time >= _nextPlant)
                 _task = Nearest(from, FindObjectsByType<Workplace>(FindObjectsSortMode.None), HasWorkers);
             if (_task == null) return;
             _taskSince = Time.time;
             _lastProgress = Time.time;
             _progressAt = from;
+        }
+
+        Workplace _bubbleFor;   // whose sleepy workers the bubble it's off to pop is for
+        int _delivered;
+
+        /// <summary>
+        /// Workers asleep for want of trees, rocks or flowers, and a bubble holding just that lying
+        /// about: it pops the bubble and sets the thing down by them, the way you would.
+        /// </summary>
+        Bubble SleepyBubble(Vector2 from)
+        {
+            foreach (var place in FindObjectsByType<Workplace>(FindObjectsSortMode.None))
+            {
+                var needs = place.SleeperNeeds;
+                if (needs == null || _skip.Contains(place)) continue;
+                var bubble = DreamGuide.BubbleFor(needs.Value, place.transform.position);
+                if (bubble == null || _skip.Contains(bubble) || !Reachable(from, bubble.transform.position)) continue;
+                _bubbleFor = place;
+                return bubble;
+            }
+            return null;
+        }
+
+        void Deliver(Bubble bubble)
+        {
+            var place = _bubbleFor;
+            _bubbleFor = null;
+            if (bubble == null || bubble.Taken || place == null) return;
+            var item = bubble.Collect();
+            if (item == null) return;
+            string name = item.TryGetComponent<CatalogItem>(out var tag) ? StoryText.Name(tag.StoreName) : "";
+            var placeable = item.GetComponent<Placeable>();
+            if (placeable != null && placeable.SettleNear(place.transform.position, 4f))
+            {
+                var fx = HarvestEffects.Instance;
+                if (fx != null) fx.Twinkle(item.transform.position + Vector3.up * 0.5f, 8);
+                Sfx.PlayAt(SfxKind.Plop, item.transform.position, 0.7f);
+                Emote(Emoji.Star);
+                _delivered++;
+                Hints.Show(string.Format("{0} popped a bubble and put the {1} by your sleepy workers!", Who.name, name));
+            }
+            else Hints.Show(string.Format("{0} popped a bubble for your sleepy workers. It's in your trail: put it down near them!", Who.name));
         }
 
         static bool HasWorkers(Workplace place)
@@ -437,7 +496,7 @@ namespace CapyIsland.Game
         }
 
         /// <summary>A walk over land the whole way (no swimming to islands you have not bridged).</summary>
-        static bool Reachable(Vector2 from, Vector2 to)
+        internal static bool Reachable(Vector2 from, Vector2 to)
         {
             float length = Vector2.Distance(from, to);
             int steps = Mathf.CeilToInt(length / 0.3f);
@@ -467,6 +526,9 @@ namespace CapyIsland.Game
                     _fed++;
                     Emote(Emoji.Heart);
                     Hints.Show(Who.name + " fed one of your hungry workers.");
+                    break;
+                case Bubble bubble:
+                    Deliver(bubble);
                     break;
                 case Workplace place:
                     if (PlantFlowersBy(place)) _planted++;
@@ -552,6 +614,7 @@ namespace CapyIsland.Game
 
         void LogOff()
         {
+            if (Pastime != null) Pastime.Stop();
             _leaving = true;
             Emote(Emoji.Wave);
             if (QuietExit) _sentHome = true;   // no "add them?" question, no ema
@@ -561,6 +624,7 @@ namespace CapyIsland.Game
                 if (_fed > 0) did.Add($"fed {_fed} worker{(_fed > 1 ? "s" : "")}");
                 if (_pests > 0) did.Add($"bombed {_pests} pest{(_pests > 1 ? "s" : "")}");
                 if (_planted > 0) did.Add($"planted {_planted} flower garden{(_planted > 1 ? "s" : "")}");
+                if (_delivered > 0) did.Add($"woke {_delivered} sleepy station{(_delivered > 1 ? "s" : "")}");
                 if (did.Count > 0) Hints.Show(Who.name + " " + string.Join(", ", did) + " before heading home.");
                 // Sometimes they hang an ema for you at Old Mochi's shrine.
                 if (!_sentHome && UnityEngine.Random.value < 0.45f) Shrine.LeaveEmaFrom(Who);
@@ -575,6 +639,25 @@ namespace CapyIsland.Game
         }
 
         // ---------------------------------------------------------------- moving
+
+        /// <summary>Its body's picture (BotHobby holds the rod and binoculars to it).</summary>
+        internal Transform Body => _bodyTransform;
+        internal SpriteRenderer BodySprite => _body;
+        internal bool Walking => _moving;
+
+        /// <summary>Walks to a spot on land (BotHobby going to the water's edge). False if it isn't land.</summary>
+        internal bool WalkTo(Vector2 to)
+        {
+            if (!BunniSpace.PointOnLand(to)) return false;
+            _target = to;
+            _moving = true;
+            return true;
+        }
+
+        internal void Halt() => _moving = false;
+
+        /// <summary>A hobby done for the fun of it is over: a good while before the next.</summary>
+        internal void PastimeOver() => _nextPastime = Time.time + UnityEngine.Random.Range(60f, 120f);
 
         void Head(Vector2 to)
         {

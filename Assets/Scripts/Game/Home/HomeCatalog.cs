@@ -57,9 +57,32 @@ namespace CapyIsland.Game
     {
         public override void Tap()
         {
-            if (Visit.Active) { Hints.Answer("That's your friend's burrow. Pop down into your own when you're home!"); return; }
             Sfx.Play(SfxKind.Tap, 0.5f);
+            // A friend's: down you go to look round (theirs to arrange, not yours).
+            if (Visit.Active)
+            {
+                var host = Visit.Host;
+                if (host == null) return;
+                UI.TunnelCutscene.Show(() => UI.BurrowScreen.ShowFriend(host));
+                return;
+            }
             UI.TunnelCutscene.Show(UI.BurrowScreen.Show);
+        }
+
+        /// <summary>How many dens this island has, standing or carried in the trail: one is all an island gets.</summary>
+        public static int OnThisIsland()
+        {
+            int n = 0;
+            foreach (var d in FindObjectsByType<BurrowDoor>(FindObjectsSortMode.None))
+            {
+                var p = d.GetComponent<Placeable>();
+                var f = d.GetComponent<Follower>();
+                if ((p != null && p.Placed) || (f != null && f.Carried)) n++;
+            }
+            // …or still in its bubble.
+            foreach (var b in FindObjectsByType<Bubble>(FindObjectsSortMode.None))
+                if (!b.Taken && b.Contents != null && b.Contents.GetComponent<BurrowDoor>() != null) n++;
+            return n;
         }
 
         /// <summary>Your den on the island, if you have one placed.</summary>

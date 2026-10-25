@@ -35,6 +35,13 @@ namespace CapyIsland.Game
             return land == null || land.Reachable(from, to);
         }
 
+        /// <summary>The nearest bubble you can walk to holding what a sleepy worker needs (a visiting friend pops it for you).</summary>
+        public static Bubble BubbleFor(StoreItemKind need, Vector2 from)
+        {
+            var t = BubbleWith(need, from);
+            return t != null ? t.GetComponent<Bubble>() : null;
+        }
+
         static Transform BubbleWith(StoreItemKind need, Vector2 from)
         {
             Transform best = null;

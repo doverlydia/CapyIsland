@@ -71,13 +71,42 @@ namespace CapyIsland.UI
             string found = h == Hobby.Gardening ? "You grew every vegetable there is!" : $"You found every {page} on the islands!";
             string body = $"{found} Here are {JournalRewards.Gems} gems"
                           + (hat != null ? $", and the <b>{hat.Name}</b> is waiting in your wardrobe." : ".");
-            CardPopup.Show($"The {page} journal is complete!", body, hat != null ? Wardrobe.Art(hat) : IconPainter.Trophy);
+            // After you've put the rod (or net) away, not in the middle of it.
+            Attention.Ask("journal:" + h, () => CardPopup.Show($"The {page} journal is complete!", body, hat != null ? Wardrobe.Art(hat) : IconPainter.Trophy), null, 1.5f);
         }
 
         void OnDestroy()
         {
             if (Instance == this) Instance = null;
         }
+
+        /// <summary>
+        /// Everything on the HUD but its screens out of sight (the photo camera, so the buttons
+        /// aren't in the picture), or back again.
+        /// </summary>
+        public static void HideChrome(bool hide)
+        {
+            if (Instance == null || Instance._safe == null) return;
+            if (!hide)
+            {
+                foreach (var (group, alpha, blocks) in _hidden)
+                    if (group != null) { group.alpha = alpha; group.blocksRaycasts = blocks; }
+                _hidden.Clear();
+                return;
+            }
+            if (_hidden.Count > 0) return;   // hidden already
+            foreach (Transform t in Instance._safe)
+            {
+                if (t.name == "Screens") continue;
+                var group = t.GetComponent<CanvasGroup>();
+                if (group == null) group = t.gameObject.AddComponent<CanvasGroup>();
+                _hidden.Add((group, group.alpha, group.blocksRaycasts));   // as it was, to put back
+                group.alpha = 0f;
+                group.blocksRaycasts = false;
+            }
+        }
+
+        static readonly System.Collections.Generic.List<(CanvasGroup group, float alpha, bool blocks)> _hidden = new();
 
         /// <summary>A new outfit waits its turn (never during the opening).</summary>
         static void AnnounceOutfit(WearItem item) =>
@@ -346,6 +375,7 @@ namespace CapyIsland.UI
             MakeScreen<CookingScreen>(screens, "CookingScreen");
             MakeScreen<BurrowScreen>(screens, "BurrowScreen");
             MakeScreen<FurnitureShopScreen>(screens, "FurnitureShopScreen");
+            MakeScreen<AlbumScreen>(screens, "AlbumScreen");
             MakeScreen<BaitShopScreen>(screens, "BaitShopScreen");
             MakeScreen<RecipeShopScreen>(screens, "RecipeShopScreen");
             var events = MakeScreen<EventsScreen>(screens, "EventsScreen");
@@ -413,6 +443,8 @@ namespace CapyIsland.UI
 
             EmojiBar.Create(_safe).transform.SetSiblingIndex(screens.GetSiblingIndex());
             FishingButton.Create(_safe).transform.SetSiblingIndex(screens.GetSiblingIndex());
+            PhotoMode.CreateButton(_safe);
+            _safe.Find("CameraButton").SetSiblingIndex(screens.GetSiblingIndex());
 
             UiKit.ApplyFonts(side);
         }

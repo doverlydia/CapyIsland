@@ -1,0 +1,27 @@
+{
+  "name": "capy-trailer",
+  "version": "1.0.0",
+  "description": "Capy Island trailer, made in Remotion. Everything is drawn in code.",
+  "scripts": {
+    "studio": "remotion studio",
+    "import": "node scripts/import-assets.mjs && node scripts/collect-clips.mjs",
+    "render": "remotion render Trailer out/trailer.mp4",
+    "render:melt": "remotion render SnowMelt out/snow_melt.mp4",
+    "render:15": "remotion render Trailer15 out/trailer_15s.mp4",
+    "render:short": "remotion render TrailerShort out/trailer_short.mp4"
+  },
+  "type": "commonjs",
+  "dependencies": {
+    "@remotion/cli": "4.0.538",
+    "@remotion/fonts": "4.0.538",
+    "@remotion/noise": "4.0.538",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "remotion": "4.0.538"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.31",
+    "typescript": "7.0.2"
+  },
+  "private": true
+}

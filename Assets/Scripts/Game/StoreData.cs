@@ -213,6 +213,8 @@ namespace CapyIsland.Game
                 case "Wedding Dress": return Motes.Has("The Girl's New Dress");
                 case "String of Pearls": return Motes.Has("The Girl's New Necklace");
                 case "Tiara": return Motes.Has("The Girl's Tiara");
+                // One burrow per island: yours at home, or the one you build a friend on theirs.
+                case "Monster Den": return BurrowDoor.OnThisIsland() > 0;
             }
             var def = Get(name);
             if (!def.IsValid || def.Max <= 0) return false;

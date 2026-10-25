@@ -81,6 +81,7 @@ namespace CapyIsland.Game
             go.transform.localScale = Vector3.one * (1.7f / Mathf.Max(0.01f, art.bounds.size.y));
             go.AddComponent<YSorter>();
             go.AddComponent<Sailor>().Init(sr);
+            NpcTag.Add(go, Skipper, null, () => sr.sprite);   // named on the map
             LayOutWares(at);
         }
 

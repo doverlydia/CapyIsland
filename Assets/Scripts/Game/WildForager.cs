@@ -67,15 +67,38 @@ namespace CapyIsland.Game
             // Never born at sea or on an island you can't reach yet (it would crawl to you through
             // the water for ages): such a one starts beside your trees and rocks instead. This also
             // brings back ones an older save left stranded.
+            // Dropped just off the land's edge (a cat's present on the beach's lip, a bridge), it's
+            // born on the nearest open land instead, right there: not somewhere else entirely.
             var land = LandMap.Instance;
-            if (land != null && !Visit.Active && !land.IslandOpen(land.IslandAt(transform.position)))
-                transform.position = land.PestSpot();
+            // (An island's area reaches a little past its drawn shore, so the shallows count as
+            // "on" it: the land itself is checked too.)
+            if (land != null && !Visit.Active && (!land.IslandOpen(land.IslandAt(transform.position)) || !BunniSpace.PointOnLand(transform.position)))
+            {
+                var near = NearestOpenLand(land, transform.position, 4f);
+                transform.position = near.HasValue ? new Vector3(near.Value.x, near.Value.y, transform.position.z) : (Vector3)land.PestSpot();
+            }
             float a = Random.value * Mathf.PI * 2f;
             _bornTarget = (Vector2)transform.position + BunniSpace.ToUnity(new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * 70f);
             // The first steps stay on its island, too.
             if (land != null && land.IslandAt(_bornTarget) != land.IslandAt(transform.position)) _bornTarget = transform.position;
+            // …and never out into the water, the whole way there.
+            for (int i = 1; i <= 8; i++)
+                if (!BunniSpace.PointOnLand(Vector2.Lerp(transform.position, _bornTarget, i / 8f))) { _bornTarget = transform.position; break; }
             _hintTimer = 30f;
             _hinted = false;
+        }
+
+        /// <summary>The closest point within <paramref name="within"/> that is on an island you can walk to, if any.</summary>
+        static Vector2? NearestOpenLand(LandMap land, Vector2 from, float within)
+        {
+            for (float r = 0.25f; r <= within; r += 0.25f)
+                for (int a = 0; a < 16; a++)
+                {
+                    float ang = a * Mathf.PI / 8f;
+                    var p = from + new Vector2(Mathf.Cos(ang), Mathf.Sin(ang)) * r;
+                    if (BunniSpace.PointOnLand(p) && land.IslandOpen(land.IslandAt(p))) return p;
+                }
+            return null;
         }
 
         protected virtual void Update()

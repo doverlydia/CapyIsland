@@ -507,6 +507,9 @@ namespace CapyIsland.UI
             if (fish > 0) list.Add(("fish:any", fish));
             foreach (var e in HobbyLog.Bag)
                 if ((e.id.StartsWith("crop:") || e.id.StartsWith("pantry:")) && e.count > 0 && food.Contains(e.id)) list.Add((e.id, e.count));
+            // The cats' cockroaches in your trail go on the shelf too. Surely nobody would cook those… (Cooking.IsRoachPot)
+            int roaches = Cooking.TrailRoaches().Count;
+            if (roaches > 0) list.Add((Cooking.Roach, roaches));
             return list;
         }
 
@@ -585,7 +588,13 @@ namespace CapyIsland.UI
                 _resultPic.color = new Color(0.25f, 0.18f, 0.14f, 0.85f);
                 _resultName.text = "???\n<size=70%><color=#8A7563>Something new…?</color></size>";
             }
-            else if (dish != null) { _resultPic.enabled = true; _resultPic.sprite = HobbyData.ItemArt("dish:" + dish.Id); _resultName.text = dish.Name; }
+            else if (dish != null)
+            {
+                _resultPic.enabled = true;
+                _resultPic.sprite = HobbyData.ItemArt("dish:" + dish.Id);
+                // How hard it is to cook well (DishKind.Difficulty), under its name.
+                _resultName.text = dish.Name + "\n<size=70%><color=#8A7563>" + DishKind.DifficultyName(dish.Difficulty) + "</color></size>";
+            }
             else { _resultPic.enabled = true; _resultPic.sprite = HobbyData.Art("Dish_Bizarre"); _resultName.text = "???\n<size=70%><color=#8A7563>No recipe for this…</color></size>"; }
             _cook.interactable = _pot.Count > 0 && !_cooking;
         }
@@ -746,6 +755,68 @@ namespace CapyIsland.UI
                 .SetLoops(-1, LoopType.Yoyo).SetUpdate(true).SetLink(hand.gameObject);
         }
 
+        /// <summary>One spatula over the pot: its ring, how long it has left, and how many taps it still wants.</summary>
+        class Stir
+        {
+            public RectTransform Rect;
+            public Image Ring;
+            public TextMeshProUGUI Count;
+            public float Left, Window;
+            public int TapsLeft;
+            public bool Pair;
+        }
+
+        /// <summary>
+        /// A spatula pops up over the pot (away from <paramref name="avoid"/>, the other one of a
+        /// pair). <paramref name="taps"/> over 1: tap it that many times, quick, before its ring runs out.
+        /// </summary>
+        Stir MakeStir(float window, int taps, Vector2? avoid, bool point)
+        {
+            var disc = UiKit.Image(_center, "Stir", UiKit.Circle, Color.white, true);
+            var stir = new Stir { Rect = disc.rectTransform, Left = window, Window = window, TapsLeft = taps, Pair = avoid.HasValue };
+            float x = avoid.HasValue ? (avoid.Value.x < 0.5f ? Random.Range(0.6f, 0.74f) : Random.Range(0.26f, 0.4f)) : Random.Range(0.3f, 0.7f);
+            stir.Rect.anchorMin = stir.Rect.anchorMax = new Vector2(x, Random.Range(0.62f, 0.9f));
+            float ps = Mathf.Clamp(_center.sizeDelta.x * 0.3f, 130f, 190f);
+            stir.Rect.sizeDelta = new Vector2(ps, ps);
+            UiKit.AddShadow(stir.Rect, 16f, 6f, 0.3f);
+            stir.Ring = UiKit.Image(stir.Rect, "Ring", UiKit.Circle, UiKit.Leaf);
+            stir.Ring.type = Image.Type.Filled;
+            stir.Ring.fillMethod = Image.FillMethod.Radial360;
+            stir.Ring.fillOrigin = (int)Image.Origin360.Top;
+            UiKit.Stretch(stir.Ring.rectTransform, -12f, -12f, -12f, -12f);
+            stir.Ring.transform.SetAsFirstSibling();
+            var icon = UiKit.Image(stir.Rect, "Spatula", IconPainter.Spatula, Wood);
+            icon.preserveAspect = true;
+            UiKit.Stretch(icon.rectTransform, ps * 0.2f, ps * 0.2f, ps * 0.2f, ps * 0.2f);
+            if (taps > 1)
+            {
+                // How many taps it still wants, in a little badge.
+                var badge = UiKit.Image(stir.Rect, "Badge", UiKit.Circle, UiKit.Primary);
+                badge.raycastTarget = false;
+                UiKit.Place(badge.rectTransform, new Vector2(1f, 1f), new Vector2(-6f, -6f), new Vector2(ps * 0.36f, ps * 0.36f));
+                stir.Count = UiKit.Text(badge.transform, "Taps", "×" + taps, ps * 0.16f, Color.white, true, TextAlignmentOptions.Center);
+                UiKit.Stretch(stir.Count.rectTransform);
+            }
+            var b = disc.gameObject.AddComponent<Button>();
+            b.transition = Selectable.Transition.None;
+            b.onClick.AddListener(() =>
+            {
+                if (stir.TapsLeft <= 0 || stir.Left <= 0f) return;
+                stir.TapsLeft--;
+                if (stir.TapsLeft > 0)
+                {
+                    Sfx.Play(SfxKind.Tap, 0.45f, 0.2f);
+                    if (stir.Count != null) stir.Count.text = "×" + stir.TapsLeft;
+                    stir.Rect.DOKill(true);
+                    stir.Rect.DOPunchScale(new Vector3(0.12f, 0.12f, 0f), 0.15f, 6, 0.5f).SetUpdate(true);
+                }
+            });
+            if (point) PointAt(stir.Rect, ps);
+            stir.Rect.localScale = Vector3.zero;
+            stir.Rect.DOScale(1f, 0.15f).SetEase(Ease.OutBack).SetUpdate(true);
+            return stir;
+        }
+
         IEnumerator Cook()
         {
             _cooking = true;
@@ -771,14 +842,16 @@ namespace CapyIsland.UI
             yield return new WaitForSecondsRealtime(0.5f);
 
             float heat = 0.25f, done = 0f, length = 6f + _pot.Count, redTime = 0f;
-            float window = Mathf.Min(2.2f, 1.5f + level * 0.08f);   // a kinder window as you level up
+            // The dish sets the pace (DishKind.Difficulty): a shorter ring, sooner prompts, a
+            // hotter stove; from Tricky up, now and then two spatulas at once, or one to tap fast.
+            int difficulty = dish != null ? dish.Difficulty : 1;
+            float[] windowBy = { 1f, 0.85f, 0.72f, 0.62f }, gapBy = { 1f, 0.85f, 0.7f, 0.6f }, pairBy = { 0f, 0.15f, 0.28f, 0.4f }, flurryBy = { 0f, 0.18f, 0.26f, 0.32f };
+            int di = Mathf.Clamp(difficulty, 1, 4) - 1;
+            float window = Mathf.Min(2.2f, 1.5f + level * 0.08f) * windowBy[di];   // a kinder window as you level up
             float nextPrompt = 1.2f, nextPuff = 0f;
             int misses = 0, hits = 0, perfect = 0;
             bool burnt = false;
-            RectTransform prompt = null;
-            Image ring = null;
-            float promptLeft = 0f;
-            bool tapped = false;
+            var stirs = new List<Stir>();
             bool missedLast = false;
 
             _status.text = "Tap the spatula when it appears, to stir and cool it down!";
@@ -788,7 +861,7 @@ namespace CapyIsland.UI
             {
                 float dt = Time.unscaledDeltaTime;
                 done += dt;
-                heat += dt * (0.09f + _pot.Count * 0.01f);
+                heat += dt * (0.09f + _pot.Count * 0.01f + di * 0.015f);
 
                 // Steam: more of it, and quicker, the hotter it gets.
                 nextPuff -= dt;
@@ -798,69 +871,56 @@ namespace CapyIsland.UI
                     Puff(Random.Range(0.36f, 0.64f), 0.8f, 0.5f + heat * 0.5f);
                 }
 
-                // A spatula prompt: pops up over the pot, its ring runs out.
+                // A spatula prompt (or two at once, or one to tap fast): pops up over the pot, its ring runs out.
                 nextPrompt -= dt;
-                if (prompt == null && nextPrompt <= 0f)
+                if (stirs.Count == 0 && nextPrompt <= 0f)
                 {
-                    tapped = false;
-                    var disc = UiKit.Image(_center, "Stir", UiKit.Circle, Color.white, true);
-                    prompt = disc.rectTransform;
-                    prompt.anchorMin = prompt.anchorMax = new Vector2(Random.Range(0.3f, 0.7f), Random.Range(0.62f, 0.9f));
-                    float ps = Mathf.Clamp(_center.sizeDelta.x * 0.3f, 130f, 190f);
-                    prompt.sizeDelta = new Vector2(ps, ps);
-                    UiKit.AddShadow(prompt, 16f, 6f, 0.3f);
-                    ring = UiKit.Image(prompt, "Ring", UiKit.Circle, UiKit.Leaf);
-                    ring.type = Image.Type.Filled;
-                    ring.fillMethod = Image.FillMethod.Radial360;
-                    ring.fillOrigin = (int)Image.Origin360.Top;
-                    UiKit.Stretch(ring.rectTransform, -12f, -12f, -12f, -12f);
-                    ring.transform.SetAsFirstSibling();
-                    var icon = UiKit.Image(prompt, "Spatula", IconPainter.Spatula, Wood);
-                    icon.preserveAspect = true;
-                    UiKit.Stretch(icon.rectTransform, ps * 0.2f, ps * 0.2f, ps * 0.2f, ps * 0.2f);
-                    var b = disc.gameObject.AddComponent<Button>();
-                    b.transition = Selectable.Transition.None;
-                    b.onClick.AddListener(() => tapped = true);
-                    if (StirsLearned < StirsToLearn || missedLast) PointAt(prompt, ps);
-                    prompt.localScale = Vector3.zero;
-                    prompt.DOScale(1f, 0.15f).SetEase(Ease.OutBack).SetUpdate(true);
-                    promptLeft = window;
+                    bool pair = Random.value < pairBy[di];
+                    bool flurry = !pair && Random.value < flurryBy[di];
+                    var first = MakeStir(flurry ? window * 1.35f : window, flurry ? Random.Range(3, 5) : 1, null, StirsLearned < StirsToLearn || missedLast);
+                    stirs.Add(first);
+                    if (pair)
+                    {
+                        stirs.Add(MakeStir(window * 1.15f, 1, first.Rect.anchorMin, false));
+                        _status.text = "<b>Two at once! Tap both!</b>";
+                    }
+                    else if (flurry) _status.text = string.Format("<b>Quick, tap it {0} times!</b>", first.TapsLeft);
                     Sfx.Play(SfxKind.Tap, 0.5f);
                 }
-                if (prompt != null)
+                for (int s = stirs.Count - 1; s >= 0; s--)
                 {
-                    promptLeft -= dt;
-                    ring.fillAmount = Mathf.Clamp01(promptLeft / window);
-                    ring.color = ring.fillAmount > 0.5f ? UiKit.Leaf : ring.fillAmount > 0.2f ? UiKit.Sun : UiKit.Danger;
-                    if (tapped || promptLeft <= 0f)
+                    var stir = stirs[s];
+                    stir.Left -= dt;
+                    stir.Ring.fillAmount = Mathf.Clamp01(stir.Left / stir.Window);
+                    stir.Ring.color = stir.Ring.fillAmount > 0.5f ? UiKit.Leaf : stir.Ring.fillAmount > 0.2f ? UiKit.Sun : UiKit.Danger;
+                    bool done1 = stir.TapsLeft <= 0;
+                    if (!done1 && stir.Left > 0f) continue;
+                    if (done1)
                     {
-                        if (tapped)
-                        {
-                            hits++;
-                            missedLast = false;
-                            StirsLearned++;
-                            bool great = ring.fillAmount > 0.45f;
-                            if (great) perfect++;
-                            heat = Mathf.Max(0f, heat - 0.32f);
-                            _status.text = great ? "<color=#8EE59A><b>Perfect stir!</b></color>" : "Good stir!";
-                            Sfx.Play(SfxKind.Stir, 0.8f);
-                            for (int i = 0; i < 4; i++) Puff(prompt.anchorMin.x + Random.Range(-0.08f, 0.08f), prompt.anchorMin.y, 0.9f);
-                            _center.Find("Pot")?.DOPunchRotation(new Vector3(0f, 0f, 6f), 0.35f, 8, 0.5f).SetUpdate(true);
-                        }
-                        else
-                        {
-                            misses++;
-                            missedLast = true;
-                            heat += 0.22f;
-                            _status.text = "<color=#FF9A8A><b>Too slow! It's getting hot…</b></color>";
-                            Sfx.Play(SfxKind.Fuse, 0.7f);
-                            _center.DOShakeAnchorPos(0.3f, 10f, 20).SetUpdate(true);
-                        }
-                        var gone = prompt;
-                        gone.DOScale(0f, 0.12f).SetUpdate(true).OnComplete(() => { if (gone != null) Destroy(gone.gameObject); });
-                        prompt = null;
-                        nextPrompt = Random.Range(0.7f, 1.4f);
+                        hits++;
+                        missedLast = false;
+                        StirsLearned++;
+                        bool great = stir.Ring.fillAmount > 0.45f;
+                        if (great) perfect++;
+                        heat = Mathf.Max(0f, heat - (stirs.Count > 1 || stir.Pair ? 0.2f : 0.32f));
+                        _status.text = great ? "<color=#8EE59A><b>Perfect stir!</b></color>" : "Good stir!";
+                        Sfx.Play(SfxKind.Stir, 0.8f);
+                        for (int i = 0; i < 4; i++) Puff(stir.Rect.anchorMin.x + Random.Range(-0.08f, 0.08f), stir.Rect.anchorMin.y, 0.9f);
+                        _center.Find("Pot")?.DOPunchRotation(new Vector3(0f, 0f, 6f), 0.35f, 8, 0.5f).SetUpdate(true);
                     }
+                    else
+                    {
+                        misses++;
+                        missedLast = true;
+                        heat += 0.22f;
+                        _status.text = "<color=#FF9A8A><b>Too slow! It's getting hot…</b></color>";
+                        Sfx.Play(SfxKind.Fuse, 0.7f);
+                        _center.DOShakeAnchorPos(0.3f, 10f, 20).SetUpdate(true);
+                    }
+                    var gone = stir.Rect;
+                    gone.DOScale(0f, 0.12f).SetUpdate(true).OnComplete(() => { if (gone != null) Destroy(gone.gameObject); });
+                    stirs.RemoveAt(s);
+                    if (stirs.Count == 0) nextPrompt = Random.Range(0.7f, 1.4f) * gapBy[di];
                 }
 
                 // The heat, shown on the thermometer and in the glow behind the stove.
@@ -875,7 +935,7 @@ namespace CapyIsland.UI
                 yield return null;
             }
 
-            if (prompt != null) Destroy(prompt.gameObject);
+            foreach (var stir in stirs) if (stir.Rect != null) Destroy(stir.Rect.gameObject);
 
             // How it turned out.
             int stars = Mathf.Clamp(5 - misses - (hits - perfect + 1) / 2 - (redTime > 1f ? 1 : 0), 1, 5);
@@ -883,6 +943,14 @@ namespace CapyIsland.UI
             bool discovered = dish != null && !burnt && !HobbyLog.KnowsRecipe(dish.Id);
             string id = Cooking.Finish(cooked, dish, burnt, stars);
             _pot.Clear();
+            if (id == Baits.Roach.Item)
+            {
+                CardPopup.Show("Crispy Roaches?!", "They're not food… but the fish will go wild for them! Three crispy roach baits are in your tackle box.", HobbyData.ItemArt(id));
+                _cooking = false;
+                Layout();
+                _status.text = "Cook something else?";
+                yield break;
+            }
             bool good = dish != null && !burnt;
             string title = good ? Loc.T(dish.Name) + "!" : "Bizarre Food…";
             string line = good

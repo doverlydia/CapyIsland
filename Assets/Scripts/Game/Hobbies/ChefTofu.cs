@@ -294,6 +294,7 @@ namespace CapyIsland.Game
             {
                 _sr = sr;
                 _restY = sr.transform.localPosition.y;
+                NpcTag.Add(gameObject, StoryText.Chef, null, () => _sr != null ? _sr.sprite : null);   // named on the map
             }
 
             void Update()

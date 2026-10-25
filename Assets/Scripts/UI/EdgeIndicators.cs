@@ -74,7 +74,7 @@ namespace CapyIsland.UI
             foreach (var m in MapMarkers.All)
             {
                 if (m is Object o && o == null) continue;
-                if (!m.MarkerActive || m.MarkerKind == MarkerKind.Tower) continue;
+                if (!m.MarkerActive || m.MarkerKind == MarkerKind.Tower || m.MarkerKind == MarkerKind.Npc) continue;   // the islanders are only named on the map
                 var world = m.MarkerPosition;
                 var screen = cam.WorldToScreenPoint(new Vector3(world.x, world.y, 0f));
                 if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(_rect, screen, null, out var local)) continue;

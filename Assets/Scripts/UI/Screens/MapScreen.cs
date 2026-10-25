@@ -341,9 +341,12 @@ namespace CapyIsland.UI
                 MarkerKind.Guide => (UiKit.Primary, 60f),
                 MarkerKind.Friend => (UiKit.Hex("5B9BD5"), 64f),
                 MarkerKind.Asleep => (EdgeIndicators.AsleepColour, 60f),
+                MarkerKind.Npc => (UiKit.Hex("C98B5B"), 64f),
                 _ => (UiKit.Spring, 52f),
             };
-            return Pin(m.MarkerIcon, colour, size, null);
+            // People are named: the island's own folk, anyone with news, a friend who's here.
+            bool named = m.MarkerKind is MarkerKind.Npc or MarkerKind.Quest or MarkerKind.Friend;
+            return Pin(m.MarkerIcon, colour, size, named ? m.MarkerLabel : null);
         }
 
         RectTransform Pin(Sprite icon, Color colour, float size, string label)

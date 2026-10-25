@@ -640,7 +640,39 @@ namespace CapyIsland.Game
             {
                 { ProfileKey, JsonUtility.ToJson(profile) },
                 { IslandKey, PlayerPrefs.GetString(SaveGame.Key, "") },
+                { HomeKey, HomeLog.Snapshot() },   // your burrow, for a friend to look round
+                { AlbumKey, PhotoLog.SharedAlbum() },   // and the photos in your album there
             };
+        }
+
+        public const string HomeKey = "home", AlbumKey = "album";
+
+        /// <summary>A friend's photo album, as they last saved it (PhotoLog.SharedAlbum), or null.</summary>
+        public static async Task<string> FetchAlbum(FriendProfile who)
+        {
+            if (who?.member == null) return null;
+            try
+            {
+                var items = await CloudSaveService.Instance.Data.Player.LoadAsync(new HashSet<string> { AlbumKey },
+                    new LoadOptions(new PublicReadAccessClassOptions(who.member)));
+                if (items.TryGetValue(AlbumKey, out var item)) return item.Value.GetAs<string>();
+            }
+            catch (Exception e) { Debug.Log("[RealFriends] Couldn't fetch a friend's album: " + e.Message); }
+            return null;
+        }
+
+        /// <summary>A friend's burrow as they last saved it (HomeLog.Snapshot), or null if there isn't one up yet.</summary>
+        public static async Task<string> FetchHome(FriendProfile who)
+        {
+            if (who?.member == null) return null;
+            try
+            {
+                var items = await CloudSaveService.Instance.Data.Player.LoadAsync(new HashSet<string> { HomeKey },
+                    new LoadOptions(new PublicReadAccessClassOptions(who.member)));
+                if (items.TryGetValue(HomeKey, out var item)) return item.Value.GetAs<string>();
+            }
+            catch (Exception e) { Debug.Log("[RealFriends] Couldn't fetch a friend's burrow: " + e.Message); }
+            return null;
         }
 
         /// <summary>A friend's island as they last saved it, or null (with a hint shown) if it can't be fetched.</summary>

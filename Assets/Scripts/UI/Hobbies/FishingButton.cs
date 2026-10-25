@@ -351,7 +351,7 @@ namespace CapyIsland.UI
             bool lineOut = f.Now != Fishing.State.Idle;
             bool straightOn = f.Now == Fishing.State.Waiting && f.BaitOnHook == null;   // see Fishing.PutOnBait
             var key = new System.Text.StringBuilder();
-            foreach (var b in Baits.All) key.Append(b.Id).Append(Baits.Count(b)).Append(b == current ? "*," : ",");
+            foreach (var b in Baits.Every) key.Append(b.Id).Append(Baits.Count(b)).Append(b == current ? "*," : ",");
             key.Append(shells).Append(MermaidCharms.Count).Append(why).Append(mine != null).Append(lineOut).Append(straightOn);
             string k = key.ToString();
             if (k == _rowsShown) return;
@@ -370,7 +370,7 @@ namespace CapyIsland.UI
             if (Baits.All.Length > 0 && (current != null || HasAnyBait())) HookLine(current, lineOut && f.BaitOnHook != current);   // a different one waits for the next cast
 
             bool anyBait = false;
-            foreach (var b in Baits.All)
+            foreach (var b in Baits.Every)
             {
                 int n = Baits.Count(b);
                 if (n <= 0) continue;
@@ -398,7 +398,7 @@ namespace CapyIsland.UI
 
         static bool HasAnyBait()
         {
-            foreach (var b in Baits.All) if (Baits.Count(b) > 0) return true;
+            foreach (var b in Baits.Every) if (Baits.Count(b) > 0) return true;
             return false;
         }
 
@@ -757,7 +757,9 @@ namespace CapyIsland.UI
                 Hobby.Cooking => "New recipes in the kitchen.",
                 _ => "Keep it up!",
             };
-            CardPopup.Show(name + " level " + level + "!", more, HobbyCutscene.Picture(h));
+            // Its turn comes when the screen is yours again: never over your line while you fish
+            // (Attention waits while fishing mode is on), nor over a contest's catches.
+            Attention.Ask("level:" + h, () => CardPopup.Show(name + " level " + level + "!", more, HobbyCutscene.Picture(h)), null, 1.5f);
         }
 
         void Flash()

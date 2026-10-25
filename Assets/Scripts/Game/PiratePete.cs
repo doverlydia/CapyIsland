@@ -24,6 +24,7 @@ namespace CapyIsland.Game
             var body = transform.Find("Sprite");
             _body = body != null ? body.GetComponent<SpriteRenderer>() : null;
             _placeable = GetComponent<Placeable>();
+            NpcTag.Add(gameObject, StoryText.Sailor, () => InWorld, () => Face);   // named on the map
 
             // The same "!" Miso wears: he has a story to tell, so tap him.
             var markerGo = new GameObject("QuestMarker");

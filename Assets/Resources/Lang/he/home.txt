@@ -112,3 +112,175 @@
 
 @ Stone Fireplace
 = אח אבן
+
+# ---------------------------------------------------------------- the roomy burrow (2026-10-25): rooms, using the furniture, Decorate
+
+@ {0}'s Burrow
+= המחילה של {0}
+
+@ Room {0}
+= חדר {0}
+
+@ New room · {0}
+= חדר חדש · {0}
+
+@ Room {0} of {1}
+= חדר {0} מתוך {1}
+
+@ A new room
+= חדר חדש
+
+@ Dig out room {0}? It costs {1} gold, and then it's yours to fill.
+= לחפור את חדר {0}? זה עולה {1} זהב, ואז הוא שלך למלא.
+
+@ Dig it out
+= לחפור
+
+@ You need {0} gold to dig out a new room.
+= צריך {0} זהב כדי לחפור חדר חדש.
+
+@ Room {0} is dug out! Decorate it however you like.
+= חדר {0} נחפר! קשט אותו איך שתרצה.
+~ חדר {0} נחפר! קשטי אותו איך שתרצי.
+
+@ Decorate
+= לקשט
+
+@ Photo
+= צילום
+
+@ Drag pieces to move them. Tap one to flip it or put it away.
+= גרור רהיטים כדי להזיז אותם. הקש על אחד כדי להפוך אותו או לאחסן.
+~ גררי רהיטים כדי להזיז אותם. הקישי על אחד כדי להפוך אותו או לאחסן.
+
+@ That's {0}'s photo album. Take your own photos and fill yours!
+= זה אלבום התמונות של {0}. צלם תמונות משלך ומלא את שלך!
+~ זה אלבום התמונות של {0}. צלמי תמונות משלך ומלאי את שלך!
+
+@ A photo album!
+= אלבום תמונות!
+
+@ It's in your storage. Tap Decorate and stand it wherever you like, then fill it with photos from your camera.
+= הוא במחסן שלך. הקש על "לקשט" והעמד אותו איפה שתרצה, ואז מלא אותו בתמונות מהמצלמה.
+~ הוא במחסן שלך. הקישי על "לקשט" והעמידי אותו איפה שתרצי, ואז מלאי אותו בתמונות מהמצלמה.
+
+# The new furniture.
+
+@ Cosy Sofa
+= ספה נעימה
+
+@ Floor Cushion
+= כרית רצפה
+
+@ Bean Bag
+= פוף
+
+@ Rope Hammock
+= ערסל חבלים
+
+@ Little Stove
+= כיריים קטנות
+
+@ Mint Icebox
+= מקרר מנטה
+
+@ Writing Desk
+= שולחן כתיבה
+
+@ Old Telly
+= טלוויזיה ישנה
+
+@ Taiko Drum
+= תוף טאיקו
+
+@ Standing Mirror
+= מראה עומדת
+
+@ Paper Lantern
+= פנס נייר
+
+@ Washstand
+= עמדת רחצה
+
+@ Bonsai
+= בונסאי
+
+@ Bubble Bath
+= אמבט קצף
+
+@ Kotatsu
+= קוטאצו
+
+@ Brass Telescope
+= טלסקופ נחושת
+
+@ Hanging Chair
+= כיסא תלוי
+
+@ Arcade Machine
+= מכונת ארקייד
+
+@ Photo Album
+= אלבום תמונות
+
+# ---------------------------------------------------------------- the camera (UI/Photo/PhotoMode) and the album (AlbumScreen)
+
+@ Your camera roll is full ({0} photos). Throw a few away to take more.
+= גליל המצלמה מלא ({0} תמונות). זרוק כמה כדי לצלם עוד.
+~ גליל המצלמה מלא ({0} תמונות). זרקי כמה כדי לצלם עוד.
+
+@ Couldn't keep that photo. Is the phone's storage full?
+= לא הצלחנו לשמור את התמונה. אולי הזיכרון בטלפון מלא?
+
+@ Add a tag, like "me and a friend"
+= הוסף תגית, כמו "אני וחבר"
+~ הוסיפי תגית, כמו "אני וחברה"
+
+@ Throw away
+= לזרוק
+
+@ Keep
+= לשמור
+
+@ Photo kept! Stick it in the photo album in your burrow.
+= התמונה נשמרה! הדבק אותה באלבום התמונות במחילה שלך.
+~ התמונה נשמרה! הדביקי אותה באלבום התמונות במחילה שלך.
+
+@ Your photos
+= התמונות שלך
+
+@ No photos yet. Frame something lovely and tap the big white button!
+= עוד אין תמונות. כוון אל משהו יפה והקש על הכפתור הלבן הגדול!
+~ עוד אין תמונות. כווני אל משהו יפה והקישי על הכפתור הלבן הגדול!
+
+@ Page {0} of {1}
+= עמוד {0} מתוך {1}
+
+@ New page
+= עמוד חדש
+
+@ + Add a photo
+= + הוספת תמונה
+
+@ No photos yet! Tap Photo in your burrow, or the camera on your island, and snap something.
+= עוד אין תמונות! הקש על "צילום" במחילה, או על המצלמה באי, וצלם משהו.
+~ עוד אין תמונות! הקישי על "צילום" במחילה, או על המצלמה באי, וצלמי משהו.
+
+@ Pick a photo
+= בחירת תמונה
+
+@ Take it out
+= להוציא
+
+@ No tag yet
+= עוד בלי תגית
+
+@ Tap a photo to write its tag, or to throw it away.
+= הקש על תמונה כדי לכתוב לה תגית, או כדי לזרוק אותה.
+~ הקישי על תמונה כדי לכתוב לה תגית, או כדי לזרוק אותה.
+
+@ {0}'s Photo Album
+= אלבום התמונות של {0}
+
+@ {0}'s album is still empty. Maybe next time!
+= האלבום של {0} עדיין ריק. אולי בפעם הבאה!

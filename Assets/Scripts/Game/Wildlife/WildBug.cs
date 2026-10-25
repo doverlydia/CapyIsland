@@ -56,7 +56,7 @@ namespace CapyIsland.Game
             _ => Moves.Crawl,
         };
 
-        static float WidthOf(BugKind k) => k.Id switch
+        internal static float WidthOf(BugKind k) => k.Id switch
         {
             // Small beside a capybara, as a bug should be; the art's dark outline keeps them easy to spot.
             "Snail" or "Ladybug" => 0.44f,
@@ -406,6 +406,7 @@ namespace CapyIsland.Game
                 return;
             }
             _gone = true;   // it stops still: here comes the net
+            Live.SendHobby(null, "net", _sr.bounds.center, Kind.Id, 1);   // a friend here sees your net come down too
             Vector2 paws = _king != null
                 ? (Vector2)_king.transform.position + new Vector2(transform.position.x >= _king.transform.position.x ? 0.35f : -0.35f, 0.55f)
                 : (Vector2)transform.position;
@@ -432,9 +433,10 @@ namespace CapyIsland.Game
         /// <summary>
         /// The butterfly net: out of your paws, a swoop in an arc down over the bug, a little
         /// wiggle as it goes in, then lifted away. <paramref name="caught"/> runs as the net lands,
-        /// <paramref name="done"/> once it has gone.
+        /// <paramref name="done"/> once it has gone. Someone else's net (an islander's, BotHobby) is
+        /// <paramref name="heard"/> from where it is; a miss (<paramref name="hit"/> false) has no twinkle.
         /// </summary>
-        static void NetSwoop(Vector2 from, Vector2 to, System.Action caught, System.Action done)
+        internal static void NetSwoop(Vector2 from, Vector2 to, System.Action caught, System.Action done, Vector2? heard = null, bool hit = true)
         {
             var art = HobbyData.Art("Net");
             if (art == null) { caught(); done(); return; }
@@ -462,9 +464,10 @@ namespace CapyIsland.Game
             seq.AppendCallback(() =>
             {
                 caught();
-                Sfx.Play(SfxKind.Plop, 0.7f);
+                if (heard.HasValue) Sfx.PlayAt(SfxKind.Plop, heard.Value, 0.7f);
+                else Sfx.Play(SfxKind.Plop, 0.7f);
                 var fx = HarvestEffects.Instance;
-                if (fx != null) fx.Twinkle(to, 6);
+                if (fx != null && hit) fx.Twinkle(to, 6);
             });
             seq.Append(pivot.DOPunchRotation(new Vector3(0f, 0f, 8f), 0.35f, 8, 0.6f));
             seq.Append(pivot.DORotate(new Vector3(0f, 0f, raised), 0.25f).SetEase(Ease.OutQuad));

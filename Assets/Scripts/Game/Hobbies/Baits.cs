@@ -31,7 +31,20 @@ namespace CapyIsland.Game
                     BiteSpeed = 2f, Gentle = 0.6f, Pack = 3, Gems = 2 },
         };
 
-        public static BaitKind ById(string id) => System.Array.Find(All, b => b.Id == id);
+        /// <summary>
+        /// The secret one, never sold: cook three cockroaches (cats bring them) in one pot and they
+        /// come out crispy. Fish can't resist them.
+        /// </summary>
+        public static readonly BaitKind Roach = new()
+        {
+            Id = "Roach", Name = "Crispy Roach", Blurb = "Cooked by you, somehow. Fish can't resist it: they bite almost at once.",
+            BiteSpeed = 3f, Gentle = 0.8f,
+        };
+
+        /// <summary>Every bait you might have in your tackle box: the shop's, and the secret one.</summary>
+        public static readonly BaitKind[] Every = { All[0], All[1], All[2], Roach };
+
+        public static BaitKind ById(string id) => System.Array.Find(Every, b => b.Id == id);
 
         public static int Count(BaitKind b) => b == null ? 0 : HobbyLog.Count(b.Item);
 

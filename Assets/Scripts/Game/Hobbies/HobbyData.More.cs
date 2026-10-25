@@ -20,6 +20,16 @@ namespace CapyIsland.Game
 
         /// <summary>What Chef Tofu asks for the recipe: dearer as the dish gets fancier.</summary>
         public int RecipeGold => 30 + MinLevel * 30;
+
+        /// <summary>
+        /// How hard it is to cook well, 1 easy … 4 master: the fancier the dish, the quicker the
+        /// spatula runs out, the sooner the next comes, and from 2 up, now and then two at once
+        /// (a finger each) or one to tap fast three or four times (CookingScreen).
+        /// </summary>
+        public int Difficulty => MinLevel <= 2 ? 1 : MinLevel <= 4 ? 2 : MinLevel <= 6 ? 3 : 4;
+
+        /// <summary>The difficulty in words (the fonts have no star glyph).</summary>
+        public static string DifficultyName(int d) => d switch { 1 => "Easy", 2 => "Tricky", 3 => "Hard", _ => "Master chef" };
     }
 
     /// <summary>What you can't grow or catch: Chef Tofu sells it in small packs, straight into the bag.</summary>
@@ -164,6 +174,8 @@ namespace CapyIsland.Game
             if (item.StartsWith("pantry:")) return Art("Pantry_" + item.Substring(7));
             if (item.StartsWith("dish:")) return Art("Dish_" + item.Substring(5));
             if (item == "mat:Silk") return Art("Bug_Silkworm");
+            if (item == Cooking.Roach) return Art("Gift_Roach");
+            if (item == Baits.Roach.Item) return Art("Bait_Roach") ?? Art("Gift_Roach");
             if (item.StartsWith("bait:")) return Art("Bait_" + item.Substring(5));
             if (item == MermaidCharms.Item) return Art("Charm_Mermaid");
             return null;
@@ -177,6 +189,7 @@ namespace CapyIsland.Game
             if (item.StartsWith("pantry:")) return PantryById(item.Substring(7))?.Name ?? "Food";
             if (item == "dish:Bizarre") return "Bizarre Food";
             if (item == "mat:Silk") return "Silk";
+            if (item == Cooking.Roach) return "Cockroach";
             if (item.StartsWith("bait:")) return Baits.ById(item.Substring(5))?.Name ?? "Bait";
             if (item == MermaidCharms.Item) return StoryText.Charm.Name;
             if (item.StartsWith("dish:")) return Dish(item.Substring(5))?.Name ?? "Dish";

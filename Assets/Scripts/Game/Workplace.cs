@@ -63,6 +63,9 @@ namespace CapyIsland.Game
             }
         }
 
+        /// <summary>What its sleeping workers dream of (trees, rocks, flowers), or null when nobody's asleep.</summary>
+        public StoreItemKind? SleeperNeeds => Sleeper != null ? Sleeper.Needs : null;
+
         public MarkerKind MarkerKind => MarkerKind.Asleep;
         public bool MarkerActive => isActiveAndEnabled && Sleeper != null;
         public Vector2 MarkerPosition => transform.position;

@@ -89,6 +89,9 @@ namespace CapyIsland.Game
 
         System.Collections.IEnumerator Start()
         {
+            // Named on the map (Miso, the Captain) whenever they're out and about; with news to
+            // tell, their quest pin shows instead (named too).
+            if (kind != Kind.Ghost) NpcTag.Add(gameObject, Speaker, () => InWorld && !HasNews, () => _bodyRenderer != null ? _bodyRenderer.sprite : null);
             yield return null;   // the save has been read and the trail laid out
             DressAsSaved();
             SettleIfCarried();

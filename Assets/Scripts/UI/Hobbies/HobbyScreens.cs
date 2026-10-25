@@ -656,6 +656,17 @@ namespace CapyIsland.UI
                 Detail(tile.transform, detail, met);
                 // A cat you've met: its card (its nature once adopted); one not met yet: where strays turn up.
                 TapTile(tile, met, adopted ? "hobbies/Cats/" + cat.Id : null, title, adopted ? cat.Personality + "\n" + detail : detail, Horaira.Picture(cat));
+                // A cat you've found: a paw in the corner takes you to it.
+                if (met)
+                {
+                    var kind = cat;
+                    string who = title;
+                    var go = UiKit.RoundButton(tile.transform, "GoToCat", IconPainter.Paw, null, UiKit.Spring, () => GoToCat(kind, who), 64f);
+                    var gr = (RectTransform)go.transform.parent;
+                    gr.anchorMin = gr.anchorMax = gr.pivot = new Vector2(1f, 1f);
+                    gr.anchoredPosition = new Vector2(-8f, -8f);
+                    gr.gameObject.AddComponent<LayoutElement>().ignoreLayout = true;
+                }
             }
             DotsSeen("hobbies/Cats/");
             var tip = UiKit.Text(_list, "Tip", "Strays wander onto your island every so often. Pet them, share a fish, and once they trust you, adopt them.", 26f, UiKit.InkSoft, false, TextAlignmentOptions.Center);
@@ -707,7 +718,7 @@ namespace CapyIsland.UI
                     // A list no table can hold: each name is translated as it goes in.
                     needs.Append(have ? "" : "<color=#C0503E>").Append(count).Append(' ').Append(Loc.T(HobbyData.ItemName(item))).Append(have ? "" : "</color>");
                 }
-                string line = known ? needs.ToString() + "\n<size=85%>" + dish.Blurb + "</size>" : Whereabouts.Dish(dish);
+                string line = known ? needs.ToString() + "\n<size=70%><color=#8A7563>" + DishKind.DifficultyName(dish.Difficulty) + "</color></size>\n<size=85%>" + dish.Blurb + "</size>" : Whereabouts.Dish(dish);
                 ItemRow("dish:" + dish.Id, line, known ? dish.Name : "???");
             }
         }
@@ -726,6 +737,15 @@ namespace CapyIsland.UI
 
         /// <summary>Closes the menu and walks over to something on the island — or says where to find it.</summary>
         void ShowInWorld(Transform target, string otherwise) => ShowInWorld(target != null ? (Vector2?)target.position : null, otherwise);
+
+        /// <summary>Off to wherever this cat is on the island now (a stray may have wandered off).</summary>
+        void GoToCat(CatKind cat, string name)
+        {
+            foreach (var view in FindObjectsByType<CatCare.CatView>(FindObjectsSortMode.None))
+                if (view.Kind == cat && view.isActiveAndEnabled) { ShowInWorld(view.transform, null); return; }
+            // (A hint shows under this page, so the page goes first, as the other "go to" buttons do.)
+            ShowInWorld((Vector2?)null, Loc.F("{0} isn't on the island right now. Cats come and go: look again later!", Loc.T(name)));
+        }
 
         void ShowInWorld(Vector2? target, string otherwise)
         {

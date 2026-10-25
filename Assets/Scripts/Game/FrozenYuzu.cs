@@ -66,6 +66,8 @@ namespace CapyIsland.Game
             _alive = Layer("Alive", standing, 1.3f, Vector2.zero);
             _alive.enabled = false;
             Refresh(true);
+            // Named on the map: frozen in her shell, or up and about.
+            NpcTag.Add(gameObject, StoryText.Guide, null, () => _alive != null && _alive.enabled ? _alive.sprite : _body != null ? _body.sprite : null);
         }
 
         void OnEnable()

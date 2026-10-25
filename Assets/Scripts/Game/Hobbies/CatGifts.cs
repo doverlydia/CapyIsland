@@ -125,7 +125,7 @@ namespace CapyIsland.Game
                     break;
                 case Kind.Zombie:
                     UI.CardPopup.Show(title, "A zombie capybara. It followed the cat home, and it isn't leaving.", Icon("Monster") ?? catPicture,
-                        () => Hazards.Spawn(HazardKind.Monster, at + new Vector2(1.2f, 0.4f)));
+                        () => Hazards.Spawn(HazardKind.Monster, BesideOnLand(at, new Vector2(1.2f, 0.4f))));
                     break;
                 case Kind.Pests:
                     UI.CardPopup.Show(title, "A whole family of guinea pigs. They're already eyeing your flowers.", Icon("Deer") ?? catPicture, () =>
@@ -135,6 +135,14 @@ namespace CapyIsland.Game
                     });
                     break;
             }
+        }
+
+        /// <summary>A step to one side of where the cat dropped it, if that's land; else right where it dropped it.</summary>
+        static Vector2 BesideOnLand(Vector2 at, Vector2 step)
+        {
+            if (BunniSpace.PointOnLand(at + step)) return at + step;
+            if (BunniSpace.PointOnLand(at - step)) return at - step;
+            return at;
         }
 
         static Sprite Icon(string name)

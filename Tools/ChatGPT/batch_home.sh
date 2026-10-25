@@ -57,10 +57,49 @@ make () {
   prop Furn_HotTub "a little round wooden hot tub $VIEW: steaming turquoise water with a floating yuzu fruit and a wooden ladle on the rim."
   prop Furn_Piano "a tiny upright piano $VIEW: polished warm brown wood, a little stool in front, a candle on top."
   prop Furn_Fireplace "a rounded stone fireplace $VIEW: grey cobblestones, a cosy crackling fire inside, a wooden mantel with a little clock on it."
+
+  # The roomy burrow (2026-10-25): one wide room the camera walks along, the same in portrait
+  # and landscape, with overlays for the way out and the tunnel on to the next room.
+  wide Burrow_Room "a WIDE storybook panorama of the inside of a capybara's underground burrow room, landscape composition, seen from slightly above like the rest of the game, in the same style, colours and earthen materials as the attached picture. The back wall and the floor meet in a long, gently uneven horizontal line 55% of the way up from the bottom of the picture, running the whole width. Above it: a rounded warm packed-brown earth wall with a few curling tree roots, filling the whole top of the picture right up to the edge (more wall above than you need: the top is just more earth and roots). Below it: a broad smooth warm packed-earth floor with a few flat stepping stones, completely empty, running right down to the bottom edge. At the far left and far right ends the wall curves gently forward. A few small softly glowing mushrooms along the foot of the wall. NO doors, NO doorways, NO openings, NO steps, NO furniture, NO characters, NO animals, NO text. Even, seamless, calm."
+  prop Burrow_Door "a round wooden front door set into a rounded earthen archway, a sliver of warm daylight around its edges, at the top of three chunky packed-earth steps that come down towards the viewer, seen from the front and slightly above. Only the door, its arch and the steps." ArtSource/Home/Furn_Bookshelf.png
+  prop Burrow_Arch "a rounded tunnel opening in a packed-earth wall, a dark cosy passage leading on to another room, framed by a chunky curved wooden beam arch with a little lantern hanging from the top, seen from the front and slightly above. Only the archway and the dark opening." ArtSource/Home/Furn_Bookshelf.png
+
+  FREF=ArtSource/Home/Furn_Armchair.png
+  prop Furn_Album "a big cosy photo album lying open on a small wooden reading stand $VIEW: thick cream pages with little photos tucked into the corners, a ribbon bookmark." $FREF
+  prop Furn_Sofa "a chunky comfy three-seater sofa $VIEW: rounded dusty-terracotta upholstery, plump seat cushions and two small round pillows, short wooden legs." $FREF
+  prop Furn_Bathtub "an old-fashioned white clawfoot bathtub $VIEW, full of fluffy white bubbles, a rubber duck on the rim." $FREF
+  prop Furn_Stove "a little cast-iron cooking stove $VIEW: a round black body on short legs, a kettle and a small pot on top, a warm glow in its little door." $FREF
+  prop Furn_Icebox "a rounded old-fashioned mint-green icebox fridge $VIEW, one door with a chunky chrome handle." $FREF
+  prop Furn_Kotatsu "a low square Japanese kotatsu table $VIEW: a wooden top over a soft quilted patterned blanket that drapes to the floor, a bowl of mandarins on top." $FREF
+  prop Furn_Desk "a small wooden writing desk $VIEW: a sheet of paper, an ink pot with a quill, a tiny lamp, and a round little stool tucked under it." $FREF
+  prop Furn_Telly "a chunky old rounded television set on short wooden legs $VIEW, its screen softly glowing pale blue, two knobs on the side, a little antenna on top." $FREF
+  prop Furn_Hammock "a woven cream rope hammock slung between two short wooden posts $VIEW, a plump pillow in it." $FREF
+  prop Furn_BeanBag "a big squashy round bean bag $VIEW in soft mustard-yellow fabric, slightly dented in the middle." $FREF
+  prop Furn_Cushion "a plump square floor cushion $VIEW, sage green with a button in the middle and little tassels on the corners. Flat and low." $FREF
+  prop Furn_Telescope "a brass telescope on a wooden tripod $VIEW, pointing up and to the side." $FREF
+  prop Furn_Taiko "a round Japanese taiko drum on a little wooden stand $VIEW, with two wooden drumsticks resting on top." $FREF
+  prop Furn_Mirror "a tall standing oval mirror in a carved wooden frame on little feet $VIEW, its glass softly reflecting pale light." $FREF
+  prop Furn_Lantern "a Japanese paper floor lantern $VIEW: a round warm-glowing paper shade on a short wooden stand." $FREF
+  prop Furn_Basin "a little washstand $VIEW: a wooden stand with a round ceramic wash basin, a jug beside it and a folded towel." $FREF
+  prop Furn_Bonsai "a little bonsai tree in a shallow blue glazed pot $VIEW, with a tiny moss bed." $FREF
+  prop Furn_Wardrobe "a tall rounded wooden wardrobe $VIEW: two doors with round knobs, one door slightly open showing a little scarf and a hat inside." $FREF
+  prop Furn_SwingChair "a round wicker hanging egg chair on a curved stand $VIEW, with a plump cream cushion inside." $FREF
+  prop Furn_Arcade "a small rounded retro arcade cabinet $VIEW in soft teal, its screen glowing, a joystick and two round buttons." $FREF
+}
+
+wide () {
+  local out="ArtSource/Home/$1.png"; shift
+  if [ -f "$out" ]; then echo "skip $out"; return; fi
+  echo "=== $out ==="
+  node Tools/ChatGPT/chatgpt.mjs image "$SCENE_STYLE Draw instead: $1" --out "$out" --size 1536x1024 --quality high --ref ArtSource/Home/Burrow_Cave.png || echo "FAILED: $out"
 }
 
 ship () {
   [ -f ArtSource/Home/Burrow_Cave.png ] && node Tools/ChatGPT/downscale.mjs ArtSource/Home/Burrow_Cave.png Assets/Resources/Home/Burrow_Cave.png 1024 > /dev/null && echo "shipped Burrow_Cave"
+  [ -f ArtSource/Home/Burrow_Room.png ] && node Tools/ChatGPT/downscale.mjs ArtSource/Home/Burrow_Room.png Assets/Resources/Home/Burrow_Room.png 1536 > /dev/null && echo "shipped Burrow_Room"
+  for f in Burrow_Door Burrow_Arch; do
+    [ -f ArtSource/Home/$f.png ] && node Tools/ChatGPT/downscale.mjs ArtSource/Home/$f.png Assets/Resources/Home/$f.png 512 > /dev/null && echo "shipped $f"
+  done
   [ -f ArtSource/Home/Store_Furniture.png ] && node Tools/ChatGPT/downscale.mjs ArtSource/Home/Store_Furniture.png Assets/Resources/Home/Store_Furniture.png 384 > /dev/null && echo "shipped Store_Furniture"
   for f in ArtSource/Home/Furn_*.png; do
     [ -f "$f" ] && node Tools/ChatGPT/downscale.mjs "$f" "Assets/Resources/Home/$(basename "$f")" 256 > /dev/null && echo "shipped $(basename "$f")"

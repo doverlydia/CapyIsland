@@ -23,8 +23,8 @@ namespace CapyIsland.EditorTools
             bool world = assetPath.StartsWith("Assets/Resources/World/");      // runtime-built world pieces (the hot spring)
             bool home = assetPath.StartsWith("Assets/Resources/Home/");        // your burrow, its furniture and shop
             // Full-screen paintings drawn big in the UI: the kitchen, the burrow, the tunnel.
-            bool painting = assetPath.EndsWith("/Ema_Rack.png") || assetPath.EndsWith("/Shrine_Backdrop.png") || assetPath.EndsWith("/Cook_Kitchen.png") || assetPath.EndsWith("/Burrow_Cave.png") || assetPath.EndsWith("/Tunnel.png") || assetPath.EndsWith("/Sew_Room.png");
-            bool big = assetPath.EndsWith("/Cook_Stove.png") || assetPath.EndsWith("/Cook_Pot.png") || assetPath.EndsWith("/Store_Furniture.png")
+            bool painting = assetPath.EndsWith("/Ema_Rack.png") || assetPath.EndsWith("/Shrine_Backdrop.png") || assetPath.EndsWith("/Cook_Kitchen.png") || assetPath.EndsWith("/Burrow_Cave.png") || assetPath.EndsWith("/Burrow_Room.png") || assetPath.EndsWith("/Tunnel.png") || assetPath.EndsWith("/Sew_Room.png");
+            bool big = assetPath.EndsWith("/Cook_Stove.png") || assetPath.EndsWith("/Cook_Pot.png") || assetPath.EndsWith("/Store_Furniture.png") || assetPath.EndsWith("/Burrow_Door.png") || assetPath.EndsWith("/Burrow_Arch.png")
                        || assetPath.Contains("/Vignette_") || assetPath.EndsWith("/Sew_Mannequin.png") || assetPath.EndsWith("/Shrine.png");   // drawn big in the hobby carousel and sewing room
             if (!assetPath.StartsWith("Assets/Art/") && !wardrobe && !hobbies && !cutscene && !world && !home) return;
             if (assetPath.StartsWith("Assets/Art/Icon/")) return;   // app icons: full size, uncompressed, set by the App Icon menu
@@ -50,7 +50,8 @@ namespace CapyIsland.EditorTools
 
             var web = importer.GetPlatformTextureSettings("WebGL");
             web.overridden = true;
-            web.maxTextureSize = cutscene || painting ? 1024 : world || big ? 512 : 256;
+            // The burrow room is a wide panorama the camera walks along: it keeps its width.
+            web.maxTextureSize = assetPath.EndsWith("/Burrow_Room.png") ? 2048 : cutscene || painting ? 1024 : world || big ? 512 : 256;
             web.crunchedCompression = true;
             web.compressionQuality = 60;
             web.format = TextureImporterFormat.Automatic;

@@ -35,7 +35,7 @@ namespace CapyIsland.Game
         public static bool ScreenBusy =>
             UI.Cutscene.Playing || UI.AwakeningScreen.IsOpen || UI.IntroAudio.Active
             || UI.HudTour.IsOpen || UI.UiScreen.AnyOpen || UI.SpeechDialog.IsOpen || UI.CardPopup.IsShowing
-            || UI.PurchaseDialog.IsOpen || UI.TextReader.IsOpen
+            || UI.PurchaseDialog.IsOpen || UI.TextReader.IsOpen || UI.PhotoMode.IsOpen
             || HotSpring.Bathing || (Fishing.Instance != null && Fishing.Instance.Mode)
             || Visit.Travelling;
 

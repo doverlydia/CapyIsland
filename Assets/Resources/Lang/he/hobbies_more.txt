@@ -10,3 +10,32 @@
 
 @ Chef Tofu's stall is on Sunflower Farm, once its bridge is up.
 = הדוכן של השף טופו נמצא בחוות החמניות, אחרי שהגשר אליה מורם.
+
+# ---------------------------------------------------------------- the cockroach secret (Cooking.IsRoachPot), and finding your cats
+
+@ Crispy Roaches?!
+= ג'וקים פריכים?!
+
+@ They're not food… but the fish will go wild for them! Three crispy roach baits are in your tackle box.
+= זה לא אוכל… אבל הדגים ישתגעו מזה! שלושה פיתיונות ג'וקים פריכים מחכים בקופסת הדיג שלך.
+
+@ Crispy Roach
+= ג'וק פריך
+
+@ Cooked by you, somehow. Fish can't resist it: they bite almost at once.
+= בושל איכשהו במטבח שלך. הדגים לא יכולים לעמוד בפניו: הם נושכים כמעט מיד.
+
+@ Cockroach
+= ג'וק
+
+@ {0} isn't on the island right now. Cats come and go: look again later!
+= {0} לא באי כרגע. חתולים באים והולכים: כדאי לחפש שוב אחר כך!
+
+# Islanders who visit you (Visits/VisitorBot).
+
+@ {0} popped a bubble and put the {1} by your sleepy workers!
+= {1} מחכה עכשיו ליד הפועלים הישנוניים שלך, באדיבות {0}!
+
+@ {0} popped a bubble for your sleepy workers. It's in your trail: put it down near them!
+= בועה נפתחה בשביל הפועלים הישנוניים שלך, באדיבות {0}. היא בשובל שלך: הנח אותה לידם!
+~ בועה נפתחה בשביל הפועלים הישנוניים שלך, באדיבות {0}. היא בשובל שלך: הניחי אותה לידם!

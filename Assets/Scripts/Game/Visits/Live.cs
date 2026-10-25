@@ -96,7 +96,8 @@ namespace CapyIsland.Game
         [Serializable]
         class Note
         {
-            // hi, at, emo, bye, gone (someone left: from); ask / build / nobuild (building
+            // hi, at, emo, bye, gone (someone left: from); do (a hobby step, BotHobby: data, the
+            // fish/bug/bird in name, e a detail); ask / build / nobuild (building
             // together); put (something placed), pop (a bubble collected), bubble (a found thing
             // given back as a bubble); leave (the host asks a visitor to go); gs (a gathering's
             // state, host to all), gn (a visitor's contest news for the host: data says what);
@@ -635,6 +636,17 @@ namespace CapyIsland.Game
             else Send(n);
         }
 
+        /// <summary>
+        /// Someone doing a hobby where the others can see it, one step at a time (BotHobby: "cast",
+        /// "net", "seen"…): you (<paramref name="who"/> null), or, hosting, an islander your game plays.
+        /// </summary>
+        public static void SendHobby(string who, string step, Vector2 at, string id, int e)
+        {
+            if (!Connected || !OnSharedIsland) return;
+            if (who != null && Now != Mode.Hosting) return;   // only the host plays islanders
+            Send(new Note { t = "do", from = who, data = step, name = id, x = at.x, y = at.y, e = e });
+        }
+
         /// <summary>A visitor tells the host something about the contest ("catch", "out").</summary>
         public static void TellHost(string what) => Send(new Note { t = "gn", data = what });
 
@@ -905,6 +917,10 @@ namespace CapyIsland.Game
                     if (peer?.Puppet != null) peer.Puppet.Emote((Emoji)n.e);
                     Relay(n, c);
                     break;
+                case "do":
+                    if (peer?.Puppet != null && OnSharedIsland) peer.Puppet.Pastime.Play(n.data, new Vector2(n.x, n.y), n.name, n.e);
+                    Relay(n, c);
+                    break;
                 case "put":
                     if (OnSharedIsland) PutRemote(n.name, new Vector2(n.x, n.y), peer?.Who);
                     Relay(n, c);
@@ -971,6 +987,9 @@ namespace CapyIsland.Game
                     break;
                 case "emo":
                     if (peer?.Puppet != null) peer.Puppet.Emote((Emoji)n.e);
+                    break;
+                case "do":
+                    if (peer?.Puppet != null && OnSharedIsland) peer.Puppet.Pastime.Play(n.data, new Vector2(n.x, n.y), n.name, n.e);
                     break;
                 case "put":
                     if (OnSharedIsland) PutRemote(n.name, new Vector2(n.x, n.y), peer?.Who);

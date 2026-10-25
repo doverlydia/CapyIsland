@@ -1771,3 +1771,25 @@
 @ You're out of this round for now. Come back to join in again!
 = אתה בחוץ בסיבוב הזה בינתיים. חזור כדי להצטרף שוב!
 ~ את בחוץ בסיבוב הזה בינתיים. חזרי כדי להצטרף שוב!
+
+# How hard a dish is to cook (DishKind.Difficulty, CookingScreen), and the trickier spatulas.
+
+@ <size=70%><color=#8A7563>Easy</color></size>
+= <size=70%><color=#8A7563>קל</color></size>
+
+@ <size=70%><color=#8A7563>Tricky</color></size>
+= <size=70%><color=#8A7563>מאתגר</color></size>
+
+@ <size=70%><color=#8A7563>Hard</color></size>
+= <size=70%><color=#8A7563>קשה</color></size>
+
+@ <size=70%><color=#8A7563>Master chef</color></size>
+= <size=70%><color=#8A7563>שף אמיתי</color></size>
+
+@ <b>Two at once! Tap both!</b>
+= <b>שניים בבת אחת! הקש על שניהם!</b>
+~ <b>שניים בבת אחת! הקישי על שניהם!</b>
+
+@ <b>Quick, tap it {0} times!</b>
+= <b>מהר, הקש עליו {0} פעמים!</b>
+~ <b>מהר, הקישי עליו {0} פעמים!</b>
