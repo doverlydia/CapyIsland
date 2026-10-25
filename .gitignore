@@ -118,3 +118,7 @@ InitTestScene*.unity*
 
 # Capy Music Studio: deleted songs wait here
 Tools/MusicStudio/songs/trash/
+
+# Written and deleted by the Performance Testing package during every build
+/Assets/Resources/PerformanceTestRun*.json
+/Assets/Resources/PerformanceTestRun*.json.meta
