@@ -37,6 +37,7 @@ namespace CapyIsland.Game
             if (water != null && water.GetComponent<SeaLanterns>() == null) water.gameObject.AddComponent<SeaLanterns>();
             if (land != null && land.GetComponent<BridgeGates>() == null) land.gameObject.AddComponent<BridgeGates>();
             if (land != null && land.GetComponent<StoneLanterns>() == null) land.gameObject.AddComponent<StoneLanterns>();
+            if (land != null && land.GetComponent<HolidayDecor>() == null) land.gameObject.AddComponent<HolidayDecor>();
         }
 
         Texture2D _shore;

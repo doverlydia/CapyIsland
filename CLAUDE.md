@@ -48,7 +48,8 @@ balance numbers are fine to learn from and reimplement. **Never copy AS3 source,
 Capy Island has its own story ("The Big Chill") and cast: Old Yuzu, Miso, Captain Wasabi, Salty Kombu,
 Elder Matcha. **Every visible name and line lives in `Assets/Scripts/Game/StoryText.cs`.** Item and
 achievement *names* in code ("Coriander", "The Girl's New Dress", "Deer"…) are save-file ids only and
-must never be shown directly — show `StoryText.Name(id)` / `MoteDef.Title`. The `*.g.cs` data tables
+must never be shown directly — show `StoryText.Name(id)` / `MoteDef.Title`. (One exception: a holiday
+skin's greeting lives in its `Skins/<id>/skin.json`, with its Hebrew, because it ships without a build.) The `*.g.cs` data tables
 and their generators carry ids and numbers only; never re-introduce prose from `docs/reference/*.xml`.
 
 **Sound and music are ours, and generated.** `Tools/fx/sfx.mjs` makes every effect and the ambience
@@ -75,6 +76,7 @@ spellings that are the same for both (לך, שלך, אליך) need none. Text sh
 - `Assets/Scripts/Game/Visits/` — fake multiplayer: bot friends, generated islands, flights (`Visit`)
 - `Assets/Scripts/Game/Hobbies/` — fishing, birdwatching, books, sewing (`HobbyLog`)
 - `Assets/Scripts/UI/Cutscenes/` — little movies for big moments (`Cutscene` base: paused game, cinema bars, tap to skip; wedding, Captain's dance). Backdrops in `Assets/Resources/Cutscenes/`, masters in `ArtSource/Cutscenes/`
+- `Assets/Scripts/Game/Skins/` + `Skins/` — holiday skins fetched from GitHub `main` by date, no new build needed (`Skins/README.md`). Fixed scenery only, never purchasables
 - `Assets/Scripts/UI/` — runtime-built HUD (`MobileHud` bootstraps it), `UiKit`/`IconPainter`, screens
 - `Assets/Scripts/CameraRig/`, `Assets/Scripts/UI/`, `Assets/Scripts/Core/`
 - `Assets/Editor/IslandBuilder.cs`

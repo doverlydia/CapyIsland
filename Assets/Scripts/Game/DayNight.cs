@@ -98,6 +98,7 @@ namespace CapyIsland.Game
             // Rain: a cooler, greyer, softer light, like a real wet afternoon.
             float rain = Weather.Rain;
             var light = Color.Lerp(k.Light, k.Light * new Color(0.74f, 0.78f, 0.86f), rain);
+            light *= Skins.Tint;   // a holiday skin's own light (white when none is on)
             if (_light != null) _light.color = light;
             if (_colour == null) return;
             _colour.postExposure.Override(k.Exposure - 0.06f * rain);

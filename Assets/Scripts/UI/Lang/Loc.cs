@@ -139,9 +139,29 @@ namespace CapyIsland.UI
 
             foreach (var asset in Resources.LoadAll<TextAsset>("Lang/" + Code(Current)))
                 Parse(asset.text, asset.name);
+            if (Current == Language.Hebrew)
+                foreach (var (english, hebrew, girl) in _runtime)
+                {
+                    Add(english, hebrew, "runtime", 0);
+                    if (!string.IsNullOrEmpty(girl)) _exactFeminine[english] = girl;
+                }
 
             // Most specific first: "Day {0} of your streak" must win over "Day {0}".
             _templates.Sort((a, b) => b.Specificity.CompareTo(a.Specificity));
+        }
+
+        static readonly List<(string english, string hebrew, string girl)> _runtime = new();
+
+        /// <summary>
+        /// A line that arrived after the game was built (a holiday skin's greeting), with its Hebrew
+        /// and, where the words for a girl differ, her line. Joins the tables like any entry.
+        /// </summary>
+        public static void AddRuntime(string english, string hebrew, string hebrewGirl = null)
+        {
+            if (string.IsNullOrEmpty(english) || string.IsNullOrEmpty(hebrew)) return;
+            _runtime.Add((english, hebrew, hebrewGirl));
+            _loadedFor = null;   // read again, with it, on the next lookup
+            _cache.Clear();
         }
 
         static void Parse(string text, string file)

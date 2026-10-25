@@ -11,6 +11,9 @@ namespace CapyIsland.Game
     /// Bridges running up and down the screen get the gate face-on; those running across get it
     /// turned, and that one is two layers — the near pillar and the far one, each sorted at its own
     /// foot — so the capybara walks between them, behind one and in front of the other.
+    ///
+    /// A holiday skin may dress the gates (its Torii_Front / Torii_Side pictures, drawn on the same
+    /// layout at any size): they are put up again in it when the skin goes on or comes off.
     /// </summary>
     public class BridgeGates : MonoBehaviour
     {
@@ -29,13 +32,31 @@ namespace CapyIsland.Game
             _side = Resources.Load<Sprite>("World/Torii_Side")?.texture;
             if (_front == null || _side == null) { enabled = false; return; }
             LandMap.BridgeOpened += OnOpened;
+            Skins.Changed += Rebuild;
+            BuildAll();
+        }
+
+        void OnDestroy()
+        {
+            LandMap.BridgeOpened -= OnOpened;
+            Skins.Changed -= Rebuild;
+        }
+
+        void BuildAll()
+        {
             var land = LandMap.Instance;
             if (land == null) return;
             foreach (var p in land.Pieces)
                 if (p.isBridge && p.open) Build(p, false);
         }
 
-        void OnDestroy() => LandMap.BridgeOpened -= OnOpened;
+        void Rebuild()
+        {
+            if (this == null) return;
+            foreach (var g in _gates.Values) if (g != null) Destroy(g);
+            _gates.Clear();
+            BuildAll();
+        }
 
         void OnOpened(string name)
         {
@@ -61,19 +82,23 @@ namespace CapyIsland.Game
 
             if (!across)
             {
+                var tex = Skins.Texture("Torii_Front") ?? _front;
+                float k = tex.width / Px;   // a skin's picture may be any size on the same layout
                 float ppu = Px * 0.87f / Width;   // the gate fills ~87% of its picture's width
-                var sprite = Sprite.Create(_front, new Rect(0, 0, Px, Px), new Vector2(0.5f, (Px - FrontFoot) / Px), ppu, 0, SpriteMeshType.FullRect);
+                var sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, (Px - FrontFoot) / Px), ppu * k, 0, SpriteMeshType.FullRect);
                 Layer(gate.transform, "Gate", sprite, mid.y, false);
             }
             else
             {
+                var tex = Skins.Texture("Torii_Side") ?? _side;
+                float k = tex.width / Px;
                 // Drawn running down to the right; a bridge rising to the right gets it mirrored.
                 bool mirror = dir.x != 0f && dir.y / dir.x > 0.3f;
                 float ppu = Px * 0.6f / Width;   // turned, it fills less of its picture
                 float footMid = (SideNearFoot + SideFarFoot) * 0.5f;
                 float pivotY = (Px - footMid) / Px;
-                var near = Sprite.Create(_side, new Rect(0, 0, SideSplit, Px), new Vector2(Px * 0.5f / SideSplit, pivotY), ppu, 0, SpriteMeshType.FullRect);
-                var far = Sprite.Create(_side, new Rect(SideSplit, 0, Px - SideSplit, Px), new Vector2((Px * 0.5f - SideSplit) / (Px - SideSplit), pivotY), ppu, 0, SpriteMeshType.FullRect);
+                var near = Sprite.Create(tex, new Rect(0, 0, SideSplit * k, tex.height), new Vector2(Px * 0.5f / SideSplit, pivotY), ppu * k, 0, SpriteMeshType.FullRect);
+                var far = Sprite.Create(tex, new Rect(SideSplit * k, 0, tex.width - SideSplit * k, tex.height), new Vector2((Px * 0.5f - SideSplit) / (Px - SideSplit), pivotY), ppu * k, 0, SpriteMeshType.FullRect);
                 Layer(gate.transform, "Near", near, mid.y - (SideNearFoot - footMid) / ppu, mirror);
                 Layer(gate.transform, "Far", far, mid.y + (footMid - SideFarFoot) / ppu, mirror);
             }

@@ -32,6 +32,9 @@ namespace CapyIsland.UI
 
         public static bool IsShowing => _instance != null && _instance._showing;
 
+        /// <summary>There is a card on the island to show things on.</summary>
+        public static bool Ready => _instance != null;
+
         void Awake()
         {
             _instance = this;
