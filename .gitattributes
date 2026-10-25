@@ -169,3 +169,12 @@ Packages/packages-lock.json linguist-generated
 
 # Exceptions for .asset files such as lightning pre-baking
 LightingData.asset     binary
+
+# Holiday skins (Skins/README.md) are downloaded by installed games straight from
+# raw.githubusercontent.com, which serves an LFS file as its pointer, not the picture.
+# Keep them plain git files. (Last, so these win over the *.png etc. LFS rules above.)
+Skins/**            -filter
+Skins/**/*.png      -diff -merge -text
+Skins/**/*.ogg      -diff -merge -text
+Skins/**/*.mp3      -diff -merge -text
+Skins/**/*.wav      -diff -merge -text
