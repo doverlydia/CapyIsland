@@ -73,7 +73,6 @@ namespace CapyIsland.Game
         int _searchCounter;
         Vector2 _napOffset;
         bool _asleep;
-        bool _dreamStarted;
 
         // HarvestWood
         int _swingFrame;
@@ -176,7 +175,7 @@ namespace CapyIsland.Game
             if (full != null)
             {
                 var name = full.TryGetComponent<Placeable>(out var p) ? StoryText.Name(p.DisplayName) : "workplace";
-                Hints.Island($"That {name} is full. It has room for {full.MaxWorkers} capybaras.");
+                Hints.Answer($"That {name} is full. It has room for {full.MaxWorkers} capybaras.");
             }
         }
 
@@ -248,7 +247,7 @@ namespace CapyIsland.Game
 
         void Update()
         {
-            ShowHungerThought();
+            ShowDream();
             if (_state == State.Following || _workplace == null) return;
 
             int frames = _clock.Consume(Time.deltaTime);
@@ -264,23 +263,36 @@ namespace CapyIsland.Game
             }
         }
 
-        // ---------------------------------------------------------------- the hungry dream
+        // ---------------------------------------------------------------- the dream
 
         WorldBubble _thought;
+        StoreItemKind _dreamOf;
 
         /// <summary>
-        /// Asleep because it's hungry: a little garden in a thought bubble over its head, so you
-        /// can see at a glance what it needs. Tap it and Old Yuzu says so in words.
+        /// What an asleep worker lacks: flowers when it's hungry, otherwise trees for a sawmill or
+        /// rocks for a mine. Null while it isn't asleep at a workplace.
         /// </summary>
-        void ShowHungerThought()
+        public StoreItemKind? Needs =>
+            !_asleep || _workplace == null ? null
+            : _hungry ? StoreItemKind.Garden
+            : _workplace.Accepts == ResourceKind.Wood ? StoreItemKind.Forest : StoreItemKind.Hill;
+
+        /// <summary>
+        /// Asleep, for want of something: a picture of it in a thought cloud over its head, so you
+        /// can see at a glance what it needs. Tap the cloud and the camera shows you where to get
+        /// one (DreamGuide) — on your own island; on a friend's, it is only to look at.
+        /// </summary>
+        void ShowDream()
         {
-            bool dreaming = _asleep && _hungry && _workplace != null;
-            if (dreaming == (_thought != null)) return;
-            if (!dreaming) { _thought.Pop(); _thought = null; return; }
+            var needs = Needs;
+            if (_thought != null && (needs == null || needs != _dreamOf)) { _thought.Pop(); _thought = null; }
+            if (needs == null || _thought != null) return;
+            _dreamOf = needs.Value;
             var catalog = ItemCatalog.Instance;
-            var flowers = catalog != null ? catalog.Icon("Medium Posie Garden") : null;
-            _thought = WorldBubble.Thought(transform, flowers, 0.75f, () =>
-                Hints.Island("This capybara is too hungry to work. Plant a garden near its workplace and it will wake up for a snack."));
+            var picture = catalog != null ? catalog.Icon(DreamGuide.DreamItem(_dreamOf)) : null;
+            var need = _dreamOf;
+            _thought = WorldBubble.Thought(transform, picture, 1.1f,
+                Visit.Active ? null : () => DreamGuide.ShowWay(need, transform.position));
         }
 
         void OnDisable()
@@ -328,7 +340,6 @@ namespace CapyIsland.Game
             _state = State.FindWood;
             _searchCounter = 0;
             _asleep = false;
-            _dreamStarted = false;
 
             // The nap spot: 70 units from the workplace at a random angle through the front half.
             float angle = UnityEngine.Random.value * Mathf.PI;
@@ -346,18 +357,12 @@ namespace CapyIsland.Game
             var napSpot = (Vector2)_workplace.transform.position + _napOffset;
             if (BunniSpace.WorldDistance(transform.position, napSpot) < 3f)
             {
-                // Asleep beside the mill: no hunger drain, dreaming of what it lacks.
+                // Asleep beside the mill: no hunger drain, dreaming of what it lacks (ShowDream).
                 _asleep = true;
-                if (!_dreamStarted)
-                {
-                    _dreamStarted = true;
-                    RaiseDreamHint();
-                }
             }
             else
             {
                 _asleep = false;
-                _dreamStarted = false;
                 GetHungry();
                 if (_state != State.FindWood) return;   // hunger restarted the search
                 var pos = (Vector2)transform.position;
@@ -387,33 +392,6 @@ namespace CapyIsland.Game
             _target = _workplace.Find(_workplace.WorkFamily, from, reserve: true);
             if (_target == null && _workplace.Accepts == ResourceKind.Wood)
                 _tree = _workplace.FindFruitTree(from, needFruit: false, reserve: true);
-        }
-
-        void RaiseDreamHint()
-        {
-            // The opening explains its own first hungry nap, with a movie and Old Yuzu.
-            if (Attention.TutorialRunning) return;
-            string who = "A " + StoryText.Name(speciesName);
-            if (_hungry && !AnyFlowers())
-                Hints.Island(who + " is hungry and fell asleep. There's no garden to eat from: plant one near its workplace.");
-            else if (_hungry)
-                Hints.Island(who + " ate the last flower in the garden. Plant bigger gardens for your hungry workers.");
-            else if (_workplace.Accepts == ResourceKind.Wood)
-                Hints.Island(who + " chopped down the last tree in a forest. Too many workers on one forest will strip it bare.");
-            else
-                Hints.Island(who + " dug out the last rock in a hill. With no rocks in reach, the mine will close.");
-        }
-
-        /// <summary>Is any flower garden planted on the island at all (eaten bare or not)?</summary>
-        static bool AnyFlowers()
-        {
-            foreach (var tag in FindObjectsByType<CatalogItem>(FindObjectsSortMode.None))
-            {
-                var n = tag.StoreName ?? "";
-                if (!n.Contains("Garden") || n.Contains("Vegetable")) continue;
-                if (tag.TryGetComponent<Placeable>(out var p) && p.Placed) return true;
-            }
-            return false;
         }
 
         // ---------------------------------------------------------------- GetWood

@@ -11,6 +11,10 @@ namespace CapyIsland.UI
     /// the page (the original splits dialogue on [br]). The last page can offer choices ("Pay 20
     /// Gems" / "Cancel", the bank's trades); with none, tapping it closes.
     ///
+    /// A tap anywhere around the panel does the same as tapping it (TapOutside). On a page of
+    /// choices it takes the one that just closes ("Not now", "Cancel": no action of its own); when
+    /// every choice does something, the question waits for an answer.
+    ///
     /// One instance in the HUD; anything opens it through <see cref="Show"/>.
     /// </summary>
     public class SpeechDialog : MonoBehaviour
@@ -37,6 +41,7 @@ namespace CapyIsland.UI
         int _page;
         Action _onClosed;
         readonly List<Choice> _choices = new();
+        GameObject _outside;
 
         public static bool IsOpen => _instance != null && _instance.panel != null && _instance.panel.activeSelf;
 
@@ -45,6 +50,7 @@ namespace CapyIsland.UI
             _instance = this;
             if (panel != null) panel.SetActive(false);
             if (pageButton != null) pageButton.onClick.AddListener(NextPage);
+            BuildOutside();
             for (int i = 0; i < choiceButtons.Count; i++)
             {
                 int index = i;
@@ -55,6 +61,26 @@ namespace CapyIsland.UI
         void OnDestroy()
         {
             if (_instance == this) _instance = null;
+        }
+
+        /// <summary>An invisible backdrop behind the panel, there while it is open, to hear taps around it.</summary>
+        void BuildOutside()
+        {
+            if (panel == null) return;
+            var img = UiKit.Image(panel.transform.parent, "Outside", null, Color.clear, true);
+            UiKit.Stretch(img.rectTransform, -400f, -400f, -400f, -400f);
+            img.transform.SetAsFirstSibling();
+            TapOutside.Add(img, (RectTransform)panel.transform, Outside);
+            _outside = img.gameObject;
+            _outside.SetActive(false);
+        }
+
+        void Outside()
+        {
+            bool choosing = _page >= _pages.Length - 1 && _choices.Count > 0;
+            if (!choosing) { NextPage(); return; }
+            for (int i = 0; i < _choices.Count; i++)
+                if (_choices[i].Action == null && _choices[i].Enabled) { Choose(i); return; }
         }
 
         /// <summary>Opens the dialog. Choices appear on the last page.</summary>
@@ -90,6 +116,7 @@ namespace CapyIsland.UI
             }
             if (nameLabel != null) nameLabel.text = speaker ?? "";
             if (panel != null) panel.SetActive(true);
+            if (_outside != null) _outside.SetActive(true);
             FitWidth();
             ShowPage();
         }
@@ -103,6 +130,40 @@ namespace CapyIsland.UI
             if (parent == null) return;
             float max = parent.rect.width - 40f;
             rect.sizeDelta = new Vector2(Mathf.Min(1000f, max), rect.sizeDelta.y);
+            FitHeight(rect);
+        }
+
+        float _baseHeight = -1f, _baseNameHeight, _baseBodyTop, _baseShadowHeight;
+        RectTransform _shadow;
+
+        /// <summary>
+        /// Easy Reading: a taller panel for the bigger words. The body fits its words to the room it
+        /// has, so without more room a long line would stay small; the name grows taller too, and
+        /// the body starts below it. (Laid out in the scene at normal size; that is the 1x.)
+        /// </summary>
+        void FitHeight(RectTransform rect)
+        {
+            if (_baseHeight < 0f)
+            {
+                _baseHeight = rect.sizeDelta.y;
+                if (nameLabel != null) _baseNameHeight = nameLabel.rectTransform.sizeDelta.y;
+                if (bodyLabel != null) _baseBodyTop = -bodyLabel.rectTransform.offsetMax.y;
+                _shadow = rect.parent.Find("PanelShadow") as RectTransform;
+                if (_shadow != null) _baseShadowHeight = _shadow.sizeDelta.y;
+            }
+            float s = Accessibility.TextScale;
+            rect.sizeDelta = new Vector2(rect.sizeDelta.x, _baseHeight * s);
+            if (_shadow != null) _shadow.sizeDelta = new Vector2(_shadow.sizeDelta.x, _baseShadowHeight + _baseHeight * (s - 1f));
+            if (nameLabel != null)
+            {
+                var n = nameLabel.rectTransform;
+                n.sizeDelta = new Vector2(n.sizeDelta.x, _baseNameHeight * s);
+            }
+            if (bodyLabel != null)
+            {
+                var b = bodyLabel.rectTransform;
+                b.offsetMax = new Vector2(b.offsetMax.x, -(_baseBodyTop + _baseNameHeight * (s - 1f)));
+            }
         }
 
         void ShowPage()
@@ -145,6 +206,7 @@ namespace CapyIsland.UI
         void Close(bool runCallback)
         {
             if (panel != null) panel.SetActive(false);
+            if (_outside != null) _outside.SetActive(false);
             var callback = _onClosed;
             _onClosed = null;
             if (runCallback) callback?.Invoke();

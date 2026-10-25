@@ -116,9 +116,11 @@ namespace CapyIsland.EditorTools
             so.FindProperty("plantedSprite").objectReferenceValue = planted;
             so.ApplyModifiedPropertiesWithoutUndo();
 
-            // Trees and flowers bend in the wind; trees shed leaves in the gusts.
+            // Trees and flowers bend in the wind; trees shed leaves in the gusts. Rock stays put.
+            var family = Game.BunniRules.FamilyOf(resource);
+            if (family == Game.NodeFamily.Rock) return;
             var sway = item.AddComponent<Game.Sway>();
-            if (Game.BunniRules.FamilyOf(resource) == Game.NodeFamily.Flower)
+            if (family == Game.NodeFamily.Flower)
                 sway.Configure(1.6f, 0f, Color.white);
             else
                 sway.Configure(1f, 0.7f, new Color(0.33f, 0.52f, 0.30f));

@@ -62,7 +62,11 @@ therefore every existing file, stays byte-identical.
 **Hebrew.** Code keeps writing English; `UI/Lang/LocText` translates every label as it is drawn, from
 `Assets/Resources/Lang/he/*.txt` (`@ English` / `= Hebrew`, `{0}` templates; format in `Loc.cs`).
 When you add or change player-visible text, add its Hebrew entry too. Playing in Hebrew in the editor
-appends anything untranslated to `Logs/loc_missing_he.txt`. The player is addressed in the masculine.
+appends anything untranslated to `Logs/loc_missing_he.txt`. **The player picks boy or girl** (opening
+screen and Settings, Hebrew only): the `=` line speaks to a boy, and an optional `~` line right under it
+speaks to a girl. Add a `~` line whenever the words for a girl differ (הקש/הקישי, אתה/את, קטן/קטנה);
+spellings that are the same for both (לך, שלך, אליך) need none. Text shown before the choice
+(the opening screen) is written neutral: infinitive or "let's".
 
 ## Layout
 

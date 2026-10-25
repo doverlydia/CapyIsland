@@ -21,7 +21,7 @@ namespace CapyIsland.UI
                 "Block", "Cancel", () =>
                 {
                     _ = RealFriends.Block(member, name);   // in force here at once; the service hears it after
-                    Hints.Show(Loc.F("{0} is blocked.", name));
+                    Hints.Answer(Loc.F("{0} is blocked.", name));
                     done?.Invoke();
                 }, null, null, IconPainter.Block);
         }

@@ -24,6 +24,7 @@ namespace CapyIsland.Game
         public int Stars, MinLevel;
         public Color Body, Wing, Breast;
         public bool Wader;            // stands on rocks and shore rather than perching in trees
+        public bool Sea;              // wheels over the sea and rests on the beach (the gull): never in a tree, never wading
         public DayParts Times = DayParts.Any;
         public bool RainOnly;
     }
@@ -75,6 +76,7 @@ namespace CapyIsland.Game
             new() { Id = "crane",      Name = "Red-crowned Crane",Stars = 4, MinLevel = 7, Body = C("F4F2EC"), Wing = C("2B2B2B"), Breast = C("FFFFFF"), Wader = true, Times = DayParts.Twilight },
             new() { Id = "owl",        Name = "Tawny Owl",        Stars = 3, MinLevel = 4, Body = C("9A7550"), Wing = C("6E5236"), Breast = C("D9C29A"), Times = DayParts.Night | DayParts.Dusk },
             new() { Id = "pheasant",   Name = "Golden Pheasant",  Stars = 5, MinLevel = 9, Body = C("E8A42F"), Wing = C("B83A2A"), Breast = C("F2D04A"), Times = DayParts.Dawn },
+            new() { Id = "gull",       Name = "Seagull",          Stars = 1, MinLevel = 1, Body = C("F4F4F0"), Wing = C("9AA3AD"), Breast = C("FFFFFF"), Sea = true, Times = DayParts.Daylight },
         };
 
         static readonly string[] RarityNames = { "Common", "Uncommon", "Rare", "Very rare", "Legendary" };
@@ -100,7 +102,7 @@ namespace CapyIsland.Game
         /// <summary>A bird for this level and time of day, or null if none is about (most sleep at night).</summary>
         public static BirdKind RollBird(int level, bool wader)
         {
-            return Roll(Birds, b => b.MinLevel <= level && b.Wader == wader && GameClock.Allows(b.Times) && (!b.RainOnly || Weather.IsRaining), b => b.Stars);
+            return Roll(Birds, b => !b.Sea && b.MinLevel <= level && b.Wader == wader && GameClock.Allows(b.Times) && (!b.RainOnly || Weather.IsRaining), b => b.Stars);
         }
 
         static T Roll<T>(T[] all, System.Predicate<T> allowed, System.Func<T, int> stars) where T : class

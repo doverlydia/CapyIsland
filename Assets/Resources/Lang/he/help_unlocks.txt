@@ -1,0 +1,5 @@
+# Hebrew for the help pages that turn up as you play (UI/Help/HelpScreen.cs, HelpUnlocks.cs)
+
+@ Nothing found. Try another word, like walk or zoom. More pages turn up as you play.
+= לא נמצא כלום. נסה מילה אחרת, כמו ללכת או זום. עוד דפים יופיעו ככל שתשחק.
+~ לא נמצא כלום. נסי מילה אחרת, כמו ללכת או זום. עוד דפים יופיעו ככל שתשחקי.

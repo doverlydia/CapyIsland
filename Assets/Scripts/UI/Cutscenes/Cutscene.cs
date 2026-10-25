@@ -39,7 +39,8 @@ namespace CapyIsland.UI
             var go = new GameObject("[Cutscene] " + typeof(T).Name, typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
             var canvas = go.GetComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = 450;
+            // Over everything: windows, knocks, tap notes (900). Only the reading aid and the HUD tour sit higher.
+            canvas.sortingOrder = 950;
             var scaler = go.GetComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1080f, 1920f);

@@ -8,7 +8,8 @@ namespace CapyIsland.Game
     /// <summary>
     /// The king you control, with the camera trailing him as he moves (WASD / arrows on a keyboard).
     ///
-    /// Tap a spot on the ground and he walks there. Hold on the ground and he walks toward your
+    /// Tap a spot on the ground and he walks there; tap the sea and he walks down to the nearest
+    /// bit of shore he can reach, ready to fish. Hold on the ground and he walks toward your
     /// finger, tracking it as it moves — or, with the joystick on (Settings), a floating stick
     /// under your thumb steers him, so you never have to reach for the edge of the screen. See
     /// <see cref="CameraInputController"/> for the gestures.
@@ -66,7 +67,7 @@ namespace CapyIsland.Game
             if (_route == null || _route.Count == 0)
             {
                 _autoTarget = null;
-                Hints.Show(Unreachable);
+                Hints.Answer(Unreachable);
                 return;
             }
             _routeAt = 0;
@@ -95,7 +96,7 @@ namespace CapyIsland.Game
             var land = LandMap.Instance;
             if (land != null && !land.Reachable(king.transform.position, target))
             {
-                Hints.Show(Unreachable);
+                Hints.Answer(Unreachable);
                 return;
             }
             king.WalkTo(target);
@@ -144,18 +145,101 @@ namespace CapyIsland.Game
 
         /// <summary>
         /// A quick tap on bare ground: walk there, whichever way you like to steer. A tap on the sea
-        /// is just a tap; land you can't reach yet says so.
+        /// walks you down to the water's edge nearest it (somewhere you can fish from); land you
+        /// can't reach yet says so.
         /// </summary>
         void OnGroundTapped(Vector2 world)
         {
-            if (!BunniSpace.PointOnLand(world)) return;
+            if (!BunniSpace.PointOnLand(world))
+            {
+                // A line out: a stray tap on the water mustn't walk you off and lose the fish.
+                var rod = Fishing.Instance;
+                if (rod != null && rod.Now != Fishing.State.Idle) return;
+                var shore = ShoreNear(world);
+                if (!shore.HasValue) return;   // no shore of yours anywhere: just a tap
+                world = shore.Value;
+            }
             if (Vector2.Distance(transform.position, world) < 0.5f) return;
             var land = LandMap.Instance;
-            if (land != null && !land.Reachable(transform.position, world)) { Hints.Show(Unreachable); return; }
+            if (land != null && !land.Reachable(transform.position, world)) { Hints.Answer(Unreachable); return; }
             WalkTo(world, 0.15f);
             if (!_autoTarget.HasValue) return;
             _tapWalk = true;
             WalkMarker.Show(world);
+        }
+
+        /// <summary>How far in from the water's edge a walk to the shore stops, in world units: dry feet, rod's reach.</summary>
+        const float ShoreInset = 8f;
+
+        /// <summary>
+        /// The spot at the water's edge nearest a point out on the sea, on land you can walk to from
+        /// here (never the beach of an island whose bridge isn't open), a step in from the waterline
+        /// so you stand on the sand with the sea close enough to fish (<see cref="Fishing.AtShore"/>).
+        /// Null if there is none.
+        ///
+        /// The land is made of circles (<see cref="LandMap.Piece"/>), so the shore is their rims
+        /// wherever no other circle covers them. Each rim is walked round, nearest circles first,
+        /// and the closest uncovered point (as it looks on screen, not in the squashed world) wins.
+        /// </summary>
+        Vector2? ShoreNear(Vector2 sea)
+        {
+            var land = LandMap.Instance;
+            if (land == null) return null;
+            Vector2 seaWorld = LandMap.UnityToWorld(sea);
+            Vector2 here = transform.position;
+            int myIsland = land.IslandAt(here);
+
+            // Every land circle, by how near its rim could possibly be on screen (a world unit is
+            // never less than half of UnitsPerWorld on screen: y is squashed 2:1).
+            var circles = new List<(float bound, Vector3 c)>();
+            foreach (var piece in land.Pieces)
+            {
+                if (piece.isBridge && !piece.open) continue;
+                foreach (var c in piece.circles)
+                {
+                    float gap = Vector2.Distance(seaWorld, new Vector2(c.x, c.y)) - c.z;
+                    circles.Add((Mathf.Max(0f, gap) * BunniSpace.UnitsPerWorld * 0.5f, c));
+                }
+            }
+            circles.Sort((a, b) => a.bound.CompareTo(b.bound));
+
+            Vector2? best = null;
+            float bestD = float.MaxValue;
+            foreach (var (bound, c) in circles)
+            {
+                if (bound >= bestD) break;   // no rim further down the list can be nearer
+                var centre = new Vector2(c.x, c.y);
+                // A point every quarter of a unit or so along the rim.
+                int around = Mathf.Clamp(Mathf.CeilToInt(2f * Mathf.PI * c.z * BunniSpace.UnitsPerWorld / 0.25f), 16, 720);
+                for (int i = 0; i < around; i++)
+                {
+                    float a = i * Mathf.PI * 2f / around;
+                    var dir = new Vector2(Mathf.Cos(a), Mathf.Sin(a));
+                    var rim = LandMap.WorldToUnity(centre + dir * c.z);
+                    float d = Vector2.Distance(rim, sea);
+                    if (d >= bestD) continue;
+                    // Covered by another circle: inland, not shore.
+                    if (land.IsOnLand(LandMap.WorldToUnity(centre + dir * (c.z + 4f)))) continue;
+                    var spot = LandMap.WorldToUnity(centre + dir * Mathf.Max(0f, c.z - ShoreInset));
+                    if (!land.IsOnLand(spot) || !SameLand(land, myIsland, here, spot)) continue;
+                    if (!Fishing.WaterNear(spot, 2.6f).HasValue) continue;
+                    best = spot;
+                    bestD = d;
+                }
+            }
+            return best;
+        }
+
+        /// <summary>
+        /// True if a spot is on land joined to where you stand. Standing on a bridge, an island
+        /// counts if it is open (joined to the first island); a spot on an open bridge always does.
+        /// </summary>
+        static bool SameLand(LandMap land, int myIsland, Vector2 here, Vector2 spot)
+        {
+            int island = land.IslandAt(spot);
+            if (island < 0) return true;   // an open bridge (a closed one isn't land at all)
+            if (myIsland < 0) return land.IslandOpen(island);
+            return land.Reachable(here, spot);
         }
 
         void Update()
@@ -247,7 +331,7 @@ namespace CapyIsland.Game
                     return Vector2.zero;
                 }
                 _autoTarget = null;
-                Hints.Show(Unreachable);
+                Hints.Answer(Unreachable);
                 return Vector2.zero;
             }
 

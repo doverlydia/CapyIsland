@@ -70,6 +70,7 @@ namespace CapyIsland.UI
             UiKit.Stretch(scrim.rectTransform);
 
             var card = UiKit.Card(root, "Card", UiKit.Surface, 40);
+            TapOutside.Add(scrim, card.rectTransform, Close);   // a tap around it is Cancel / Done
             var cr = card.rectTransform;
             cr.anchorMin = new Vector2(0.06f, 0.5f);
             cr.anchorMax = new Vector2(0.94f, 0.5f);

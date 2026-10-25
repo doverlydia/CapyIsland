@@ -12,8 +12,8 @@ namespace CapyIsland.UI
     /// body. Screens stack — the menu opens the map over itself — and the phone's back button (or
     /// Escape) closes the top one. While any is open the island ignores touches.
     ///
-    /// Only the ✕ and the back button close a screen: a tap that just misses a button near the
-    /// sheet's edge lands on the dimmed island and does nothing.
+    /// The ✕, the back button, or a tap on the dimmed island around the sheet closes it (TapOutside:
+    /// a real tap, clear of the sheet's edge, so a finger that just misses a button there does nothing).
     ///
     /// Subclasses build their body once in <see cref="Build"/> and refresh it in <see cref="OnOpen"/>.
     /// </summary>
@@ -47,6 +47,22 @@ namespace CapyIsland.UI
         /// </summary>
         protected virtual bool FullBleed => false;
 
+        /// <summary>
+        /// A short window (a choice, a question): the sheet is only as tall as what is in it and sits
+        /// in the middle of the screen, rather than leaving its few things at the top of a tall,
+        /// empty page. A long one still stops at the screen's edge, and its body scrolls as before.
+        /// </summary>
+        protected virtual bool FitToContent => false;
+
+        /// <summary>
+        /// What <see cref="FitToContent"/> measures: a rect laid out by a layout group (a
+        /// <see cref="UiKit.ScrollList"/>'s list, say). The body itself by default.
+        /// </summary>
+        protected virtual RectTransform ContentRoot => Body;
+
+        /// <summary>How tall the body's content wants to be, for <see cref="FitToContent"/>.</summary>
+        protected virtual float ContentHeight => ContentRoot != null ? LayoutUtility.GetPreferredHeight(ContentRoot) : 0f;
+
         public bool IsOpen => _root != null && _root.activeSelf;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -65,6 +81,7 @@ namespace CapyIsland.UI
             Fit();
             if (!_stack.Contains(this)) _stack.Add(this);
             OnOpen();
+            if (FitToContent) MeasureContent();
             UiKit.PopIn(Sheet, 0.9f);
             Game.Sfx.Play(Game.SfxKind.Tap, 0.4f);
             Opened?.Invoke(this);
@@ -93,6 +110,9 @@ namespace CapyIsland.UI
         {
             if (!IsOpen) return;
             if (_stack.Count > 0 && _stack[_stack.Count - 1] == this && Input.GetKeyDown(KeyCode.Escape)) Close();
+            // Sized to its content: kept so as the words settle (the translation and Easy Reading's
+            // bigger letters are applied as labels are drawn, after the page is built).
+            if (FitToContent && Sheet != null && Mathf.Abs(FittedHeight() - Sheet.sizeDelta.y) > 1f) Fit();
         }
 
         void EnsureBuilt()
@@ -121,6 +141,8 @@ namespace CapyIsland.UI
 
             var card = UiKit.Card(_root.transform, "Sheet", UiKit.Surface, 44);
             Sheet = card.rectTransform;
+            // Only the top screen: the one under it can't be tapped through to anyway.
+            TapOutside.Add(scrim, Sheet, Close, () => _stack.Count > 0 && _stack[_stack.Count - 1] == this);
             Sheet.anchorMin = Sheet.anchorMax = Sheet.pivot = new Vector2(0.5f, 0.5f);
 
             // Header: a coloured band with the title and the close button.
@@ -167,15 +189,37 @@ namespace CapyIsland.UI
             _root.SetActive(false);
         }
 
-        /// <summary>Sizes the sheet to the safe area: full height on a phone, capped width on a tablet.</summary>
+        /// <summary>
+        /// Sizes the sheet to the safe area: full height on a phone, capped width on a tablet. A
+        /// window that <see cref="FitToContent"/> is only as tall as its content, centred.
+        /// </summary>
         protected virtual void Fit()
         {
             if (Sheet == null || FullBleed) return;
             var area = ((RectTransform)transform).rect;
             float w = Mathf.Min(MaxWidth, area.width - 32f);
-            float h = area.height - 48f;
-            Sheet.sizeDelta = new Vector2(w, h);
+            Sheet.sizeDelta = new Vector2(w, FittedHeight());
             Sheet.anchoredPosition = Vector2.zero;
+        }
+
+        /// <summary>The sheet's height: the screen's, or (fitting its content) the header, the body's margins and the content.</summary>
+        float FittedHeight()
+        {
+            float h = ((RectTransform)transform).rect.height - 48f;
+            if (FitToContent) h = Mathf.Min(h, 128f + 24f + ContentHeight + 32f);
+            return h;
+        }
+
+        /// <summary>
+        /// Measures the page just built, as it will be drawn: its labels translated and at Easy
+        /// Reading's size now rather than at the end of the frame, its layout worked out, then fits.
+        /// </summary>
+        void MeasureContent()
+        {
+            if (Body == null) return;
+            foreach (var label in Body.GetComponentsInChildren<LocText>()) label.Refresh();
+            if (ContentRoot != null) LayoutRebuilder.ForceRebuildLayoutImmediate(ContentRoot);
+            Fit();
         }
 
         // ---------------------------------------------------------------- helpers for bodies

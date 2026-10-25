@@ -26,8 +26,8 @@ namespace CapyIsland.CameraRig
         [SerializeField] float referenceAspect = 16f / 9f;
 
         [Header("Zoom")]
-        [Tooltip("Multiplier on the computed size. 1 = the reference framing.")]
-        [SerializeField] float zoom = 1f;
+        [Tooltip("Multiplier on the computed size. 1 = the reference framing. Replaced by DefaultZoom at start.")]
+        [SerializeField] float zoom = DefaultZoom;
         [SerializeField] float minZoom = 0.5f;
         [SerializeField] float maxZoom = 2f;
 
@@ -37,6 +37,13 @@ namespace CapyIsland.CameraRig
         [SerializeField] bool clampToBounds = true;
 
         Camera _camera;
+
+        /// <summary>
+        /// Where every session starts: a little further out than the reference framing (about 15%
+        /// more world each way), so a new island shows its forest, mill and house together. Set in
+        /// code, over the scene's saved 1; zoom is not kept between sessions.
+        /// </summary>
+        public const float DefaultZoom = 1.15f;
 
         /// <summary>Current zoom, clamped. Setting it re-frames immediately.</summary>
         public float Zoom
@@ -61,6 +68,7 @@ namespace CapyIsland.CameraRig
         {
             _camera = GetComponent<Camera>();
             _camera.orthographic = true;
+            zoom = Mathf.Clamp(DefaultZoom, minZoom, maxZoom);
             ScreenMetrics.Changed += Apply;
             Apply();
         }

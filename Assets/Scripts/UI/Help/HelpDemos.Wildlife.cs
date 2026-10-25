@@ -30,7 +30,7 @@ namespace CapyIsland.UI
         static Vector2 WildW(Vector2 stage) => stage - WildPan;
 
         /// <summary>
-        /// Bug catching as the game plays it (BugCatching). Buy the Bug Net at the Bronze Store and
+        /// Bug catching as the game plays it (WildBug). Buy the Bug Net at the Bronze Store and
         /// walk off to the flowers. A butterfly settles on them and flits about its spot; you walk
         /// straight at it and, once you're right up close, it escapes up and away. Another settles on
         /// the next flowers a few steps off: tap it, it holds still, the net swoops out of your paws
@@ -54,7 +54,7 @@ namespace CapyIsland.UI
             var flowersA = new Vector2(60f, -50f);
             var flowersB = new Vector2(205f, -85f);
             const float flowerSize = 95f;
-            // A bug on flowers sits just above their middle (BugCatching.Spawn).
+            // A bug on flowers sits just above their middle (Wildlife.FlowerPerch).
             var homeA = flowersA + new Vector2(0f, flowerSize * 0.4f + 15f);
             var homeB = flowersB + new Vector2(0f, flowerSize * 0.4f + 15f);
 
@@ -96,7 +96,7 @@ namespace CapyIsland.UI
         }
 
         /// <summary>
-        /// Birdwatching as the game plays it (Birding). Buy the Binoculars at the Silver Store and
+        /// Birdwatching as the game plays it (WildBird). Buy the Binoculars at the Silver Store and
         /// walk off to the trees. A sparrow flutters down into one, hopping and turning about; you
         /// walk right up under it and it takes fright and flies off. A robin lands in the next tree,
         /// a few steps away: tap it from where you are and the card comes up at once, "You spotted a
@@ -120,7 +120,7 @@ namespace CapyIsland.UI
             var grassA = new Vector2(30f, -80f);
             var treeA = new Vector2(60f, -45f);
             var treeB = new Vector2(225f, -5f);
-            // A bird perches near the top of its tree (Birding.TryLand): a third of the way down.
+            // A bird perches near the top of its tree (Wildlife.TreePerch): a quarter to a third of the way down.
             var perchA = treeA + new Vector2(10f, -14f + 140f * 0.7f);
             var perchB = treeB + new Vector2(-10f, -13f + 130f * 0.7f);
 
@@ -229,7 +229,7 @@ namespace CapyIsland.UI
         }
 
         /// <summary>
-        /// A bug as BugCatching.Bug draws it, centred on its spot in <paramref name="parent"/>: it
+        /// A bug as WildBug draws it, centred on its spot in <paramref name="parent"/>: it
         /// fades in, flits about its spot in lazy loops facing the way it's going, holds still from
         /// <paramref name="still"/> (tapped), and from <paramref name="escape"/> (if not negative)
         /// flies up and away, fading. Returns the bug's holder (to shrink into the net) and where it
@@ -262,7 +262,7 @@ namespace CapyIsland.UI
         }
 
         /// <summary>
-        /// The butterfly net as BugCatching.NetSwoop swings it: out of your paws at
+        /// The butterfly net as WildBug.NetSwoop swings it: out of your paws at
         /// <paramref name="from"/>, raised, then swooped in an arc down over <paramref name="to"/>,
         /// a wiggle as the bug goes in, and lifted away fading. Returns the moment it lands.
         /// </summary>
@@ -292,7 +292,7 @@ namespace CapyIsland.UI
         }
 
         /// <summary>
-        /// A bird as Birding.Bird draws it: fluttering down from above to its perch at
+        /// A bird as WildBird draws it: fluttering down from above to its perch at
         /// <paramref name="land"/>, a little hop (turning about if <paramref name="turns"/>), and at
         /// <paramref name="leave"/> off it flies, up and away the way it's facing, fading. The
         /// pictures face left.

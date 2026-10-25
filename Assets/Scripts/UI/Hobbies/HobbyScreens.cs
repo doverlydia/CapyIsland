@@ -60,6 +60,8 @@ namespace CapyIsland.UI
         void Refresh()
         {
             ClearChildren(_list);
+            _dotsShowing = 0;
+            _dotsPrefix = null;
             TitleLabel.text = _page switch
             {
                 Page.Fish => "Fish Journal", Page.Birds => "Bird Journal", Page.Bugs => "Bug Journal", Page.Veg => "Vegetable Journal",
@@ -92,6 +94,7 @@ namespace CapyIsland.UI
             UiKit.Button(row, "Bag", "Bag", UiKit.ButtonStyle.Spring, () => Go(Page.Bag), 32f, IconPainter.Gift);
             if (HobbyLog.IsUnlocked(Hobby.Cooking))
                 UiKit.Button(row, "Kitchen", "Kitchen", UiKit.ButtonStyle.Primary, () => Go(Page.Kitchen), 32f, IconPainter.Star);
+            CardBanner();
 
             // Hobbies you have first; the ones still to take up after them, with how to get them.
             var all = new (Hobby hobby, string name, Sprite icon, Color colour, System.Action card)[]
@@ -123,23 +126,62 @@ namespace CapyIsland.UI
                 (Hobby.Writing, "Writing", IconPainter.Book, UiKit.Hex("A77BD6"), () => HobbyCard(Hobby.Writing, "Writing", IconPainter.Book, UiKit.Hex("A77BD6"),
                     $"{HobbyLog.Books.Count} ema hung",
                     "Old Mochi keeps the shrine on the hill. Hang an ema with your wish on his rack, and read the ones friends leave you.",
-                    "Show me", () => ShowInWorld(Shrine.Spot, "The shrine is on your first island."))),
+                    // A friend has left an ema: straight to the rack to read it (which is what clears its dot).
+                    NewStuff.Any("hobbies/Writing/") ? "Look at the rack" : "Show me",
+                    NewStuff.Any("hobbies/Writing/") ? (Action)(() => { Close(); LibraryScreen.ShowRack(); }) : () => ShowInWorld(Shrine.Spot, "The shrine is on your first island."))),
                 (Hobby.Sewing, "Sewing", IconPainter.Hat, UiKit.Hex("C2577F"), () => HobbyCard(Hobby.Sewing, "Sewing", IconPainter.Hat, UiKit.Hex("C2577F"),
                     $"{HobbyLog.Designs.Count} piece{(HobbyLog.Designs.Count == 1 ? "" : "s")} sewn",
                     "At your sewing machine: a hat needs cotton from your garden. Then decorate it and wear it!",
                     "Show me", () => ShowInWorld(SewingStation.Placed() != null ? SewingStation.Placed().transform : null, "Put your sewing machine down somewhere first."))),
             };
-            // A carousel, one big picture card per hobby: yours first, then the ones still to take up.
+            // A carousel, one big picture card per hobby: yours first, then the ones open to take
+            // up, then the ones still waiting for a hobby card.
             var order = new List<(Hobby hobby, string name, Sprite icon, Color colour, System.Action card)>();
             foreach (var c in all) if (HobbyLog.IsUnlocked(c.hobby)) order.Add(c);
-            foreach (var c in all) if (!HobbyLog.IsUnlocked(c.hobby)) order.Add(c);
+            foreach (var c in all) if (!HobbyLog.IsUnlocked(c.hobby) && HobbyLog.IsOpened(c.hobby)) order.Add(c);
+            foreach (var c in all) if (!HobbyLog.IsOpened(c.hobby)) order.Add(c);
+
+            // Something new on a page: it opens there (unless the page it was left on has news too),
+            // and the pager's dot and arrow toward any other such page turn red.
+            var news = new List<bool>();
+            foreach (var c in order) news.Add(PageNews(c.hobby));
+            if (_carouselIndex < 0 || _carouselIndex >= news.Count || !news[_carouselIndex])
+            {
+                int first = news.IndexOf(true);
+                if (first >= 0) _carouselIndex = first;
+            }
             Carousel(order.Count, i =>
             {
                 var c = order[i];
                 if (HobbyLog.IsUnlocked(c.hobby)) c.card();
                 else LockedCard(c.hobby, c.name, c.icon);
-            });
-            foreach (var c in all) NewStuff.Remove("hobbies/" + c.hobby);   // a newly taken-up hobby: seen
+            }, news);
+            foreach (var c in all)
+            {
+                NewStuff.Remove("hobbies/" + c.hobby);   // a newly opened or taken-up hobby: seen
+                // Finds for a hobby not taken up have no page to be seen on (a friend's ema left
+                // before writing was open, say): let them go rather than keep the button's dot lit.
+                if (!HobbyLog.IsUnlocked(c.hobby)) NewStuff.Clear("hobbies/" + c.hobby + "/");
+            }
+        }
+
+        static readonly Hobby[] AllHobbies = (Hobby[])Enum.GetValues(typeof(Hobby));
+
+        /// <summary>
+        /// New on a hobby's page of the carousel: the hobby itself, just opened or taken up (its
+        /// card shows a dot), or a find in its journal — only for a hobby you have, since a locked
+        /// card has no journal to open.
+        /// </summary>
+        static bool PageNews(Hobby h) => NewStuff.Has("hobbies/" + h) || (HobbyLog.IsUnlocked(h) && NewStuff.Any("hobbies/" + h + "/"));
+
+        /// <summary>
+        /// The Hobbies button's red dot: only for what this screen will show you (and clear), so it
+        /// never stays lit with nothing to find inside — a hobby card waiting, or new on a page.
+        /// </summary>
+        public static bool HasNews()
+        {
+            foreach (var h in AllHobbies) if (PageNews(h)) return true;
+            return NewStuff.Has("hobbies/card") && HobbyCards.Waiting > 0;
         }
 
         // ---------------------------------------------------------------- the carousel
@@ -148,13 +190,18 @@ namespace CapyIsland.UI
         ScrollRect _carousel;
         int _carouselIndex;
         readonly List<Image> _dots = new();
+        List<bool> _pageNews;           // pages with something new on them
+        GameObject _prevNew, _nextNew;  // the red dots on the arrows: more news that way
 
         /// <summary>
         /// A row of full-width pages you swipe through, snapping to each; arrows at the sides and
         /// dots underneath. <paramref name="build"/> fills page i (its cards go into <see cref="_cardSlot"/>).
+        /// Pages marked in <paramref name="news"/> have a red dot underneath, and an arrow pointing
+        /// toward one carries a little red dot of its own.
         /// </summary>
-        void Carousel(int count, Action<int> build)
+        void Carousel(int count, Action<int> build, List<bool> news = null)
         {
+            _pageNews = news;
             float width = Sheet.sizeDelta.x - 64f - 8f;
             float height = Mathf.Max(760f, Sheet.sizeDelta.y - 128f - 64f - 96f - 16f - 70f);
             var holder = UiKit.Rect("Carousel", _list);
@@ -198,8 +245,8 @@ namespace CapyIsland.UI
             _cardSlot = null;
 
             // Arrows at the sides.
-            Arrow(holder, -1, count);
-            Arrow(holder, 1, count);
+            _prevNew = Arrow(holder, -1, count);
+            _nextNew = Arrow(holder, 1, count);
 
             // Dots.
             _dots.Clear();
@@ -219,7 +266,8 @@ namespace CapyIsland.UI
             ShowPage(Mathf.Clamp(_carouselIndex, 0, count - 1), false);
         }
 
-        void Arrow(RectTransform holder, int dir, int count)
+        /// <summary>One of the side arrows. Returns its red dot (hidden until there's news that way).</summary>
+        GameObject Arrow(RectTransform holder, int dir, int count)
         {
             var a = UiKit.Image(holder, dir < 0 ? "Prev" : "Next", UiKit.Circle, new Color(1f, 1f, 1f, 0.92f), true).rectTransform;
             a.anchorMin = a.anchorMax = a.pivot = new Vector2(dir < 0 ? 0f : 1f, 0.68f);
@@ -234,6 +282,18 @@ namespace CapyIsland.UI
             b.transition = Selectable.Transition.None;
             b.onClick.AddListener(() => ShowPage(Mathf.Clamp(_carouselIndex + dir, 0, count - 1), true));
             a.gameObject.AddComponent<PressSquash>();
+            var dot = NewDot.Fixed(a, 24f);
+            dot.SetActive(false);
+            return dot;
+        }
+
+        /// <summary>Is there a page with something new beyond <paramref name="index"/> in direction <paramref name="dir"/>?</summary>
+        bool NewsBeyond(int index, int dir)
+        {
+            if (_pageNews == null) return false;
+            for (int i = index + dir; i >= 0 && i < _pageNews.Count; i += dir)
+                if (_pageNews[i]) return true;
+            return false;
         }
 
         void ShowPage(int index, bool animate)
@@ -248,9 +308,12 @@ namespace CapyIsland.UI
             else { Canvas.ForceUpdateCanvases(); _carousel.horizontalNormalizedPosition = target; }
             for (int i = 0; i < _dots.Count; i++)
             {
-                _dots[i].color = i == index ? AccentColour : UiKit.SurfaceSunk;
+                bool fresh = _pageNews != null && i < _pageNews.Count && _pageNews[i];
+                _dots[i].color = fresh ? UiKit.Danger : i == index ? AccentColour : UiKit.SurfaceSunk;
                 _dots[i].rectTransform.sizeDelta = Vector2.one * (i == index ? 26f : 20f);
             }
+            if (_prevNew != null) _prevNew.SetActive(NewsBeyond(index, -1));
+            if (_nextNew != null) _nextNew.SetActive(NewsBeyond(index, 1));
         }
 
         /// <summary>Lets go of a swipe on the nearest page (or the next one, for a flick).</summary>
@@ -328,15 +391,56 @@ namespace CapyIsland.UI
             return card;
         }
 
-        /// <summary>A hobby you have not taken up yet: greyed out, with what to buy and where.</summary>
+        /// <summary>
+        /// A hobby you have not taken up yet: greyed out, with what to buy and where — or, while it
+        /// is still closed, how a hobby card opens it (and a way to spend one, if one is waiting).
+        /// </summary>
         void LockedCard(Hobby hobby, string name, Sprite icon)
         {
-            PictureCard(hobby, UiKit.InkSoft, true, out var text);
+            var locked = PictureCard(hobby, UiKit.InkSoft, true, out var text);
+            if (NewStuff.Has("hobbies/" + hobby)) NewDot.Fixed(locked, 40f);   // just opened with a card
             var title = UiKit.Text(text, "Name", name, 46f, UiKit.InkSoft, true, TextAlignmentOptions.Center);
             title.textWrappingMode = TextWrappingModes.NoWrap;
-            var how = UiKit.Text(text, "How", HobbyLog.HowToUnlock(hobby), 28f, UiKit.InkSoft, false, TextAlignmentOptions.Center);
+            bool closed = !HobbyLog.IsOpened(hobby);
+            // A card can take it up now (the first card only a hobby with gear, given free).
+            bool card = HobbyCards.Waiting > 0 && HobbyCards.Choices().Contains(hobby);
+            string words = card ? (HobbyCards.FirstCard ? StoryText.HobbyCardLines.LockedFree : StoryText.HobbyCardLines.LockedChoose)
+                : !closed ? HobbyLog.HowToUnlock(hobby)
+                : !HobbyCards.CanOpenYet(hobby) ? StoryText.HobbyCardLines.CookingAfterFarm
+                : HobbyCards.Waiting > 0 ? StoryText.HobbyCardLines.LockedLater
+                : HobbyCards.HeartsToNext is int more
+                    ? (more == 1 ? StoryText.HobbyCardLines.LockedHeart : string.Format(StoryText.HobbyCardLines.LockedHearts, more))
+                    : StoryText.HobbyCardLines.LockedLater;
+            var how = UiKit.Text(text, "How", words, 28f, UiKit.InkSoft, false, TextAlignmentOptions.Center);
             how.overflowMode = TextOverflowModes.Overflow;
+            if (!card) return;
+            var use = UiKit.Button(text, "UseCard", StoryText.HobbyCardLines.UseCard, UiKit.ButtonStyle.Primary, () => SpendCard(hobby), 30f, IconPainter.Star);
+            use.transform.parent.gameObject.AddComponent<LayoutElement>().preferredHeight = 84f;
         }
+
+        /// <summary>Cards waiting to be spent: how many, and the way to the choice.</summary>
+        void CardBanner()
+        {
+            int waiting = HobbyCards.Waiting;
+            if (waiting <= 0) return;
+            var banner = UiKit.Image(_list, "HobbyCards", UiKit.Rounded(32), UiKit.Hex("FDE7EF")).rectTransform;
+            var h = banner.gameObject.AddComponent<HorizontalLayoutGroup>();
+            h.padding = new RectOffset(24, 18, 14, 14);
+            h.spacing = 16f;
+            h.childAlignment = TextAnchor.MiddleLeft;
+            h.childControlWidth = h.childControlHeight = true;
+            h.childForceExpandWidth = h.childForceExpandHeight = false;
+            banner.gameObject.AddComponent<LayoutElement>().minHeight = 112f;
+            var words = UiKit.Text(banner, "Words", waiting > 1 ? string.Format(StoryText.HobbyCardLines.HubMany, waiting) : StoryText.HobbyCardLines.HubOne,
+                32f, UiKit.Ink, true);
+            words.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1f;
+            var go = UiKit.Button(banner, "Choose", StoryText.HobbyCardLines.HubButton, UiKit.ButtonStyle.Primary, () => SpendCard(null), 28f, IconPainter.Star);
+            var le = go.transform.parent.gameObject.AddComponent<LayoutElement>();
+            le.preferredWidth = 330f; le.preferredHeight = 80f;
+            NewDot.Fixed(go.transform, 30f);   // the card is what lit the Hobbies button
+        }
+
+        void SpendCard(Hobby? hobby) => HobbyCardScreen.Offer(hobby, () => { if (IsOpen && _page == Page.Hub) Refresh(); });
 
         static int CountDishes()
         {
@@ -406,15 +510,55 @@ namespace CapyIsland.UI
                 var tile = UiKit.Image(grid.transform, name, UiKit.Rounded(26), known ? Color.white : UiKit.SurfaceSunk);
                 Picture(tile.transform, pic, known);
                 Label(tile.transform, known ? name : "???", known);
-                if (known && NewStuff.Has("hobbies/" + hobby + "/" + entry.id)) NewDot.Fixed(tile.transform, 30f);
                 // Not found yet: where and when to go looking. Found: when it's about, and your tally.
                 string detail = known
                     ? HobbyData.Rarity(stars) + "\n" + (rain ? "Only in the rain" : GameClock.Describe(times))
                       + (sizes ? $"\n×{entry.count} · best {entry.best:0} cm" : $"\n×{entry.count}")
                     : HobbyData.Rarity(stars) + "\n" + where;
                 Detail(tile.transform, detail, known);
+                TapTile(tile, known, known ? "hobbies/" + hobby + "/" + entry.id : null, name, detail, pic);
             }
-            NewStuff.Clear("hobbies/" + hobby + "/");   // seen
+            DotsSeen("hobbies/" + hobby + "/");
+        }
+
+        // ---------------------------------------------------------------- tapping a journal tile
+
+        int _dotsShowing;
+        string _dotsPrefix;
+
+        /// <summary>
+        /// A journal tile you can tap (a Button, so dragging the page along doesn't count): found,
+        /// a card about it, and its new-dot goes; not found yet, where to look, by your finger.
+        /// </summary>
+        void TapTile(Image tile, bool known, string key, string title, string about, Sprite pic)
+        {
+            GameObject dot = null;
+            if (known && key != null && NewStuff.Has(key)) { dot = NewDot.Fixed(tile.transform, 30f); _dotsShowing++; }
+            tile.raycastTarget = true;
+            var button = tile.gameObject.AddComponent<Button>();
+            button.transition = Selectable.Transition.None;
+            tile.gameObject.AddComponent<PressSquash>();
+            button.onClick.AddListener(() =>
+            {
+                Sfx.Play(SfxKind.Tap, 0.5f);
+                if (dot != null)
+                {
+                    NewStuff.Remove(key);
+                    Destroy(dot);
+                    dot = null;
+                    // The last new one looked at: the page is seen (and anything it doesn't show a tile for).
+                    if (--_dotsShowing <= 0 && _dotsPrefix != null) NewStuff.Clear(_dotsPrefix);
+                }
+                if (known) CardPopup.Show(title, about ?? "", pic);
+                else Hints.Answer(string.IsNullOrEmpty(about) ? "Not found yet." : about);
+            });
+        }
+
+        /// <summary>After a page is built: with nothing new on it to tap, it is seen at once.</summary>
+        void DotsSeen(string prefix)
+        {
+            _dotsPrefix = prefix;
+            if (_dotsShowing == 0) NewStuff.Clear(prefix);
         }
 
         /// <summary>How much of the page is found, and what a full page wins.</summary>
@@ -485,12 +629,13 @@ namespace CapyIsland.UI
                 var tile = UiKit.Image(grid.transform, crop.Name, UiKit.Rounded(26), known ? Color.white : UiKit.SurfaceSunk);
                 Picture(tile.transform, HobbyData.ItemArt("crop:" + crop.Id), known);
                 Label(tile.transform, known ? crop.Name : "???", known);
-                if (known && NewStuff.Has("hobbies/Gardening/" + crop.Id)) NewDot.Fixed(tile.transform, 30f);
-                Detail(tile.transform, known
+                string detail = known
                     ? Loc.F("×{0} harvested", entry.count) + "\n" + Loc.F("Grows in {0} min", crop.Minutes)
-                    : Whereabouts.Crop(crop), known);
+                    : Whereabouts.Crop(crop);
+                Detail(tile.transform, detail, known);
+                TapTile(tile, known, known ? "hobbies/Gardening/" + crop.Id : null, crop.Name, detail, HobbyData.ItemArt("crop:" + crop.Id));
             }
-            NewStuff.Clear("hobbies/Gardening/");   // seen
+            DotsSeen("hobbies/Gardening/");
         }
 
         void CatsPage()
@@ -505,11 +650,14 @@ namespace CapyIsland.UI
                 bool adopted = state != null && state.adopted;
                 var tile = UiKit.Image(grid.transform, cat.Name, UiKit.Rounded(26), adopted ? UiKit.Hex("FDE8F0") : met ? Color.white : UiKit.SurfaceSunk);
                 Picture(tile.transform, Horaira.Picture(cat), met);
-                Label(tile.transform, adopted || met && Horaira.Is(cat) ? CatCare.NameOf(cat) : met ? "Stray cat" : "???", met);
-                Detail(tile.transform, adopted ? "Adopted!" : met ? $"Trust {state.bond}/{CatCare.MaxBond}" : Whereabouts.CatHint(cat), met);
-                if (adopted && NewStuff.Has("hobbies/Cats/" + cat.Id)) NewDot.Fixed(tile.transform, 30f);
+                string title = adopted || met && Horaira.Is(cat) ? CatCare.NameOf(cat) : met ? "Stray cat" : "???";
+                Label(tile.transform, title, met);
+                string detail = adopted ? "Adopted!" : met ? $"Trust {state.bond}/{CatCare.MaxBond}" : Whereabouts.CatHint(cat);
+                Detail(tile.transform, detail, met);
+                // A cat you've met: its card (its nature once adopted); one not met yet: where strays turn up.
+                TapTile(tile, met, adopted ? "hobbies/Cats/" + cat.Id : null, title, adopted ? cat.Personality + "\n" + detail : detail, Horaira.Picture(cat));
             }
-            NewStuff.Clear("hobbies/Cats/");   // seen
+            DotsSeen("hobbies/Cats/");
             var tip = UiKit.Text(_list, "Tip", "Strays wander onto your island every so often. Pet them, share a fish, and once they trust you, adopt them.", 26f, UiKit.InkSoft, false, TextAlignmentOptions.Center);
             tip.overflowMode = TextOverflowModes.Overflow;
         }
@@ -540,11 +688,13 @@ namespace CapyIsland.UI
             Back();
             // A recipe book: the cooking itself happens at your stove.
             var stove = CookingStove.Placed();
+            // His stall is on Sunflower Farm: until its bridge is up, he's not there to walk to.
+            const string ChefAway = "Chef Tofu's stall is on Sunflower Farm, once its bridge is up.";
             var go = UiKit.Button(_list, "Stove", stove != null ? "Go to my stove" : "Buy a stove from Chef Tofu",
-                UiKit.ButtonStyle.Primary, () => ShowInWorld(stove != null ? (Vector2?)stove.transform.position : ChefTofu.Spot, null), 30f, IconPainter.Flame);
+                UiKit.ButtonStyle.Primary, () => ShowInWorld(stove != null ? (Vector2?)stove.transform.position : ChefTofu.Spot, ChefAway), 30f, IconPainter.Flame);
             go.transform.parent.gameObject.AddComponent<LayoutElement>().preferredHeight = 96f;
             // Recipes and pantry goods: Chef Tofu's.
-            var chef = UiKit.Button(_list, "Chef", "Visit Chef Tofu", UiKit.ButtonStyle.Spring, () => ShowInWorld(ChefTofu.Spot, null), 30f);
+            var chef = UiKit.Button(_list, "Chef", "Visit Chef Tofu", UiKit.ButtonStyle.Spring, () => ShowInWorld(ChefTofu.Spot, ChefAway), 30f);
             chef.transform.parent.gameObject.AddComponent<LayoutElement>().preferredHeight = 96f;
             foreach (var dish in HobbyData.Dishes)
             {
@@ -579,7 +729,7 @@ namespace CapyIsland.UI
 
         void ShowInWorld(Vector2? target, string otherwise)
         {
-            if (target == null) { if (otherwise != null) Hints.Show(otherwise); Close(); return; }
+            if (target == null) { if (otherwise != null) Hints.Answer(otherwise); Close(); return; }
             Close();
             PlayerAvatar.GoTo(target.Value);
         }
@@ -707,8 +857,12 @@ namespace CapyIsland.UI
             int pages = Mathf.Max(1, Mathf.CeilToInt(all.Count / (float)perPage));
             _page = Mathf.Clamp(_page, 0, pages - 1);
 
-            var hang = UiKit.Button(_list, "Hang", "Hang a new ema (1 gold)", UiKit.ButtonStyle.Primary, Shrine.WriteNew, 32f, HobbyData.Art("Ema"));
-            hang.transform.parent.gameObject.AddComponent<LayoutElement>().preferredHeight = 96f;
+            // Only once writing is open (a hobby card): until then the rack is just to read.
+            if (HobbyLog.IsOpened(Hobby.Writing))
+            {
+                var hang = UiKit.Button(_list, "Hang", "Hang a new ema (1 gold)", UiKit.ButtonStyle.Primary, Shrine.WriteNew, 32f, HobbyData.Art("Ema"));
+                hang.transform.parent.gameObject.AddComponent<LayoutElement>().preferredHeight = 96f;
+            }
 
             // Which rack, right at the top: never below the fold where it could be missed.
             if (pages > 1)
@@ -779,8 +933,11 @@ namespace CapyIsland.UI
                 t.overflowMode = TextOverflowModes.Overflow;
                 return;
             }
+            // With Easy Reading the plaques hang a little bigger, for bigger writing: up to 15%,
+            // which still leaves a gap between neighbours' wood (the painting's edges are clear).
+            float size = width * 0.205f * Mathf.Min(1.15f, 1f + 0.3f * (Accessibility.TextScale - 1f));
             for (int i = 0; i < ema.Count && i < PegsX.Length * BarsY.Length; i++)
-                Plaque(rack, ema[i], i, PegsX[i % PegsX.Length], BarsY[i / PegsX.Length], width * 0.205f);
+                Plaque(rack, ema[i], i, PegsX[i % PegsX.Length], BarsY[i / PegsX.Length], size);
         }
 
         // Measured on the painting: the pegs used (left, middle, right) and the two bars, from the top.
@@ -802,9 +959,11 @@ namespace CapyIsland.UI
             r.localRotation = Quaternion.Euler(0f, 0f, ((index * 37) % 11 - 5) * 0.8f);
 
             // The wish's title, in ink on the plain wood below the little picture.
+            // With Easy Reading it takes more of the plain wood: nearer the edges, up to the picture.
             var t = UiKit.Text(plaque.transform, "Wish", e.Title, 22f, UiKit.Hex("4A3524"), true, TextAlignmentOptions.Center);
-            t.rectTransform.anchorMin = new Vector2(0.12f, 0.15f);
-            t.rectTransform.anchorMax = new Vector2(0.88f, 0.45f);
+            float more = Mathf.Clamp01((Accessibility.TextScale - 1f) * 2f);
+            t.rectTransform.anchorMin = new Vector2(Mathf.Lerp(0.12f, 0.1f, more), Mathf.Lerp(0.15f, 0.14f, more));
+            t.rectTransform.anchorMax = new Vector2(Mathf.Lerp(0.88f, 0.9f, more), Mathf.Lerp(0.45f, 0.48f, more));
             t.rectTransform.offsetMin = t.rectTransform.offsetMax = Vector2.zero;
             t.enableAutoSizing = true;
             t.fontSizeMin = 12f;
@@ -1124,6 +1283,9 @@ namespace CapyIsland.UI
             zv.spacing = 10f;
             zv.childControlWidth = zv.childControlHeight = true;
             zv.childForceExpandWidth = zv.childForceExpandHeight = true;
+            // Bigger buttons for Easy Reading's "Fit" (longer in Hebrew). A little less growth down
+            // than across, because the gaps between them stay the same: they stay round.
+            GrowsWithText.Add(_zoomBar, tall: 0.55f, wide: 0.6f);
             ZoomButton(_zoomBar, "+", () => ZoomBy(1.6f, HatCentre()));
             ZoomButton(_zoomBar, "−", () => ZoomBy(1f / 1.6f, HatCentre()));
             ZoomButton(_zoomBar, "Fit", Recentre);
@@ -1141,7 +1303,9 @@ namespace CapyIsland.UI
             ph.spacing = 14f;
             ph.childControlWidth = ph.childControlHeight = true;
             ph.childForceExpandWidth = true;
-            _patternRow.gameObject.AddComponent<LayoutElement>().preferredHeight = 112f;
+            var patternLayout = _patternRow.gameObject.AddComponent<LayoutElement>();
+            patternLayout.preferredHeight = 112f;
+            GrowsWithText.Add(patternLayout, tall: 1f);   // Easy Reading: room for what each needs, a line apiece (Patterns_)
 
             _status = UiKit.Text(list, "Status", "Tap or drag to paint.", 26f, UiKit.InkSoft, false, TextAlignmentOptions.Center);
 
@@ -1180,7 +1344,10 @@ namespace CapyIsland.UI
             th.spacing = 14f;
             th.childControlWidth = th.childControlHeight = true;
             th.childForceExpandWidth = true;
-            tools.gameObject.AddComponent<LayoutElement>().preferredHeight = 84f;
+            var toolsLayout = tools.gameObject.AddComponent<LayoutElement>();
+            toolsLayout.preferredHeight = 84f;
+            GrowsWithText.Add(toolsLayout, tall: 0.6f);
+            _tools = tools;
             _brushButton = UiKit.Button(tools, "Brush", "Brush", UiKit.ButtonStyle.Secondary, () => Pick(Tool.Brush), 26f, IconPainter.Brush);
             // The brush's size: three dots, small to large, beside it.
             var sizes = UiKit.Rect("Sizes", tools);
@@ -1205,7 +1372,19 @@ namespace CapyIsland.UI
             }
             _fillButton = UiKit.Button(tools, "Fill", "Fill", UiKit.ButtonStyle.Secondary, () => Pick(Tool.Fill), 26f, IconPainter.Bucket);
             _handButton = UiKit.Button(tools, "Hand", "Move", UiKit.ButtonStyle.Secondary, () => Pick(Tool.Hand), 26f, TutorialPointer.HandSprite);
-            UiKit.Button(tools, "Undo", "Undo", UiKit.ButtonStyle.Secondary, Undo, 26f, IconPainter.Undo);
+            var undo = UiKit.Button(tools, "Undo", "Undo", UiKit.ButtonStyle.Secondary, Undo, 26f, IconPainter.Undo);
+            foreach (var b in new[] { _fillButton, _handButton, undo }) _moreTools.Add((RectTransform)b.transform.parent);
+
+            // Easy Reading's second row of tools (SplitTools): five side by side only have room for small words.
+            _toolsMore = UiKit.Rect("MoreTools", list);
+            var mh = _toolsMore.gameObject.AddComponent<HorizontalLayoutGroup>();
+            mh.spacing = 14f;
+            mh.childControlWidth = mh.childControlHeight = true;
+            mh.childForceExpandWidth = true;
+            var moreLayout = _toolsMore.gameObject.AddComponent<LayoutElement>();
+            moreLayout.preferredHeight = 84f;
+            GrowsWithText.Add(moreLayout, tall: 0.6f);
+            _toolsMore.gameObject.SetActive(false);
 
             // Stickers: little ready-made pictures to stamp on, for when you don't want to paint it all.
             SectionLabel(list, "Stickers");
@@ -1271,6 +1450,7 @@ namespace CapyIsland.UI
             UiKit.Place(icon.rectTransform, new Vector2(0f, 0.5f), new Vector2(22f, 0f), new Vector2(54f, 54f));
             var t = UiKit.Text(chip, "Title", Title, 44f, Color.white, true, TextAlignmentOptions.MidlineLeft);
             UiKit.Stretch(t.rectTransform, 88f, 0f, 16f, 0f);
+            FitsText.Add(chip, t, new Vector2(104f, 33f), wide: true, tall: true);   // the title as drawn: translated, at Easy Reading's size
             t.textWrappingMode = TextWrappingModes.NoWrap;
 
             var close = UiKit.Image(body, "Close", UiKit.Circle, UiKit.HudGlass, true).rectTransform;
@@ -1359,9 +1539,24 @@ namespace CapyIsland.UI
             _zoomBar.anchoredPosition = new Vector2(-24f, -top - 10f);
         }
 
+        RectTransform _tools, _toolsMore;
+        readonly List<RectTransform> _moreTools = new();
+
+        /// <summary>
+        /// With Easy Reading, Fill, Move and Undo go down to a row of their own, so every tool's
+        /// word has room to be drawn big; at normal size all five share one row.
+        /// </summary>
+        void SplitTools()
+        {
+            bool two = Accessibility.TextScale > 1.2f;
+            foreach (var t in _moreTools) t.SetParent(two ? _toolsMore : _tools, false);
+            _toolsMore.gameObject.SetActive(two);
+        }
+
         protected override void OnOpen()
         {
             Arrange();
+            SplitTools();
             Swatches();
             Pick(_tool);
             Patterns_();
@@ -1376,7 +1571,10 @@ namespace CapyIsland.UI
             {
                 int index = i;
                 var p = Patterns[i];
-                string label = $"{p.name}\n<size=65%>{NeedsLine(i)}</size>";
+                // With Easy Reading each thing it needs gets a line: side by side they could only shrink.
+                string needs = NeedsLine(i);
+                if (Accessibility.TextScale > 1.2f) needs = needs.Replace(" · ", "</size>\n<size=65%>");
+                string label = $"{p.name}\n<size=65%>{needs}</size>";
                 var b = UiKit.Button(_patternRow, p.name, label, index == _pattern ? UiKit.ButtonStyle.Primary : UiKit.ButtonStyle.Secondary, () =>
                 {
                     if (_pattern == index) return;
@@ -1387,6 +1585,9 @@ namespace CapyIsland.UI
                     Silhouette();
                     Status(HaveFor(index) ? "Paint your " + Patterns[index].name.ToLower() + "!" : Patterns[index].where);
                 }, 28f);
+                // The words get the button's full height, not just the height they asked for at the
+                // size they were last drawn: otherwise three lines settle smaller than the room allows.
+                b.GetComponentInChildren<HorizontalLayoutGroup>().childForceExpandHeight = true;
             }
         }
 

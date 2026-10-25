@@ -148,6 +148,9 @@ namespace CapyIsland.UI
                 _languages.Add((l, pill, t));
             }
 
+            // In Hebrew: spoken to as a boy or a girl.
+            AddressChoice.Build(list, 72f, 30f, UiKit.Ink, AccentColour, UiKit.SurfaceSunk, Color.white, UiKit.Ink, card: true);
+
             // ---- Sound.
             var sound = Row(list, IconPainter.Sound, "Sound");
             Toggle(sound, () => SoundOn, v => SoundOn = v);
@@ -294,7 +297,7 @@ namespace CapyIsland.UI
             if (problem != null) { _deleteWarning.text = problem; return; }
             _deleteConfirm.SetActive(false);
             Sfx.Play(SfxKind.Tap, 0.6f);
-            Hints.Show("Your account and your island in the cloud are deleted.");
+            Hints.Answer("Your account and your island in the cloud are deleted.");
         }
 
         static RectTransform Row(RectTransform list, Sprite icon, string label)
@@ -311,7 +314,7 @@ namespace CapyIsland.UI
             var ic = UiKit.Image(row, "Icon", icon, UiKit.InkSoft);
             ic.preserveAspect = true;
             var le = ic.gameObject.AddComponent<LayoutElement>();
-            le.preferredWidth = le.preferredHeight = 54f;
+            le.preferredWidth = le.preferredHeight = le.minWidth = 54f;   // a long label wraps; the icon keeps its size
             var t = UiKit.Text(row, "Label", label, 34f, UiKit.Ink, true);
             t.overflowMode = TextOverflowModes.Overflow;
             t.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1f;
@@ -324,6 +327,10 @@ namespace CapyIsland.UI
             var state = UiKit.Text(row, "State", "", 30f, UiKit.InkSoft, true, TextAlignmentOptions.Right);
             state.textWrappingMode = TextWrappingModes.NoWrap;
             state.overflowMode = TextOverflowModes.Overflow;
+            // A long row label (bigger with Easy Reading, longer in Hebrew) would squeeze "On"
+            // until it spilled under the switch: the row label wraps instead.
+            state.gameObject.AddComponent<LayoutElement>();
+            FitsText.Add(state, state, Vector2.zero, firm: true);
 
             var track = UiKit.Image(row, "Toggle", UiKit.Rounded(30), UiKit.Leaf, true);
             var le = track.gameObject.AddComponent<LayoutElement>();
@@ -467,6 +474,7 @@ namespace CapyIsland.UI
         {
             SaveGame.Suspended = true;
             SaveGame.Delete();
+            GameClock.StartAfresh();   // the new island wakes up in the morning
             HudTour.ResetAll();   // a fresh island starts with the welcome page and its tips
             SaveGame.ResetStatics();
             Time.timeScale = 1f;

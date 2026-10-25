@@ -105,6 +105,16 @@ namespace CapyIsland.Game
             return item;
         }
 
+        /// <summary>
+        /// Gear given rather than bought (the first hobby card's gift, popped from its bubble):
+        /// everything buying it does — the hobby taken up, its little movie — without the price.
+        /// </summary>
+        public static void GearGiven(string name)
+        {
+            if (StoreData.HobbyFor(name) is Hobby gear && HobbyLog.Unlock(gear)) UI.HobbyCutscene.Show(gear);
+            Announce(name, null);
+        }
+
         /// <summary>An item came out of a free bubble: the same hooks as a purchase.</summary>
         public static void Collected(GameObject item)
         {

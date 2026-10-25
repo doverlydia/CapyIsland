@@ -79,13 +79,16 @@ namespace CapyIsland.Game
         static Sprite _bubbleSprite;
 
         /// <summary>
-        /// Borrows the sprite from a bubble already in the scene, so this needs no Resources
-        /// folder and no inspector wiring.
+        /// The glass: its own copy in Resources (World/Bubble). Borrowing it from a bubble already
+        /// in the scene, as this once did, failed on an island reopened after every bubble it
+        /// started with had been popped — new bubbles came out as bare items with no glass.
         /// </summary>
-        static Sprite BubbleSprite
+        public static Sprite BubbleSprite
         {
             get
             {
+                if (_bubbleSprite != null) return _bubbleSprite;
+                _bubbleSprite = Resources.Load<Sprite>("World/Bubble");
                 if (_bubbleSprite != null) return _bubbleSprite;
                 foreach (var b in Resources.FindObjectsOfTypeAll<Bubble>())
                 {

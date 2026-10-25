@@ -126,6 +126,14 @@ namespace CapyIsland.UI
 
         void Update()
         {
+            // Just under the goal card, however tall it is (Easy Reading makes it taller).
+            var tracker = ObjectiveTracker.Instance;
+            if (tracker != null)
+            {
+                var r = (RectTransform)transform;
+                float y = -104f - ((RectTransform)tracker.transform).sizeDelta.y - 14f;
+                if (!Mathf.Approximately(r.anchoredPosition.y, y)) r.anchoredPosition = new Vector2(r.anchoredPosition.x, y);
+            }
             Warning();
             if (Time.unscaledTime < _next) return;
             _next = Time.unscaledTime + 0.5f;
@@ -258,9 +266,19 @@ namespace CapyIsland.UI
                 bool me = p.id == Live.MyId;
                 string who = me ? Loc.T("You") : p.name;
                 string tag = p.gone ? " · " + Loc.T("left") : p.isOut ? " · " + Loc.T("out") : "";
-                var row = UiKit.Text(_board, "Row", (i + 1) + ". " + who + tag + "   <b>" + p.score + "</b>", 24f, me ? UiKit.PrimaryDark : UiKit.Ink, me);
+                // A line of its own, with the islander's leaf before an islander's name.
+                var line = UiKit.Rect("Row", _board);
+                var h = line.gameObject.AddComponent<HorizontalLayoutGroup>();
+                h.spacing = 6f;
+                h.childAlignment = TextAnchor.MiddleLeft;
+                h.childControlWidth = h.childControlHeight = true;
+                h.childForceExpandWidth = h.childForceExpandHeight = false;
+                RtlLayout.Add(h);
+                if (p.bot && !me) UiKit.IslanderLeafIcon(line, 22f);
+                var row = UiKit.Text(line, "Text", (i + 1) + ". " + who + tag + "   <b>" + p.score + "</b>", 24f, me ? UiKit.PrimaryDark : UiKit.Ink, me);
                 row.textWrappingMode = TextWrappingModes.NoWrap;
                 row.overflowMode = TextOverflowModes.Ellipsis;
+                row.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1f;
             }
         }
 

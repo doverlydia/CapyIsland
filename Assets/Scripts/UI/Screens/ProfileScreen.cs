@@ -138,13 +138,14 @@ namespace CapyIsland.UI
             var grid = UiKit.Rect("Stats", _list);
             var g = grid.gameObject.AddComponent<GridLayoutGroup>();
             grid.gameObject.AddComponent<FlexGrid>();
-            g.cellSize = new Vector2(440f, 104f);
+            float cell = 104f * Accessibility.TextScale;   // taller with Easy Reading, so the words grow
+            g.cellSize = new Vector2(440f, cell);
             g.spacing = new Vector2(14f, 14f);
             g.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
             g.constraintCount = 2;
             g.childAlignment = TextAnchor.UpperCenter;
             int rows = (stats.Count + 1) / 2;
-            grid.gameObject.AddComponent<LayoutElement>().preferredHeight = rows * 104f + (rows - 1) * 14f;
+            grid.gameObject.AddComponent<LayoutElement>().preferredHeight = rows * cell + (rows - 1) * 14f;
             foreach (var s in stats) Stat(grid, s.icon, s.colour, s.value, s.label);
         }
 
@@ -189,13 +190,14 @@ namespace CapyIsland.UI
             var grid = UiKit.Rect("Hobbies", _list);
             var g = grid.gameObject.AddComponent<GridLayoutGroup>();
             grid.gameObject.AddComponent<FlexGrid>();
-            g.cellSize = new Vector2(440f, 84f);
+            float cell = 84f * Accessibility.TextScale;
+            g.cellSize = new Vector2(440f, cell);
             g.spacing = new Vector2(14f, 12f);
             g.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
             g.constraintCount = 2;
             g.childAlignment = TextAnchor.UpperCenter;
             int rows = (names.Length + 1) / 2;
-            grid.gameObject.AddComponent<LayoutElement>().preferredHeight = rows * 84f + (rows - 1) * 12f;
+            grid.gameObject.AddComponent<LayoutElement>().preferredHeight = rows * cell + (rows - 1) * 12f;
             foreach (var n in names)
             {
                 var tile = UiKit.Image(grid, n.name, UiKit.Rounded(24), Color.white);

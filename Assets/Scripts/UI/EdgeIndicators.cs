@@ -9,7 +9,8 @@ namespace CapyIsland.UI
 {
     /// <summary>
     /// Arrows around the edge of the screen pointing at things you cannot see: bubbles (showing what
-    /// is inside), pests to bomb or tame, anyone with news, and wherever the guide's hand is pointing.
+    /// is inside), pests to bomb or tame, anyone with news, a station whose capybaras have fallen
+    /// asleep for want of something, and wherever the guide's hand is pointing.
     /// Things in the same direction share one arrow with a count. Tap an arrow and your capybara
     /// walks over there (touch the ground to take over again).
     /// </summary>
@@ -25,7 +26,7 @@ namespace CapyIsland.UI
         class Widget
         {
             public RectTransform Root, Arrow;
-            public Image Ring, Icon, ArrowImage;
+            public Image Ring, Face, Icon, ArrowImage, Cloud, CloudRim;
             public TextMeshProUGUI Count, Label;
             public RectTransform LabelPill;
             public Vector2 Target;
@@ -174,6 +175,7 @@ namespace CapyIsland.UI
             MarkerKind.Quest => 3,
             MarkerKind.Pest => 2,
             MarkerKind.Friend => 2,
+            MarkerKind.Asleep => 2,
             _ => 1,
         };
 
@@ -183,6 +185,7 @@ namespace CapyIsland.UI
             MarkerKind.Quest => "Quest",
             MarkerKind.Pest => "Pests",
             MarkerKind.Friend => "Visitor",
+            MarkerKind.Asleep => "Asleep",
             _ => "Bubble",
         };
 
@@ -192,8 +195,12 @@ namespace CapyIsland.UI
             MarkerKind.Quest => UiKit.Sun,
             MarkerKind.Pest => UiKit.Danger,
             MarkerKind.Friend => UiKit.Hex("5B9BD5"),
+            MarkerKind.Asleep => AsleepColour,
             _ => UiKit.Spring,
         };
+
+        /// <summary>A station asleep for want of something: the slate of a thought cloud's outline.</summary>
+        public static Color AsleepColour => UiKit.Hex("7F8FA6");
 
         void Dress(Widget w, IMapMarker m)
         {
@@ -203,6 +210,15 @@ namespace CapyIsland.UI
             var icon = m.MarkerIcon;
             w.Icon.sprite = icon != null ? icon : IconPainter.Star;
             w.Icon.color = icon != null ? Color.white : colour;
+            bool dream = m.MarkerKind == MarkerKind.Asleep;
+            if (w.Cloud.gameObject.activeSelf != dream)
+            {
+                w.Cloud.gameObject.SetActive(dream);
+                w.CloudRim.gameObject.SetActive(dream);
+                w.Face.color = dream ? UiKit.Hex("D9E0E8") : Color.white;
+                float inset = dream ? 20f : 9f;
+                UiKit.Stretch(w.Icon.rectTransform, inset, inset, inset, inset);
+            }
 
             // Pests and the guide's hand pulse: they want attention now.
             bool pulse = m.MarkerKind == MarkerKind.Pest || m.MarkerKind == MarkerKind.Guide;
@@ -250,6 +266,15 @@ namespace CapyIsland.UI
             w.Ring.rectTransform.sizeDelta = new Vector2(Size, Size);
             var face = UiKit.Image(w.Ring.transform, "Face", UiKit.Circle, Color.white);
             UiKit.Stretch(face.rectTransform, 7f, 7f, 7f, 7f);
+            w.Face = face;
+            // A sleepy station's picture sits in a little thought cloud, like the one over its
+            // sleepers, so it never reads as a bubble with that thing in it.
+            w.CloudRim = UiKit.Image(face.transform, "CloudRim", IconPainter.ThoughtCloudRim, WorldBubble.DreamRim);
+            w.CloudRim.preserveAspect = true;
+            UiKit.Stretch(w.CloudRim.rectTransform, 2f, 2f, 2f, 2f);
+            w.Cloud = UiKit.Image(face.transform, "Cloud", IconPainter.ThoughtCloud, WorldBubble.DreamFill);
+            w.Cloud.preserveAspect = true;
+            UiKit.Stretch(w.Cloud.rectTransform, 2f, 2f, 2f, 2f);
             w.Icon = UiKit.Image(face.transform, "Icon", null, Color.white);
             w.Icon.preserveAspect = true;
             UiKit.Stretch(w.Icon.rectTransform, 9f, 9f, 9f, 9f);

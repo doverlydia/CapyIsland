@@ -15,7 +15,11 @@ namespace CapyIsland.Game
     /// The player's purse. Everything that earns or spends goes through here so there is exactly one
     /// place that can change a balance, and exactly one event the HUD listens to.
     ///
-    /// Starting values are the original's: 1000 wood, 1500 gold, 0 gems (see docs/BUNNI_MECHANICS.md).
+    /// A new game starts with 100 wood, 100 gold and no gems: a deliberate departure from the
+    /// original's 1000 / 1500 (docs/reference/game.xml), so money has a job from the start. Miso
+    /// hands over the rest (900 wood, 1400 gold) with the General Store, her first quest
+    /// (<see cref="MissionSetUps"/>). The scene still holds the original's numbers; a save, or a
+    /// friend's island, sets its own.
     /// </summary>
     public class ResourceStore : MonoBehaviour
     {
@@ -41,6 +45,9 @@ namespace CapyIsland.Game
         [SerializeField] int gold = 1500;
         [SerializeField] int gems;
 
+        /// <summary>What a brand-new game starts with.</summary>
+        public const int NewGameWood = 100, NewGameGold = 100;
+
         /// <summary>Raised whenever any balance changes, with the kind that changed and its new total.</summary>
         public event Action<ResourceKind, int> Changed;
 
@@ -48,6 +55,13 @@ namespace CapyIsland.Game
         {
             if (_instance != null && _instance != this) { Destroy(gameObject); return; }
             _instance = this;
+            // A brand-new game (no save, not a visit): the lean start. Old saves bring their own purse.
+            if (!SaveGame.HasSave && !Visit.Active)
+            {
+                wood = NewGameWood;
+                gold = NewGameGold;
+                gems = 0;
+            }
         }
 
         void OnDestroy()

@@ -427,7 +427,7 @@ namespace CapyIsland.UI
         {
             if (Asked(member)) return;
             var who = Who(member);
-            if (who == null || string.IsNullOrEmpty(who.code)) { Hints.Show("Couldn't find their friend code just now. Try again in a moment."); return; }
+            if (who == null || string.IsNullOrEmpty(who.code)) { Hints.Answer("Couldn't find their friend code just now. Try again in a moment."); return; }
             _asked.Add(member);
             Sfx.Play(SfxKind.Plop, 0.45f);
             Changed?.Invoke();
@@ -441,7 +441,7 @@ namespace CapyIsland.UI
                 _asked.Remove(member);
                 Changed?.Invoke();
             }
-            Hints.Show(problem ?? Loc.F("Request sent to {0}. You'll be friends once they accept.", who.name));
+            Hints.Answer(problem ?? Loc.F("Request sent to {0}. You'll be friends once they accept.", who.name));
         }
     }
 

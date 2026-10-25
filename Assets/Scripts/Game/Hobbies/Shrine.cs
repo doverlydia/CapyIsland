@@ -162,27 +162,36 @@ namespace CapyIsland.Game
         {
             if (Attention.TutorialRunning) { UI.SpeechDialog.Show(face, StoryText.Keeper, new[] { StoryText.Mochi.Busy }, null); return; }
 
+            // Writing opens with a hobby card: until then Mochi says hello, and the rack is just to read.
+            bool open = HobbyLog.IsOpened(Hobby.Writing);
             string[] lines;
             Action closed = null;
-            if (Visit.Active) lines = new[] { StoryText.Mochi.Visit(Visit.Host.name) };
+            if (Visit.Active) lines = new[] { open ? StoryText.Mochi.Visit(Visit.Host.name) : StoryText.HobbyCardLines.MochiWaits };
             else if (PlayerPrefs.GetInt(MetKey, 0) == 0)
             {
                 PlayerPrefs.SetInt(MetKey, 1);
                 PlayerPrefs.Save();
                 lines = StoryText.Mochi.Meet;
+                if (!open)
+                {
+                    // Everything but his offer to hang one: that waits for the card.
+                    lines = new string[StoryText.Mochi.Meet.Length];
+                    Array.Copy(StoryText.Mochi.Meet, lines, lines.Length - 1);
+                    lines[lines.Length - 1] = StoryText.HobbyCardLines.MochiWaits;
+                }
                 // Old Yuzu has something to say about him, once you've met (when the screen is free).
                 closed = () => Attention.Ask("yuzu-met-mochi", () => Hints.Show(StoryText.Yuzu.MetMochi));
             }
+            else if (!open) lines = new[] { StoryText.HobbyCardLines.MochiWaits };
             else lines = new[] { StoryText.Mochi.Hello[UnityEngine.Random.Range(0, StoryText.Mochi.Hello.Length)] };
 
             var store = ResourceStore.Instance;
             bool afford = store != null && store.Get(ResourceKind.Gold) >= 1;
-            UI.SpeechDialog.ShowChoices(face, StoryText.Keeper, lines, closed, new List<UI.SpeechDialog.Choice>
-            {
-                new("Hang an ema (1 gold)", WriteNew, afford),
-                new("Look at the rack", OpenRack),
-                new("Not now", null),
-            });
+            var choices = new List<UI.SpeechDialog.Choice>();
+            if (open) choices.Add(new("Hang an ema (1 gold)", WriteNew, afford));
+            choices.Add(new("Look at the rack", OpenRack));
+            choices.Add(new("Not now", null));
+            UI.SpeechDialog.ShowChoices(face, StoryText.Keeper, lines, closed, choices);
         }
 
         static void OpenRack() => UI.LibraryScreen.ShowRack();
@@ -190,8 +199,9 @@ namespace CapyIsland.Game
         /// <summary>Pays the offering and opens a fresh ema to write.</summary>
         public static void WriteNew()
         {
+            if (!HobbyLog.IsOpened(Hobby.Writing)) { Hints.Answer(StoryText.HobbyCardLines.WritingClosed); return; }
             var store = ResourceStore.Instance;
-            if (store == null || store.Get(ResourceKind.Gold) < 1) { Hints.Show("An ema is an offering of one gold coin."); return; }
+            if (store == null || store.Get(ResourceKind.Gold) < 1) { Hints.Answer("An ema is an offering of one gold coin."); return; }
             UI.LibraryScreen.WriteEma((title, text) =>
             {
                 if (!store.TrySpend(0, 1, 0)) return;
@@ -208,12 +218,12 @@ namespace CapyIsland.Game
                 var left = Load(LeftKey);
                 left.list.Add(new Note { who = Visit.Host.id, from = "you", title = title, text = text });
                 Save(LeftKey, left);
-                Hints.Show($"Your ema hangs on {Visit.Host.name}'s rack. They'll find it!");
+                Hints.Answer($"Your ema hangs on {Visit.Host.name}'s rack. They'll find it!");
             }
             else
             {
                 HobbyLog.AddBook(title, text);
-                Hints.Show("Your ema hangs on the rack. Friends who visit can read it!");
+                Hints.Answer("Your ema hangs on the rack. Friends who visit can read it!");
             }
             HobbyLog.AddXp(Hobby.Writing, Mathf.Clamp(text.Length / 20, 10, 40));
             Motes.Trigger("hobby_book");
@@ -275,7 +285,9 @@ namespace CapyIsland.Game
             notes.list.Add(new Note { from = who.name, title = story.Title, text = story.Text });
             while (notes.list.Count > 24) notes.list.RemoveAt(0);
             Save(ShoreKey, notes);
-            NewStuff.Add("hobbies/Writing/" + who.id + "/" + story.Title);
+            // A dot on the Hobbies button only once writing is yours: before that its page is a
+            // locked card, with nothing to tap that would show (and clear) it.
+            if (HobbyLog.IsOpened(Hobby.Writing)) NewStuff.Add("hobbies/Writing/" + who.id + "/" + story.Title);
             Hints.Show(who.name + " hung an ema at Old Mochi's shrine for you!");
         }
 

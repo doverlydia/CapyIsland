@@ -199,7 +199,25 @@ namespace CapyIsland.Game
             tmp.outlineWidth = 0.25f;
             tmp.outlineColor = new Color32(60, 40, 25, 255);
             tmp.rectTransform.sizeDelta = new Vector2(6f, 1f);
+            tmp.enableAutoSizing = true;   // "Juniper of Saltbreeze Point" fits too
+            tmp.fontSizeMin = 2f;
+            tmp.fontSizeMax = 3.2f;
             tmp.sortingOrder = 31000;
+            // An islander, whom the game plays: a leaf before the name, as on their portrait.
+            if (Who != null && Who.IsIslander)
+            {
+                tmp.ForceMeshUpdate();
+                var leaf = new GameObject("Islander").AddComponent<SpriteRenderer>();
+                leaf.transform.SetParent(go.transform, false);
+                leaf.sprite = UI.IconPainter.Leaf;
+                leaf.sharedMaterial = HarvestEffects.SpriteMaterial();   // bright like the name, night or day
+                leaf.color = UI.UiKit.Hex("8FD47A");
+                leaf.sortingOrder = 31001;
+                float w = leaf.sprite.bounds.size.x;
+                leaf.transform.localScale = Vector3.one * (0.42f / Mathf.Max(0.01f, w));
+                float half = Mathf.Min(tmp.textBounds.size.x, 6f) * 0.5f;
+                leaf.transform.localPosition = new Vector3(-half - 0.24f, 0.02f, 0f);
+            }
         }
 
         void OnDestroy()

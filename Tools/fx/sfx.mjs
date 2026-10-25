@@ -367,3 +367,25 @@ write("Intro_Crown", make(1.6, (t) =>
     const k = t / 2.8, rise = Math.pow(k, 1.3) * Math.pow(Math.sin(Math.PI * Math.min(1, k * 1.05)), 0.6);
     return air(420 + 900 * rise) * rise + rumble(140) * (0.3 + 0.4 * rise) * 0.6;
   }), "Assets/Resources/Sfx", 0.45); }
+
+// ---------------------------------------------------------------- the island's wildlife
+// Appended last, so every earlier file stays byte-identical. Tiny, soft and quiet: they play often.
+
+// A bird taking off: four quick feathery puffs of soft air, fading as it gets away.
+{ const air = softNoise(3, 260);
+  const beats = [0, 0.07, 0.15, 0.24];
+  write("Sfx_Flutter", make(0.4, (t) => {
+    let a = 0;
+    beats.forEach((at, i) => { const u = t - at; if (u >= 0 && u < 0.06) a += Math.sin(Math.PI * u / 0.06) * (1 - i * 0.2); });
+    return air(1100) * a;
+  }), "Assets/Resources/Sfx", 0.35); }
+
+// A bumblebee going by: a low round hum (a soft square-ish wobble near 180 Hz, under a band of
+// air) that swells in and fades away, never a whine.
+{ const fuzz = softNoise(3, 120);
+  write("Sfx_Buzz", make(1.1, (t) => {
+    const k = t / 1.1, swell = Math.pow(Math.sin(Math.PI * k), 1.5);
+    const f = 175 + 12 * Math.sin(2 * Math.PI * 3.1 * t);
+    const hum = Math.tanh(2.2 * Math.sin(2 * Math.PI * f * t)) * 0.5 + 0.2 * Math.sin(4 * Math.PI * f * t);
+    return (hum * 0.6 + fuzz(700) * 0.5) * swell * (0.85 + 0.15 * Math.sin(2 * Math.PI * 23 * t));
+  }), "Assets/Resources/Sfx", 0.3); }

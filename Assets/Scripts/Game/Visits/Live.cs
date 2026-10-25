@@ -396,7 +396,7 @@ namespace CapyIsland.Game
         {
             if (host == null || string.IsNullOrEmpty(code)) return;
             if (Now == Mode.Knocking) CancelKnock();
-            if (Now == Mode.Hosting) { Hints.Show("You're hosting right now. End it first, then you can fly off."); return; }
+            if (Now == Mode.Hosting) { Hints.Answer("You're hosting right now. End it first, then you can fly off."); return; }
             if (Now == Mode.Visiting) await End();
             FlyOver(host, code);
         }
@@ -429,7 +429,7 @@ namespace CapyIsland.Game
             UI.KnockPanel.Hide();
             Now = Mode.None;
             _host = null;
-            Hints.Show(why);
+            Hints.Answer(why);
         }
 
         /// <summary>The flight to them didn't happen after all (no airstrip, their island unreadable): nothing live either.</summary>
@@ -552,7 +552,7 @@ namespace CapyIsland.Game
             {
                 _expected.RemoveAll(x => x.who.member == who.member);
                 _ = RealFriends.Send(who, "no");
-                Hints.Show("Couldn't open your island just now. Try again in a moment.");
+                Hints.Answer("Couldn't open your island just now. Try again in a moment.");
                 return;
             }
             await RealFriends.Send(who, "open", code);

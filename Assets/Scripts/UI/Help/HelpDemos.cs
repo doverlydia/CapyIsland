@@ -301,17 +301,17 @@ namespace CapyIsland.UI
         }
 
         /// <summary>
-        /// The hungry dream: a pale thought bubble with a garden in it and two little dots trailing
+        /// The hungry dream: a pale thought cloud with a garden in it and two little dots trailing
         /// down to the sleeper's head (WorldBubble.Thought).
         /// </summary>
         static RectTransform Dream(HelpMovie m, Vector2 at, float size, Sprite inside)
         {
             var g = m.Group("Dream", at);
-            var dot = new Color(1f, 1f, 1f, 0.7f);
-            m.Shape("Dot", UiKit.Circle, new Vector2(-0.42f, -0.98f) * size, Vector2.one * size * 0.15f, dot, g);
-            m.Shape("Dot", UiKit.Circle, new Vector2(-0.28f, -0.68f) * size, Vector2.one * size * 0.26f, dot, g);
-            m.Shape("Disc", UiKit.Circle, Vector2.zero, Vector2.one * size, new Color(1f, 1f, 1f, 0.78f), g);
-            var pic = m.Shape("Icon", inside, Vector2.zero, Vector2.one * size * 0.66f, new Color(1f, 1f, 1f, 0.9f), g);
+            m.Shape("Dot", UiKit.Circle, new Vector2(-0.56f, -1.14f) * size, Vector2.one * size * 0.15f, WorldBubble.DreamDot, g);
+            m.Shape("Dot", UiKit.Circle, new Vector2(-0.4f, -0.84f) * size, Vector2.one * size * 0.26f, WorldBubble.DreamDot, g);
+            m.Shape("Rim", IconPainter.ThoughtCloudRim, Vector2.zero, Vector2.one * size * 2.15f, WorldBubble.DreamRim, g);
+            m.Shape("Cloud", IconPainter.ThoughtCloud, Vector2.zero, Vector2.one * size * 2.15f, WorldBubble.DreamFill, g);
+            var pic = m.Shape("Icon", inside, Vector2.zero, Vector2.one * size, WorldBubble.DreamIcon, g);
             pic.preserveAspect = true;
             return g;
         }
@@ -516,7 +516,7 @@ namespace CapyIsland.UI
 
             // Its dream, over its head until it wakes.
             var dreamAt = nap + new Vector2(18f, 128f);
-            var dream = Dream(m, dreamAt, 78f, HelpArt.Item("Medium Posie Garden", "Small Posie Garden"));
+            var dream = Dream(m, dreamAt, 64f, HelpArt.Item("Medium Posie Garden", "Small Posie Garden"));
             m.Move(dream).At(0f, dreamAt).At(1.1f, dreamAt + new Vector2(0f, 6f)).At(2.2f, dreamAt).At(wake, dreamAt + new Vector2(0f, 5f));
             m.Size(dream).At(wake, 1f).At(wake + 0.12f, 1.2f).At(wake + 0.3f, 0.3f);
             m.Fade(dream).At(0f, 0f).At(0.3f, 1f).At(wake, 1f).At(wake + 0.3f, 0f);

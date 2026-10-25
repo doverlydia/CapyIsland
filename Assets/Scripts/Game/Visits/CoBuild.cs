@@ -80,13 +80,13 @@ namespace CapyIsland.Game
             }
             if (Live.Now != Live.Mode.Visiting || !Live.Connected)
             {
-                Hints.Show(UI.Loc.F("{0} isn't home. Visit them while they're online to build together.", host.name));
+                Hints.Answer(UI.Loc.F("{0} isn't home. Visit them while they're online to build together.", host.name));
                 return;
             }
             Asking = true;
             Changed?.Invoke();
             Live.AskToBuild();
-            Hints.Show(UI.Loc.F("Asking {0}…", host.name));
+            Hints.Answer(UI.Loc.F("Asking {0}…", host.name));
         }
 
         /// <summary>The host's answer (from a bot at once, or a real friend over the live link).</summary>
@@ -127,7 +127,7 @@ namespace CapyIsland.Game
             GuestAllowed = yes;
             Changed?.Invoke();
             if (guest.IsReal) Live.AnswerBuild(guest, yes);
-            if (yes) Hints.Show(UI.Loc.F("{0} can build on your island now.", guest.name));
+            if (yes) Hints.Answer(UI.Loc.F("{0} can build on your island now.", guest.name));
         }
     }
 }

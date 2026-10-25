@@ -140,6 +140,7 @@ namespace CapyIsland.UI
         void Update()
         {
             KeepNameAboveKeyboard();
+            FitPanel();
             if (_candle == null) return;
             float t = Time.unscaledTime;
             float flame = 0.65f * Mathf.PerlinNoise(t * 0.9f, 0.3f) + 0.35f * Mathf.PerlinNoise(t * 4.5f, 7.1f);
@@ -323,6 +324,7 @@ namespace CapyIsland.UI
             panel.anchorMin = _wide ? new Vector2(0.52f, 0.06f) : new Vector2(0.06f, 0.06f);
             panel.anchorMax = _wide ? new Vector2(0.95f, 0.86f) : new Vector2(0.94f, 0.5f);
             panel.offsetMin = panel.offsetMax = Vector2.zero;
+            panel.pivot = new Vector2(0.5f, 1f);   // FitPanel shrinks it from its top edge
             var v = panel.gameObject.AddComponent<VerticalLayoutGroup>();
             v.spacing = 26f;
             v.childAlignment = TextAnchor.UpperCenter;
@@ -338,9 +340,12 @@ namespace CapyIsland.UI
             line.textWrappingMode = TextWrappingModes.Normal;
 
             Languages(panel);
-            EasyReading(panel);
+            // In Hebrew: a boy or a girl, so everything after (the movie first) speaks to you rightly.
+            _address = AddressChoice.Build(panel, 84f, 36f, new Color(0.9f, 0.97f, 0.96f), UiKit.Spring, new Color(1f, 1f, 1f, 0.12f),
+                Color.white, new Color(0.88f, 0.95f, 0.94f)).gameObject;
+            var easy = EasyReading(panel);
             // Stepped aside while you type your name, so the name box can sit above the keyboard.
-            _asideWhileTyping = new[] { panel.GetChild(0).gameObject, panel.GetChild(1).gameObject, panel.GetChild(2).gameObject };   // the line, languages, Easy Reading
+            _asideWhileTyping = new[] { line.gameObject, panel.Find("Languages").gameObject, _address, easy };
 
             _name = UiKit.Input(panel, "Name", "Your name", false, 110f);
             _name.characterLimit = PlayerProfile.MaxNameLength;
@@ -348,31 +353,30 @@ namespace CapyIsland.UI
             var current = PlayerPrefs.GetString("CapyIsland.PlayerName", "");
             if (!string.IsNullOrWhiteSpace(current)) _name.text = current;
 
-            // Signing up comes first, so an island isn't lost with its phone (AccountScreen.ShowWelcome);
-            // going on as a guest is offered in there, under a warning.
-            var go = UiKit.Button(panel, "SignUp", "Sign up", UiKit.ButtonStyle.Primary, SignUp, 40f);
-            go.transform.parent.gameObject.AddComponent<LayoutElement>().preferredHeight = 112f;
+            // Every way in, right here, so an island isn't lost with its phone: Google (where it
+            // works), a new account, or one you already have. Each opens the account window on that
+            // step (AccountScreen.ShowWelcome…); going on as a guest is under them, with its warning.
+            if (GoogleLogin.Available || Application.isEditor)
+            {
+                var google = UiKit.Button(panel, "Google", "Continue with Google", UiKit.ButtonStyle.Secondary, () => SignUp(Way.Google), 38f);
+                google.transform.parent.gameObject.AddComponent<LayoutElement>().preferredHeight = 104f;
+            }
+            var ways = UiKit.Rect("Accounts", panel);
+            var wh = ways.gameObject.AddComponent<HorizontalLayoutGroup>();
+            wh.spacing = 18f;
+            wh.childControlWidth = wh.childControlHeight = true;
+            wh.childForceExpandWidth = true;
+            ways.gameObject.AddComponent<LayoutElement>().preferredHeight = 96f;
+            UiKit.Button(ways, "SignUp", "Sign up", UiKit.ButtonStyle.Primary, () => SignUp(Way.SignUp), 36f);
+            UiKit.Button(ways, "SignIn", "Sign in", UiKit.ButtonStyle.Secondary, () => SignUp(Way.SignIn), 36f);
             var risk = UiKit.Text(panel, "Risk", "Without an account, your island could be lost forever.", 28f, new Color(1f, 0.78f, 0.7f), false, TextAlignmentOptions.Center);
             risk.overflowMode = TextOverflowModes.Overflow;
             // The same way on as the sign-up window offers, right here, for those who'd rather not.
             var guest = UiKit.Button(panel, "Guest", "Continue as guest", UiKit.ButtonStyle.Ghost, Continue, 30f);
             guest.transform.parent.gameObject.AddComponent<LayoutElement>().preferredHeight = 76f;
             foreach (var t in guest.GetComponentsInChildren<TextMeshProUGUI>()) t.color = new Color(0.88f, 0.95f, 0.94f);
-
-            // Played before, on another device or before clearing the browser: bring that island back.
-            // Up in the corner, out of the panel: the panel's height is fixed, and another row in it
-            // squeezed the language pills to nothing in landscape.
-            var load = UiKit.Button(_root, "LoadSave", "Load a save", UiKit.ButtonStyle.Ghost, SaveCodeScreen.ShowImport, 32f);
-            var corner = (RectTransform)load.transform.parent;
-            corner.anchorMin = corner.anchorMax = corner.pivot = new Vector2(1f, 1f);
-            corner.anchoredPosition = new Vector2(-36f, -36f);
-            corner.sizeDelta = new Vector2(320f, 90f);
-            var cornerGroup = corner.gameObject.AddComponent<CanvasGroup>();
-            cornerGroup.alpha = 0f;
-            cornerGroup.DOFade(1f, 1f).SetDelay(0.9f).SetUpdate(true);
-            // Light on the dark, like the language pills.
-            load.GetComponent<Image>().color = new Color(1f, 1f, 1f, 0.12f);
-            foreach (var t in load.GetComponentsInChildren<TextMeshProUGUI>()) t.color = new Color(0.88f, 0.95f, 0.94f);
+            // Played before (another device, a cleared browser)? Sign in brings that island back, and a
+            // saved island code loads from the same window (AccountScreen), so there's one way back, not two.
         }
 
         /// <summary>Landscape: she drifts over to the left, making room for the questions beside her.</summary>
@@ -423,7 +427,8 @@ namespace CapyIsland.UI
             Paint();
         }
 
-        void EasyReading(RectTransform parent)
+        /// <summary>The Easy Reading switch; returns its row in the panel.</summary>
+        GameObject EasyReading(RectTransform parent)
         {
             var easy = UiKit.Button(parent, "Easy", "Easy Reading: Off", UiKit.ButtonStyle.Secondary, null, 36f, IconPainter.Magnifier);
             easy.transform.parent.gameObject.AddComponent<LayoutElement>().preferredHeight = 100f;
@@ -442,9 +447,11 @@ namespace CapyIsland.UI
                 Paint();
             });
             Paint();
+            return easy.transform.parent.gameObject;
         }
 
         RectTransform _panel;
+        GameObject _address;
         GameObject[] _asideWhileTyping;
         bool _typing;
 
@@ -459,7 +466,8 @@ namespace CapyIsland.UI
             bool typing = _name.isFocused && (Application.isMobilePlatform || TouchScreenKeyboard.visible);
             if (typing == _typing) return;
             _typing = typing;
-            foreach (var g in _asideWhileTyping) if (g != null) g.SetActive(!typing);
+            // (The boy-or-girl row only ever comes back in Hebrew.)
+            foreach (var g in _asideWhileTyping) if (g != null) g.SetActive(!typing && (g != _address || Loc.Current == Language.Hebrew));
             float shift = 0f;
             if (typing)
             {
@@ -475,12 +483,36 @@ namespace CapyIsland.UI
             _panel.offsetMax = new Vector2(0f, shift);
         }
 
-        /// <summary>Your name kept, then the sign-up window; it goes on with the opening either way.</summary>
-        void SignUp()
+        enum Way { Google, SignUp, SignIn }
+
+        /// <summary>Your name kept, then the account window on the step you chose; it goes on with the opening either way.</summary>
+        void SignUp(Way way)
         {
             PlayerProfile.Name = _name != null ? _name.text : "";
             if (CloudSync.Linked) { Continue(); return; }
-            AccountScreen.ShowWelcome(() => { if (this != null) Continue(); });
+            Action done = () => { if (this != null) Continue(); };
+            if (way == Way.Google) AccountScreen.ShowWelcomeGoogle(done);
+            else AccountScreen.ShowWelcome(done, way == Way.SignIn);
+        }
+
+        /// <summary>
+        /// The panel's rows (the question, languages, Easy Reading, your name, every way in, the
+        /// guest line) can need more height than a short or sideways screen gives it, more so with
+        /// Easy Reading's bigger words: then it shrinks from its top edge instead of running off the bottom.
+        /// </summary>
+        void FitPanel()
+        {
+            if (_panel == null || _typing) return;
+            // The room its anchors give it, and the height its rows want.
+            float room = ((RectTransform)_panel.parent).rect.height * (_panel.anchorMax.y - _panel.anchorMin.y);
+            float need = LayoutUtility.GetPreferredHeight(_panel);
+            float scale = need > room && need > 0f ? room / need : 1f;
+            // Laid out at its full height, so no row is squeezed (the question was being cut short),
+            // then shrunk as a whole from its top edge to fit the room.
+            float extra = scale < 1f ? need - room : 0f;
+            if (Mathf.Abs(_panel.offsetMax.y - _panel.offsetMin.y - extra) > 0.5f)
+                _panel.offsetMin = new Vector2(_panel.offsetMin.x, _panel.offsetMax.y - extra);
+            if (Mathf.Abs(_panel.localScale.x - scale) > 0.001f) _panel.localScale = new Vector3(scale, scale, 1f);
         }
 
         void Continue()

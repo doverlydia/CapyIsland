@@ -1,0 +1,20 @@
+# The goals list and the corner card: who wants a word, and a quest's steps on the way.
+
+@ {0} wants to talk to you
+= {0} רוצה לדבר איתך
+
+@ Build the {0}
+= בנה את {0}
+~ בני את {0}
+
+@ Put down the {0}
+= הנח את {0}
+~ הניחי את {0}
+
+@ Buy a {0} at the {1}
+= קנה {0} ב{1}
+~ קני {0} ב{1}
+
+@ Put the {0} to work at a sawmill
+= שים את {0} לעבוד במנסרה
+~ שימי את {0} לעבוד במנסרה

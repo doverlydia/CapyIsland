@@ -39,6 +39,7 @@ namespace CapyIsland.UI
             UiKit.Stretch(scrim.rectTransform);
 
             var card = UiKit.Card(root, "Card", UiKit.Surface, 40);
+            TapOutside.Add(scrim, card.rectTransform, () => Destroy(gameObject));   // a tap around it is Close
             var cr = card.rectTransform;
             cr.anchorMin = new Vector2(0.06f, 0.5f);
             cr.anchorMax = new Vector2(0.94f, 0.5f);
@@ -107,6 +108,7 @@ namespace CapyIsland.UI
             var n = UiKit.Text(disc.transform, "N", (index + 1).ToString(), 24f, placed && index < 3 ? Color.white : UiKit.InkSoft, true, TextAlignmentOptions.Center);
             UiKit.Stretch(n.rectTransform);
 
+            if (p.bot && !me) UiKit.IslanderLeafIcon(row, 30f);   // an islander, whom the game plays
             string name = me ? Loc.T("You") : p.name;
             string tag = p.gone ? Loc.T("flew home") : p.isOut ? Loc.T("left the area") : null;
             var label = UiKit.Text(row, "Name", tag != null ? name + "  <size=75%><color=#A89A8C>" + tag + "</color></size>" : name, 30f, UiKit.Ink, me);

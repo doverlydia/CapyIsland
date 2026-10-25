@@ -34,7 +34,10 @@ masters () {
   gen Animal_Deer "$CAPY" "a guinea pig, $VIEW: small round chubby body, tortoiseshell patches of ginger, white and dark brown fur, tiny round ears, bright beady eyes and cheeks stuffed full with a flower petal sticking out of its mouth. Cheeky and mischievous. Its four little feet rest on empty transparent space with nothing drawn under them."
   gen Item_Bomb "ArtSource/Item_Bomb.png" "a round fizz bomb: a pale blue glass bath-bomb sphere fizzing with tiny bubbles, with a short twisted fuse on top that has a little spark at its tip."
   gen Item_DeerBomb "ArtSource/Item_DeerBomb.png" "a gentle shoo bomb: a small round pink bath bomb wrapped in a paper band printed with a little guinea pig silhouette, with a short fuse on top sparking softly."
-  gen Build_Tower "ArtSource/Build_Tower.png" "the Steam Tower: a tall round stone tower seen from a 3/4 top-down oblique angle, built over a small steaming hot spring pool at its base, with a warm wooden roof, a large round window glowing with soft warm light, little heart-shaped vents near the top puffing gentle white steam. Cosy, magical, storybook."
+  gen Build_Tower "ArtSource/Build_Tower.png" "the Steam Tower: a tall round stone tower seen from a 3/4 top-down oblique angle, built over a small steaming hot spring pool at its base, with a warm wooden roof, a large round window glowing with soft warm light, little heart-shaped vents near the top. No steam drawn at all: the game adds its own rising steam over the tower. Cosy, magical, storybook."
+  # The same tower while its spring is still frozen (the opening): no steam, a little snow and ice.
+  # Drawn over the warm tower so the two line up exactly when the game swaps them at the thaw.
+  gen Build_Tower_Cold "ArtSource/Build_Tower.png" "the SAME Steam Tower as the reference, with an identical outline, size, position, stones, roof shape, round window and arched doorway, but cold and asleep after a long winter: no steam anywhere, the heart-shaped vents dark and still, a soft dusting of white snow on the roof and along the stone rim, a few small rounded icicles hanging from the roof edge, the round window glowing only faintly, and the little pool at its base frozen over with smooth pale blue ice. Still cosy and storybook, just wintry and quiet."
 }
 
 ship () {
@@ -45,6 +48,9 @@ ship () {
     [ -f "ArtSource/$n.png" ] && node Tools/ChatGPT/downscale.mjs "ArtSource/$n.png" "Assets/Art/Props/$n.png" 128
   done
   [ -f ArtSource/Build_Tower.png ] && node Tools/ChatGPT/downscale.mjs ArtSource/Build_Tower.png Assets/Art/Buildings/Build_Tower.png 256
+  # Loaded at run time by HotSpring while the spring is frozen, so it ships into Resources.
+  [ -f ArtSource/Build_Tower_Cold.png ] && node Tools/ChatGPT/alignbounds.mjs ArtSource/Build_Tower.png ArtSource/Build_Tower_Cold.png ArtSource/Build_Tower_Cold.png
+  [ -f ArtSource/Build_Tower_Cold.png ] && node Tools/ChatGPT/downscale.mjs ArtSource/Build_Tower_Cold.png Assets/Resources/World/Build_Tower_Cold.png 256
 }
 
 case "${1:-}" in

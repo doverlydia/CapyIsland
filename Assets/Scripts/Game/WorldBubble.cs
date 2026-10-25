@@ -4,8 +4,9 @@ namespace CapyIsland.Game
 {
     /// <summary>
     /// A little speech-bubble over someone's head in the world, with a picture in it — a dish
-    /// someone fancies, a heart from a cat with a present. It bobs gently so it catches the eye,
-    /// and can be tapped (the owner decides what that does).
+    /// someone fancies, a heart from a cat with a present — or a thought cloud over a sleeper,
+    /// showing what it dreams of. It bobs gently so it catches the eye, and can be tapped (the
+    /// owner decides what that does).
     /// </summary>
     public class WorldBubble : MonoBehaviour, ITappable
     {
@@ -55,9 +56,10 @@ namespace CapyIsland.Game
         Vector3 _rest;
 
         /// <summary>
-        /// A dream: a thought bubble well above a sleeper's head, a little see-through, with two
-        /// small dots trailing down to it instead of a speech tail, drifting and swaying gently.
-        /// The height is measured from the top of whoever it floats over.
+        /// A dream: a pale, puffy thought cloud well above a sleeper's head, with two small dots
+        /// trailing down to it instead of a speech tail, drifting and swaying gently. Its colours are
+        /// duller than the round bubbles', so it never reads as one to pop. The height is measured
+        /// from the top of whoever it floats over.
         /// </summary>
         public static WorldBubble Thought(Transform over, Sprite icon, float above, System.Action onTap = null)
         {
@@ -65,29 +67,62 @@ namespace CapyIsland.Game
             float top = body != null ? body.bounds.max.y - over.position.y : 1f;
             var b = Show(over, icon, top + above, onTap);
             b._dream = true;
-            b._rest = Vector3.one * 0.9f / Mathf.Max(0.01f, UI.UiKit.Circle.bounds.size.x);
-            b._disc.color = new Color(1f, 1f, 1f, 0.78f);
-            b._icon.color = new Color(1f, 1f, 1f, 0.9f);
+            float scale = 0.9f / Mathf.Max(0.01f, UI.UiKit.Circle.bounds.size.x);
+            b._rest = Vector3.one * scale;
+            b._disc.enabled = false;   // the cloud stands in for the round disc
+
+            // The cloud and its outline, a little wider than the disc was so the picture sits inside.
+            var cloud = UI.IconPainter.ThoughtCloud;
+            float fit = CloudWidth / Mathf.Max(0.01f, cloud.bounds.size.x * scale);
+            var rim = new GameObject("CloudRim").AddComponent<SpriteRenderer>();
+            rim.transform.SetParent(b.transform, false);
+            rim.transform.localScale = Vector3.one * fit;
+            rim.sprite = UI.IconPainter.ThoughtCloudRim;
+            rim.color = DreamRim;
+            rim.sortingOrder = 30498;
+            var fill = new GameObject("Cloud").AddComponent<SpriteRenderer>();
+            fill.transform.SetParent(b.transform, false);
+            fill.transform.localScale = Vector3.one * fit;
+            fill.sprite = cloud;
+            fill.color = DreamFill;
+            fill.sortingOrder = 30500;
+            b._dreamTint = DreamIcon;
+            b.SetIcon(icon);   // again, now it's a dream: a bigger picture, faded
+
             // The speech tail becomes two little thought dots, getting smaller toward the head.
             var tail = b.transform.Find("Tail").GetComponent<SpriteRenderer>();
-            tail.color = new Color(1f, 1f, 1f, 0.7f);
+            tail.color = DreamDot;
             tail.transform.localScale = Vector3.one * 0.26f;
-            tail.transform.localPosition = new Vector3(-0.28f, -0.68f, 0f) * UI.UiKit.Circle.bounds.size.x;
+            tail.transform.localPosition = new Vector3(-0.4f, -0.84f, 0f) * UI.UiKit.Circle.bounds.size.x;
             var dot = Object.Instantiate(tail.gameObject, b.transform).GetComponent<SpriteRenderer>();
             dot.name = "Dot";
             dot.transform.localScale = Vector3.one * 0.15f;
-            dot.transform.localPosition = new Vector3(-0.42f, -0.98f, 0f) * UI.UiKit.Circle.bounds.size.x;
+            dot.transform.localPosition = new Vector3(-0.56f, -1.14f, 0f) * UI.UiKit.Circle.bounds.size.x;
             return b;
         }
+
+        /// <summary>
+        /// The thought cloud's width, in world units: wide enough to read at a glance beside the
+        /// round bubbles (0.9 here, 1.6 for the ones with things in) and a sawmill's chimney puffs.
+        /// </summary>
+        const float CloudWidth = 1.8f;
+
+        /// <summary>A dream's muted colours: a misty off-white cloud, a slate outline, a picture a little faded.</summary>
+        public static readonly Color DreamFill = new(0.9f, 0.92f, 0.95f, 0.94f),
+            DreamRim = new(0.56f, 0.62f, 0.7f, 0.85f),
+            DreamDot = new(0.82f, 0.86f, 0.9f, 0.9f),
+            DreamIcon = new(0.9f, 0.9f, 0.92f, 0.85f);
+
+        Color? _dreamTint;
 
         public void SetIcon(Sprite icon, Color? tint = null)
         {
             _icon.sprite = icon;
-            _icon.color = tint ?? Color.white;
+            _icon.color = tint ?? _dreamTint ?? Color.white;
             if (icon == null) return;
-            // Fit the picture inside the disc, whatever its size.
+            // Fit the picture inside the disc (or the wider cloud), whatever its size.
             float disc = UI.UiKit.Circle.bounds.size.x;
-            float s = disc * 0.66f / Mathf.Max(0.01f, Mathf.Max(icon.bounds.size.x, icon.bounds.size.y));
+            float s = disc * (_dream ? 1f : 0.66f) / Mathf.Max(0.01f, Mathf.Max(icon.bounds.size.x, icon.bounds.size.y));
             _icon.transform.localScale = Vector3.one * s;
             _icon.transform.localPosition = Vector3.zero - (Vector3)icon.bounds.center * s;
         }
@@ -117,7 +152,7 @@ namespace CapyIsland.Game
         {
             if (_onTap == null) return -1f;
             float d = Vector2.Distance(transform.position, worldPoint);
-            return d < 0.7f ? d * 0.5f : -1f;   // nearer than whoever it floats over, so it wins the tap
+            return d < (_dream ? 0.9f : 0.7f) ? d * 0.5f : -1f;   // nearer than whoever it floats over, so it wins the tap
         }
 
         public void Tap()

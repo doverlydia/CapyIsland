@@ -14,18 +14,22 @@
 
 @ Flip
 = הפוך
+~ הפכי
 
 @ Put away
 = לאחסן
 
 @ Your burrow is bare! Buy something cosy at the Furniture Shop on your island.
 = המחילה שלך ריקה! קנה משהו נעים בחנות הרהיטים שבאי שלך.
+~ המחילה שלך ריקה! קני משהו נעים בחנות הרהיטים שבאי שלך.
 
 @ Nothing in storage. Pieces you buy wait here.
 = המחסן ריק. רהיטים שתקנה יחכו כאן.
+~ המחסן ריק. רהיטים שתקני יחכו כאן.
 
 @ That's your friend's burrow. Pop down into your own when you're home!
 = זו המחילה של החבר שלך. תרד למחילה שלך כשתחזור הביתה!
+~ זו המחילה של החבר שלך. תרדי למחילה שלך כשתחזרי הביתה!
 
 # ---------------------------------------------------------------- the shop (FurnitureShopScreen)
 
@@ -37,6 +41,7 @@
 
 @ Get your burrow door first, and then your furniture has a home to go to!
 = קנה קודם את דלת המחילה, ואז לרהיטים שלך יהיה בית!
+~ קני קודם את דלת המחילה, ואז לרהיטים שלך יהיה בית!
 
 @ New pieces in {0}h {1}m. Each piece can be bought once a day.
 = רהיטים חדשים בעוד {0} ש' {1} ד'. אפשר לקנות כל רהיט פעם ביום.
@@ -46,6 +51,7 @@
 
 @ Buy
 = קנה
+~ קני
 
 @ Sold
 = נמכר
@@ -55,6 +61,7 @@
 
 @ Your burrow door is with you. Put it down somewhere cosy, then tap it to go inside!
 = דלת המחילה איתך. הנח אותה במקום נעים, ואז הקש עליה כדי להיכנס!
+~ דלת המחילה איתך. הניחי אותה במקום נעים, ואז הקישי עליה כדי להיכנס!
 
 # ---------------------------------------------------------------- the furniture (Furniture.cs)
 

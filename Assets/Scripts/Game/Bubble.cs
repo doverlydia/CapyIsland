@@ -1,4 +1,5 @@
 using System;
+using DG.Tweening;
 using UnityEngine;
 
 namespace CapyIsland.Game
@@ -64,6 +65,9 @@ namespace CapyIsland.Game
             // the edge arrows say "look here" well enough on their own.
             var arrow = transform.Find("Arrow");
             if (arrow != null) arrow.gameObject.SetActive(false);
+            // Never bare: a bubble made without its glass (see BubbleSpawner.BubbleSprite) gets it here.
+            if (sprite != null && sprite.TryGetComponent<SpriteRenderer>(out var glass) && glass.sprite == null)
+                glass.sprite = BubbleSpawner.BubbleSprite;
             FloatAbove();
             RefreshIcon();
         }
@@ -139,27 +143,9 @@ namespace CapyIsland.Game
             _age = 0;
         }
 
-        float _bornAt = -1f;
-        bool _nudged;
-
         void Update()
         {
             if (_taken) return;
-
-            // Left alone for 30 seconds: the original's "free item" nudge (after the tutorial).
-            if (_bornAt < 0f) _bornAt = Time.time;
-            if (!_nudged && Time.time - _bornAt > 30f && contents != null)
-            {
-                if (!Attention.TutorialRunning)
-                {
-                    _nudged = true;
-                    var tag = contents.GetComponent<CatalogItem>();
-                    string line = "You found a free <b>" + (tag != null ? StoryText.Name(tag.StoreName) : contents.name) + "</b>! Tap the bubble to pick it up.";
-                    // Waits its turn, and is dropped unsaid if the bubble is popped first.
-                    bool StillHere() => this != null && !_taken;
-                    Attention.Ask("nudge:" + GetInstanceID(), () => Hints.Show(line, StillHere), StillHere);
-                }
-            }
 
             if (_lifeFrames >= 0)
             {
@@ -212,9 +198,13 @@ namespace CapyIsland.Game
                 item.transform.position = transform.position;
                 item.SetActive(true);
 
-                // Straight into the trail: picked-up items follow you until you place them.
+                // Straight into the trail: picked-up items follow you until you place them. A
+                // character has no spot to choose, so steps out and settles right there instead
+                // (into the trail only if there's no room near the bubble, over the sea say).
                 var placeable = item.GetComponent<Placeable>();
-                if (placeable != null) placeable.MarkCarried();
+                bool character = item.TryGetComponent<QuestGiver>(out var giver) && giver.GiverKind != QuestGiver.Kind.Ghost;
+                if (placeable != null && character && placeable.SettleNear(transform.position, 4f)) StepOut(item.transform);
+                else if (placeable != null) placeable.MarkCarried();
                 else
                 {
                     var follower = item.GetComponent<Follower>();
@@ -227,6 +217,16 @@ namespace CapyIsland.Game
             Purchasing.Collected(item);
             gameObject.SetActive(false);
             return item;
+        }
+
+        /// <summary>A character out of the bubble: a little bounce up to full size where it settled.</summary>
+        static void StepOut(Transform who)
+        {
+            var full = who.localScale;
+            who.localScale = full * 0.6f;
+            who.DOScale(full, 0.35f).SetEase(Ease.OutBack).SetLink(who.gameObject);
+            var fx = HarvestEffects.Instance;
+            if (fx != null) fx.Twinkle(who.position + Vector3.up * 0.6f, 6);
         }
 
         /// <summary>Gone unclaimed: the bubble bursts and takes its contents with it.</summary>

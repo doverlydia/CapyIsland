@@ -137,6 +137,7 @@ namespace CapyIsland.UI
             UiKit.Place(icon.rectTransform, new Vector2(0f, 0.5f), new Vector2(22f, 0f), new Vector2(54f, 54f));
             var t = UiKit.Text(chip, "Title", Title, 42f, Color.white, true, TextAlignmentOptions.MidlineLeft);
             UiKit.Stretch(t.rectTransform, 88f, 0f, 16f, 0f);
+            FitsText.Add(chip, t, new Vector2(104f, 33f), wide: true, tall: true);   // the title as drawn: translated, at Easy Reading's size
             t.textWrappingMode = TextWrappingModes.NoWrap;
             t.enableAutoSizing = true;
             t.fontSizeMin = 26f;

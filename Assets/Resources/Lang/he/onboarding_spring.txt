@@ -1,0 +1,90 @@
+# StoryText.Spring.cs: the frozen hot spring at the end of the opening, the fire,
+# the zoom beat, and Miso's start-up gift.
+
+# ---------------------------------------------------------------- the goal card
+
+@ Find the hot spring and tap it
+= מצא את המעיין החם והקש עליו
+~ מצאי את המעיין החם והקישי עליו
+
+@ Bring wood for the fire: {0}/{1}
+= הבא עץ למדורה: {0}/{1}
+~ הביאי עץ למדורה: {0}/{1}
+
+@ Your capybara keeps chopping at the sawmill. Tap the frozen spring to give the wood.
+= הקפיברה שלך ממשיכה לכרות במנסרה. הקש על המעיין הקפוא כדי לתת את העץ.
+~ הקפיברה שלך ממשיכה לכרות במנסרה. הקישי על המעיין הקפוא כדי לתת את העץ.
+
+@ Tap the hot spring and hop in
+= הקש על המעיין החם וקפוץ פנימה
+~ הקישי על המעיין החם וקפצי פנימה
+
+# ---------------------------------------------------------------- Old Yuzu
+
+@ There's the Steam Tower, and my old hot spring at its foot. Tap the spring!
+= הנה מגדל האדים, והמעיין החם הישן שלי למרגלותיו. הקש על המעיין!
+~ הנה מגדל האדים, והמעיין החם הישן שלי למרגלותיו. הקישי על המעיין!
+
+@ Oh, no... it's frozen solid. The snow melted long ago, but the Big Chill left my spring full of ice.
+= אוי, לא... הוא קפוא לגמרי. השלג נמס מזמן, אבל הקור הגדול השאיר את המעיין שלי מלא קרח.
+
+@ It needs a fire to thaw it, and a fire needs wood. Your capybara has been chopping: let's feed the fire!
+= צריך מדורה כדי להפשיר אותו, ומדורה צריכה עץ. הקפיברה שלך כורתת כל הזמן: בוא נאכיל את המדורה!
+~ צריך מדורה כדי להפשיר אותו, ומדורה צריכה עץ. הקפיברה שלך כורתת כל הזמן: בואי נאכיל את המדורה!
+
+@ That's my old hot spring, frozen solid. Cross the bridge and we'll have a closer look.
+= זה המעיין החם הישן שלי, קפוא לגמרי. חצה את הגשר ונסתכל עליו מקרוב.
+~ זה המעיין החם הישן שלי, קפוא לגמרי. חצי את הגשר ונסתכל עליו מקרוב.
+
+# ---------------------------------------------------------------- the fire
+
+@ The fire for the spring needs {0} wood.
+= המדורה של המעיין צריכה {0} עץ.
+
+@ You have {0} wood.
+= יש לך {0} עץ.
+
+@ Wood is usually spent at the shops, but this fire is worth every log.
+= בדרך כלל מוציאים עץ בחנויות, אבל המדורה הזאת שווה כל בול עץ.
+
+@ Not enough yet? Another capybara at the sawmill chops wood faster.
+= עוד לא מספיק? עוד קפיברה במנסרה תכרות עץ מהר יותר.
+
+@ Give {0} wood
+= תן {0} עץ
+~ תני {0} עץ
+
+@ Not enough wood
+= אין מספיק עץ
+
+@ When you have {0} wood, bring it to the spring. More capybaras at the sawmill chop it faster.
+= כשיהיו לך {0} עץ, הבא אותם למעיין. עוד קפיברות במנסרה יכרתו מהר יותר.
+~ כשיהיו לך {0} עץ, הביאי אותם למעיין. עוד קפיברות במנסרה יכרתו מהר יותר.
+
+@ You have enough wood for the fire. Tap the frozen spring to give it.
+= יש לך מספיק עץ למדורה. הקש על המעיין הקפוא כדי לתת אותו.
+~ יש לך מספיק עץ למדורה. הקישי על המעיין הקפוא כדי לתת אותו.
+
+@ Listen... it's bubbling! My spring is warm again, for the first time since the Big Chill.
+= תקשיב... הוא מבעבע! המעיין שלי שוב חם, בפעם הראשונה מאז הקור הגדול.
+~ תקשיבי... הוא מבעבע! המעיין שלי שוב חם, בפעם הראשונה מאז הקור הגדול.
+
+@ The spring is warm again! Tap it and hop in for a soak.
+= המעיין שוב חם! הקש עליו וקפוץ פנימה לטבילה.
+~ המעיין שוב חם! הקישי עליו וקפצי פנימה לטבילה.
+
+# ---------------------------------------------------------------- the zoom beat
+
+@ Nicely done! Zoom whenever you like, to see more of your island.
+= כל הכבוד! אפשר להתקרב ולהתרחק מתי שתרצה, כדי לראות יותר מהאי שלך.
+~ כל הכבוד! אפשר להתקרב ולהתרחק מתי שתרצי, כדי לראות יותר מהאי שלך.
+
+# ---------------------------------------------------------------- Miso's start-up gift
+
+@ Oh, and take these! It's everything I gathered myself while the snow melted, to help you start. Wood and gold are for the shops, so spend them well!
+= אה, וקח את אלה! זה כל מה שאספתי בעצמי בזמן שהשלג נמס, כדי לעזור לך להתחיל. עץ וזהב הם בשביל החנויות, אז תוציא אותם בחוכמה!
+~ אה, וקחי את אלה! זה כל מה שאספתי בעצמי בזמן שהשלג נמס, כדי לעזור לך להתחיל. עץ וזהב הם בשביל החנויות, אז תוציאי אותם בחוכמה!
+
+@ That's enough! The fire's catching... watch the ice!
+= זה מספיק! האש נדלקת... תסתכל על הקרח!
+~ זה מספיק! האש נדלקת... תסתכלי על הקרח!

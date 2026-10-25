@@ -47,6 +47,9 @@ namespace CapyIsland.Game
         /// <summary>Signed in and caught up with the cloud: it's safe to upload.</summary>
         public static bool Ready => Instance != null && Instance._ready;
 
+        /// <summary>The editor-only switch that keeps cloud sync out of a playtest (see Start).</summary>
+        public const string EditorOffKey = "CapyIsland.Playtest.NoCloud";
+
         bool _ready, _busy, _blocked;
         float _nextUpload;
 
@@ -60,6 +63,16 @@ namespace CapyIsland.Game
         async void Start()
         {
             if (Visit.Active) return;   // a friend's island is never sent up as yours
+#if UNITY_EDITOR
+            // A playtest from a fresh start keeps the editor's own island in the cloud out of it
+            // (otherwise "no island here, one up there" brings it straight back down). On for one
+            // editor session: UnityEditor.SessionState.SetBool(EditorOffKey, true).
+            if (UnityEditor.SessionState.GetBool(EditorOffKey, false))
+            {
+                Debug.Log("[CloudSync] Off for this editor session (playtest).");
+                return;
+            }
+#endif
             // Let the island load first: its save is what gets compared.
             await Task.Yield();
             await Task.Yield();

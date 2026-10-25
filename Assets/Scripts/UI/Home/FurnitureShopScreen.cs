@@ -84,6 +84,7 @@ namespace CapyIsland.UI
             var card = UiKit.Image(_list, "Piece", UiKit.Rounded(30), tint ?? Color.white).rectTransform;
             var le = card.gameObject.AddComponent<LayoutElement>();
             le.minHeight = le.preferredHeight = 200f;
+            GrowsWithText.Add(card, tall: 1.5f);   // Easy Reading: a taller card, so the name and two lines of blurb have room
 
             var back = UiKit.Image(card, "Back", UiKit.Rounded(26), UiKit.SurfaceSunk);
             UiKit.Place(back.rectTransform, new Vector2(0f, 0.5f), new Vector2(18f, 0f), new Vector2(164f, 164f));
@@ -168,7 +169,7 @@ namespace CapyIsland.UI
             {
                 if (!Purchasing.TryBuy("Monster Den", _shopAt)) return;
                 Close();
-                Hints.Show("Your burrow door is with you. Put it down somewhere cosy, then tap it to go inside!");
+                Hints.Answer("Your burrow door is with you. Put it down somewhere cosy, then tap it to go inside!");
             });
         }
 
@@ -191,7 +192,7 @@ namespace CapyIsland.UI
                 Sfx.Play(SfxKind.Buy, 0.8f);
                 HomeLog.AddToStorage(f.Id);
                 HomeLog.MarkBought(f.Id);
-                Hints.Show(Loc.F("The {0} is waiting in your burrow's storage.", Loc.T(f.Name)));
+                Hints.Answer(Loc.F("The {0} is waiting in your burrow's storage.", Loc.T(f.Name)));
                 Refresh();
             });
         }

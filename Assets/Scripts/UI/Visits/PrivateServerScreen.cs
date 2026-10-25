@@ -41,6 +41,7 @@ namespace CapyIsland.UI
             UiKit.Stretch(scrim.rectTransform);
 
             var card = UiKit.Card(root, "Card", UiKit.Surface, 40);
+            TapOutside.Add(scrim, card.rectTransform, Close);   // a tap around it is Cancel
             var cr = card.rectTransform;
             cr.anchorMin = new Vector2(0.06f, 0.5f);
             cr.anchorMax = new Vector2(0.94f, 0.5f);
@@ -119,7 +120,7 @@ namespace CapyIsland.UI
             Sfx.Play(SfxKind.Chest, 0.6f);
             string pretty = PrivateServer.Pretty(PrivateServer.Code);
             if (made) SaveCodeScreen.CopyText(pretty);
-            Hints.Show(made
+            Hints.Answer(made
                 ? Loc.F("Your server is ready: {0}. The code is copied, send it to your friends!", pretty)
                 : Loc.F("You're on server {0}.", pretty));
             Destroy(gameObject);

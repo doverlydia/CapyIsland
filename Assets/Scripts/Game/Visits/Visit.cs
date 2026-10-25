@@ -68,14 +68,14 @@ namespace CapyIsland.Game
             if (Travelling) return;
             if (to == null && !Active) return;
             var why = WhyCantFly();
-            if (why != null) { Hints.Show(why); Live.FlightFailed(to); return; }
+            if (why != null) { Hints.Answer(why); Live.FlightFailed(to); return; }
             // A real person's island: only with their yes. Knock, and fly once they let you in
             // (Live flies you then); never just because the button was pressed again.
             if (to != null && to.IsReal && !Live.MayLand(to))
             {
                 if (Live.ShouldKnock(to)) { Live.Knock(to); return; }
                 var notNow = Live.WhyNotKnock(to);
-                if (notNow != null) Hints.Show(notNow);
+                if (notNow != null) Hints.Answer(notNow);
                 return;
             }
             Travelling = true;

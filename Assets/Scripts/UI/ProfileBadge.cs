@@ -53,6 +53,7 @@ namespace CapyIsland.UI
             _name.enableAutoSizing = true;
             _name.fontSizeMin = 14f;
             _name.fontSizeMax = 24f;
+            GrowsWithText.Add(pill.rectTransform, tall: 1f, wide: 0.2f);   // room for Easy Reading's bigger name
 
             var button = disc.gameObject.AddComponent<Button>();
             button.transition = Selectable.Transition.None;

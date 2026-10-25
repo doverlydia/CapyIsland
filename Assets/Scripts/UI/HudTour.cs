@@ -16,10 +16,12 @@ namespace CapyIsland.UI
     /// lines) off for good — Settings can switch them back, and replay the whole tour.
     ///
     /// The game teaches by doing, so most of these never come by themselves: a page turns up only
-    /// when the thing it explains first matters to you (see <see cref="TipTriggers"/>) — Friends
-    /// when the first visitor lands, Events when a hobby opens — and only once the opening is
-    /// over and <see cref="Attention"/> says the screen is free. Each tip shows once. Settings →
-    /// Show me around plays every page in a row.
+    /// when the thing it explains first matters to you (see <see cref="TipTriggers"/>) — the
+    /// emoji button when the first visitor lands, the clock once contests open — and only once the
+    /// opening is over and <see cref="Attention"/> says the screen is free. Each tip shows once.
+    /// The side buttons introduce themselves as they appear (<see cref="HudReveal"/>); a page about
+    /// one waits until it's there. Settings → Show me around plays every page in a row, skipping
+    /// buttons you haven't got yet.
     ///
     /// Never while visiting someone else's island.
     /// </summary>
@@ -38,7 +40,10 @@ namespace CapyIsland.UI
             PlayerPrefs.Save();
         }
 
-        static readonly string[] AllIds = { "welcome", "goals", "arrows", "map", "gifts", "friends", "events", "profile", "clock", "hello", "help", "walk" };
+        static readonly string[] AllIds = { "welcome", "goals", "arrows", "map", "gifts", "friends", "events", "profile", "clock", "hello", "help", "walk", "goalsList", "goalsQuests", "goalsHearts", "tapNews" };
+
+        /// <summary>The walk through the Goals screen, the first time it opens (ObjectivesScreen).</summary>
+        public static readonly string[] GoalsPages = { "goalsQuests", "goalsList", "goalsHearts" };
 
         /// <summary>
         /// Forgets every tip and the tour, and switches the tutorial back on (Start over): a fresh
@@ -50,6 +55,8 @@ namespace CapyIsland.UI
             foreach (var id in AllIds) PlayerPrefs.DeleteKey(TipKey + id);
             _tips.Clear();
             NewStuff.Clear("");     // nothing is new on a fresh island
+            HudReveal.Forget();     // and the column on the right starts with Settings and Help again
+            HelpUnlocks.Forget();   // and Help with only the first few pages
             Guidance.Off = false;
             IntroCutscene.Forget();   // a fresh island opens with the story
             Game.YuzuHeart.Forget();  // and Old Yuzu frozen again
@@ -98,15 +105,36 @@ namespace CapyIsland.UI
             _tips.RemoveAt(0);
             // Drop pages that were seen while this tip waited (the full tour, say).
             var fresh = new List<string>();
+            var later = new List<string>();
             foreach (var id in next)
             {
                 if (Seen(id)) continue;
                 // The arrows page is about an arrow you can see: if the one that queued it has gone,
                 // it waits for the next (TipTriggers queues it again whenever one is on screen).
                 if (id == "arrows" && EdgeIndicators.FirstShown == null) continue;
+                // A page about a side button that hasn't joined the column yet (HudReveal) waits for it.
+                if (ButtonMissing(id)) { later.Add(id); continue; }
                 fresh.Add(id);
             }
+            if (later.Count > 0) _tips.Add(later.ToArray());
             if (fresh.Count > 0) Begin(fresh.ToArray());
+        }
+
+        /// <summary>The side button this page points at, if it has one.</summary>
+        static string SideButton(string id) => id switch
+        {
+            "map" => "Map", "gifts" => "Gifts", "friends" => "Friends", "events" => "Events",
+            _ => null,
+        };
+
+        /// <summary>This page points at a side button that isn't on screen yet.</summary>
+        static bool ButtonMissing(string id)
+        {
+            string name = SideButton(id);
+            if (name == null) return false;
+            var hud = MobileHud.Instance != null ? MobileHud.Instance.transform : null;
+            var button = hud != null ? hud.Find("SafeArea/SideButtons/" + name) ?? hud.Find("SideButtons/" + name) : null;
+            return button == null || !button.gameObject.activeInHierarchy;
         }
 
         /// <summary>A breather after each card, so tips never arrive one on top of another.</summary>
@@ -282,6 +310,33 @@ namespace CapyIsland.UI
                 Body = "Your next goal is always here. Tap it to see every goal and quest.",
                 Target = Hud("ObjectiveTracker"), Optional = true,
             });
+            // Inside the Goals screen, while it is open (skipped in the full tour otherwise).
+            Func<Rect?> InGoals(Func<ObjectivesScreen, Transform> part) => () =>
+            {
+                var goals = ObjectivesScreen.Instance;
+                return goals != null && goals.IsOpen ? ScreenRect(part(goals)) : null;
+            };
+            _steps.Add(new Step
+            {
+                Id = "goalsQuests",
+                Title = "Your goals",
+                Body = "Quests come first: what Old Yuzu and your neighbours are asking for right now. The one you're on also waits at the top of the screen.",
+                Target = InGoals(g => g.QuestsTab), Optional = true,
+            });
+            _steps.Add(new Step
+            {
+                Id = "goalsList",
+                Title = "Show me",
+                Body = "Not sure where to go? Tap Show me and you'll see where it happens.",
+                Target = InGoals(g => g.ShowMeButton), Optional = true,   // only when a goal has one
+            });
+            _steps.Add(new Step
+            {
+                Id = "goalsHearts",
+                Title = "Achievements",
+                Body = "Bigger things to do around the island, for whenever you like. Each one brings a heart home to the Steam Tower.",
+                Target = InGoals(g => g.AchievementsTab), Optional = true,
+            });
             _steps.Add(new Step
             {
                 Id = "arrows",
@@ -296,7 +351,7 @@ namespace CapyIsland.UI
             {
                 Id = "map",
                 Title = "Map",
-                Body = "See all the islands. Drag yourself on the map to travel.",
+                Body = "See all the islands. Tap a spot to go there, or drag yourself across the map.",
                 Target = Hud("SideButtons/Map"), Optional = true,
             });
             _steps.Add(new Step
@@ -437,6 +492,7 @@ namespace CapyIsland.UI
                 (UiKit.Spring, "A bubble with a present inside"),
                 (UiKit.Danger, "Trouble: pests on your island"),
                 (UiKit.Hex("5B9BD5"), "A friend visiting"),
+                (EdgeIndicators.AsleepColour, "Sleepy capybaras: the cloud shows what they need"),
             };
             foreach (var (colour, what) in kinds)
             {
@@ -571,6 +627,10 @@ namespace CapyIsland.UI
         {
             var img = UiKit.Image(_root, name, null, c, true);
             img.rectTransform.anchorMin = img.rectTransform.anchorMax = img.rectTransform.pivot = Vector2.zero;
+            // A tap on the dark is Next (and on the last page, done), like a tap around any popup.
+            var tap = img.gameObject.AddComponent<Button>();
+            tap.transition = Selectable.Transition.None;
+            tap.onClick.AddListener(() => { if (_open && !Cutscene.Playing) Go(+1); });
             return img;
         }
 

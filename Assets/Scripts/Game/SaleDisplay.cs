@@ -159,7 +159,7 @@ namespace CapyIsland.Game
                 BubbleSpawner.ReturnToBubble(item);
                 moved = true;
             }
-            if (moved) Hints.Island("Something was standing on a shop's wares, so it's back in a bubble. Put it down somewhere else!");
+            if (moved) Hints.Show("Something was standing on a shop's wares, so it's back in a bubble. Put it down somewhere else!");
         }
 
         /// <summary>

@@ -1,0 +1,9 @@
+# The Island Map: tap a spot to go there, or drag yourself.
+
+@ Tap a spot or drag yourself to travel
+= הקש על מקום או גרור את עצמך כדי לנסוע
+~ הקישי על מקום או גררי את עצמך כדי לנסוע
+
+@ See all the islands. Tap a spot to go there, or drag yourself across the map.
+= כל האיים במבט אחד. הקש על מקום כדי להגיע אליו, או גרור את עצמך על המפה.
+~ כל האיים במבט אחד. הקישי על מקום כדי להגיע אליו, או גררי את עצמך על המפה.

@@ -46,6 +46,7 @@
 
 @ Your airstrip is ready! Tap it any time to see who's online.
 = מסלול ההמראה שלך מוכן! הקש עליו מתי שתרצה כדי לראות מי מחובר.
+~ מסלול ההמראה שלך מוכן! הקישי עליו מתי שתרצי כדי לראות מי מחובר.
 
 # ---------------------------------------------------------------- Game/Visits/Visit.cs
 
@@ -57,12 +58,15 @@
 
 @ Let's get your own island settled first. Then you can fly anywhere you like!
 = קודם נסדר את האי שלך. אחר כך תוכל לטוס לאן שתרצה!
+~ קודם נסדר את האי שלך. אחר כך תוכלי לטוס לאן שתרצי!
 
 @ You'll need an airstrip before you can fly. Build one above!
 = כדי לטוס צריך מסלול המראה. בנה אחד למעלה!
+~ כדי לטוס צריך מסלול המראה. בני אחד למעלה!
 
 @ Put your airstrip down somewhere first. Pop its bubble and drag it to a clear spot!
 = קודם הנח את מסלול ההמראה איפשהו. פוצץ את הבועה שלו וגרור אותו למקום פנוי!
+~ קודם הניחי את מסלול ההמראה איפשהו. פוצצי את הבועה שלו וגררי אותו למקום פנוי!
 
 # ---------------------------------------------------------------- Game/Visits/VisitorBot.cs
 
@@ -88,6 +92,7 @@
 
 @ {0} is waving at you! Lend a hand: feed hungry workers and chase off pests.
 = נפנוף שלום מ-{0}! תן יד: האכל פועלים רעבים וגרש מזיקים.
+~ נפנוף שלום מ-{0}! תני יד: האכילי פועלים רעבים וגרשי מזיקים.
 
 @ Visitor!
 = יש ביקור!
@@ -97,6 +102,7 @@
 
 @ Let them in
 = הזמן פנימה
+~ הזמיני פנימה
 
 @ Not now
 = לא עכשיו
@@ -112,9 +118,11 @@
 
 @ <b>{0}</b> had to go. Add them as a friend so you can visit their island?
 = הגיע הזמן של <b>{0}</b> לחזור הביתה. להוסיף לחברים, כדי שתוכל לבקר באי ההוא?
+~ הגיע הזמן של <b>{0}</b> לחזור הביתה. להוסיף לחברים, כדי שתוכלי לבקר באי ההוא?
 
 @ Add friend
 = הוסף חבר
+~ הוסיפי חבר
 
 @ No thanks
 = לא תודה
@@ -144,12 +152,15 @@
 
 @ You're on {0}'s island.
 = אתה באי של {0}.
+~ את באי של {0}.
 
 @ Unfriend
 = הסר חבר
+~ הסירי חבר
 
 @ Close
 = סגור
+~ סגרי
 
 @ {0} is no longer your friend.
 = {0} כבר לא ברשימת החברים שלך.
@@ -159,6 +170,7 @@
 
 @ You're on {0}'s island. Add them as a friend to visit again — their island will be kept.
 = אתה באי של {0}. הוסף לחברים כדי לבקר שוב — האי יישמר בשבילך.
+~ את באי של {0}. הוסיפי לחברים כדי לבקר שוב — האי יישמר בשבילך.
 
 @ {0} is your friend now!
 = {0} עכשיו ברשימת החברים שלך!
@@ -170,12 +182,14 @@
 
 @ Fly home
 = טוס הביתה
+~ טוסי הביתה
 
 @ Your friends
 = החברים שלך
 
 @ No friends yet. Visit someone on the server above, and add them from their island!
 = עוד אין לך חברים. בקר מישהו בשרת שלמעלה, והוסף אותו מהאי שלו!
+~ עוד אין לך חברים. בקרי מישהו בשרת שלמעלה, והוסיפי אותו מהאי שלו!
 
 @ <color=#5DBB63>Online</color> · Island level {0}
 = <color=#5DBB63>מחובר</color> · רמת אי {0}
@@ -191,9 +205,11 @@
 
 @ You're here now
 = אתה כאן עכשיו
+~ את כאן עכשיו
 
 @ Visit
 = בקר
+~ בקרי
 
 @ Unfriend?
 = להסיר מהחברים?
@@ -206,24 +222,29 @@
 
 @ Build an airstrip
 = בנה מסלול המראה
+~ בני מסלול המראה
 
 @ You need one to fly to your neighbours. {0} wood and {1} gold.
 = צריך אחד כדי לטוס לשכנים. {0} עץ ו-{1} זהב.
 
 @ Build
 = בנה
+~ בני
 
 @ Here's your airstrip! Pop the bubble, then drag it wherever you'd like it to stand.
 = הנה מסלול ההמראה שלך! פוצץ את הבועה וגרור אותו לאן שתרצה.
+~ הנה מסלול ההמראה שלך! פוצצי את הבועה וגררי אותו לאן שתרצי.
 
 @ {0} of {1} islands online
 = {0} מתוך {1} איים מחוברים
 
 @ Switch server
 = החלף שרת
+~ החליפי שרת
 
 @ Tap an island to fly there. Lend a hand, and add the ones you like as friends.
 = הקש על אי כדי לטוס אליו. תן יד, והוסף לחברים את מי שאהבת.
+~ הקישי על אי כדי לטוס אליו. תני יד, והוסיפי לחברים את מי שאהבת.
 
 @ Empty
 = ריק
@@ -325,6 +346,7 @@
 
 @ Walk to the water's edge where fish shadows swim, and tap Start fishing.
 = לך לשפת המים, איפה שצללי דגים שוחים, והקש על "התחל לדוג".
+~ לכי לשפת המים, איפה שצללי דגים שוחים, והקישי על "התחילי לדוג".
 
 @ Journal
 = יומן
@@ -334,24 +356,29 @@
 
 @ Birds land in trees and on the shore. Tap one from a few steps away. Don't rush up to it!
 = ציפורים נוחתות על עצים ועל החוף. הקש על אחת מכמה צעדים. אל תמהר להתקרב!
+~ ציפורים נוחתות על עצים ועל החוף. הקישי על אחת מכמה צעדים. אל תמהרי להתקרב!
 
 @ {0} of {1} bugs caught
 = נתפסו {0} מתוך {1} חרקים
 
 @ Bugs settle on flowers, trees and grass near you. Tap one to net it, gently.
 = חרקים נוחתים על פרחים, עצים ודשא לידך. הקש על אחד כדי לתפוס אותו ברשת, בעדינות.
+~ חרקים נוחתים על פרחים, עצים ודשא לידך. הקישי על אחד כדי לתפוס אותו ברשת, בעדינות.
 
 @ {0} of {1} plots
 = {0} מתוך {1} ערוגות
 
 @ Buy vegetable plots at the Garden Shop and put them anywhere. Tap one to plant seeds, come back when it's grown.
 = קנה ערוגות ירקות בחנות הגינה והנח אותן איפה שתרצה. הקש על ערוגה כדי לשתול זרעים, וחזור כשהיא גדלה.
+~ קני ערוגות ירקות בחנות הגינה והניחי אותן איפה שתרצי. הקישי על ערוגה כדי לשתול זרעים, וחזרי כשהיא גדלה.
 
 @ Show me
 = הראה לי
+~ הראי לי
 
 @ Buy a vegetable plot at the Garden Shop, then put it down anywhere.
 = קנה ערוגת ירקות בחנות הגינה, ואז הנח אותה איפה שתרצה.
+~ קני ערוגת ירקות בחנות הגינה, ואז הניחי אותה איפה שתרצי.
 
 @ {0} dish in your bag
 = {0} מנה בתיק שלך
@@ -361,6 +388,7 @@
 
 @ Tap your stove and drag ingredients into the pot. Islanders with a dish in a bubble over their head will pay for it.
 = הקש על הכיריים וגרור מצרכים לסיר. תושבים עם מנה בבועה מעל הראש ישלמו עליה.
+~ הקישי על הכיריים וגררי מצרכים לסיר. תושבים עם מנה בבועה מעל הראש ישלמו עליה.
 
 @ Recipes
 = מתכונים
@@ -370,6 +398,7 @@
 
 @ Stray cats visit your island. Pet them and share fish until they trust you.
 = חתולי רחוב מבקרים באי שלך. לטף אותם ושתף איתם דגים עד שיסמכו עליך.
+~ חתולי רחוב מבקרים באי שלך. לטפי אותם ושתפי איתם דגים עד שיסמכו עליך.
 
 @ {0} story written
 = נכתב {0} סיפור
@@ -379,6 +408,7 @@
 
 @ Message bottles wash up on your beach. Read them, and buy a bottle from the sailor to leave a story of your own.
 = בקבוקים עם מכתבים נסחפים לחוף שלך. קרא אותם, וקנה בקבוק מהמלח כדי להשאיר סיפור משלך.
+~ בקבוקים עם מכתבים נסחפים לחוף שלך. קראי אותם, וקני בקבוק מהמלח כדי להשאיר סיפור משלך.
 
 @ The bottles are on your beach.
 = הבקבוקים מחכים על החוף שלך.
@@ -394,6 +424,7 @@
 
 @ Put your sewing machine down somewhere first.
 = קודם הנח את מכונת התפירה איפשהו.
+~ קודם הניחי את מכונת התפירה איפשהו.
 
 @ Still to discover
 = עוד לגלות
@@ -420,12 +451,15 @@
 
 @ Strays wander onto your island every so often. Pet them, share a fish, and once they trust you, adopt them.
 = מדי פעם חתולי רחוב משוטטים לאי שלך. לטף אותם, שתף דג, וכשהם סומכים עליך, אמץ אותם.
+~ מדי פעם חתולי רחוב משוטטים לאי שלך. לטפי אותם, שתפי דג, וכשהם סומכים עליך, אמצי אותם.
 
 @ Your bag is empty. Catch fish, grow vegetables and cook dishes to fill it.
 = התיק שלך ריק. דוג דגים, גדל ירקות ובשל מנות כדי למלא אותו.
+~ התיק שלך ריק. דוגי דגים, גדלי ירקות ובשלי מנות כדי למלא אותו.
 
 @ ×{0}  ·  <size=85%>Someone might fancy this — look for a bubble!</size>
 = ×{0}  ·  <size=85%>אולי מישהו ישמח לזה — חפש בועה!</size>
+~ ×{0}  ·  <size=85%>אולי מישהו ישמח לזה — חפשי בועה!</size>
 
 @ Go to my stove
 = לכיריים שלי
@@ -456,9 +490,11 @@
 
 @ Make friends to read their books. Visit an island from the Friends menu!
 = הכר חברים כדי לקרוא את הספרים שלהם. בקר באי דרך תפריט החברים!
+~ הכירי חברים כדי לקרוא את הספרים שלהם. בקרי באי דרך תפריט החברים!
 
 @ {0}'s shelf (you're here)
 = המדף של {0} (אתה כאן)
+~ המדף של {0} (את כאן)
 
 @ {0}'s shelf
 = המדף של {0}
@@ -471,18 +507,21 @@
 
 @ Write a new book
 = כתוב ספר חדש
+~ כתבי ספר חדש
 
 @ Your shelf is empty. Every great author starts with one page.
 = המדף שלך ריק. כל סופר גדול מתחיל מעמוד אחד.
 
 @ Read
 = קרא
+~ קראי
 
 @ Back to the shelf
 = חזרה למדף
 
 @ Take off the shelf
 = הורד מהמדף
+~ הורידי מהמדף
 
 @ Title
 = כותרת
@@ -492,6 +531,7 @@
 
 @ Put it in the bottle
 = הכנס לבקבוק
+~ הכניסי לבקבוק
 
 @ Put it on my shelf
 = שים על המדף שלי
@@ -549,21 +589,27 @@
 
 @ Grow cotton in your garden (gardening level 2).
 = גדל כותנה בגינה שלך (רמת גינון 2).
+~ גדלי כותנה בגינה שלך (רמת גינון 2).
 
 @ Catch silkworms for their silk (bug catching level 2).
 = תפוס תולעי משי בשביל המשי שלהן (רמת ציד חרקים 2).
+~ תפסי תולעי משי בשביל המשי שלהן (רמת ציד חרקים 2).
 
 @ Paint your hat!
 = צבע את הכובע שלך!
+~ צבעי את הכובע שלך!
 
 @ Paint your cape!
 = צבע את הגלימה שלך!
+~ צבעי את הגלימה שלך!
 
 @ A hat needs {0} cotton. Grow cotton in your garden (gardening level 2).
 = לכובע צריך {0} כותנה. גדל כותנה בגינה שלך (רמת גינון 2).
+~ לכובע צריך {0} כותנה. גדלי כותנה בגינה שלך (רמת גינון 2).
 
 @ A cape needs {0} silk. Catch silkworms for their silk (bug catching level 2).
 = לגלימה צריך {0} משי. תפוס תולעי משי בשביל המשי שלהן (רמת ציד חרקים 2).
+~ לגלימה צריך {0} משי. תפסי תולעי משי בשביל המשי שלהן (רמת ציד חרקים 2).
 
 @ My Hat {0}
 = הכובע שלי {0}
@@ -576,24 +622,29 @@
 
 @ Tap or drag to paint.
 = הקש או גרור כדי לצבוע.
+~ הקישי או גררי כדי לצבוע.
 
 @ Clear
 = נקה
+~ נקי
 
 @ A fresh piece of fabric.
 = פיסת בד חדשה.
 
 @ Sew it
 = תפור
+~ תפרי
 
 @ Sew & wear
 = תפור ולבש
+~ תפרי ולבשי
 
 @ Your sewing
 = התפירות שלך
 
 @ You're wearing it! Have a look around the island.
 = אתה לובש את זה! צא לסיבוב באי.
+~ את לובשת את זה! צאי לסיבוב באי.
 
 @ Sewn! It's in your wardrobe.
 = נתפר! זה מחכה בארון הבגדים שלך.
@@ -605,21 +656,26 @@
 
 @ Start fishing
 = התחל לדוג
+~ התחילי לדוג
 
 @ Stop
 = עצור
+~ עצרי
 
 @ Stop fishing
 = הפסק לדוג
+~ הפסיקי לדוג
 
 @ Tap to cast
 = הקש כדי להטיל
+~ הקישי כדי להטיל
 
 @ Your bobber lands by the nearest fish
 = המצוף ינחת ליד הדג הקרוב
 
 @ Wait…
 = חכה…
+~ חכי…
 
 @ A fish is coming to look
 = דג בא להציץ
@@ -629,9 +685,11 @@
 
 @ Nibble, nibble… wait for the big splash
 = נשנוש, נשנוש… חכה לשפריץ הגדול
+~ נשנוש, נשנוש… חכי לשפריץ הגדול
 
 @ Let go!
 = שחרר!
+~ שחררי!
 
 @ The line is about to snap
 = החוט עומד להיקרע
@@ -641,18 +699,22 @@
 
 @ Hold to reel!
 = החזק כדי לגלגל!
+~ החזיקי כדי לגלגל!
 
 @ Ease off when it turns red
 = הרפה כשזה נהיה אדום
+~ הרפי כשזה נהיה אדום
 
 @ Reeling…
 = מגלגל…
+~ מגלגלת…
 
 @ It's pulling hard!
 = הוא מושך חזק!
 
 @ Bring it in
 = משוך אותו פנימה
+~ משכי אותו פנימה
 
 @ Hooked!
 = נתפס!
@@ -698,17 +760,21 @@
 
 @ Keep it up!
 = המשך כך!
+~ המשיכי כך!
 
 # ---------------------------------------------------------------- UI/Hobbies/CookingScreen.cs
 
 @ Cook!
 = בשל!
+~ בשלי!
 
 @ Drag ingredients into the pot
 = גרור מצרכים לסיר
+~ גררי מצרכים לסיר
 
 @ No ingredients yet — catch fish and grow vegetables!
 = עוד אין מצרכים — דוג דגים וגדל ירקות!
+~ עוד אין מצרכים — דוגי דגים וגדלי ירקות!
 
 @ <color=#8A7563>Empty pot</color>
 = <color=#8A7563>סיר ריק</color>
@@ -718,9 +784,11 @@
 
 @ The pot is full! Tap something in it to take it out.
 = הסיר מלא! הקש על משהו בתוכו כדי להוציא אותו.
+~ הסיר מלא! הקישי על משהו בתוכו כדי להוציא אותו.
 
 @ Tap the spatula when it appears, to stir and cool it down!
 = הקש על המרית כשהיא מופיעה, כדי לערבב ולקרר!
+~ הקישי על המרית כשהיא מופיעה, כדי לערבב ולקרר!
 
 @ <color=#8EE59A><b>Perfect stir!</b></color>
 = <color=#8EE59A><b>ערבוב מושלם!</b></color>
@@ -736,9 +804,11 @@
 
 @ It's in your bag. Look for someone with this dish in a bubble over their head!
 = זה בתיק שלך. חפש מישהו עם המנה הזאת בבועה מעל הראש!
+~ זה בתיק שלך. חפשי מישהו עם המנה הזאת בבועה מעל הראש!
 
 @ It burned to a crisp. Tap the spatula sooner to keep the heat down!
 = זה נשרף לגמרי. הקש על המרית מוקדם יותר כדי להוריד את החום!
+~ זה נשרף לגמרי. הקישי על המרית מוקדם יותר כדי להוריד את החום!
 
 @ Nobody has a recipe for that, and now we know why.
 = לאף אחד אין מתכון לזה, ועכשיו ברור למה.
@@ -768,6 +838,7 @@
 
 @ tap to skip
 = הקש כדי לדלג
+~ הקישי כדי לדלג
 
 @ Warmed right up!
 = חמים ונעים עכשיו!
@@ -783,6 +854,7 @@
 
 @ <size=55%>Off you go, explorer</size>
 = <size=55%>לדרך, הרפתקן</size>
+~ <size=55%>לדרך, הרפתקנית</size>
 
 @ The Hot Pepper Hornpipe!
 = ריקוד הפלפל החריף!
@@ -804,63 +876,76 @@
 
 @ <size=55%>You & Miso</size>
 = <size=55%>אתה ומיסו</size>
+~ <size=55%>את ומיסו</size>
 
 @ New hobby: {0}!
 = תחביב חדש: {0}!
 
 @ <size=55%>Let's give it a go</size>
 = <size=55%>בוא ננסה!</size>
+~ <size=55%>בואי ננסה!</size>
 
 @ How to fish
 = איך דגים
 
 @ Walk to the water's edge where fish shadows swim and tap Start fishing.
 = לך לשפת המים, איפה שצללי דגים שוחים, והקש על "התחל לדוג".
+~ לכי לשפת המים, איפה שצללי דגים שוחים, והקישי על "התחילי לדוג".
 
 @ Your bobber goes straight in by the nearest fish. When it bites, hold to reel and let go when the line turns red!
 = המצוף נוחת מיד ליד הדג הקרוב. כשדג נתפס, החזק כדי לגלגל ושחרר כשהחוט נהיה אדום!
+~ המצוף נוחת מיד ליד הדג הקרוב. כשדג נתפס, החזיקי כדי לגלגל ושחררי כשהחוט נהיה אדום!
 
 @ How to catch bugs
 = איך תופסים חרקים
 
 @ Bugs settle on flowers, trees and grass. Walk close and tap one to swing your net.
 = חרקים נוחתים על פרחים, עצים ודשא. התקרב והקש על אחד כדי להניף את הרשת.
+~ חרקים נוחתים על פרחים, עצים ודשא. התקרבי והקישי על אחד כדי להניף את הרשת.
 
 @ Some are shy, so don't run straight at them!
 = חלקם ביישנים, אז אל תרוץ ישר אליהם!
+~ חלקם ביישנים, אז אל תרוצי ישר אליהם!
 
 @ How to watch birds
 = איך צופים בציפורים
 
 @ Birds land in trees and on the shore. Tap one from a few steps away to spot it through your binoculars.
 = ציפורים נוחתות על עצים ועל החוף. הקש על אחת מכמה צעדים כדי לצפות בה במשקפת.
+~ ציפורים נוחתות על עצים ועל החוף. הקישי על אחת מכמה צעדים כדי לצפות בה במשקפת.
 
 @ Get too close and it flies off!
 = אם תתקרב יותר מדי, היא תעוף!
+~ אם תתקרבי יותר מדי, היא תעוף!
 
 @ How to sew
 = איך תופרים
 
 @ Put your sewing machine down, then tap it.
 = הנח את מכונת התפירה, ואז הקש עליה.
+~ הניחי את מכונת התפירה, ואז הקישי עליה.
 
 @ A hat needs cotton from your garden. Decorate it, and it goes in your wardrobe!
 = לכובע צריך כותנה מהגינה. קשט אותו, והוא נכנס לארון הבגדים שלך!
+~ לכובע צריך כותנה מהגינה. קשטי אותו, והוא נכנס לארון הבגדים שלך!
 
 @ How to garden
 = איך מגדלים גינה
 
 @ Put a vegetable plot down anywhere and tap it to plant seeds.
 = הנח ערוגת ירקות איפה שתרצה והקש עליה כדי לשתול זרעים.
+~ הניחי ערוגת ירקות איפה שתרצי והקישי עליה כדי לשתול זרעים.
 
 @ They grow while you're away. Tap again to harvest!
 = הם גדלים כשאתה לא כאן. הקש שוב כדי לקטוף!
+~ הם גדלים כשאת לא כאן. הקישי שוב כדי לקטוף!
 
 @ How to cook
 = איך מבשלים
 
 @ Put your stove down and tap it. Drag ingredients into the pot, press Cook, and tap the spatula in time to keep the heat down.
 = הנח את הכיריים והקש עליהן. גרור מצרכים לסיר, לחץ על "בשל!", והקש על המרית בזמן כדי לשמור על חום נמוך.
+~ הניחי את הכיריים והקישי עליהן. גררי מצרכים לסיר, לחצי על "בשלי!", והקישי על המרית בזמן כדי לשמור על חום נמוך.
 
 @ Islanders with a dish in a bubble will pay for it!
 = תושבים עם מנה בבועה ישלמו עליה!
@@ -870,6 +955,7 @@
 
 @ Find it in Hobbies, in the menu.
 = תמצא אותו בתחביבים, בתפריט.
+~ תמצאי אותו בתחביבים, בתפריט.
 
 # ---------------------------------------------------------------- VisitorBot.cs LogOff: guest's summary (all combinations)
 
@@ -953,9 +1039,11 @@
 
 @ Write a few words first.
 = כתוב קודם כמה מילים.
+~ כתבי קודם כמה מילים.
 
 @ Tap your bottle any time to write your note.
 = הקש על הבקבוק שלך מתי שתרצה כדי לכתוב את הפתק.
+~ הקישי על הבקבוק שלך מתי שתרצי כדי לכתוב את הפתק.
 
 @ You need a fishing rod first. Nori sells one right here.
 = קודם צריך חכה. נורי מוכר אחת ממש כאן.
@@ -990,12 +1078,15 @@
 
 @ Tap the hat to stick it on.
 = הקש על הכובע כדי להדביק.
+~ הקישי על הכובע כדי להדביק.
 
 @ Tap an area to fill it with your colour.
 = הקש על אזור כדי למלא אותו בצבע שלך.
+~ הקישי על אזור כדי למלא אותו בצבע שלך.
 
 @ Tap an area to clear it.
 = הקש על אזור כדי לנקות אותו.
+~ הקישי על אזור כדי לנקות אותו.
 
 # ---------------------------------------------------------------- hat patterns (SewingScreen)
 
@@ -1010,21 +1101,27 @@
 
 @ Paint your beanie!
 = צבע את כובע הצמר שלך!
+~ צבעי את כובע הצמר שלך!
 
 @ Paint your fedora!
 = צבע את הפדורה שלך!
+~ צבעי את הפדורה שלך!
 
 @ Paint your sun hat!
 = צבע את כובע השמש שלך!
+~ צבעי את כובע השמש שלך!
 
 @ Grow cotton in your garden (gardening level 2).
 = גדל כותנה בגינה שלך (גינון רמה 2).
+~ גדלי כותנה בגינה שלך (גינון רמה 2).
 
 @ Catch silkworms for their silk (bug catching level 2).
 = תפוס תולעי משי בשביל המשי שלהן (תפיסת חרקים רמה 2).
+~ תפסי תולעי משי בשביל המשי שלהן (תפיסת חרקים רמה 2).
 
 @ Grow cotton in your garden and catch silkworms for their silk.
 = גדל כותנה בגינה ותפוס תולעי משי בשביל המשי שלהן.
+~ גדלי כותנה בגינה ותפסי תולעי משי בשביל המשי שלהן.
 
 @ A {0} needs {1}. {2}
 = ל{0} צריך {1}. {2}
@@ -1089,9 +1186,11 @@
 
 @ Drag to move around. Zoom in to see the details.
 = גרור כדי לזוז. התקרב כדי לראות את הפרטים.
+~ גררי כדי לזוז. התקרבי כדי לראות את הפרטים.
 
 @ Fit
 = התאם
+~ התאימי
 
 @ Move
 = הזזה
@@ -1110,6 +1209,7 @@
 
 @ Warm up a zombie capybara
 = חמם קפיברת זומבי
+~ חממי קפיברת זומבי
 
 @ Comes with the story
 = מגיע עם הסיפור
@@ -1149,9 +1249,11 @@
 
 @ Grow it on Sunflower Farm
 = גדל אותו בחוות החמניות
+~ גדלי אותו בחוות החמניות
 
 @ Cook it at the farm's stove
 = בשל אותו בכיריים של החווה
+~ בשלי אותו בכיריים של החווה
 
 @ Wanders onto your island
 = משוטט לאי שלך
@@ -1179,6 +1281,7 @@
 
 @ Pay the spirit to raise the bridge to Sunflower Farm: fields ready to plant, and a barn full of seeds.
 = שלם לרוח כדי להרים את הגשר לחוות החמניות: שדות מוכנים לשתילה, ואסם מלא זרעים.
+~ שלמי לרוח כדי להרים את הגשר לחוות החמניות: שדות מוכנים לשתילה, ואסם מלא זרעים.
 
 @ Your vegetable plots have moved to Sunflower Farm, south of Pebble Cove. Your crops are still growing there!
 = ערוגות הירקות שלך עברו לחוות החמניות, דרומית למפרץ החלוקים. הגידולים שלך עדיין צומחים שם!
@@ -1188,37 +1291,47 @@
 
 @ Pay the spirit at the south end of Pebble Cove to raise the bridge to Sunflower Farm
 = שלם לרוח בקצה הדרומי של מפרץ החלוקים כדי להרים את הגשר לחוות החמניות
+~ שלמי לרוח בקצה הדרומי של מפרץ החלוקים כדי להרים את הגשר לחוות החמניות
 
 @ Tap the stove on Sunflower Farm
 = הקש על הכיריים בחוות החמניות
+~ הקישי על הכיריים בחוות החמניות
 
 @ Drag ingredients into the pot, press Cook, and tap the spatula in time to keep the heat down.
 = גרור מרכיבים לסיר, לחץ על בשל, והקש על המרית בזמן כדי להוריד את החום.
+~ גררי מרכיבים לסיר, לחצי על בשלי, והקישי על המרית בזמן כדי להוריד את החום.
 
 @ Go to my farm
 = לחווה שלי
 
 @ Find Sunflower Farm
 = מצא את חוות החמניות
+~ מצאי את חוות החמניות
 
 @ Open Pebble Cove first: Sunflower Farm's bridge is at its south end.
 = קודם פתח את מפרץ החלוקים: הגשר לחוות החמניות נמצא בקצה הדרומי שלו.
+~ קודם פתחי את מפרץ החלוקים: הגשר לחוות החמניות נמצא בקצה הדרומי שלו.
 
 @ Find the stove on Sunflower Farm
 = מצא את הכיריים בחוות החמניות
+~ מצאי את הכיריים בחוות החמניות
 
 
 @ Buy seeds at the barn on Sunflower Farm, then drag them from your trail onto an empty plot.
 = קנה זרעים באסם בחוות החמניות, ואז גרור אותם מהשובל שלך אל ערוגה ריקה.
+~ קני זרעים באסם בחוות החמניות, ואז גררי אותם מהשובל שלך אל ערוגה ריקה.
 
 @ They grow while you're away. Tap the plot to harvest! More plots and seeds open as your gardening level grows.
 = הם גדלים גם כשאתה לא כאן. הקש על הערוגה כדי לקצור! ערוגות וזרעים נוספים נפתחים ככל שרמת הגינון שלך עולה.
+~ הם גדלים גם כשאת לא כאן. הקישי על הערוגה כדי לקצור! ערוגות וזרעים נוספים נפתחים ככל שרמת הגינון שלך עולה.
 
 @ Buy seeds at the barn on Sunflower Farm and drag them onto a plot. Come back when they've grown. More plots and seeds open as you level up.
 = קנה זרעים באסם בחוות החמניות וגרור אותם אל ערוגה. חזור כשהם גדלו. ערוגות וזרעים נוספים נפתחים כשאתה עולה ברמה.
+~ קני זרעים באסם בחוות החמניות וגררי אותם אל ערוגה. חזרי כשהם גדלו. ערוגות וזרעים נוספים נפתחים כשאת עולה ברמה.
 
 @ Buy seeds at the barn, then drag them from your trail onto an empty plot.
 = קנה זרעים באסם, ואז גרור אותם מהשובל שלך אל ערוגה ריקה.
+~ קני זרעים באסם, ואז גררי אותם מהשובל שלך אל ערוגה ריקה.
 
 @ Something is already growing there.
 = משהו כבר גדל שם.
@@ -1234,21 +1347,27 @@
 
 @ Drop it on an empty plot on Sunflower Farm: {0} × {1} in {2} min.
 = הנח אותו על ערוגה ריקה בחוות החמניות: {0} × {1} תוך {2} דק'.
+~ הניחי אותו על ערוגה ריקה בחוות החמניות: {0} × {1} תוך {2} דק'.
 
 @ Buy a stove from Chef Tofu by the hot spring
 = קנה כיריים מהשף טופו ליד המעיין החם
+~ קני כיריים מהשף טופו ליד המעיין החם
 
 @ Buy a stove from Chef Tofu
 = קנה כיריים מהשף טופו
+~ קני כיריים מהשף טופו
 
 @ Visit Chef Tofu
 = בקר אצל השף טופו
+~ בקרי אצל השף טופו
 
 @ Buy it from Chef Tofu, or work it out in the pot
 = קנה אותו מהשף טופו, או גלה אותו בסיר
+~ קני אותו מהשף טופו, או גלי אותו בסיר
 
-@ Buy the recipe from Chef Tofu by the hot spring
-= קנה את המתכון מהשף טופו ליד המעיין החם
+@ Buy the recipe from Chef Tofu on Sunflower Farm
+= קנה את המתכון מהשף טופו בחוות החמניות
+~ קני את המתכון מהשף טופו בחוות החמניות
 
 @ Free when you take up gardening
 = בחינם כשמתחילים לגנן
@@ -1273,6 +1392,7 @@
 
 @ A recipe shows what goes into a dish, and islanders only ask for dishes you know. Put the right things in the pot and you might work one out for yourself!
 = מתכון מראה מה נכנס למנה, ותושבי האי מבקשים רק מנות שאתה מכיר. שים את הדברים הנכונים בסיר ואולי תגלה מתכון בעצמך!
+~ מתכון מראה מה נכנס למנה, ותושבי האי מבקשים רק מנות שאת מכירה. שימי את הדברים הנכונים בסיר ואולי תגלי מתכון בעצמך!
 
 @ You need a stove first. Chef Tofu sells one right here.
 = קודם צריך כיריים. השף טופו מוכר אותן ממש כאן.
@@ -1280,23 +1400,26 @@
 @ Back for more? Anything you can't grow or catch, I've got right here. And my recipes are all in my book!
 = חזרת לעוד? כל מה שאי אפשר לגדל או לדוג, יש לי ממש כאן. וכל המתכונים שלי נמצאים בספר שלי!
 
-@ Chef Tofu by the hot spring sells recipes, eggs and milk.
-= השף טופו ליד המעיין החם מוכר מתכונים, ביצים וחלב.
+@ Chef Tofu on Sunflower Farm sells recipes, eggs and milk.
+= השף טופו בחוות החמניות מוכר מתכונים, ביצים וחלב.
 
 @ Hello, hello! Chef Tofu, at your service. I cooked for the whole of the isles before the Big Chill, and being a ghost was never going to keep me out of my kitchen.
 = שלום, שלום! השף טופו, לשירותך. בישלתי לכל האיים לפני הקור הגדול, ולהיות רוח רפאים בטח לא ירחיק אותי מהמטבח שלי.
 
 @ Every good kitchen starts with a stove, and mine are the best on the isles. Then come back for eggs, milk, flour, and all the recipes you can learn!
 = כל מטבח טוב מתחיל בכיריים, ושלי הן הכי טובות באיים. אחר כך תחזור לקנות ביצים, חלב, קמח ואת כל המתכונים שאפשר ללמוד!
+~ כל מטבח טוב מתחיל בכיריים, ושלי הן הכי טובות באיים. אחר כך תחזרי לקנות ביצים, חלב, קמח ואת כל המתכונים שאפשר ללמוד!
 
 @ Buy a stove first
 = קודם קנה כיריים
+~ קודם קני כיריים
 
 @ My recipe book
 = ספר המתכונים שלי
 
 @ You know every recipe Chef Tofu has. Bravo!
 = אתה מכיר כל מתכון שיש לשף טופו. כל הכבוד!
+~ את מכירה כל מתכון שיש לשף טופו. כל הכבוד!
 
 @ Accept
 = לקבל
@@ -1309,6 +1432,7 @@
 
 @ Copied! Send it to a friend so they can add you.
 = הועתק! שלח אותו לחבר כדי שיוכל להוסיף אותך.
+~ הועתק! שלחי אותו לחבר כדי שיוכל להוסיף אותך.
 
 @ A friend's code, like Miso#1234
 = קוד של חבר, כמו Miso#1234
@@ -1324,12 +1448,15 @@
 
 @ Couldn't answer just now. Try again in a moment.
 = לא הצלחנו לענות כרגע. נסה שוב עוד רגע.
+~ לא הצלחנו לענות כרגע. נסי שוב עוד רגע.
 
 @ Remove {0} from your friends? You'll need their friend code to add them again.
 = להסיר את {0} מהחברים שלך? כדי להוסיף אותם שוב תצטרך את קוד החבר שלהם.
+~ להסיר את {0} מהחברים שלך? כדי להוסיף אותם שוב תצטרכי את קוד החבר שלהם.
 
 @ {0}'s island isn't ready for visitors yet. Try again later!
 = האי של {0} עוד לא מוכן למבקרים. נסה שוב אחר כך!
+~ האי של {0} עוד לא מוכן למבקרים. נסי שוב אחר כך!
 
 @ {0} wants to be your friend! Answer in Neighbours.
 = {0} רוצה להיות חבר שלך! אפשר לענות ב"שכנים".
@@ -1354,42 +1481,51 @@
 
 @ Nobody has that friend code. Check the name and the numbers.
 = לאף אחד אין את קוד החבר הזה. בדוק את השם ואת המספרים.
+~ לאף אחד אין את קוד החבר הזה. בדקי את השם ואת המספרים.
 
 @ Couldn't send the request. Try again in a moment.
 = לא הצלחנו לשלוח את הבקשה. נסה שוב עוד רגע.
+~ לא הצלחנו לשלוח את הבקשה. נסי שוב עוד רגע.
 
 @ Knocking on {0}'s door…
 = דופק על הדלת של {0}…
+~ דופקת על הדלת של {0}…
 
 @ Couldn't reach them just now. Try again in a moment.
 = לא הצלחנו להגיע אליהם כרגע. נסה שוב עוד רגע.
+~ לא הצלחנו להגיע אליהם כרגע. נסי שוב עוד רגע.
 
 @ {0} didn't answer. Maybe they're busy. Try again later!
 = {0} לא ענו. אולי הם עסוקים. נסה שוב אחר כך!
+~ {0} לא ענו. אולי הם עסוקים. נסי שוב אחר כך!
 
 @ {0} is visiting someone else right now.
 = {0} מבקרים מישהו אחר כרגע.
 
 @ {0} already has a visitor. Try again a bit later!
 = אצל {0} כבר יש אורח. נסה שוב עוד קצת!
+~ אצל {0} כבר יש אורח. נסי שוב עוד קצת!
 
 @ {0} can't have visitors right now.
 = {0} לא יכולים לארח כרגע.
 
 @ Couldn't connect to their island. Try again in a moment.
 = לא הצלחנו להתחבר לאי שלהם. נסה שוב עוד רגע.
+~ לא הצלחנו להתחבר לאי שלהם. נסי שוב עוד רגע.
 
 @ {0} went offline. You can look around, or fly home.
 = {0} התנתקו. אפשר להסתובב, או לטוס הביתה.
 
 @ You're on {0}'s island together! Say hi with an emoji.
 = אתם יחד באי של {0}! תגיד שלום עם אימוג'י.
+~ אתם יחד באי של {0}! תגידי שלום עם אימוג'י.
 
 @ {0} is on the way!
 = {0} בדרך!
 
 @ Couldn't open your island just now. Try again in a moment.
 = לא הצלחנו לפתוח את האי שלך כרגע. נסה שוב עוד רגע.
+~ לא הצלחנו לפתוח את האי שלך כרגע. נסי שוב עוד רגע.
 
 @ {0} couldn't come after all.
 = {0} לא הצליחו להגיע בסוף.
@@ -1399,21 +1535,26 @@
 
 @ This is {0}'s island. Add them as a friend, then you can ask to build together.
 = זה האי של {0}. הוסף אותם כחברים, ואז תוכל לבקש לבנות יחד.
+~ זה האי של {0}. הוסיפי אותם כחברים, ואז תוכלי לבקש לבנות יחד.
 
 @ Ask {0} if you can build here first: tap their face in the corner.
 = קודם תשאל את {0} אם אפשר לבנות כאן: הקש על הפנים שלהם בפינה.
+~ קודם תשאלי את {0} אם אפשר לבנות כאן: הקישי על הפנים שלהם בפינה.
 
 @ {0} isn't home. Visit them while they're online to build together.
 = {0} לא בבית. בקר אותם כשהם מחוברים כדי לבנות יחד.
+~ {0} לא בבית. בקרי אותם כשהם מחוברים כדי לבנות יחד.
 
 @ Asking {0}…
 = שואל את {0}…
+~ שואלת את {0}…
 
 @ {0} said yes! You can build on their island now.
 = {0} הסכימו! עכשיו אפשר לבנות באי שלהם.
 
 @ {0} would rather you just helped out for now.
 = {0} מעדיפים שבינתיים רק תעזור.
+~ {0} מעדיפים שבינתיים רק תעזרי.
 
 @ Build together?
 = לבנות יחד?
@@ -1438,9 +1579,11 @@
 
 @ Asking…
 = שואל…
+~ שואלת…
 
 @ That one stays on your own island. Put it down at home!
 = את זה משאירים באי שלך. הנח אותו בבית!
+~ את זה משאירים באי שלך. הניחי אותו בבית!
 
 @ {0} is offline right now. You can visit when they're online!
 = {0} לא מחוברים כרגע. אפשר לבקר כשהם מחוברים!
@@ -1453,9 +1596,11 @@
 
 @ Copy code
 = העתק קוד
+~ העתיקי קוד
 
 @ Leave server
 = עזוב שרת
+~ עזבי שרת
 
 @ Leave server?
 = לעזוב את השרת?
@@ -1468,24 +1613,29 @@
 
 @ Copied {0}! Send it to friends so they can join.
 = {0} הועתק! שלח אותו לחברים כדי שיצטרפו.
+~ {0} הועתק! שלחי אותו לחברים כדי שיצטרפו.
 
 @ Everyone with this code lands here. Tap a friend's island to visit, or someone new to add them as a friend.
 = כל מי שיש לו את הקוד הזה מגיע לכאן. הקש על אי של חבר כדי לבקר, או על מישהו חדש כדי להוסיף אותו כחבר.
+~ כל מי שיש לו את הקוד הזה מגיע לכאן. הקישי על אי של חבר כדי לבקר, או על מישהו חדש כדי להוסיף אותו כחבר.
 
 @ Couldn't find their friend code just now. Try again in a moment.
 = לא מצאנו את קוד החבר שלהם כרגע. נסה שוב עוד רגע.
+~ לא מצאנו את קוד החבר שלהם כרגע. נסי שוב עוד רגע.
 
 @ Ask {0} to be friends? Once they accept, you can visit each other.
 = לבקש מ{0} להיות חברים? ברגע שיאשרו, תוכלו לבקר זה את זה.
 
 @ A server just for you and your friends: everyone with the same code lands on it. Make one and send its code, or type a code you were sent.
 = שרת רק בשבילך ובשביל החברים שלך: כל מי שמקליד את אותו קוד מגיע אליו. צור אחד ושלח את הקוד שלו, או הקלד קוד ששלחו לך.
+~ שרת רק בשבילך ובשביל החברים שלך: כל מי שמקליד את אותו קוד מגיע אליו. צרי אחד ושלחי את הקוד שלו, או הקלידי קוד ששלחו לך.
 
 @ Server code, like K7M-2QX
 = קוד שרת, כמו K7M-2QX
 
 @ Join
 = הצטרף
+~ הצטרפי
 
 @ Or
 = או
@@ -1498,12 +1648,15 @@
 
 @ Joining…
 = מצטרף…
+~ מצטרפת…
 
 @ Your server is ready: {0}. The code is copied, send it to your friends!
 = השרת שלך מוכן: {0}. הקוד הועתק, שלח אותו לחברים שלך!
+~ השרת שלך מוכן: {0}. הקוד הועתק, שלחי אותו לחברים שלך!
 
 @ You're on server {0}.
 = אתה בשרת {0}.
+~ את בשרת {0}.
 
 @ A server code has 6 letters and numbers, like K7M-2QX.
 = לקוד שרת יש 6 אותיות ומספרים, כמו K7M-2QX.
@@ -1513,6 +1666,7 @@
 
 @ Couldn't reach that server. Try again in a moment.
 = לא הצלחנו להגיע לשרת הזה. נסה שוב עוד רגע.
+~ לא הצלחנו להגיע לשרת הזה. נסי שוב עוד רגע.
 
 @ Waiting for {0} to let you in…
 = מחכה ש{0} יכניס אותך…
@@ -1522,9 +1676,11 @@
 
 @ You're still waiting for {0} to answer.
 = אתה עדיין מחכה לתשובה של {0}.
+~ את עדיין מחכה לתשובה של {0}.
 
 @ {0} is on your island right now. Say goodbye first!
 = {0} נמצא באי שלך עכשיו. קודם תיפרד!
+~ {0} נמצא באי שלך עכשיו. קודם תיפרדי!
 
 @ {0} stopped knocking.
 = {0} הפסיק לדפוק בדלת.
@@ -1534,66 +1690,84 @@
 
 @ Step off the bridge onto an island's shore to host a fishing contest there.
 = רד מהגשר אל החוף של אי כדי לארח שם תחרות דיג.
+~ רדי מהגשר אל החוף של אי כדי לארח שם תחרות דיג.
 
 @ This island doesn't have enough trees for a birdwatching contest. Try one with more.
 = באי הזה אין מספיק עצים לתחרות צפרות. נסה אי עם יותר עצים.
+~ באי הזה אין מספיק עצים לתחרות צפרות. נסי אי עם יותר עצים.
 
 @ This island doesn't have enough trees or flowers for a bug contest. Try one with more.
 = באי הזה אין מספיק עצים או פרחים לתחרות חרקים. נסה אי עם יותר.
+~ באי הזה אין מספיק עצים או פרחים לתחרות חרקים. נסי אי עם יותר.
 
 @ the island
 = האי
 
 @ You left the shore of {0}, so you're out of this round. You keep everything you caught!
 = עזבת את החוף של {0}, אז אתה בחוץ בסיבוב הזה. כל מה שתפסת נשאר שלך!
+~ עזבת את החוף של {0}, אז את בחוץ בסיבוב הזה. כל מה שתפסת נשאר שלך!
 
 @ You left {0}, so you're out of this round. You keep everything you caught!
 = עזבת את {0}, אז אתה בחוץ בסיבוב הזה. כל מה שתפסת נשאר שלך!
+~ עזבת את {0}, אז את בחוץ בסיבוב הזה. כל מה שתפסת נשאר שלך!
 
 @ Catch as many bugs as you can on {0}!
 = תפוס כמה שיותר חרקים ב-{0}!
+~ תפסי כמה שיותר חרקים ב-{0}!
 
 @ Spot as many birds as you can on {0}!
 = צפה בכמה שיותר ציפורים ב-{0}!
+~ צפי בכמה שיותר ציפורים ב-{0}!
 
 @ Catch as many fish as you can along the shore of {0}!
 = תפוס כמה שיותר דגים לאורך החוף של {0}!
+~ תפסי כמה שיותר דגים לאורך החוף של {0}!
 
 @ Wait by the shore of {0} for the contest to start
 = חכה על החוף של {0} עד שהתחרות תתחיל
+~ חכי על החוף של {0} עד שהתחרות תתחיל
 
 @ Wait on {0} for the contest to start
 = חכה ב-{0} עד שהתחרות תתחיל
+~ חכי ב-{0} עד שהתחרות תתחיל
 
 @ Come back to the shore of {0}! {1}
 = חזור לחוף של {0}! {1}
+~ חזרי לחוף של {0}! {1}
 
 @ Come back to {0}! {1}
 = חזור ל-{0}! {1}
+~ חזרי ל-{0}! {1}
 
 @ Event
 = אירוע
 
 @ You left the shore of {0}, so you're out of this round for now. Come back to join in again!
 = עזבת את החוף של {0}, אז אתה בחוץ בסיבוב הזה בינתיים. חזור כדי להצטרף שוב!
+~ עזבת את החוף של {0}, אז את בחוץ בסיבוב הזה בינתיים. חזרי כדי להצטרף שוב!
 
 @ You left {0}, so you're out of this round for now. Come back to join in again!
 = עזבת את {0}, אז אתה בחוץ בסיבוב הזה בינתיים. חזור כדי להצטרף שוב!
+~ עזבת את {0}, אז את בחוץ בסיבוב הזה בינתיים. חזרי כדי להצטרף שוב!
 
 @ You're back at the {0}! Join this round again? What you caught before still counts.
 = חזרת ל{0}! להצטרף שוב לסיבוב הזה? מה שתפסת קודם עדיין נחשב.
 
 @ Join in
 = הצטרף
+~ הצטרפי
 
 @ Come back to the shore of {0} first, then join in again!
 = חזור קודם לחוף של {0}, ואז תוכל להצטרף שוב!
+~ חזרי קודם לחוף של {0}, ואז תוכלי להצטרף שוב!
 
 @ Come back to {0} first, then join in again!
 = חזור קודם ל-{0}, ואז תוכל להצטרף שוב!
+~ חזרי קודם ל-{0}, ואז תוכלי להצטרף שוב!
 
 @ You're back in this round. Good luck!
 = חזרת לסיבוב הזה. בהצלחה!
 
 @ You're out of this round for now. Come back to join in again!
 = אתה בחוץ בסיבוב הזה בינתיים. חזור כדי להצטרף שוב!
+~ את בחוץ בסיבוב הזה בינתיים. חזרי כדי להצטרף שוב!

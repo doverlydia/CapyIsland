@@ -79,6 +79,8 @@ namespace CapyIsland.Game
             // No strays during the opening: the first one turns up a minute or two after it, and
             // only when nothing else has the screen.
             if (Attention.TutorialRunning) { _nextStray = Time.time + UnityEngine.Random.Range(60f, 120f); return; }
+            // Strays only come once cat care has been opened with a hobby card: the first soon after.
+            if (!HobbyLog.IsOpened(Hobby.Cats)) { _nextStray = Time.time + UnityEngine.Random.Range(15f, 30f); return; }
             if (Time.time < _nextStray) return;
             if (!Attention.Free(6f)) { _nextStray = Time.time + 5f; return; }
             _nextStray = Time.time + UnityEngine.Random.Range(90f, 180f);
@@ -742,7 +744,7 @@ namespace CapyIsland.Game
                         if (_whim == Whim.Begging) EndWhim();
                         bool already = CatGifts.FishGiftComing(state);
                         CatGifts.Fed(state);
-                        if (!already) Hints.Show("The cat licks its whiskers and gives you a long, thoughtful look. It's planning something…");
+                        if (!already) Hints.Answer("The cat licks its whiskers and gives you a long, thoughtful look. It's planning something…");
                     }, (!tired || begging) && HobbyLog.FishInBag() > 0),   // a beggar can always be given one
                 };
                 if (!state.adopted && state.bond >= AdoptAt)
@@ -783,7 +785,7 @@ namespace CapyIsland.Game
                 _sr.transform.DOPunchScale(new Vector3(0.1f, 0.15f, 0f), 0.35f, 6, 0.6f);
                 Sfx.Play(SfxKind.Heart, 0.5f);
                 if (!state.adopted && state.bond >= AdoptAt)
-                    Hints.Show("This cat really trusts you now. Tap it to adopt it!");
+                    Hints.Answer("This cat really trusts you now. Tap it to adopt it!");
             }
 
             void Adopt(HobbyLog.Cat state)

@@ -344,24 +344,31 @@
 
 @ Buy a Fishing Rod from Skipper Nori on the beach
 = קנה חכה מהסקיפר נורי בחוף
+~ קני חכה מהסקיפר נורי בחוף
 
 @ Buy a Fishing Rod at the Bronze Store
 = קנה חכה בחנות הארד
+~ קני חכה בחנות הארד
 
 @ Buy a Bug Net at the Bronze Store
 = קנה רשת חרקים בחנות הארד
+~ קני רשת חרקים בחנות הארד
 
 @ Buy Binoculars at the Silver Store
 = קנה משקפת בחנות הכסף
+~ קני משקפת בחנות הכסף
 
 @ Buy a Sewing Machine at the Steel Store
 = קנה מכונת תפירה בחנות הפלדה
+~ קני מכונת תפירה בחנות הפלדה
 
 @ Buy a Vegetable Plot at the Garden Shop (after the Legendary Gem Store)
 = קנה ערוגת ירקות בחנות הגינה (אחרי חנות היהלומים האגדית)
+~ קני ערוגת ירקות בחנות הגינה (אחרי חנות היהלומים האגדית)
 
 @ Buy a Cooking Stove at the Garden Shop (after the Legendary Gem Store)
 = קנה כיריים בחנות הגינה (אחרי חנות היהלומים האגדית)
+~ קני כיריים בחנות הגינה (אחרי חנות היהלומים האגדית)
 
 # ---------------------------------------------------------------- shared catch cards (Fishing, Birding, BugCatching)
 
@@ -399,37 +406,46 @@
 
 @ Wait for the big splash — then hold to reel.
 = חכה להתזה הגדולה — ואז לחץ והחזק כדי למשוך.
+~ חכי להתזה הגדולה — ואז לחצי והחזיקי כדי למשוך.
 
 @ Walk right up to the water's edge to fish.
 = גש עד קצה המים כדי לדוג.
+~ גשי עד קצה המים כדי לדוג.
 
 @ You walked off and the fish got away.
 = התרחקת, והדג ברח.
 
 @ Nothing's biting here. Try casting just in front of a fish shadow.
 = שום דבר לא נוגס פה. נסה להטיל ממש לפני צל של דג.
+~ שום דבר לא נוגס פה. נסי להטיל ממש לפני צל של דג.
 
 @ It's hooked! Hold to reel. If the line turns red, let go until it calms down.
 = הדג על הקרס! החזק כדי למשוך. אם החוט נהיה אדום, שחרר עד שיירגע.
+~ הדג על הקרס! החזיקי כדי למשוך. אם החוט נהיה אדום, שחררי עד שיירגע.
 
 @ Snap! The line broke. Let go when it turns red.
 = טראח! החוט נקרע. שחרר כשהוא נהיה אדום.
+~ טראח! החוט נקרע. שחררי כשהוא נהיה אדום.
 
 @ It swam off. Keep reeling between its pulls.
 = הוא שחה לו. המשך למשוך בין הטלטולים שלו.
+~ הוא שחה לו. המשיכי למשוך בין הטלטולים שלו.
 
 # ---------------------------------------------------------------- birding and bugs (Birding.cs, BugCatching.cs)
 
 @ That bird is too far away to see properly. Creep a little closer.
 = הציפור הזאת רחוקה מדי בשביל לראות אותה טוב. התגנב קצת יותר קרוב.
+~ הציפור הזאת רחוקה מדי בשביל לראות אותה טוב. התגנבי קצת יותר קרוב.
 
 @ Too far to reach with your net. Tiptoe a little closer.
 = רחוק מדי בשביל הרשת שלך. התקרב על קצות האצבעות.
+~ רחוק מדי בשביל הרשת שלך. התקרבי על קצות האצבעות.
 
 # ---------------------------------------------------------------- gardening (Gardening.cs)
 
 @ Tap your plot to plant some seeds.
 = הקש על הערוגה כדי לשתול זרעים.
+~ הקישי על הערוגה כדי לשתול זרעים.
 
 @ Your {0} will be ready in {1}.
 = {0}: עוד {1} עד הקטיף.
@@ -448,6 +464,7 @@
 
 @ What would you like to plant? Seeds grow while you're away, too.
 = מה תרצה לשתול? הזרעים גדלים גם כשאתה לא כאן.
+~ מה תרצי לשתול? הזרעים גדלים גם כשאת לא כאן.
 
 @ {0} seeds planted! Ready in {1} min.
 = זרעי {0} נשתלו! מוכן בעוד {1} דק'.
@@ -459,15 +476,18 @@
 
 @ A stray cat has wandered onto your island. Go and say hello!
 = חתול משוטט הגיע לאי שלך. לך להגיד לו שלום!
+~ חתול משוטט הגיע לאי שלך. לכי להגיד לו שלום!
 
 @ The stray cat
 = החתול המשוטט
 
 @ {0} has brought you something! Tap it to see.
 = {0} הביא לך משהו! הקש עליו כדי לראות.
+~ {0} הביא לך משהו! הקישי עליו כדי לראות.
 
 @ {0} hopped up onto your head! Take them for a walk.
 = {0} קפץ לך על הראש! קח אותו לטיול.
+~ {0} קפץ לך על הראש! קחי אותו לטיול.
 
 @ {0} remembers exactly who has the fish…
 = {0} זוכר בדיוק למי יש את הדגים…
@@ -489,18 +509,22 @@
 
 @ Pet
 = לטף
+~ לטפי
 
 @ Give a fish ({0})
 = תן דג ({0})
+~ תני דג ({0})
 
 @ The cat licks its whiskers and gives you a long, thoughtful look. It's planning something…
 = החתול מלקק את השפם ונועץ בך מבט ארוך ומהורהר. הוא זומם משהו…
 
 @ Adopt!
 = אמץ!
+~ אמצי!
 
 @ Leave
 = עזוב
+~ עזבי
 
 @ Stray cat
 = חתול משוטט
@@ -510,9 +534,11 @@
 
 @ It's had plenty of fuss for now. Come back in a little while.
 = הוא קיבל מספיק פינוקים בינתיים. חזור עוד קצת.
+~ הוא קיבל מספיק פינוקים בינתיים. חזרי עוד קצת.
 
 @ This cat really trusts you now. Tap it to adopt it!
 = החתול הזה כבר ממש סומך עליך. הקש עליו כדי לאמץ אותו!
+~ החתול הזה כבר ממש סומך עליך. הקישי עליו כדי לאמץ אותו!
 
 @ {0} is yours!
 = {0} שלך!
@@ -537,6 +563,7 @@
 
 @ Something it dug up… and it's still growing! Pop the bubble to see.
 = משהו שהוא חפר… והוא עדיין גדל! פוצץ את הבועה כדי לראות.
+~ משהו שהוא חפר… והוא עדיין גדל! פוצצי את הבועה כדי לראות.
 
 @ A cockroach. It looks extremely proud of itself.
 = ג'וק. החתול נראה גאה בעצמו להפליא.
@@ -552,6 +579,7 @@
 
 @ A lit fizz bomb?! Run!
 = פצצת תסס דולקת?! רוץ!
+~ פצצת תסס דולקת?! רוצי!
 
 @ A zombie capybara. It followed the cat home, and it isn't leaving.
 = קפיברת זומבי. היא הלכה אחרי החתול הביתה, ואין לה שום כוונה ללכת.
@@ -570,11 +598,13 @@
 
 @ Nobody wants a {0} lying about. Drop it on Salty Kombu, he might buy it!
 = אף אחד לא רוצה {0} שמתגלגל סתם. זרוק אותו על קומבו המלוח, אולי הוא יקנה!
+~ אף אחד לא רוצה {0} שמתגלגל סתם. זרקי אותו על קומבו המלוח, אולי הוא יקנה!
 
 # ---------------------------------------------------------------- dish orders (DishOrders.cs)
 
 @ {0} would love some {1}! Cook it at your stove: {2}.
 = ל{0} מתחשק {1}! בשל את זה בכיריים שלך: {2}.
+~ ל{0} מתחשק {1}! בשלי את זה בכיריים שלך: {2}.
 
 @ "{0}! Now THAT'S proper ship's cooking!" The Captain pays you in gems.
 = "{0}! זה כבר בישול של ספינה כמו שצריך!" הקפטן משלמת לך ביהלומים.
@@ -613,9 +643,11 @@
 
 @ Ahoy! Fancy a message bottle? One gold coin. Write what you like and I'll set it on the shore for anyone passing by.
 = אהוי! מתחשק לך בקבוק עם מכתב? מטבע זהב אחד. כתוב מה שבא לך, ואני אניח אותו על החוף לכל מי שעובר.
+~ אהוי! מתחשק לך בקבוק עם מכתב? מטבע זהב אחד. כתבי מה שבא לך, ואני אניח אותו על החוף לכל מי שעובר.
 
 @ Buy a bottle (1 gold)
 = קנה בקבוק (1 זהב)
+~ קני בקבוק (1 זהב)
 
 # ---------------------------------------------------------------- islanders' books (BotBooks.cs)
 
@@ -636,6 +668,7 @@
 
 @ Step one: go fishing.\n\nStep two: go fishing again.\n\nStep three: catch four hundred sardines. Learn to love sardines. Name your favourite one Gerald.\n\nStep four: one morning, when the mist is thick and you have nearly given up, see the biggest shadow you have ever seen.\n\nStep five: wait. Do not reel at the nibbles. Wait for the tug.\n\nStep six: I will let you know when I get to step six.
 = שלב ראשון: צא לדוג.\n\nשלב שני: צא לדוג שוב.\n\nשלב שלישי: תפוס ארבע מאות סרדינים. למד לאהוב סרדינים. לסרדין האהוב עליך תקרא ג'רלד.\n\nשלב רביעי: בוקר אחד, כשהערפל סמיך וכמעט התייאשת, תראה את הצל הכי גדול שראית בחיים.\n\nשלב חמישי: חכה. אל תמשוך בנגיסות הקטנות. חכה למשיכה החזקה.\n\nשלב שישי: אודיע לך כשאגיע לשלב שישי.
+~ שלב ראשון: צאי לדוג.\n\nשלב שני: צאי לדוג שוב.\n\nשלב שלישי: תפסי ארבע מאות סרדינים. למדי לאהוב סרדינים. לסרדין האהוב עליך תקראי ג'רלד.\n\nשלב רביעי: בוקר אחד, כשהערפל סמיך וכמעט התייאשת, תראי את הצל הכי גדול שראית בחיים.\n\nשלב חמישי: חכי. אל תמשכי בנגיסות הקטנות. חכי למשיכה החזקה.\n\nשלב שישי: אודיע לך כשאגיע לשלב שישי.
 
 @ Letters to the Hot Spring
 = מכתבים למעיין החם
@@ -783,21 +816,25 @@
 
 @ It slipped off the hook and sank. Keep reeling!
 = זה החליק מהקרס ושקע. המשך לגלגל!
+~ זה החליק מהקרס ושקע. המשיכי לגלגל!
 
 @ Cockroach
 = ג'וק
 
 @ Name your cat
 = תן שם לחתול שלך
+~ תני שם לחתול שלך
 
 @ A name
 = שם
 
 @ Rename
 = שנה שם
+~ שני שם
 
 @ Save
 = שמור
+~ שמרי
 
 @ Dress up
 = להלביש
@@ -810,39 +847,49 @@
 
 @ Toss it into the sea while you fish and it sings for a minute. Anyone fishing in its ring gets quicker bites, and after five catches something shimmering comes up to listen.
 = זרוק אותו לים בזמן הדיג והוא שר במשך דקה. כל מי שדג בתוך הטבעת שלו מקבל נשיכות מהירות יותר, ואחרי חמש תפיסות משהו נוצץ עולה להקשיב.
+~ זרקי אותו לים בזמן הדיג והוא שר במשך דקה. כל מי שדג בתוך הטבעת שלו מקבל נשיכות מהירות יותר, ואחרי חמש תפיסות משהו נוצץ עולה להקשיב.
 
 @ Only comes to a Mermaid's Shell
 = מגיע רק לצדף בת הים
 
 @ Ahoy there! You're reeling them in like an old salt now. Here, three of my mermaid's shells, on the house.
 = אהוי! אתה כבר מגלגל אותם פנימה כמו מלח ותיק. הנה, שלושה מצדפי בת הים שלי, על חשבון הבית.
+~ אהוי! את כבר מגלגלת אותם פנימה כמו מלח ותיק. הנה, שלושה מצדפי בת הים שלי, על חשבון הבית.
 
 @ Toss one into the water while you fish. It sings a little song, and the fish swim over to hear it. Fish inside its ring and they bite quicker.
 = זרוק אחד למים בזמן שאתה דג. הוא שר שיר קטן, והדגים שוחים אליו לשמוע. דוג בתוך הטבעת שלו והם ינשכו מהר יותר.
+~ זרקי אחד למים בזמן שאת דגה. הוא שר שיר קטן, והדגים שוחים אליו לשמוע. דוגי בתוך הטבעת שלו והם ינשכו מהר יותר.
 
 @ Friends can fish in the ring too, and every catch counts. After five, something shimmering comes up to listen. Those fish never come any other way!
 = גם חברים יכולים לדוג בטבעת, וכל תפיסה נספרת. אחרי חמש, משהו נוצץ עולה להקשיב. הדגים האלה לא מגיעים בשום דרך אחרת!
 
 @ Reach fishing level 4 first, then Nori will sell you one.
 = הגע קודם לרמת דיג 4, ואז נורי ימכור לך אחד.
+~ הגיעי קודם לרמת דיג 4, ואז נורי ימכור לך אחד.
 
 @ Your shell is singing! Fish inside its ring for quicker bites.
 = הצדף שלך שר! דוג בתוך הטבעת שלו בשביל נשיכות מהירות יותר.
+~ הצדף שלך שר! דוגי בתוך הטבעת שלו בשביל נשיכות מהירות יותר.
 
 @ {0} tossed a Mermaid's Shell into the sea! Fish inside its ring.
 = {0} זרק צדף בת הים לים! דוג בתוך הטבעת שלו.
+~ {0} זרק צדף בת הים לים! דוגי בתוך הטבעת שלו.
 
 @ Something shimmering has come to listen to the shell! Look for the sparkling shadow.
 = משהו נוצץ בא להקשיב לצדף! חפש את הצל המנצנץ.
+~ משהו נוצץ בא להקשיב לצדף! חפשי את הצל המנצנץ.
 
 @ Your shell is still singing. Wait until it goes quiet.
 = הצדף שלך עדיין שר. חכה עד שישתתק.
+~ הצדף שלך עדיין שר. חכי עד שישתתק.
 
 @ Three shells are singing here already. Wait for one to go quiet.
 = כבר שלושה צדפים שרים כאן. חכה שאחד מהם ישתתק.
+~ כבר שלושה צדפים שרים כאן. חכי שאחד מהם ישתתק.
 
 @ Stand at the water's edge to toss it in.
 = עמוד על שפת המים כדי לזרוק אותו.
+~ עמדי על שפת המים כדי לזרוק אותו.
 
 @ No shells left. Skipper Nori sells them on the beach.
 = נגמרו לך הצדפים. הסקיפר נורי מוכר אותם בחוף.
@@ -876,6 +923,7 @@
 
 @ Old Yuzu smiles: "He's chosen you, little one."
 = יוזו הזקנה מחייכת: "הוא בחר בך, קטנטן."
+~ יוזו הזקנה מחייכת: "הוא בחר בך, קטנטנה."
 
 @ He'll still stay close to her side.
 = הוא עדיין יישאר קרוב אליה.
@@ -897,9 +945,11 @@
 
 @ Something was standing on a shop's wares, so it's back in a bubble. Put it down somewhere else!
 = משהו עמד על הסחורה של חנות, אז הוא חזר לבועה. הנח אותו במקום אחר!
+~ משהו עמד על הסחורה של חנות, אז הוא חזר לבועה. הניחי אותו במקום אחר!
 
 @ A shop needs clear land in front of it for its wares. Try a more open spot.
 = חנות צריכה שטח פנוי לפניה בשביל הסחורה שלה. נסה מקום פתוח יותר.
+~ חנות צריכה שטח פנוי לפניה בשביל הסחורה שלה. נסי מקום פתוח יותר.
 
 @ Bait: bites ×{0}, easier reeling
 = פיתיון: נשיכות ×{0}, משיכה קלה יותר
@@ -924,9 +974,11 @@
 
 @ Land this fish first!
 = קודם תוציא את הדג הזה!
+~ קודם תוציאי את הדג הזה!
 
 @ Put on
 = שים על הקרס
+~ שימי על הקרס
 
 @ On hook
 = על הקרס
@@ -936,6 +988,7 @@
 
 @ Use
 = בחר
+~ בחרי
 
 @ In use
 = בשימוש
@@ -948,6 +1001,7 @@
 
 @ Throw
 = זרוק
+~ זרקי
 
 @ Bites ×{0}, easier reeling
 = נשיכות ×{0}, משיכה קלה יותר
@@ -966,6 +1020,7 @@
 
 @ Bait goes on your hook as you cast, one per cast. Tap Tackle while fishing to choose.
 = הפיתיון עולה על הקרס כשאתה זורק את החכה, אחד בכל זריקה. בזמן הדיג הקש על "ציוד דיג" כדי לבחור.
+~ הפיתיון עולה על הקרס כשאת זורקת את החכה, אחד בכל זריקה. בזמן הדיג הקישי על "ציוד דיג" כדי לבחור.
 
 @ On the hook: {0}
 = על הקרס: {0}
@@ -978,3 +1033,35 @@
 
 @ Take off
 = להוריד
+
+# ---------------------------------------------------------------- the island's wildlife (Game/Wildlife)
+
+@ Seagull
+= שחף
+
+@ Over the sea and on the beach
+= מעל הים ועל החוף
+
+@ Birdwatching opens with a hobby card. Then you can spot birds like this one for your journal.
+= צפרות נפתחת עם כרטיס תחביב. אז תוכל לזהות ציפורים כמו זו בשביל היומן שלך.
+~ צפרות נפתחת עם כרטיס תחביב. אז תוכלי לזהות ציפורים כמו זו בשביל היומן שלך.
+
+@ Bug catching opens with a hobby card. Then you can catch bugs like this one for your journal.
+= ציד חרקים נפתח עם כרטיס תחביב. אז תוכל לתפוס חרקים כמו זה בשביל היומן שלך.
+~ ציד חרקים נפתח עם כרטיס תחביב. אז תוכלי לתפוס חרקים כמו זה בשביל היומן שלך.
+
+@ Get binoculars at the Silver Store, and you can spot birds like this one for your journal.
+= קנה משקפת בחנות הכסף, ותוכל לזהות ציפורים כמו זו בשביל היומן שלך.
+~ קני משקפת בחנות הכסף, ותוכלי לזהות ציפורים כמו זו בשביל היומן שלך.
+
+@ Get a bug net at the Bronze Store, and you can catch bugs like this one for your journal.
+= קנה רשת חרקים בחנות הארד, ותוכל לתפוס חרקים כמו זה בשביל היומן שלך.
+~ קני רשת חרקים בחנות הארד, ותוכלי לתפוס חרקים כמו זה בשביל היומן שלך.
+
+@ This one is too shy for you yet. Spot more birds to get better at it!
+= הציפור הזו עדיין ביישנית מדי בשבילך. זהה עוד ציפורים כדי להשתפר!
+~ הציפור הזו עדיין ביישנית מדי בשבילך. זהי עוד ציפורים כדי להשתפר!
+
+@ This one is too quick for you yet. Catch more bugs to get better at it!
+= החרק הזה עדיין מהיר מדי בשבילך. תפוס עוד חרקים כדי להשתפר!
+~ החרק הזה עדיין מהיר מדי בשבילך. תפסי עוד חרקים כדי להשתפר!

@@ -32,6 +32,13 @@ namespace CapyIsland.UI
 
         /// <summary>False while it's still ahead of you (a hobby not taken up yet). The page still opens.</summary>
         public Func<bool> Started;
+
+        /// <summary>
+        /// True once the thing this page explains has come into your game: only then does the page
+        /// turn up in the help (with a red dot, the first time). Asked now and then, and remembered
+        /// once true (<see cref="HelpUnlocks"/>). None: there from the start.
+        /// </summary>
+        public Func<bool> Unlocked;
     }
 
     /// <summary>
@@ -86,6 +93,21 @@ namespace CapyIsland.UI
 
         static Func<bool> HobbyStarted(Hobby h) => () => HobbyLog.IsUnlocked(h);
 
+        // ---------------------------------------------------------------- when each page turns up
+
+        /// <summary>One of these is planted on the island.</summary>
+        static Func<bool> Planted(params string[] names) => () => HelpUnlocks.Placed(names);
+        /// <summary>One of these is yours, or out for sale.</summary>
+        static Func<bool> Met(params string[] names) => () => HelpUnlocks.Met(names);
+        /// <summary>Its button has joined the column on the right.</summary>
+        static Func<bool> SideButton(string id) => () => HudReveal.Shown(id);
+        /// <summary>
+        /// A hobby has been opened (a hobby card: its gear goes on sale), or taken up, or a shop
+        /// already has its gear out.
+        /// </summary>
+        static Func<bool> HobbyOpen(Hobby h, string gear = null) =>
+            () => HobbyLog.IsOpened(h) || HobbyLog.IsUnlocked(h) || (gear != null && HelpUnlocks.ForSale(gear));
+
         static Func<Sprite> Item(params string[] ids) => () => HelpArt.Item(ids);
         static Func<Sprite> Art(string name) => () => HelpArt.Picture(name);
 
@@ -129,6 +151,7 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "arrows", Category = HelpCategory.GettingAround, Demo = HelpDemo.Arrows,
+                Unlocked = () => EdgeIndicators.FirstShown != null,
                 Thumb = () => IconPainter.Arrow,
                 Title = "Arrows at the edge",
                 Summary = "They point at things you can't see yet.",
@@ -147,6 +170,7 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "worker", Category = HelpCategory.Workers, Demo = HelpDemo.Worker,
+                Unlocked = () => HelpUnlocks.OwnsWorker,
                 Thumb = () => HelpArt.Worker,
                 Title = "Put a capybara to work",
                 Summary = "Drag a capybara from your trail onto a sawmill or a mine.",
@@ -163,6 +187,8 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "feed", Category = HelpCategory.Workers, Demo = HelpDemo.Feed,
+                // The opening's first warm heart comes from planting its garden, after the first nap.
+                Unlocked = () => HelpUnlocks.HungryWorker || Motes.Has("First Love"),
                 Thumb = Item("Medium Posie Garden", "Small Posie Garden"),
                 Title = "Feed your workers",
                 Summary = "Plant flowers near the place they work.",
@@ -179,6 +205,7 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "hungry", Category = HelpCategory.Workers, Demo = HelpDemo.Feed,
+                Unlocked = () => HelpUnlocks.HungryWorker || Motes.Has("First Love"),
                 Thumb = Item("Medium Posie Garden", "Small Posie Garden"),
                 Title = "Is my worker hungry?",
                 Summary = "Look for a sleeping capybara dreaming of flowers.",
@@ -195,6 +222,7 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "kinds", Category = HelpCategory.Workers, Demo = HelpDemo.Kinds,
+                Unlocked = () => HelpUnlocks.Met("Fox House", "Fox", "Panda House", "Panda") || HelpUnlocks.TameZombie,
                 Thumb = Item("Fox", "Capybara"),
                 Title = "Other kinds of capybara",
                 Summary = "Burrow, woolly and zombie capybaras.",
@@ -213,6 +241,7 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "wood", Category = HelpCategory.Resources, Demo = HelpDemo.Wood,
+                Unlocked = Planted("Sawmill", "Legendary Sawmill"),
                 Thumb = () => HelpArt.Resource(ResourceKind.Wood),
                 Title = "Get more wood",
                 Summary = "A forest, a sawmill next to it, and capybaras to work it.",
@@ -230,6 +259,7 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "trees", Category = HelpCategory.Resources, Demo = HelpDemo.Forest,
+                Unlocked = () => HelpUnlocks.PlacedKind(StoreItemKind.Forest),
                 Thumb = Item("Medium Pine Forest", "Small Pine Forest"),
                 Title = "Get more trees",
                 Summary = "Forests spread by themselves, and shops sell more.",
@@ -247,6 +277,7 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "gold", Category = HelpCategory.Resources, Demo = HelpDemo.Gold,
+                Unlocked = () => HelpUnlocks.Placed("Mine", "Legendary Mine") || HelpUnlocks.PlacedKind(StoreItemKind.Hill),
                 Thumb = () => HelpArt.Resource(ResourceKind.Gold),
                 Title = "Get more gold",
                 Summary = "Dig hills with a mine, sell spare things, and collect gifts.",
@@ -264,6 +295,7 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "gems", Category = HelpCategory.Resources, Demo = HelpDemo.Gems,
+                Unlocked = () => ResourceStore.Instance != null && ResourceStore.Instance.Get(ResourceKind.Gem) > 0,
                 Thumb = () => HelpArt.Resource(ResourceKind.Gem),
                 Title = "Get gems",
                 Summary = "From quests, daily gifts, hobbies and shaking fruit trees.",
@@ -282,6 +314,7 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "sell", Category = HelpCategory.Resources, Demo = HelpDemo.Sell,
+                Unlocked = () => UnityEngine.Object.FindFirstObjectByType<PiratePete>() != null,
                 Thumb = () => { var s = HelpArt.Item("Pirate Pete"); return s != null ? s : HelpArt.Picture("Sailor"); },
                 Title = "Sell things",
                 Summary = "Drag what you don't need onto Salty Kombu.",
@@ -298,6 +331,7 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "fruit", Category = HelpCategory.Resources, Demo = HelpDemo.FruitTree,
+                Unlocked = Met("Apple Tree", "Pear Tree", "Legendary Plum Tree"),
                 Thumb = Item("Apple Tree", "Pear Tree"),
                 Title = "Shake fruit trees",
                 Summary = "Tap a fruit tree: fruit, chests and surprises fall out.",
@@ -314,6 +348,7 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "bank", Category = HelpCategory.Resources, Demo = HelpDemo.Bank,
+                Unlocked = Met("Bank"),
                 Thumb = Item("Bank"),
                 Title = "Trade gems at the Bank",
                 Summary = "Swap gems for wood or gold.",
@@ -338,7 +373,7 @@ namespace CapyIsland.UI
                 Steps = new[]
                 {
                     "A bubble holds something for you: a forest, a building, a capybara…",
-                    "Tap it to pop it. What was inside joins your trail.",
+                    "Tap it to pop it. What was inside joins your trail, and a new friend just steps out onto the grass.",
                     "Edge arrows and the Map show where bubbles are.",
                     "A forest or hill that was harvested all the way turns back into a bubble, so you can plant it again.",
                 },
@@ -362,6 +397,7 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "buy", Category = HelpCategory.Building, Demo = HelpDemo.Buy,
+                Unlocked = Planted("General Store"),
                 Thumb = Item("General Store"),
                 Title = "Buy from a shop",
                 Summary = "Tap what a shop has set out in front of it.",
@@ -376,6 +412,7 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "shops", Category = HelpCategory.Building, Demo = HelpDemo.Shops,
+                Unlocked = Planted("General Store"),
                 Thumb = Item("Bronze Store", "General Store"),
                 Title = "Unlock more shops",
                 Summary = "Every shop sells the next one.",
@@ -394,6 +431,7 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "pests", Category = HelpCategory.Building, Demo = HelpDemo.Pests,
+                Unlocked = () => ShopPacing.PestsHaveCome,
                 Thumb = Item("Deer Bomb", "Bomb"),
                 Title = "Pests and bombs",
                 Summary = "Guinea pigs and zombie capybaras, and how to send them off.",
@@ -409,6 +447,7 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "burrow", Category = HelpCategory.Building, Demo = HelpDemo.Burrow,
+                Unlocked = Met("Monster Den"),
                 Thumb = Item("Monster Den"),
                 Title = "Your burrow",
                 Summary = "A cosy home under the ground to decorate.",
@@ -426,9 +465,10 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "map", Category = HelpCategory.Travel, Demo = HelpDemo.Map,
+                Unlocked = SideButton(HudReveal.Map),
                 Thumb = () => IconPainter.Map,
                 Title = "Fast travel with the map",
-                Summary = "Drag yourself on the map to jump there.",
+                Summary = "Tap a spot on the map, or drag yourself there, to jump there.",
                 Keywords = "map travel fast teleport jump island go pin far",
                 Steps = new[]
                 {
@@ -443,6 +483,7 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "bridges", Category = HelpCategory.Travel, Demo = HelpDemo.Bridge,
+                Unlocked = () => HelpUnlocks.SpiritsAbout,
                 Thumb = () => IconPainter.Globe,
                 Title = "Open new islands",
                 Summary = "Pay a spirit to raise a bridge to a new island.",
@@ -463,6 +504,7 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "goals", Category = HelpCategory.Goals, Demo = HelpDemo.Goals,
+                Unlocked = () => HelpUnlocks.OpeningOver,
                 Thumb = () => IconPainter.Goals,
                 Title = "What should I do next?",
                 Summary = "Your next goal is always at the top of the screen.",
@@ -478,6 +520,7 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "hearts", Category = HelpCategory.Goals, Demo = HelpDemo.Hearts,
+                Unlocked = () => Motes.CollectedCount > 0,
                 Thumb = () => HelpArt.Heart,
                 Title = "Warm hearts",
                 Summary = "Every goal you reach makes a heart for the Steam Tower.",
@@ -493,6 +536,7 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "gifts", Category = HelpCategory.Goals, Demo = HelpDemo.Gifts,
+                Unlocked = SideButton(HudReveal.Gifts),
                 Thumb = () => IconPainter.Gift,
                 Title = "Daily gifts",
                 Summary = "A present every day you play.",
@@ -509,6 +553,7 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "events", Category = HelpCategory.Goals, Demo = HelpDemo.Contest,
+                Unlocked = SideButton(HudReveal.Events),
                 Thumb = () => IconPainter.Trophy,
                 Title = "Contests and events",
                 Summary = "A new contest every three days, and a goal every day.",
@@ -526,6 +571,7 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "wardrobe", Category = HelpCategory.Goals, Demo = HelpDemo.Wardrobe,
+                Unlocked = () => HelpUnlocks.EarnedOutfit,
                 Thumb = () => IconPainter.Hanger,
                 Title = "Dress up your capybara",
                 Summary = "Tap your picture at the top left, then Change outfit.",
@@ -544,6 +590,7 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "hobbies", Category = HelpCategory.Hobbies, Demo = HelpDemo.HobbyHub,
+                Unlocked = SideButton(HudReveal.Hobbies),
                 Thumb = () => IconPainter.Rod,
                 Title = "Hobbies",
                 Summary = "Fishing, bugs, birds, gardening, cooking, sewing, cats and more.",
@@ -559,6 +606,8 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "fishing", Category = HelpCategory.Hobbies, Demo = HelpDemo.Fishing, Found = "Fish_salmon",
+                // Skipper Nori's beach is on the Heart of the Isles, over the first bridge; his rod is always out.
+                Unlocked = () => HobbyLog.IsUnlocked(Hobby.Fishing) || HelpUnlocks.FirstBridgeOpen,
                 Thumb = Art("Rod"), Started = HobbyStarted(Hobby.Fishing),
                 Title = "Go fishing",
                 Summary = "Buy a rod from Skipper Nori on the beach.",
@@ -576,6 +625,7 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "bugs", Category = HelpCategory.Hobbies, Demo = HelpDemo.Bugs, Found = "Bug_Butterfly",
+                Unlocked = HobbyOpen(Hobby.Bugs, "Bug Net"),
                 Thumb = Art("Net"), Started = HobbyStarted(Hobby.Bugs),
                 Title = "Catch bugs",
                 Summary = "Buy a Bug Net at the Bronze Store.",
@@ -591,6 +641,7 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "birds", Category = HelpCategory.Hobbies, Demo = HelpDemo.Birds, Found = "Bird_robin",
+                Unlocked = HobbyOpen(Hobby.Birding, "Binoculars"),
                 Thumb = Art("Binoculars"), Started = HobbyStarted(Hobby.Birding),
                 Title = "Watch birds",
                 Summary = "Buy Binoculars at the Silver Store.",
@@ -606,6 +657,7 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "gardening", Category = HelpCategory.Hobbies, Demo = HelpDemo.Garden, Found = "Crop_Carrot",
+                Unlocked = HobbyOpen(Hobby.Gardening),
                 Thumb = Art("Crop_Carrot"), Started = HobbyStarted(Hobby.Gardening),
                 Title = "Grow vegetables",
                 Summary = "Plant seeds on Sunflower Farm.",
@@ -623,13 +675,14 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "cooking", Category = HelpCategory.Hobbies, Demo = HelpDemo.Cooking, Found = "Dish_Pancakes",
+                Unlocked = HobbyOpen(Hobby.Cooking, "Stove"),
                 Thumb = Art("Stove"), Started = HobbyStarted(Hobby.Cooking),
                 Title = "Cooking",
-                Summary = "Buy a stove from Chef Tofu by the hot spring.",
+                Summary = "Buy a stove from Chef Tofu on Sunflower Farm.",
                 Keywords = "cook cooking food dish recipe stove kitchen tofu chef order",
                 Steps = new[]
                 {
-                    "Buy a stove from Chef Tofu by the hot spring, put it down, and tap it.",
+                    "Buy a stove from Chef Tofu on Sunflower Farm, put it down, and tap it.",
                     "Drag ingredients into the pot, press Cook, and tap the spatula in time to keep the heat down.",
                     "Chef Tofu sells recipes, eggs and milk.",
                     "Islanders with a dish in a bubble over their head will pay for it: tap the bubble to hand it over.",
@@ -639,6 +692,7 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "sewing", Category = HelpCategory.Hobbies, Demo = HelpDemo.Sewing,
+                Unlocked = HobbyOpen(Hobby.Sewing, "Sewing Machine"),
                 Thumb = Art("SewingMachine"), Started = HobbyStarted(Hobby.Sewing),
                 Title = "Sew hats",
                 Summary = "Buy a Sewing Machine at the Steel Store.",
@@ -655,6 +709,7 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "cats", Category = HelpCategory.Hobbies, Demo = HelpDemo.Cats, Found = "Cat_Ginger",
+                Unlocked = () => HobbyLog.IsOpened(Hobby.Cats) || HobbyLog.Cats.Count > 0,
                 Thumb = Art("Cat_Ginger"),
                 Title = "Make friends with cats",
                 Summary = "Pet stray cats until they trust you, then adopt them.",
@@ -671,6 +726,8 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "ema", Category = HelpCategory.Hobbies, Demo = HelpDemo.Ema,
+                // The shrine stands from the start, but an ema can only be hung once writing is opened.
+                Unlocked = () => HobbyLog.IsOpened(Hobby.Writing),
                 Thumb = Art("Ema"),
                 Title = "Hang a wish at the shrine",
                 Summary = "Write an ema at Old Mochi's shrine.",
@@ -688,6 +745,7 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "visit", Category = HelpCategory.Friends, Demo = HelpDemo.Visit,
+                Unlocked = SideButton(HudReveal.Friends),
                 Thumb = () => IconPainter.Plane,
                 Title = "Visit other islands",
                 Summary = "Build an airstrip, then fly to friends.",
@@ -704,6 +762,7 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "friendcode", Category = HelpCategory.Friends, Demo = HelpDemo.FriendCode,
+                Unlocked = SideButton(HudReveal.Friends),
                 Thumb = () => IconPainter.AddFriend,
                 Title = "Add a friend",
                 Summary = "Share your friend code.",
@@ -720,6 +779,7 @@ namespace CapyIsland.UI
             new HelpTopic
             {
                 Id = "together", Category = HelpCategory.Friends, Demo = HelpDemo.Together,
+                Unlocked = SideButton(HudReveal.Friends),
                 Thumb = () => IconPainter.FaceSmile,
                 Title = "Play together",
                 Summary = "Parties, contests, building together, and emojis.",

@@ -40,7 +40,7 @@ namespace CapyIsland.Game
                 return;
             }
 
-            Hints.Show(plot != null && plot.WhyNot != null ? plot.WhyNot : "Seeds go on an empty plot on Sunflower Farm.");
+            Hints.Answer(plot != null && plot.WhyNot != null ? plot.WhyNot : "Seeds go on an empty plot on Sunflower Farm.");
             // Back into the trail at your feet, with a little bounce so the eye follows it home.
             if (TryGetComponent<Placeable>(out var placeable)) placeable.MarkCarried();
             var body = transform.Find("Sprite");

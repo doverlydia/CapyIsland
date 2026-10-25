@@ -30,9 +30,13 @@ namespace CapyIsland.Game
             PlantGarden,
             ClickMote,
             CrossToHeart,
-            OpenTower,
+            FindSpring,     // the hot spring is frozen: find it and tap it
+            FeedSpring,     // bring wood for a fire to thaw it
+            OpenTower,      // warm again: the first soak, then the diary
             Done,
         }
+
+        // Saved by name (SavedStep), so steps can be added anywhere; the order is what counts here.
 
         [SerializeField] GhostDialogue dialogue;
         [SerializeField] TutorialPointer pointer;
@@ -51,6 +55,15 @@ namespace CapyIsland.Game
         float _stepTimer;
 
         public bool Finished => _step == Step.Done;
+
+        /// <summary>
+        /// The opening was played to its end just now (not skipped, not an old save): Old Yuzu
+        /// leaves her corner and moves up into the goal card (ObjectiveTracker).
+        /// </summary>
+        public static event System.Action Graduated;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetSession() => Graduated = null;
 
         public static TutorialDirector Instance { get; private set; }
 
@@ -80,22 +93,61 @@ namespace CapyIsland.Game
             Step.PlantGarden => "Plant flowers by the sleepy capybara",
             Step.ClickMote => "Tap the warm heart following you",
             Step.CrossToHeart => "Walk across the new bridge",
-            Step.OpenTower => "Find the Steam Tower and tap it",
+            Step.FindSpring => StoryText.Spring.GoalFind,
+            // The fire takes all its wood at once: the count is what you've gathered toward it.
+            Step.FeedSpring => string.Format(StoryText.Spring.GoalFeed, Mathf.Min(_fed + WoodHeld, FireWood), FireWood),
+            // Already soaking: done, though the step itself ends when the goals page closes.
+            Step.OpenTower => HotSpring.Bathing ? null : StoryText.Spring.GoalSoak,
             _ => null,
         };
 
-        /// <summary>Where the current step wants you to look, if anywhere.</summary>
-        public Vector2? GoalPoint => pointer != null ? pointer.Target : null;
+        static int WoodHeld => ResourceStore.Instance != null ? ResourceStore.Instance.Get(ResourceKind.Wood) : 0;
+
+        /// <summary>A second line under the goal, when the step needs one.</summary>
+        public string CurrentGoalNote => _step == Step.FeedSpring && _fed < FireWood ? StoryText.Spring.GoalFeedNote : null;
+
+        /// <summary>Where the current step wants you to look, if anywhere (the spring, at the end, even while the hand rests).</summary>
+        public Vector2? GoalPoint
+        {
+            get
+            {
+                if (!Guidance.Off && (_step is Step.FindSpring or Step.FeedSpring or Step.OpenTower) && HotSpring.Instance != null)
+                    return HotSpring.Instance.PoolBounds.center;
+                return pointer != null ? pointer.Target : null;
+            }
+        }
 
         /// <summary>A returning player: no tutorial (Tasks.GameStarted).</summary>
         public void SkipForReturningPlayer()
         {
             _step = Step.Done;
             if (pointer != null) pointer.Hide();
+            ZoomHint.Hide();
         }
 
-        /// <summary>The step to keep in the save ("" once it is over), so closing the app mid-tutorial loses nothing.</summary>
-        public string SavedStep => _step == Step.Done ? "" : _step.ToString();
+        // ---------------------------------------------------------------- the save
+
+        /// <summary>Marks a game that started with the lean purse and is still owed Miso's start-up gift.</summary>
+        const string GiftFlag = "+gift";
+
+        /// <summary>
+        /// The step to keep in the save, so closing the app mid-tutorial loses nothing: its name,
+        /// the wood fed to the spring's fire so far ("FeedSpring:37"), and "+gift" while Miso's
+        /// start-up gift is still to come. "" once the tutorial is over with nothing owed, as in
+        /// every save from before. (Old builds read anything they don't know as "over".)
+        /// On a friend's island your own save's value is kept just as it was.
+        /// </summary>
+        public string SavedStep
+        {
+            get
+            {
+                if (Visit.Active) return _homeStep;
+                string s = _step == Step.Done ? "" : _step == Step.FeedSpring ? "FeedSpring:" + _fed : _step.ToString();
+                return _giftOwed ? s + GiftFlag : s;
+            }
+        }
+
+        string _homeStep = "";
 
         /// <summary>
         /// Back from a save made mid-tutorial: carry on from that step. An empty or unknown step
@@ -103,14 +155,246 @@ namespace CapyIsland.Game
         /// </summary>
         public void Resume(string step)
         {
+            step ??= "";
+            _giftOwed = step.EndsWith(GiftFlag, System.StringComparison.Ordinal);
+            if (_giftOwed) step = step.Substring(0, step.Length - GiftFlag.Length);
+            int colon = step.IndexOf(':');
+            _fed = 0;
+            if (colon >= 0)
+            {
+                int.TryParse(step.Substring(colon + 1), out _fed);
+                step = step.Substring(0, colon);
+            }
             if (string.IsNullOrEmpty(step) || !System.Enum.TryParse(step, out Step saved) || saved == Step.Done)
             {
                 SkipForReturningPlayer();
                 return;
             }
+            // Fed in full but closed before the thaw played: it is warm, on to the soak.
+            if (saved == Step.FeedSpring && _fed >= FireWood) saved = Step.OpenTower;
             Advance(saved);
             if (saved == Step.CollectGarden || saved == Step.PlantGarden) FindSavedGarden();
-            if (saved == Step.OpenTower) WaitForDiary();
+            if (saved == Step.OpenTower) { WaitForDiary(); _stepTimer = 3f; }
+        }
+
+        // ---------------------------------------------------------------- the frozen spring
+
+        /// <summary>
+        /// Wood the fire needs to thaw the spring. A new game has 90 wood here (100, less 10 for
+        /// the first capybara). One capybara at one sawmill on the opening's pines brings in 3 wood a
+        /// trip, a trip about 7.5 s (10–11 swings of 0.5 s on a child pine, plus a short walk each
+        /// way), and needs a posie every two trips or so: roughly 18–20 wood a minute while fed. From
+        /// putting it to work (step 8) to reaching the spring is about 100 s, with ~25 s of that
+        /// spent asleep and hungry until the garden goes in, so the player arrives holding about
+        /// 110–115 and waits a few loads more: about two minutes in all, from step 8 to a lit fire.
+        /// Asking for more than the starting wood is what makes the chopping count, and giving
+        /// what you hold reads more simply than counting only wood chopped since.
+        /// </summary>
+        public const int FireWood = 120;
+
+        int _fed;
+        bool _giftOwed;
+        float _thawStarted = -1f, _soakAt = -1f;
+        bool _springWarm;
+
+        /// <summary>
+        /// The spring is iced over: in a new game from the moment the Steam Tower rises until the
+        /// fire is fed. Never once the tutorial is ended (Settings), on a friend's island, or in a
+        /// game from before the spring froze.
+        /// </summary>
+        public static bool SpringFrozen
+        {
+            get
+            {
+                var t = Instance;
+                if (t == null || Visit.Active || Guidance.Off) return false;
+                if (t._step >= Step.OpenTower) return false;
+                return !(t._step == Step.FeedSpring && t._fed >= FireWood);
+            }
+        }
+
+        /// <summary>Wood given to the spring's fire so far.</summary>
+        public static int SpringWoodFed => Instance != null ? Instance._fed : 0;
+
+        /// <summary>
+        /// Miso's start-up gift, once: true (and from then on false) for a game that began with
+        /// the lean 100 / 100 purse. Games from before never get it.
+        /// </summary>
+        public static bool TakeStartGift()
+        {
+            var t = Instance;
+            if (t == null || Visit.Active || !t._giftOwed) return false;
+            t._giftOwed = false;
+            return true;
+        }
+
+        static Sprite YuzuFace => UI.GhostDialogue.Instance != null ? UI.GhostDialogue.Instance.GhostFace : null;
+
+        /// <summary>The frozen spring was tapped (HotSpring.TapFrozen).</summary>
+        public void SpringTapped()
+        {
+            switch (_step)
+            {
+                case Step.FeedSpring:
+                    OpenFirePanel();
+                    return;
+                case Step.FindSpring:
+                    UI.SpeechDialog.Show(YuzuFace, StoryText.Guide, StoryText.Spring.Frozen, () =>
+                    {
+                        if (_step != Step.FindSpring) return;
+                        Advance(Step.FeedSpring);
+                        OpenFirePanel();
+                    });
+                    return;
+                default:
+                    UI.SpeechDialog.Show(YuzuFace, StoryText.Guide, new[] { StoryText.Spring.FrozenFromAfar });
+                    return;
+            }
+        }
+
+        /// <summary>
+        /// The fire: how much it needs, what you hold, and a button to give it all at once. Giving in
+        /// dribs left the player with no wood for the shops and a long wait; paid in one go, the
+        /// wood in hand can buy another capybara for the sawmill until there's enough.
+        /// </summary>
+        void OpenFirePanel()
+        {
+            var store = ResourceStore.Instance;
+            int have = store != null ? store.Get(ResourceKind.Wood) : 0;
+            int need = FireWood - _fed;   // an island from before this rule may have given some already
+            bool enough = have >= need;
+            string page = string.Format(StoryText.Spring.FireNeeds, need) + "\n"
+                        + string.Format(StoryText.Spring.FireHave, have) + "\n"
+                        + (enough ? StoryText.Spring.FireShops : StoryText.Spring.FireShort);
+            var choices = new System.Collections.Generic.List<UI.SpeechDialog.Choice>
+            {
+                new(enough ? string.Format(StoryText.Spring.Give, need) : StoryText.Spring.NotEnough, () => FeedFire(need), enough),
+                new(StoryText.Spring.NotNow, null),
+            };
+            UI.SpeechDialog.ShowChoices(YuzuFace, StoryText.Guide, new[] { page }, null, choices);
+        }
+
+        void FeedFire(int wood)
+        {
+            var store = ResourceStore.Instance;
+            if (_step != Step.FeedSpring || wood < FireWood - _fed || store == null || !store.TrySpend(wood, 0, 0)) return;
+            _fed += wood;
+            var king = FindFirstObjectByType<PlayerAvatar>();
+            var spring = HotSpring.Instance;
+            if (spring != null) spring.Feed(wood, king != null ? (Vector2)king.transform.position : spring.PitPoint);
+            // That's all of it: SpringFrozen turns false and the spring plays its thaw.
+            _thawStarted = Time.time;
+            _springWarm = false;
+            if (pointer != null) pointer.Hide();
+        }
+
+        void OnSpringThawed() => _springWarm = true;
+
+        void TickFindSpring()
+        {
+            if (Guidance.Off) { SkipSpring(); return; }
+            _stepTimer -= Time.deltaTime;
+            if (_stepTimer > 0f) return;
+            Say(StoryText.Spring.FindIt);
+            PointAtSpring();
+        }
+
+        void TickFeedSpring()
+        {
+            if (_fed >= FireWood)
+            {
+                if (pointer != null) pointer.Hide();
+                // The thaw plays (about five seconds); then Old Yuzu, and in we hop.
+                if (_thawStarted < 0f)
+                {
+                    _thawStarted = Time.time;
+                    Say(StoryText.Spring.Catching);   // over any "bring more wood" still showing
+                }
+                if (!_springWarm && Time.time - _thawStarted < 7f) return;
+                Tell(StoryText.Spring.Thawed);
+                Advance(Step.OpenTower);
+                WaitForDiary();
+                _stepTimer = 20f;
+                _soakAt = Time.time + 2.5f;
+                return;
+            }
+            if (Guidance.Off) { SkipSpring(); return; }
+
+            // Point at the spring once there's all the wood it needs.
+            var store = ResourceStore.Instance;
+            int have = store != null ? store.Get(ResourceKind.Wood) : 0;
+            bool enough = have >= FireWood - _fed;
+            Say(enough ? StoryText.Spring.Bring : string.Format(StoryText.Spring.Waiting, FireWood - _fed));
+            if (enough) PointAtSpring();
+            else if (pointer != null) pointer.Hide();
+        }
+
+        /// <summary>The tutorial was ended: the spring thaws by itself, and the soak is there whenever you want it.</summary>
+        void SkipSpring()
+        {
+            Advance(Step.OpenTower);
+            WaitForDiary();
+            _stepTimer = 20f;
+        }
+
+        void PointAtSpring()
+        {
+            var spring = HotSpring.Instance;
+            if (pointer == null) return;
+            if (spring != null) pointer.PointAt((Vector2)spring.PoolBounds.center);
+            else if (TowerOfLove.Instance != null) pointer.PointAt(TowerOfLove.Instance.transform);
+        }
+
+        // ---------------------------------------------------------------- the zoom beat
+
+        enum ZoomBeat { None, Waiting, Showing, Over }
+
+        ZoomBeat _zoomBeat;
+        string _zoomLine;
+        float _zoomUntil;
+        bool _zoomed;
+
+        /// <summary>
+        /// While the first capybara works: Old Yuzu says how to zoom, a picture of the gesture shows,
+        /// and the first pinch (or turn of the wheel) gets a "nicely done". It never holds anything
+        /// up: after 15 seconds, or once the capybara falls asleep, the picture just goes.
+        /// </summary>
+        void StartZoomBeat()
+        {
+            if (Guidance.Off) return;
+            _zoomLine = ZoomLine();
+            Tell(_zoomLine, Step.WaitForHunger);
+            _zoomBeat = ZoomBeat.Waiting;
+            _zoomUntil = Time.time + 25f;   // for her to get to the line
+            _zoomed = false;
+        }
+
+        void OnZoomed() => _zoomed = true;
+
+        void TickZoomBeat()
+        {
+            if (_zoomBeat is ZoomBeat.None or ZoomBeat.Over) return;
+            bool moveOn = _step != Step.WaitForHunger || Guidance.Off;
+            if (_zoomed && !Guidance.Off)
+            {
+                ZoomHint.Hide();
+                _zoomBeat = ZoomBeat.Over;
+                Tell(StoryText.Spring.ZoomDone, Step.WaitForHunger);
+                return;
+            }
+            if (moveOn || Time.time > _zoomUntil)
+            {
+                ZoomHint.Hide();
+                _zoomBeat = ZoomBeat.Over;
+                return;
+            }
+            if (_zoomBeat == ZoomBeat.Waiting && dialogue != null && dialogue.HasSaid(_zoomLine))
+            {
+                _zoomBeat = ZoomBeat.Showing;
+                _zoomed = false;   // only a zoom after she has asked counts
+                _zoomUntil = Time.time + 15f;
+                ZoomHint.Show();
+            }
         }
 
         /// <summary>
@@ -146,15 +430,23 @@ namespace CapyIsland.Game
         }
         float _greetTimer;
 
-        void OnEnable() => Hints.Shown += SayHint;
-        void OnDisable() => Hints.Shown -= SayHint;
+        void OnEnable()
+        {
+            Hints.Shown += SayHint;
+            CameraRig.CameraInputController.Zoomed += OnZoomed;
+            HotSpring.Thawed += OnSpringThawed;
+        }
 
-        // A hint is an event: if it fires again, it should show again.
+        void OnDisable()
+        {
+            Hints.Shown -= SayHint;
+            CameraRig.CameraInputController.Zoomed -= OnZoomed;
+            HotSpring.Thawed -= OnSpringThawed;
+        }
+
+        // News is an event: if it comes again, it should show again.
         void SayHint(string line)
         {
-            // On someone else's island she doesn't remark on their island (their hungry workers,
-            // their forests): only on what's to do with you.
-            if (Visit.Active && Hints.IsAboutIsland(line)) return;
             if (dialogue != null) dialogue.Say(line, again: true);
         }
 
@@ -162,14 +454,18 @@ namespace CapyIsland.Game
         {
             // A returning player (or a visitor on someone else's island) never sees the opening.
             if (Visit.Active || SaveGame.HasSave) SkipForReturningPlayer();
+            // On a friend's island, your own save's tutorial value rides through untouched.
+            if (Visit.Active) _homeStep = SaveGame.ReadHome()?.tutorial ?? "";
             if (_step == Step.Done) return;
+            // A brand-new game starts with the lean purse: Miso makes it up with the General Store.
+            _giftOwed = true;
             // A brand-new game opens with the story of the Big Chill; Old Yuzu says hello once it ends.
             if (!UI.IntroCutscene.Seen) { UI.IntroCurtain.Drop(); UI.AwakeningScreen.Show(() => UI.IntroCutscene.Show()); }
             _greetTimer = greetSeconds;
             // Her hello is a story line, not an instruction: the first "tap the bubble" waits for
             // it to be read instead of replacing it.
             if (!Guidance.Off && dialogue != null)
-                dialogue.Say("Hello, little one! I'm Old Yuzu, or what's left of me. The snow is gone, but my island is so empty. Let's start with a home.");
+                dialogue.Say("Hello, little one! I'm Old Yuzu, or what's left of me. The snow is gone, but my island is so empty. Let's bring it back to life, one bubble at a time.");
         }
 
         void Update()
@@ -197,14 +493,15 @@ namespace CapyIsland.Game
                 case Step.PlantGarden: TickPlantGarden(); break;
                 case Step.ClickMote: TickClickMote(); break;
                 case Step.CrossToHeart: TickCrossToHeart(); break;
+                case Step.FindSpring: TickFindSpring(); break;
+                case Step.FeedSpring: TickFeedSpring(); break;
                 case Step.OpenTower: TickOpenTower(); break;
             }
+            TickZoomBeat();
             // The tutorial was ended: its steps still move the story on, but nothing points. Once it
             // is over the hand belongs to the story (a quest's focus, the chapel), so leave it be.
             if (Guidance.Off && _step != Step.Done && pointer != null) pointer.Hide();
             GlideToGoal();
-            // A sunny morning from start to finish; the day starts moving once the island is yours.
-            GameClock.Hold(_step != Step.Done);
         }
 
         // ---------------------------------------------------------------- steps
@@ -289,9 +586,9 @@ namespace CapyIsland.Game
 
             if (worker.IsAssigned)
             {
-                Tell("That's the rhythm: forest, sawmill, capybara. Watch the wood pile up with every chop.");
-                Tell(ZoomLine());   // a quiet moment while it works: time to look around
+                Tell("That's the rhythm: forest, sawmill, capybara. Watch the wood pile up with every chop.", Step.WaitForHunger);
                 Advance(Step.WaitForHunger);
+                StartZoomBeat();   // a quiet moment while it works: time to look around
                 return;
             }
 
@@ -325,9 +622,15 @@ namespace CapyIsland.Game
             }
 
             UI.NapCutscene.Show();
-            Tell("Your capybara has dozed off. It's hungry! Capybaras eat flowers, and there's a garden in that bubble.");
+            Tell(NapLine, Step.PlantGarden);
             Advance(Step.CollectGarden);
         }
+
+        /// <summary>
+        /// The first nap: why it sleeps, and what the cloud over it is — a wish, not a bubble, and
+        /// tapping it shows where to find one (DreamGuide).
+        /// </summary>
+        const string NapLine = "Your capybara has dozed off. It's hungry! See the little cloud over its head? That's what it's dreaming of. Tap the cloud and I'll show you where to find some flowers.";
 
         void TickCollectGarden()
         {
@@ -391,7 +694,7 @@ namespace CapyIsland.Game
             var catalog = ItemCatalog.Instance;
             if (land != null && catalog != null)
                 catalog.MakeItem("Tower Of Love", land.SpotNearIslandMiddle(1, 83f));   // the middle of its island
-            Tell("Oh! A warm heart! All your building is waking the island up. The spirits can feel it.");
+            Tell("Oh! A warm heart! All your building is waking the island up. The spirits can feel it.", Step.ClickMote);
             _stepTimer = 6f;
             Advance(Step.ClickMote);
         }
@@ -415,7 +718,8 @@ namespace CapyIsland.Game
         {
             var land = LandMap.Instance;
             if (land != null) land.OpenBridge("first_bridge");
-            Tell("Wonderful! A bridge has risen to the next island. Tap where the hand points and your capybara walks across.");
+            // The hand may be off the screen, so the line says where to go, not where to look.
+            Tell("Wonderful! A bridge has risen to the next island. Walk across it to the other side.", Step.CrossToHeart);
             _stepTimer = 10f;
             Advance(Step.CrossToHeart);
         }
@@ -426,10 +730,9 @@ namespace CapyIsland.Game
             var land = LandMap.Instance;
             if (king != null && land != null && land.IslandAt(king.transform.position) == 1)
             {
-                Tell("Ah... this is the heart of the Capy Isles. The old hot spring is here somewhere.");
-                _stepTimer = 10f;
-                WaitForDiary();
-                Advance(Step.OpenTower);
+                Tell("Ah... this is the heart of the Capy Isles. The old hot spring is here somewhere.", Step.FindSpring);
+                _stepTimer = 6f;
+                Advance(Step.FindSpring);
                 return;
             }
             if (pointer != null && land != null)
@@ -459,14 +762,23 @@ namespace CapyIsland.Game
                 Tell("Whenever you're stuck, visit the Steam Tower. Bring the warmth back to the islands!");
                 Advance(Step.Done);
                 WelcomeNeighbours();
+                Graduated?.Invoke();
                 return;
+            }
+            // Just thawed: once she has said so, the capybara walks over and hops in by itself.
+            if (_soakAt > 0f && Time.time >= _soakAt && !Attention.Busy)
+            {
+                var spring = HotSpring.Instance;
+                var tower = TowerOfLove.Instance;
+                if (tower != null && (spring == null || !spring.Frozen)) { _soakAt = -1f; tower.Tap(); }
+                else if (Time.time > _soakAt + 10f) _soakAt = -1f;
             }
             _stepTimer -= Time.deltaTime;
             if (_stepTimer > 0f) return;
             _stepTimer = 20f;
-            Say("Find the tall Steam Tower and tap it. Let's see what's inside.");
-            var tower = TowerOfLove.Instance;
-            if (pointer != null && tower != null) pointer.PointAt(tower.transform);
+            if (HotSpring.Bathing) return;
+            Say(StoryText.Spring.Soak);
+            PointAtSpring();
         }
 
         // ---------------------------------------------------------------- helpers
@@ -587,6 +899,8 @@ namespace CapyIsland.Game
             _circleExplained = false;
             if (pointer != null) pointer.Hide();
             HideZone();
+            // What she was about to tell you to do is done: never say it late.
+            if (dialogue != null) dialogue.DropInstructions();
         }
 
         void Say(string line)
@@ -598,11 +912,18 @@ namespace CapyIsland.Game
 
         /// <summary>
         /// A line to understand rather than a step to do (why the capybara fell asleep, what the
-        /// heart is). Queued, never replaced by the next instruction: she finishes it first.
+        /// heart is). Queued, never replaced by the next instruction: she finishes it first —
+        /// unless it is only true up to some step (<paramref name="until"/>) and you have already
+        /// gone past it, when she drops it rather than say it late.
         /// </summary>
-        void Tell(string line)
+        void Tell(string line, Step? until = null)
         {
             if (Guidance.Off) return;
+            if (until.HasValue)
+            {
+                var last = until.Value;
+                Hints.While(line, () => _step <= last);
+            }
             if (dialogue != null) dialogue.Say(line);
         }
 

@@ -6,6 +6,7 @@ namespace CapyIsland.Game
     {
         Chop, Mine, Nibble, Rustle, Plop, Pop, Chest, Coin, Buy, Heart, Bridge, Boom, Fuse, Fell, Tap, Meow,
         Stir, Slide,   // the kitchen spoon and the burrow tunnel (Resources/Sfx)
+        Flutter, Buzz, // a bird taking off, a bumblebee at the flowers (Game/Wildlife)
     }
 
     /// <summary>

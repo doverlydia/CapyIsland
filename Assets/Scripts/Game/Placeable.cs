@@ -149,7 +149,7 @@ namespace CapyIsland.Game
             if (!string.IsNullOrEmpty(TrailOnly))
             {
                 MarkCarried();
-                Hints.Show(TrailOnly);
+                Hints.Answer(TrailOnly);
                 return;
             }
 
@@ -159,7 +159,7 @@ namespace CapyIsland.Game
             if (notYours != null)
             {
                 MarkCarried();
-                Hints.Show(notYours);
+                Hints.Answer(notYours);
                 return;
             }
 
@@ -172,10 +172,10 @@ namespace CapyIsland.Game
 
             // Blocked: say why, rather than let it look as if the drop was ignored.
             if (!InZone(transform.position))
-                Hints.Show("That's too far from the sleepy capybara. Plant the garden closer, so it can reach the flowers.");
+                Hints.Answer("That's too far from the sleepy capybara. Plant the garden closer, so it can reach the flowers.");
             else if (BunniSpace.CircleOnMap(transform.position, innerRadius, this) && !WaresFit(transform.position))
-                Hints.Show("A shop needs clear land in front of it for its wares. Try a more open spot.");
-            else Hints.Show(BunniSpace.PointOnLand(transform.position)
+                Hints.Answer("A shop needs clear land in front of it for its wares. Try a more open spot.");
+            else Hints.Answer(BunniSpace.PointOnLand(transform.position)
                 ? "Not enough room there. Drop it where the circle turns green."
                 : "That's water! Things can only be planted on land.");
 
@@ -218,6 +218,34 @@ namespace CapyIsland.Game
             SendMessage("OnPlacedInWorld", SendMessageOptions.DontRequireReceiver);
 
             if (!silent) Motes.PlacementMote(displayName);
+        }
+
+        /// <summary>
+        /// Sets it down by itself on the nearest open spot within <paramref name="reach"/> of
+        /// <paramref name="at"/>, as if the player had dropped it there (a character stepping out
+        /// of a bubble). False, and nothing moves, when there's no room near enough.
+        /// </summary>
+        public bool SettleNear(Vector2 at, float reach)
+        {
+            // Not on top of the king (nothing else stops a spot there).
+            var king = FindFirstObjectByType<PlayerAvatar>();
+            bool Fits(Vector2 p) => CanPlaceAt(p) && (king == null || Vector2.Distance(p, king.transform.position) > 1.6f);
+            Vector2? spot = Fits(at) ? at : null;
+            for (float r = 0.5f; spot == null && r <= reach; r += 0.5f)
+            {
+                int around = Mathf.Max(8, Mathf.RoundToInt(r * 6f));
+                for (int i = 0; i < around && spot == null; i++)
+                {
+                    float a = i * Mathf.PI * 2f / around;
+                    var p = at + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * r;
+                    if (Fits(p)) spot = p;
+                }
+            }
+            if (spot == null) return false;
+            transform.position = new Vector3(spot.Value.x, spot.Value.y, transform.position.z);
+            MarkPlaced();
+            PlayerPlaced?.Invoke(this);
+            return true;
         }
 
         public void MarkCarried()

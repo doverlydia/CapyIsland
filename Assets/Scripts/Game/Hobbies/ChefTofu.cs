@@ -1,30 +1,34 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace CapyIsland.Game
 {
     /// <summary>
-    /// Chef Tofu's kitchen stall on the Heart of the Isles, the hot spring's island, there from the
-    /// start. His wares stand out front like a shop's: the stove (the way into cooking), packs of
-    /// what you can't grow or catch (eggs, milk, flour, rice, sugar) and his recipe book. Tap the
-    /// book, or him, for the recipes he sells; the ones above your cooking level wait, greyed.
+    /// Chef Tofu's kitchen stall on Sunflower Farm, beside the fields, there once the farm's bridge
+    /// is up — so cooking comes after a hobby or two, with vegetables growing a few steps away.
+    /// His wares stand out front like a shop's: the stove (the way into cooking), packs of what you
+    /// can't grow or catch (eggs, milk, flour, rice, sugar) and his recipe book. Tap the book, or
+    /// him, for the recipes he sells; the ones above your cooking level wait, greyed.
     ///
-    /// Where the stall stands is chosen once, on clear land near the island's middle, and
-    /// remembered, so it never wanders as the island fills up.
+    /// Where the stall stands is chosen once, on clear land to the west of the field, and
+    /// remembered, so it never wanders as the farm fills up. (He used to stand by the hot spring;
+    /// that spot was kept under another key, and is simply not used any more.)
     /// </summary>
     public class ChefTofu : MonoBehaviour
     {
-        const int IslandIndex = 1;   // the Heart of the Isles (see SeaLibrary)
-        const string SpotKey = "CapyIsland.ChefSpot";
+        const string SpotKey = "CapyIsland.ChefFarmSpot";
         const float StallHeight = 3.4f, ChefHeight = 1.7f;
+
+        /// <summary>Where on the farm he'd most like to be, from the middle of the field: west of the plots, past the hay.</summary>
+        static readonly Vector2 Wanted = new(-14f, 0.8f);
 
         public static ChefTofu Instance { get; private set; }
 
-        /// <summary>Where to send you for the chef (his stall's wares), once it stands.</summary>
+        /// <summary>Where to send you for the chef (his stall's wares), once it stands (null until the farm is open).</summary>
         public static Vector2? Spot => Instance != null && Instance._root != null ? (Vector2)Instance._root.transform.position + new Vector2(0f, -1.8f) : null;
 
         GameObject _root;
+        float _nextLook;
 
         void Awake() => Instance = this;
 
@@ -33,19 +37,20 @@ namespace CapyIsland.Game
             if (Instance == this) Instance = null;
         }
 
-        IEnumerator Start()
+        void Update()
         {
-            if (Visit.Active) yield break;   // a friend's island has its own way of doing things
-            // After the island and its items have loaded, so the stall finds land that's clear.
-            yield return null;
-            yield return null;
-            Build();
+            // A friend's island has its own way of doing things; at home the stall goes up as soon
+            // as the farm stands (on loading, or the moment its bridge is raised), after it, so it
+            // finds land the plots and the barn aren't on.
+            if (_root != null || Visit.Active || Time.unscaledTime < _nextLook) return;
+            _nextLook = Time.unscaledTime + 0.5f;
+            if (Farm.LaidOut && Farm.Centre.HasValue) Build(Farm.Centre.Value);
         }
 
-        void Build()
+        void Build(Vector2 field)
         {
             var land = LandMap.Instance;
-            if (land == null || land.Island(IslandIndex) == null) return;
+            if (land == null || land.Island(Farm.IslandIndex) == null) return;
             Vector2 at;
             var saved = PlayerPrefs.GetString(SpotKey, "");
             var parts = saved.Split(',');
@@ -54,7 +59,7 @@ namespace CapyIsland.Game
                 at = new Vector2(x, y);
             else
             {
-                at = FindSpot(land);
+                at = FindSpot(land, field);
                 PlayerPrefs.SetString(SpotKey, at.x.ToString("R", System.Globalization.CultureInfo.InvariantCulture) + "," + at.y.ToString("R", System.Globalization.CultureInfo.InvariantCulture));
                 PlayerPrefs.Save();
             }
@@ -84,52 +89,43 @@ namespace CapyIsland.Game
             foreach (var w in WareSpots(at)) yield return w;
         }
 
-        /// <summary>The nearest clear spot to the island's middle with room for the stall, the chef and his wares.</summary>
-        static Vector2 FindSpot(LandMap land)
+        /// <summary>
+        /// The clear spot on the farm nearest where he'd like to be (<see cref="Wanted"/>, from the
+        /// middle of the <paramref name="field"/>), with room for the stall, the chef and his wares.
+        /// </summary>
+        static Vector2 FindSpot(LandMap land, Vector2 field)
         {
-            var taken = new List<Vector2>();
-            foreach (var p in FindObjectsByType<Placeable>(FindObjectsSortMode.None)) if (p.Placed) taken.Add(p.transform.position);
-            foreach (var h in FindObjectsByType<Harvestable>(FindObjectsSortMode.None)) taken.Add(h.transform.position);
-            if (SeaLibrary.Spot != null) taken.Add(SeaLibrary.Spot.position);
-            // The Steam Tower, its pool and Old Yuzu by it aren't items, but they stand their ground too.
-            var spring = new List<Bounds>();
-            if (HotSpring.Instance != null)
-                foreach (var r in HotSpring.Instance.GetComponentsInChildren<SpriteRenderer>())
-                {
-                    var b = r.bounds;
-                    b.Expand(new Vector3(2.4f, 2.4f, 0f));
-                    spring.Add(b);
-                }
-            bool Fits(Vector2 at)
-            {
-                foreach (var f in Footprint(at))
-                {
-                    if (!BunniSpace.PointOnLand(f) || land.IslandAt(f) != IslandIndex) return false;
-                    foreach (var t in taken) if ((t - f).sqrMagnitude < 1.7f * 1.7f) return false;
-                    foreach (var b in spring) if (b.Contains(new Vector3(f.x, f.y, b.center.z))) return false;
-                }
-                return true;
-            }
-            // On the right-hand side of the island, where there's room: the clear spot furthest
-            // east, keeping to the middle of the island north to south.
-            var island = land.Island(IslandIndex);
+            var island = land.Island(Farm.IslandIndex);
             Vector2 lo = new Vector2(float.MaxValue, float.MaxValue), hi = -lo;
             void Grow(Vector2 world) { var u = LandMap.WorldToUnity(world); lo = Vector2.Min(lo, u); hi = Vector2.Max(hi, u); }
             foreach (var c in island.circles) { Grow(new Vector2(c.x - c.z, c.y - c.z)); Grow(new Vector2(c.x + c.z, c.y + c.z)); }
             foreach (var r in island.rects) { Grow(r.min); Grow(r.max); }
-            float midY = (lo.y + hi.y) * 0.5f;
-            Vector2? best = null;
-            float bestScore = float.MinValue;
-            for (float x = lo.x; x <= hi.x; x += 0.8f)
-                for (float y = lo.y; y <= hi.y; y += 0.8f)
+            var near = new Rect(lo - Vector2.one * 4f, hi - lo + Vector2.one * 8f);
+
+            // What already stands on the farm: its plots, barn, hay and fence, an old stove, trees.
+            var taken = new List<Vector2>();
+            foreach (var p in FindObjectsByType<Placeable>(FindObjectsSortMode.None))
+                if (p.Placed && near.Contains(p.transform.position)) taken.Add(p.transform.position);
+            foreach (var h in FindObjectsByType<Harvestable>(FindObjectsSortMode.None))
+                if (near.Contains(h.transform.position)) taken.Add(h.transform.position);
+            bool Fits(Vector2 at)
+            {
+                foreach (var f in Footprint(at))
                 {
-                    var p = new Vector2(x, y);
-                    float score = x - Mathf.Abs(y - midY) * 0.6f;
-                    if (score <= bestScore || !Fits(p)) continue;
-                    best = p;
-                    bestScore = score;
+                    if (!BunniSpace.PointOnLand(f) || land.IslandAt(f) != Farm.IslandIndex) return false;
+                    foreach (var t in taken) if ((t - f).sqrMagnitude < 1.7f * 1.7f) return false;
                 }
-            return best ?? land.SpotNearIslandMiddle(IslandIndex, 60f, Fits);
+                return true;
+            }
+
+            // Every spot on the farm, nearest the one he wants first: the first that fits is his.
+            var want = field + Wanted;
+            var spots = new List<Vector2>();
+            for (float x = lo.x; x <= hi.x; x += 0.8f)
+                for (float y = lo.y; y <= hi.y; y += 0.8f) spots.Add(new Vector2(x, y));
+            spots.Sort((a, b) => (a - want).sqrMagnitude.CompareTo((b - want).sqrMagnitude));
+            foreach (var p in spots) if (Fits(p)) return p;
+            return land.SpotNearIslandMiddle(Farm.IslandIndex, 60f, Fits);
         }
 
         // ---------------------------------------------------------------- the stall
@@ -219,9 +215,14 @@ namespace CapyIsland.Game
                 BaitStand.Create("Pantry_" + p.Id, p.Name, p.Blurb, new Vector3Int(0, p.Gold, 0),
                     HobbyData.ItemArt(p.Item), () => BuyPantry(p), spots[1 + i], _root.transform,
                     // only any use once you can cook
-                    () => HobbyLog.IsUnlocked(Hobby.Cooking) ? null : "You need a stove first. Chef Tofu sells one right here.");
+                    () => HobbyLog.IsUnlocked(Hobby.Cooking) ? null
+                        : StoveOnSale ? "You need a stove first. Chef Tofu sells one right here."
+                        : StoryText.HobbyCardLines.CookingClosed);
             }
         }
+
+        /// <summary>His stove is out for sale: cooking has been opened with a hobby card (ShopPacing).</summary>
+        static bool StoveOnSale => StoreData.IsUnlocked("Stove");
 
         static void OpenRecipes()
         {
@@ -244,6 +245,7 @@ namespace CapyIsland.Game
         public static string WhyNot(DishKind d)
         {
             if (HobbyLog.KnowsRecipe(d.Id)) return "Already in your recipe book";
+            if (!HobbyLog.IsUnlocked(Hobby.Cooking) && !StoveOnSale) return StoryText.HobbyCardLines.CookingClosed;
             if (!HobbyLog.IsUnlocked(Hobby.Cooking)) return "Buy a stove first";   // no use for a recipe without one
             if (d.MinLevel > HobbyLog.Level(Hobby.Cooking)) return UI.Loc.F("Requires cooking level {0}", d.MinLevel);
             return null;
@@ -314,6 +316,12 @@ namespace CapyIsland.Game
             public void Tap()
             {
                 Sfx.Play(SfxKind.Tap, 0.5f);
+                // Before cooking is opened with a hobby card, his stove isn't out yet: just hello.
+                if (!HobbyLog.IsUnlocked(Hobby.Cooking) && !StoveOnSale)
+                {
+                    UI.SpeechDialog.Show(_sr.sprite, StoryText.Chef, new[] { StoryText.HobbyCardLines.TofuWaits }, null);
+                    return;
+                }
                 var pages = CookingStove.Placed() == null && !HobbyLog.IsUnlocked(Hobby.Cooking) ? StoryText.Tofu.Meet : StoryText.Tofu.Back;
                 UI.SpeechDialog.Show(_sr.sprite, StoryText.Chef, pages, OpenRecipes);
             }

@@ -116,6 +116,9 @@ namespace CapyIsland.Game
             _body = sprite != null ? sprite.GetComponent<SpriteRenderer>() : null;
             if (_body != null) _iconSprite = _body.sprite;
             _placeable = GetComponent<Placeable>();
+            // Rock doesn't bend in the wind (or shed leaves). Hills built before the island builder
+            // knew that still carry a sway: drop it, and a struck rock just shakes (WorkerVisuals).
+            if (Family == NodeFamily.Rock && TryGetComponent<Sway>(out var sway)) DestroyImmediate(sway);
         }
 
         /// <summary>

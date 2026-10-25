@@ -86,6 +86,59 @@ namespace CapyIsland.UI
             if (!_showing && _queue.Count > 0 && !MoviePlaying) ShowNext();
         }
 
+        // The card as laid out in the scene, at normal text size.
+        bool _laidOut;
+        Vector2 _pictureSize, _picturePos, _titleSize, _titlePos, _bodySize, _bodyPos, _tapSize, _tapPos;
+        RectTransform _tap;
+
+        /// <summary>
+        /// Easy Reading: the words take more of the card. The picture shrinks a little and moves
+        /// up, and the title, the description and "tap to continue" share the room it leaves —
+        /// otherwise they would only shrink back into boxes made for normal-size words.
+        /// </summary>
+        void LayOutForReading()
+        {
+            if (card == null || picture == null || titleLabel == null || bodyLabel == null) return;
+            var pic = picture.rectTransform;
+            var title = titleLabel.rectTransform;
+            var body = bodyLabel.rectTransform;
+            if (!_laidOut)
+            {
+                _laidOut = true;
+                _tap = card.Find("Tap") as RectTransform;
+                _pictureSize = pic.sizeDelta; _picturePos = pic.anchoredPosition;
+                _titleSize = title.sizeDelta; _titlePos = title.anchoredPosition;
+                _bodySize = body.sizeDelta; _bodyPos = body.anchoredPosition;
+                if (_tap != null) { _tapSize = _tap.sizeDelta; _tapPos = _tap.anchoredPosition; }
+            }
+            float grow = Accessibility.TextScale - 1f;
+            // The picture gives up to 30% of its height, keeping its top edge where it was.
+            float tall = _pictureSize.y * (1f - 0.6f * grow);
+            float top = _picturePos.y + _pictureSize.y * 0.5f;
+            pic.sizeDelta = new Vector2(_pictureSize.x * tall / _pictureSize.y, tall);
+            pic.anchoredPosition = new Vector2(_picturePos.x, top - tall * 0.5f);
+            float freed = _pictureSize.y - tall;
+
+            // The tap line grows upward from the card's bottom edge; the title and body share the rest.
+            float bodyBottom = _bodyPos.y - _bodySize.y * 0.5f;
+            if (_tap != null)
+            {
+                float tap = _tapSize.y * (1f + grow);
+                float gap = bodyBottom - (_tapPos.y + _tapSize.y * 0.5f);
+                _tap.sizeDelta = new Vector2(_tapSize.x, tap);
+                // Up off the card's border too: bigger letters sit closer to the edge of their box.
+                _tap.anchoredPosition = new Vector2(_tapPos.x, _tapPos.y + (tap - _tapSize.y) * 0.5f + 24f * grow);
+                bodyBottom = _tap.anchoredPosition.y + tap * 0.5f + gap;
+            }
+            float titleH = _titleSize.y * (1f + grow);
+            float titleTop = _titlePos.y + _titleSize.y * 0.5f + freed;
+            title.sizeDelta = new Vector2(_titleSize.x, titleH);
+            title.anchoredPosition = new Vector2(_titlePos.x, titleTop - titleH * 0.5f);
+            float bodyTop = titleTop - titleH;
+            body.sizeDelta = new Vector2(_bodySize.x, Mathf.Max(_bodySize.y, bodyTop - bodyBottom));
+            body.anchoredPosition = new Vector2(_bodyPos.x, (bodyTop + bodyBottom) * 0.5f);
+        }
+
         void ShowNext()
         {
             if (_nextPage == null && _queue.Count == 0)
@@ -103,6 +156,7 @@ namespace CapyIsland.UI
             var (title, body, sprite, closed) = _nextPage ?? _queue.Dequeue();
             _nextPage = null;
             _current = closed;
+            LayOutForReading();
             if (titleLabel != null) titleLabel.text = title;
             if (bodyLabel != null) bodyLabel.text = body;
             if (picture != null)

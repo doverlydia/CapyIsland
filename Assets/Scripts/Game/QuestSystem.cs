@@ -225,14 +225,24 @@ namespace CapyIsland.Game
         /// <summary>Rewards 70 units south of the giver: the item in a bubble, resources in chests.</summary>
         public static void PayOut(QuestDef q, Vector2 giverAt)
         {
-            var spot = giverAt + BunniSpace.ToUnity(new Vector2(0f, -70f));
+            var spot = RewardSpot(giverAt);
+            var catalog = ItemCatalog.Instance;
+            if (!string.IsNullOrEmpty(q.RewardItem) && catalog != null) catalog.MakeStore(q.RewardItem, spot);
+            DropChests(spot, q.Wood, q.Gold, q.Gems);
+        }
+
+        /// <summary>Where a giver's rewards land: 70 units south of them.</summary>
+        public static Vector2 RewardSpot(Vector2 giverAt) => giverAt + BunniSpace.ToUnity(new Vector2(0f, -70f));
+
+        /// <summary>Wood, gold and gems as a row of chests just below <paramref name="spot"/> (they open by themselves).</summary>
+        public static void DropChests(Vector2 spot, int wood, int gold, int gems)
+        {
             var catalog = ItemCatalog.Instance;
             var parent = catalog != null ? catalog.ItemParent : null;
-            if (!string.IsNullOrEmpty(q.RewardItem) && catalog != null) catalog.MakeStore(q.RewardItem, spot);
             float x = -1.2f;
-            if (q.Wood > 0) { TreasureChest.SpawnValue(spot + new Vector2(x, -0.3f), ResourceKind.Wood, q.Wood, parent); x += 1.2f; }
-            if (q.Gold > 0) { TreasureChest.SpawnValue(spot + new Vector2(x, -0.3f), ResourceKind.Gold, q.Gold, parent); x += 1.2f; }
-            if (q.Gems > 0) TreasureChest.SpawnValue(spot + new Vector2(x, -0.3f), ResourceKind.Gem, q.Gems, parent);
+            if (wood > 0) { TreasureChest.SpawnValue(spot + new Vector2(x, -0.3f), ResourceKind.Wood, wood, parent); x += 1.2f; }
+            if (gold > 0) { TreasureChest.SpawnValue(spot + new Vector2(x, -0.3f), ResourceKind.Gold, gold, parent); x += 1.2f; }
+            if (gems > 0) TreasureChest.SpawnValue(spot + new Vector2(x, -0.3f), ResourceKind.Gem, gems, parent);
         }
 
         // ---------------------------------------------------------------- saving

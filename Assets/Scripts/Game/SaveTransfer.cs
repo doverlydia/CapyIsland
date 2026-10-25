@@ -25,7 +25,7 @@ namespace CapyIsland.Game
             "CapyIsland.YuzuStage", "CapyIsland.Finale", "CapyIsland.LanternStorySeen", "CapyIsland.MochiMet",
             "CapyIsland.Hobbies", "CapyIsland.Home", "CapyIsland.Friends", "CapyIsland.Events", "CapyIsland.Visited",
             "CapyIsland.Airport", "CapyIsland.Bait", "CapyIsland.DishOrders", "CapyIsland.CookStirs",
-            "CapyIsland.ChefSpot", "CapyIsland.FarmStoveGiven",
+            "CapyIsland.ChefSpot", "CapyIsland.ChefFarmSpot", "CapyIsland.FarmStoveGiven",
             "CapyIsland.CatBegSeen", "CapyIsland.CatRideSeen", "CapyIsland.ShrineSpot",
             "CapyIsland.MyBottles", "CapyIsland.LeftNotes", "CapyIsland.ShoreNotes",
             "CapyIsland.Daily.Last", "CapyIsland.Daily.Streak", "CapyIsland.ClockOffset", "CapyIsland.New",

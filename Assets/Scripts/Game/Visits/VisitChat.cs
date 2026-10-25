@@ -164,7 +164,7 @@ namespace CapyIsland.Game
             if (!changed) return;
             Live.AnswerChat(guest, on);
             Changed?.Invoke();
-            Hints.Show(on ? UI.Loc.F("You can chat with {0} now.", guest.name) : UI.Loc.F("Chat with {0} is off.", guest.name));
+            Hints.Answer(on ? UI.Loc.F("You can chat with {0} now.", guest.name) : UI.Loc.F("Chat with {0} is off.", guest.name));
         }
 
         /// <summary>A visitor went home: next time they come, you're asked again.</summary>

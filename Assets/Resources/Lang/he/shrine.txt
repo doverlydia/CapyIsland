@@ -11,27 +11,33 @@
 
 @ Hang a new ema (1 gold)
 = תלה אמה חדשה (מטבע זהב אחד)
+~ תלי אמה חדשה (מטבע זהב אחד)
 
 @ Hang an ema (1 gold)
 = תלה אמה (מטבע זהב אחד)
+~ תלי אמה (מטבע זהב אחד)
 
 @ Look at the rack
 = הסתכל על המתלה
+~ הסתכלי על המתלה
 
 @ Rack {0} of {1}
 = מתלה {0} מתוך {1}
 
 @ The rack is empty. Hang the first wish!
 = המתלה ריק. תלה את המשאלה הראשונה!
+~ המתלה ריק. תלי את המשאלה הראשונה!
 
 @ Back to the rack
 = חזרה למתלה
 
 @ Take it down
 = הורד אותה
+~ הורידי אותה
 
 @ Write your wish, your thanks, or whatever is on your mind. The gods are good listeners.
 = כתוב את המשאלה שלך, תודה, או כל מה שעל ליבך. האלים יודעים להקשיב.
+~ כתבי את המשאלה שלך, תודה, או כל מה שעל ליבך. האלים יודעים להקשיב.
 
 @ Your wish, in a few words
 = המשאלה שלך, בכמה מילים
@@ -41,9 +47,11 @@
 
 @ Hang it on the rack
 = תלה על המתלה
+~ תלי על המתלה
 
 @ Write a few words first.
 = כתוב קודם כמה מילים.
+~ כתבי קודם כמה מילים.
 
 @ A wish
 = משאלה
@@ -70,6 +78,7 @@
 
 @ Old Mochi keeps the shrine on the hill. Hang an ema with your wish on his rack, and read the ones friends leave you.
 = סבא מוצ'י שומר על המקדש שעל הגבעה. תלה על המתלה שלו אמה עם משאלה, וקרא את אלה שחברים משאירים לך.
+~ סבא מוצ'י שומר על המקדש שעל הגבעה. תלי על המתלה שלו אמה עם משאלה, וקראי את אלה שחברים משאירים לך.
 
 @ The shrine is on your first island.
 = המקדש נמצא באי הראשון שלך.
@@ -79,9 +88,11 @@
 
 @ Ahoy! The fish are biting. My bait's laid out on the sand, take your pick. Stand by the water where the shadows swim, and cast.
 = אהוי! הדגים נושכים. הפיתיונות שלי פרוסים על החול, בחר מה שתרצה. עמוד ליד המים, איפה שהצללים שוחים, והטל חכה.
+~ אהוי! הדגים נושכים. הפיתיונות שלי פרוסים על החול, בחרי מה שתרצי. עמדי ליד המים, איפה שהצללים שוחים, והטילי חכה.
 
 @ Ahoy! The fish are biting. My rod's laid out right there on the sand. Buy it, stand by the water where the shadows swim, and cast.
 = אהוי! הדגים נושכים. החכה שלי מונחת שם על החול. קנה אותה, עמוד ליד המים, איפה שהצללים שוחים, והטל.
+~ אהוי! הדגים נושכים. החכה שלי מונחת שם על החול. קני אותה, עמדי ליד המים, איפה שהצללים שוחים, והטילי.
 
 # ---------------------------------------------------------------- the achievement
 
@@ -93,11 +104,13 @@
 
 @ Hang an ema at Old Mochi's shrine
 = תלה אמה במקדש של סבא מוצ'י
+~ תלי אמה במקדש של סבא מוצ'י
 
 # ---------------------------------------------------------------- Old Mochi talks
 
 @ Oh! A visitor. Nobody has climbed up to my shrine in a very long time.
 = הו! אורח. אף אחד לא טיפס אל המקדש שלי כבר הרבה מאוד זמן.
+~ הו! אורחת. אף אחד לא טיפס אל המקדש שלי כבר הרבה מאוד זמן.
 
 @ I am Mochi. I kept this shrine before the Big Chill, and I suppose I am still keeping it. Old habits.
 = אני מוצ'י. שמרתי על המקדש הזה לפני הקור הגדול, ונראה שאני עדיין שומר עליו. הרגלים ישנים.
@@ -107,27 +120,32 @@
 
 @ And Miso is our granddaughter. Don't tell her I said so, but she has her grandmother's stubbornness. Good. She'll need it.
 = ומיסו היא הנכדה שלנו. אל תגיד לה שאמרתי, אבל יש לה את העקשנות של סבתא שלה. טוב. היא תצטרך אותה.
+~ ומיסו היא הנכדה שלנו. אל תגידי לה שאמרתי, אבל יש לה את העקשנות של סבתא שלה. טוב. היא תצטרך אותה.
 
 @ Now. Folk used to come here to hang an ema: a little wooden plaque with a wish on it, or a thank-you. Would you like to hang one? An offering of one gold coin, for the gods.
 = ובכן. פעם אנשים היו באים לכאן לתלות אמה: לוחית עץ קטנה עם משאלה, או תודה. רוצה לתלות אחת? מנחה של מטבע זהב אחד, לאלים.
 
 @ Ah, little one. Yuzu is showing you round, I see. Go on, go with her. My shrine will still be here.
 = אה, קטנטן. אני רואה שיוזו עושה לך סיור. לך, לך איתה. המקדש שלי יחכה כאן.
+~ אה, קטנטנה. אני רואה שיוזו עושה לך סיור. לכי, לכי איתה. המקדש שלי יחכה כאן.
 
 @ Welcome back. The gods have been reading your ema, I'm sure of it.
 = ברוך שובך. האלים קוראים את האמה שלך, אני בטוח בזה.
+~ ברוכה השבה. האלים קוראים את האמה שלך, אני בטוח בזה.
 
 @ Every wish on that rack makes the shrine a little warmer. Even the silly ones. Especially the silly ones.
 = כל משאלה על המתלה מחממת את המקדש עוד קצת. אפילו הטיפשיות. בעיקר הטיפשיות.
 
 @ Have you seen Yuzu today? Tell her I swept the steps. She always said I never swept the steps.
 = ראית את יוזו היום? תגיד לה שטאטאתי את המדרגות. היא תמיד אמרה שאני אף פעם לא מטאטא את המדרגות.
+~ ראית את יוזו היום? תגידי לה שטאטאתי את המדרגות. היא תמיד אמרה שאני אף פעם לא מטאטא את המדרגות.
 
 @ Miso came by yesterday and left a wish. I didn't read it. ...I read it. It was very sweet.
 = מיסו קפצה אתמול והשאירה משאלה. לא קראתי אותה. ...קראתי. היא הייתה מתוקה מאוד.
 
 @ Ah, a visitor from another island! You may hang an ema here for {0}. They'll find it on their rack.
 = אה, אורח מאי אחר! אתה יכול לתלות כאן אמה בשביל {0}. הם ימצאו אותה על המתלה שלהם.
+~ אה, אורחת מאי אחר! את יכולה לתלות כאן אמה בשביל {0}. הם ימצאו אותה על המתלה שלהם.
 
 # ---------------------------------------------------------------- the islanders' ema
 
@@ -302,12 +320,15 @@
 
 @ Every year after, I lit it again for her. Then the Big Chill came, and the candle went out. Let's light it once more.
 = כל שנה אחרי זה הדלקתי אותו שוב בשבילה. ואז הגיע הקור הגדול, והנר כבה. בוא נדליק אותו עוד פעם.
+~ כל שנה אחרי זה הדלקתי אותו שוב בשבילה. ואז הגיע הקור הגדול, והנר כבה. בואי נדליק אותו עוד פעם.
 
 @ Every warm heart you bring home sets another one adrift. Look at them all. Maybe one night she'll see them too.
 = כל לב חם שאתה מחזיר הביתה שולח עוד פנס אל המים. תסתכל על כולם. אולי לילה אחד גם היא תראה אותם.
+~ כל לב חם שאת מחזירה הביתה שולח עוד פנס אל המים. תסתכלי על כולם. אולי לילה אחד גם היא תראה אותם.
 
 @ Yuzu's wedding lantern, still burning. Old Mochi lights it every night.
 = פנס החתונה של יוזו, עדיין דולק. סבא מוצ'י מדליק אותו כל לילה.
 
 @ You went up to the shrine? Then you met my Mochi. Fifty years he swept those steps, and he still thinks I never noticed. Tell him... no. I'll tell him myself, when the spring is warm.
 = עלית למקדש? אז פגשת את המוצ'י שלי. חמישים שנה הוא טאטא את המדרגות האלה, והוא עדיין חושב שלא שמתי לב. תגיד לו... לא. אני אגיד לו בעצמי, כשהמעיין יהיה חם.
+~ עלית למקדש? אז פגשת את המוצ'י שלי. חמישים שנה הוא טאטא את המדרגות האלה, והוא עדיין חושב שלא שמתי לב. תגידי לו... לא. אני אגיד לו בעצמי, כשהמעיין יהיה חם.

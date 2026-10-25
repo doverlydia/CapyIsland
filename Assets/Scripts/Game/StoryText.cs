@@ -21,7 +21,7 @@ namespace CapyIsland.Game
     /// Internal ids — item names, achievement names — never change, because saves store them. This
     /// file maps each id to what the player sees.
     /// </summary>
-    public static class StoryText
+    public static partial class StoryText
     {
         public const string Guide = "Old Yuzu";
         public const string Sweetheart = "Miso";
@@ -30,7 +30,7 @@ namespace CapyIsland.Game
         public const string Elder = "Elder Matcha";
         /// <summary>The shrine keeper on the hill: Old Yuzu's husband, Miso's grandpa. Only his spirit is left.</summary>
         public const string Keeper = "Old Mochi";
-        /// <summary>The cook by the hot spring: sells the stove, the pantry goods and recipes.</summary>
+        /// <summary>The cook on Sunflower Farm: sells the stove, the pantry goods and recipes.</summary>
         public const string Chef = "Chef Tofu";
 
         /// <summary>The opening movie's narration, in order (UI/Cutscenes/IntroCutscene).</summary>
@@ -90,7 +90,7 @@ namespace CapyIsland.Game
             public const string KeepOnline = "Keep the online one";
         }
 
-        /// <summary>Chef Tofu, the islands' cook before the Big Chill: a spirit still minding his stall by the spring.</summary>
+        /// <summary>Chef Tofu, the islands' cook before the Big Chill: a spirit still minding his stall, now on Sunflower Farm.</summary>
         public static class Tofu
         {
             /// <summary>Before you can cook: who he is, and the stove.</summary>
@@ -375,17 +375,10 @@ namespace CapyIsland.Game
             { "Monster House", new[] { "Walks and works twice as fast as a capybara.", "Digs bronze, silver and gold 4 times quicker." } },
         };
 
-        /// <summary>The worker each house sells beside it, whose buy panel shows the same lines.</summary>
-        static readonly Dictionary<string, string> HomeOf = new()
-        {
-            { "Capybara", "Capy House" }, { "Fox", "Fox House" }, { "Panda", "Panda House" },
-            { "Pirate", "Pirate House" }, { "Monster", "Monster House" },
-        };
-
-        /// <summary>The worker lines for an item's buy panel (a home or the worker itself), or "" when it brings no worker.</summary>
+        /// <summary>The worker lines for an item's buy panel (a home or the worker itself, which shows its home's lines), or "" when it brings no worker.</summary>
         public static string WorkerStrengths(string id)
         {
-            if (!string.IsNullOrEmpty(id) && HomeOf.TryGetValue(id, out var home)) id = home;
+            if (!string.IsNullOrEmpty(id) && StoreData.WorkerHome.TryGetValue(id, out var home)) id = home;
             if (string.IsNullOrEmpty(id) || !Strengths.TryGetValue(id, out var lines)) return "";
             return "<b>As a worker</b>\n" + string.Join("\n", lines);
         }
@@ -718,16 +711,9 @@ namespace CapyIsland.Game
             "Miso keeps looking at you when you're not watching. Just saying.",
         };
 
-        // ---------------------------------------------------------------- the spirit's nudges
+        // ---------------------------------------------------------------- meeting Miso
 
         /// <summary>Old Yuzu introducing her granddaughter, the first time you go to talk to her.</summary>
         public const string MisoIntro = "Oh! That's my granddaughter Miso! She made it through the cold! Go on, see if she needs a hand.";
-
-        public static string NudgeFor(QuestGiver.Kind kind) => kind switch
-        {
-            QuestGiver.Kind.Coriander => "Oh! My granddaughter Miso made it through the cold! Tap her and see if she needs a hand.",
-            QuestGiver.Kind.Peach => "There's a pirate captain on the next island. Captain Wasabi knows how to raise the bridge to Barnacle Bay.",
-            _ => "A spirit has appeared with an errand for you. Tap them to find out more.",
-        };
     }
 }

@@ -165,6 +165,13 @@ namespace CapyIsland.Game
 
         public static StoreItemDef Get(string name) => TryGet(name, out var d) ? d : default;
 
+        /// <summary>The house each worker is sold beside (a worker isn't in any shop's stock list).</summary>
+        public static readonly Dictionary<string, string> WorkerHome = new()
+        {
+            { "Capybara", "Capy House" }, { "Fox", "Fox House" }, { "Panda", "Panda House" },
+            { "Pirate", "Pirate House" }, { "Monster", "Monster House" },
+        };
+
         /// <summary>The heart (by func) a gated display waits for — the story step before it's for sale — or null.</summary>
         public static string UnlockedBy(string name) => name switch
         {
@@ -178,7 +185,8 @@ namespace CapyIsland.Game
         /// tiara. Unlike the original, the Steel and Gold Stores don't wait for Miso's gifts: the
         /// Captain's errands need them too, and one character's task shouldn't hold up another's.
         /// Miso's gifts themselves (dress, pearls, tiara) go on sale once she has asked for them,
-        /// since a gift bought before she asks wouldn't count.
+        /// since a gift bought before she asks wouldn't count. The bombs, the hobby gear and the
+        /// Burrow Door wait for their own moment too (ShopPacing).
         /// </summary>
         public static bool IsUnlocked(string name) => name switch
         {
@@ -187,7 +195,7 @@ namespace CapyIsland.Game
             "Wedding Dress" => Asked("The Girl's New Dress"),
             "String of Pearls" => Asked("The Girl's New Necklace"),
             "Tiara" => Asked("The Girl's Tiara"),
-            _ => true,
+            _ => ShopPacing.Ready(name) ?? true,
         };
 
         static bool Asked(string taskHeart) => QuestSystem.Instance == null || !QuestSystem.Instance.WaitsForTask(taskHeart);

@@ -1,0 +1,12 @@
+# More hobby lines: Chef Tofu's stall on Sunflower Farm (Game/Hobbies/ChefTofu.cs, HobbyLog,
+# HobbyCards, UI HobbiesScreen).
+
+@ Buy a stove from Chef Tofu on Sunflower Farm
+= קנה כיריים מהשף טופו בחוות החמניות
+~ קני כיריים מהשף טופו בחוות החמניות
+
+@ Opens with a hobby card once Sunflower Farm is open. Chef Tofu has his stall there.
+= נפתח עם כרטיס תחביב אחרי שחוות החמניות נפתחת. לשף טופו יש שם דוכן.
+
+@ Chef Tofu's stall is on Sunflower Farm, once its bridge is up.
+= הדוכן של השף טופו נמצא בחוות החמניות, אחרי שהגשר אליה מורם.

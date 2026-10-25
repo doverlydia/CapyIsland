@@ -1,0 +1,148 @@
+# Hobby cards: warm hearts open one hobby at a time
+# Source: Assets/Scripts/Game/StoryText.Hobbies.cs (StoryText.HobbyCardLines)
+
+# ---------------------------------------------------------------- the choice (UI/Hobbies/HobbyCardScreen.cs)
+
+@ Hobby card
+= כרטיס תחביב
+
+@ Your warm hearts have earned you a hobby card!
+= הלבבות החמים שלך זיכו אותך בכרטיס תחביב!
+
+@ You have {0} hobby cards to use!
+= יש לך {0} כרטיסי תחביב לשימוש!
+
+@ Choose a hobby to take up. The others will wait for your next card.
+= בחר תחביב להתחיל בו. האחרים יחכו לכרטיס הבא שלך.
+~ בחרי תחביב להתחיל בו. האחרים יחכו לכרטיס הבא שלך.
+
+@ Choose a hobby
+= בחר תחביב
+~ בחרי תחביב
+
+@ Choose {0}
+= בחר ב{0}
+~ בחרי ב{0}
+
+@ Later
+= אחר כך
+
+@ Your next hobby card comes at {0} warm hearts.
+= כרטיס התחביב הבא שלך יגיע ב־{0} לבבות חמים.
+
+@ Every hobby is open to you now. Enjoy them all!
+= כל התחביבים פתוחים בפניך עכשיו. תהנה מכולם!
+~ כל התחביבים פתוחים בפניך עכשיו. תהני מכולם!
+
+# ---------------------------------------------------------------- the Hobbies hub (UI/Hobbies/HobbyScreens.cs)
+
+@ You have a hobby card!
+= יש לך כרטיס תחביב!
+
+@ You have {0} hobby cards!
+= יש לך {0} כרטיסי תחביב!
+
+@ Use my hobby card
+= השתמש בכרטיס התחביב שלי
+
+@ Choose it with your hobby card
+= בחר בו עם כרטיס התחביב שלך
+~ בחרי בו עם כרטיס התחביב שלך
+
+@ Opens with a hobby card: {0} more warm hearts
+= נפתח עם כרטיס תחביב: עוד {0} לבבות חמים
+
+@ Opens with a hobby card: 1 more warm heart
+= נפתח עם כרטיס תחביב: עוד לב חם אחד
+
+@ Opens with a hobby card
+= נפתח עם כרטיס תחביב
+
+# ---------------------------------------------------------------- before a hobby is open
+
+@ Hello, hello! Chef Tofu, at your service. My kitchen isn't ready for a new cook just yet. Choose cooking with a hobby card, and I'll have a stove waiting for you!
+= שלום, שלום! השף טופו, לשירותך. המטבח שלי עוד לא מוכן לטבח חדש. בחר בבישול עם כרטיס תחביב, ויחכו לך כיריים!
+~ שלום, שלום! השף טופו, לשירותך. המטבח שלי עוד לא מוכן לטבחית חדשה. בחרי בבישול עם כרטיס תחביב, ויחכו לך כיריים!
+
+@ Choose cooking with a hobby card first
+= קודם בחר בבישול עם כרטיס תחביב
+~ קודם בחרי בבישול עם כרטיס תחביב
+
+@ Folk used to come up here to hang an ema: a little wooden plaque with a wish on it. When you'd like to take up writing, choose it with a hobby card, and I'll show you how.
+= פעם היו עולים לכאן לתלות אמה: לוחית עץ קטנה ועליה משאלה. כשתרצה להתחיל לכתוב, בחר בכתיבה עם כרטיס תחביב, ואני אראה לך איך.
+~ פעם היו עולים לכאן לתלות אמה: לוחית עץ קטנה ועליה משאלה. כשתרצי להתחיל לכתוב, בחרי בכתיבה עם כרטיס תחביב, ואני אראה לך איך.
+
+@ Choose writing with a hobby card first, then Old Mochi will show you how to hang an ema.
+= קודם בחר בכתיבה עם כרטיס תחביב, ואז סבא מוצ'י יראה לך איך תולים אמה.
+~ קודם בחרי בכתיבה עם כרטיס תחביב, ואז סבא מוצ'י יראה לך איך תולים אמה.
+
+# ---------------------------------------------------------------- a hobby opens: its character, on where to start
+
+@ Cats! Horaira would be so pleased. Strays will start wandering onto your island soon. Say hello, pet them, and share a fish if you have one. Trust takes a little time.
+= חתולים! הוריירה היה כל כך שמח. בקרוב חתולי רחוב יתחילו לשוטט אל האי שלך. תגיד שלום, תלטף אותם, ותחלוק איתם דג אם יש לך. אמון לוקח קצת זמן.
+~ חתולים! הוריירה היה כל כך שמח. בקרוב חתולי רחוב יתחילו לשוטט אל האי שלך. תגידי שלום, תלטפי אותם, ותחלקי איתם דג אם יש לך. אמון לוקח קצת זמן.
+
+@ Ah, you'd like to write? Come up to my shrine on your first island and hang an ema on the rack. A wish, a thank-you, anything at all. One gold coin for the gods.
+= אה, אתה רוצה לכתוב? עלה אל המקדש שלי באי הראשון שלך ותלה אמה על המתלה. משאלה, תודה, כל דבר שתרצה. מטבע זהב אחד לאלים.
+~ אה, את רוצה לכתוב? עלי אל המקדש שלי באי הראשון שלך ותלי אמה על המתלה. משאלה, תודה, כל דבר שתרצי. מטבע זהב אחד לאלים.
+
+@ A new cook! Come and see me at my stall on Sunflower Farm. I have a stove with your name on it, and recipes whenever you're ready.
+= טבח חדש! בוא אליי לדוכן שלי בחוות החמניות. יש לי כיריים שמחכות במיוחד לך, ומתכונים מתי שתהיה מוכן.
+~ טבחית חדשה! בואי אליי לדוכן שלי בחוות החמניות. יש לי כיריים שמחכות במיוחד לך, ומתכונים מתי שתהיי מוכנה.
+
+@ Ahoy! My rod's laid out on the sand on the beach. Buy it, stand where the fish shadows swim, and cast.
+= אהוי! החכה שלי מונחת על החול בחוף. קנה אותה, עמוד איפה שצללי הדגים שוחים, וזרוק את החכה.
+~ אהוי! החכה שלי מונחת על החול בחוף. קני אותה, עמדי איפה שצללי הדגים שוחים, וזרקי את החכה.
+
+@ Bug catching! There's a Bug Net waiting for you at the Bronze Store. Then creep up on the bugs in the flowers and grass. Gently now!
+= ציד חרקים! רשת חרקים מחכה לך בחנות הארד. אחר כך התגנב אל החרקים שבפרחים ובדשא. בעדינות!
+~ ציד חרקים! רשת חרקים מחכה לך בחנות הארד. אחר כך התגנבי אל החרקים שבפרחים ובדשא. בעדינות!
+
+@ Bug catching! Once you've built the Bronze Store, you'll find a Bug Net there. Then creep up on the bugs in the flowers and grass. Gently now!
+= ציד חרקים! כשתבנה את חנות הארד, תמצא שם רשת חרקים. אחר כך התגנב אל החרקים שבפרחים ובדשא. בעדינות!
+~ ציד חרקים! כשתבני את חנות הארד, תמצאי שם רשת חרקים. אחר כך התגנבי אל החרקים שבפרחים ובדשא. בעדינות!
+
+@ Birdwatching! The Silver Store has a pair of Binoculars for you. Birds land in the trees and on the shore. Watch them from a few steps away.
+= צפרות! בחנות הכסף מחכה לך משקפת. ציפורים נוחתות על העצים ועל החוף. הבט בהן מכמה צעדים משם.
+~ צפרות! בחנות הכסף מחכה לך משקפת. ציפורים נוחתות על העצים ועל החוף. הביטי בהן מכמה צעדים משם.
+
+@ Birdwatching! Once you've built the Silver Store, it will have a pair of Binoculars for you. Birds land in the trees and on the shore. Watch them from a few steps away.
+= צפרות! כשתבנה את חנות הכסף, תחכה לך בה משקפת. ציפורים נוחתות על העצים ועל החוף. הבט בהן מכמה צעדים משם.
+~ צפרות! כשתבני את חנות הכסף, תחכה לך בה משקפת. ציפורים נוחתות על העצים ועל החוף. הביטי בהן מכמה צעדים משם.
+
+@ Sewing? Oh, I love sewing! There's a Sewing Machine for you at the Steel Store. A hat needs cotton, so a little garden helps too.
+= תפירה? אוי, אני אוהבת לתפור! בחנות הפלדה מחכה לך מכונת תפירה. כובע צריך כותנה, אז גם גינה קטנה תעזור.
+
+@ Sewing? Oh, I love sewing! When you've built the Steel Store, you'll find a Sewing Machine there. A hat needs cotton, so a little garden helps too.
+= תפירה? אוי, אני אוהבת לתפור! כשתבנה את חנות הפלדה, תמצא שם מכונת תפירה. כובע צריך כותנה, אז גם גינה קטנה תעזור.
+~ תפירה? אוי, אני אוהבת לתפור! כשתבני את חנות הפלדה, תמצאי שם מכונת תפירה. כובע צריך כותנה, אז גם גינה קטנה תעזור.
+
+@ Gardening! Go to the south end of Pebble Cove. The spirit there can raise the bridge to Sunflower Farm, where the fields are waiting for you.
+= גינון! לך לקצה הדרומי של מפרץ החלוקים. הרוח שם יכולה להרים את הגשר לחוות החמניות, שם השדות מחכים לך.
+~ גינון! לכי לקצה הדרומי של מפרץ החלוקים. הרוח שם יכולה להרים את הגשר לחוות החמניות, שם השדות מחכים לך.
+
+@ Gardening! First raise the bridge to Pebble Cove. At its south end, a spirit can raise another bridge, to Sunflower Farm, where the fields are waiting for you.
+= גינון! קודם הרם את הגשר למפרץ החלוקים. בקצה הדרומי שלו, רוח יכולה להרים גשר נוסף, לחוות החמניות, שם השדות מחכים לך.
+~ גינון! קודם הרימי את הגשר למפרץ החלוקים. בקצה הדרומי שלו, רוח יכולה להרים גשר נוסף, לחוות החמניות, שם השדות מחכים לך.
+
+# ---------------------------------------------------------------- the first card's gift (Game/Hobbies/HobbyCards.cs)
+
+@ Choose your first hobby. Its gear is a gift: no need to buy it!
+= בחר את התחביב הראשון שלך. הציוד שלו במתנה: לא צריך לקנות אותו!
+~ בחרי את התחביב הראשון שלך. הציוד שלו במתנה: לא צריך לקנות אותו!
+
+@ Choose it with your hobby card: its gear is free!
+= בחר בו עם כרטיס התחביב שלך: הציוד שלו בחינם!
+~ בחרי בו עם כרטיס התחביב שלך: הציוד שלו בחינם!
+
+@ A fishing rod for you, on the house! It's in that bubble right beside you. Pop it, and let's see what's biting.
+= חכה בשבילך, על חשבון הבית! היא בבועה שממש לידך. פוצץ אותה, ונראה מה נושך.
+~ חכה בשבילך, על חשבון הבית! היא בבועה שממש לידך. פוצצי אותה, ונראה מה נושך.
+
+@ Bug catching! I've tucked a bug net into a bubble for you, right beside you. Pop it to take it.
+= ציד חרקים! החבאתי בשבילך רשת חרקים בבועה, ממש לידך. פוצץ אותה כדי לקחת אותה.
+~ ציד חרקים! החבאתי בשבילך רשת חרקים בבועה, ממש לידך. פוצצי אותה כדי לקחת אותה.
+
+@ Birdwatching! Here, my old binoculars, in a bubble right beside you. Pop it to take them.
+= צפרות! הנה, המשקפת הישנה שלי, בבועה ממש לידך. פוצץ אותה כדי לקחת אותה.
+~ צפרות! הנה, המשקפת הישנה שלי, בבועה ממש לידך. פוצצי אותה כדי לקחת אותה.

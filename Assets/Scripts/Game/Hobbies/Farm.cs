@@ -7,8 +7,8 @@ namespace CapyIsland.Game
     /// Sunflower Farm: the island south of Pebble Cove where gardening lives. A spirit at the end of
     /// Pebble Cove raises the bridge (6000 wood, 6000 gold); crossing it takes up gardening, and the
     /// farm is already laid out: twelve plots in a field — as many open as your gardening level
-    /// allows, the rest roped off until you grow into them. (The stove for cooking is Chef Tofu's
-    /// to sell, by the hot spring.)
+    /// allows, the rest roped off until you grow into them. Chef Tofu has his kitchen stall here
+    /// too, once the bridge is up (ChefTofu): cooking comes after a hobby or two, with what you grow.
     ///
     /// The farm is built fresh every time the island loads (like the stone lanterns): its plots
     /// are fixtures, never saved as items, never carried off, spared by bombs. What grows in each
@@ -22,7 +22,7 @@ namespace CapyIsland.Game
         public const string BridgePiece = "farm_bridge";
         public const string GhostName = "Farm Isle";
         public const int PlotCount = 12;
-        const int IslandIndex = 7;   // appended after the original seven (IslandPainter.LaterIslands)
+        public const int IslandIndex = 7;   // appended after the original seven (IslandPainter.LaterIslands)
 
         public static Farm Instance { get; private set; }
 
@@ -36,6 +36,9 @@ namespace CapyIsland.Game
                 return b != null && b.open;
             }
         }
+
+        /// <summary>The farm stands, plots and barn and all (the bridge is up and it has been laid out).</summary>
+        public static bool LaidOut => Instance != null && Instance._root != null;
 
         /// <summary>The middle of the field, for "show me the farm".</summary>
         public static Vector2? Centre => Instance != null && Instance._centre.HasValue ? Instance._centre : null;
@@ -69,6 +72,7 @@ namespace CapyIsland.Game
         {
             if (Instance == this) Instance = null;
             LandMap.BridgeOpened -= OnBridgeOpened;
+            HobbyLog.Opened -= OnHobbyOpened;
         }
 
         void Start()
@@ -95,11 +99,18 @@ namespace CapyIsland.Game
             if (IsOpen) LayOut();
             else EnsureGhost();
             LandMap.BridgeOpened += OnBridgeOpened;
+            HobbyLog.Opened += OnHobbyOpened;
         }
 
         void OnBridgeOpened(string name)
         {
             if (name == "second_bridge") EnsureGhost();   // Pebble Cove is open: the farm's spirit waits at its end
+        }
+
+        /// <summary>Gardening chosen with a hobby card (or cooking, whose chef is on the farm): the farm's spirit comes to wait.</summary>
+        void OnHobbyOpened(Hobby h)
+        {
+            if (h is Hobby.Gardening or Hobby.Cooking) EnsureGhost();
         }
 
         /// <summary>The spirit has been paid (BridgeGhost.Cross): take up gardening, and the farm is there.</summary>
@@ -123,6 +134,9 @@ namespace CapyIsland.Game
         {
             var land = LandMap.Instance;
             if (land == null || IsOpen) return;
+            // Gardening waits for a hobby card. So does the spirit, unless cooking is open: Chef
+            // Tofu's stall is on the farm, so a cook from before he moved here needs the way across.
+            if (!ShopPacing.FarmSpiritReady && !HobbyLog.IsOpened(Hobby.Cooking)) return;
             var toCove = land.Bridge("second_bridge");
             if (toCove == null || !toCove.open) return;
             foreach (var g in FindObjectsByType<BridgeGhost>(FindObjectsSortMode.None))

@@ -207,9 +207,9 @@ namespace CapyIsland.Game
             var cam = Camera.main;
             if (cam == null) return;
             Vector2 c = cam.transform.position;
-            Birding.Bird nearest = null;
+            WildBird nearest = null;
             float best = HearBirdsWithin;
-            foreach (var bird in FindObjectsByType<Birding.Bird>(FindObjectsSortMode.None))
+            foreach (var bird in WildBird.All)
             {
                 float d = Vector2.Distance(bird.transform.position, c);
                 if (d < best) { best = d; nearest = bird; }
@@ -223,9 +223,10 @@ namespace CapyIsland.Game
             _chirp.pitch = Random.Range(0.9f, 1.12f);
             _chirp.panStereo = Mathf.Clamp((nearest.transform.position.x - c.x) / halfWidth, -0.9f, 0.9f);
             _chirp.PlayOneShot(clip, ChirpVolume * Random.Range(0.75f, 1f) * near * near * AudioMix.Ambience);
-            _nextChirp = Time.time + Random.Range(2.5f, 6f);
-            // Sometimes it sings again straight away.
-            if (Random.value < 0.3f) _nextChirp = Time.time + Random.Range(0.5f, 1.2f);
+            // A song now and then, not a running chatter (that was wearing).
+            _nextChirp = Time.time + Random.Range(10f, 25f);
+            // Once in a while it answers itself.
+            if (Random.value < 0.12f) _nextChirp = Time.time + Random.Range(0.6f, 1.2f);
         }
 
         /// <summary>1 standing at the water's edge, falling to 0 about nine units inland.</summary>

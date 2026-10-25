@@ -1,0 +1,11 @@
+# The Collection's cards when tapped (UI/Screens/CollectionScreen.cs).
+# Format: see UI/Lang/Loc.cs.
+
+@ Not found yet.
+= עוד לא נמצא.
+
+@ Put it on in the Wardrobe.
+= אפשר ללבוש את זה בארון הבגדים.
+
+@ {0} in your burrow · {1} in storage
+= {0} במחילה שלך · {1} במחסן

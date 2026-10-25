@@ -40,24 +40,29 @@
 
 @ I am a ghost now, and ghosts do not feel the cold. But I remember warm. If you find this bottle, please keep going. Every warm heart you gather brings the steam a little closer.
 = עכשיו אני רוח רפאים, ורוחות רפאים לא מרגישות בקור. אבל אני זוכרת מה זה חום. אם מצאת את הבקבוק הזה, בבקשה אל תפסיק. כל לב חם שאתה אוסף מקרב את האדים עוד קצת.
+~ עכשיו אני רוח רפאים, ורוחות רפאים לא מרגישות בקור. אבל אני זוכרת מה זה חום. אם מצאת את הבקבוק הזה, בבקשה אל תפסיקי. כל לב חם שאת אוספת מקרב את האדים עוד קצת.
 
 @ Rules of the Sea, by a Captain
 = חוקי הים, מאת קפטנית
 
 @ Rule one: never trust a seagull.
 = חוק ראשון: לעולם אל תסמוך על שחף.
+~ חוק ראשון: לעולם אל תסמכי על שחף.
 
 @ Rule two: never trust a seagull who says it is your friend.
 = חוק שני: לעולם אל תסמוך על שחף שאומר שהוא חבר שלך.
+~ חוק שני: לעולם אל תסמכי על שחף שאומר שהוא חבר שלך.
 
 @ Rule three: a pirate always shares the last biscuit. (This rule is new. Someone kind taught it to me.)
 = חוק שלישי: פיראט תמיד מתחלק בביסקוויט האחרון. (החוק הזה חדש. מישהו טוב לב לימד אותי אותו.)
 
 @ Rule four: if your ship freezes into the harbour, do not cry. Dance. Then make friends with whoever is watching you dance.
 = חוק רביעי: אם הספינה שלך קופאת בנמל, אל תבכה. תרקוד. ואז תתיידד עם מי שמסתכל עליך רוקד.
+~ חוק רביעי: אם הספינה שלך קופאת בנמל, אל תבכי. תרקדי. ואז תתיידדי עם מי שמסתכל עליך רוקדת.
 
 @ Rule five: see rule one.
 = חוק חמישי: ראה חוק ראשון.
+~ חוק חמישי: ראי חוק ראשון.
 
 @ The Pickle Barrel
 = חבית החמוצים
@@ -344,12 +349,15 @@
 
 @ Buy Gems
 = קנה יהלומים
+~ קני יהלומים
 
 @ Buy Wood
 = קנה עץ
+~ קני עץ
 
 @ Buy Gold
 = קנה זהב
+~ קני זהב
 
 @ Fancy Store
 = חנות הקישוטים
@@ -463,27 +471,35 @@
 
 @ A little bed of rich soil. Plant seeds in it, and come back when they've grown.
 = ערוגה קטנה של אדמה פורייה. שתול בה זרעים, וחזור כשהם יגדלו.
+~ ערוגה קטנה של אדמה פורייה. שתלי בה זרעים, וחזרי כשהם יגדלו.
 
 @ A cosy outdoor stove. Put ingredients in the pot and mind the heat!
 = כירה נעימה בחוץ. שים מצרכים בסיר ושים לב לחום!
+~ כירה נעימה בחוץ. שימי מצרכים בסיר ושימי לב לחום!
 
 @ Take up fishing: walk to the water's edge and cast.
 = התחל לדוג: לך לשפת המים והטל את החכה.
+~ התחילי לדוג: לכי לשפת המים והטילי את החכה.
 
 @ Take up bug catching: creep up on bugs and catch them.
 = התחל לצוד חרקים: התגנב אל החרקים ותפוס אותם.
+~ התחילי לצוד חרקים: התגנבי אל החרקים ותפסי אותם.
 
 @ Take up birdwatching: spot the birds that visit your island.
 = התחל בצפרות: גלה את הציפורים שמבקרות באי שלך.
+~ התחילי בצפרות: גלי את הציפורים שמבקרות באי שלך.
 
 @ Take up sewing: stitch and paint your own hats.
 = התחל לתפור: תפור וצבע כובעים משלך.
+~ התחילי לתפור: תפרי וצבעי כובעים משלך.
 
 @ A hutch for guinea pigs. Are you sure about this?
 = כלוב לשרקנים. אתה בטוח בזה?
+~ כלוב לשרקנים. את בטוחה בזה?
 
 @ Calm, kind and always ready to help. Put one to work at a sawmill or a mine.
 = רגועה, טובת לב ותמיד מוכנה לעזור. שלח אותה לעבוד במנסרה או במכרה.
+~ רגועה, טובת לב ותמיד מוכנה לעזור. שלחי אותה לעבוד במנסרה או במכרה.
 
 @ A capybara with sea legs. Strong, if a little loud.
 = קפיברה עם רגלי ים. חזקה, אם כי קצת רעשנית.
@@ -499,6 +515,7 @@
 
 @ A guinea pig. Eats every flower it can find. You probably don't want one.
 = שרקן. אוכל כל פרח שהוא מוצא. כנראה שאתה לא רוצה אחד כזה.
+~ שרקן. אוכל כל פרח שהוא מוצא. כנראה שאת לא רוצה אחד כזה.
 
 @ Workers chop the trees in its circle and carry the wood here.
 = הפועלים כורתים את העצים שבמעגל שלה ומביאים את העץ לכאן.
@@ -535,27 +552,34 @@
 
 @ Trade your gems for wood or gold.
 = החלף את היהלומים שלך בעץ או בזהב.
+~ החליפי את היהלומים שלך בעץ או בזהב.
 
 @ Trade for gems.
 = החלף תמורת יהלומים.
+~ החליפי תמורת יהלומים.
 
 @ Trade gems for wood.
 = החלף יהלומים בעץ.
+~ החליפי יהלומים בעץ.
 
 @ Trade gems for gold.
 = החלף יהלומים בזהב.
+~ החליפי יהלומים בזהב.
 
 @ A chapel under blossom that never falls. Weddings held here.
 = קפלה תחת פריחה שלעולם לא נושרת. כאן עורכים חתונות.
 
 @ It stands over the old hot spring. Every warm heart you find flies here.
 = הוא עומד מעל המעיין החם הישן. כל לב חם שתמצא עף לכאן.
+~ הוא עומד מעל המעיין החם הישן. כל לב חם שתמצאי עף לכאן.
 
 @ Shake it for apples, and the odd surprise.
 = נער אותו ויפלו תפוחים, ולפעמים גם הפתעה.
+~ נערי אותו ויפלו תפוחים, ולפעמים גם הפתעה.
 
 @ Shake it for pears and hidden treats.
 = נער אותו ויפלו אגסים ומטעמים חבויים.
+~ נערי אותו ויפלו אגסים ומטעמים חבויים.
 
 @ Rare, sweet plums, and treasures tucked among the branches.
 = שזיפים מתוקים ונדירים, ואוצרות חבויים בין הענפים.
@@ -589,12 +613,14 @@
 
 @ The front door of your home under the ground. Tap it to slide down and decorate!
 = דלת הכניסה לבית שלך מתחת לאדמה. הקש עליה כדי להחליק למטה ולקשט!
+~ דלת הכניסה לבית שלך מתחת לאדמה. הקישי עליה כדי להחליק למטה ולקשט!
 
 @ A friendly spirit with an errand for you.
 = רוח ידידותית עם שליחות בשבילך.
 
 @ An old sailor full of tall tales. Drag spare items onto him to sell them.
 = מלח זקן מלא סיפורי בדים. גרור אליו פריטים מיותרים כדי למכור אותם.
+~ מלח זקן מלא סיפורי בדים. גררי אליו פריטים מיותרים כדי למכור אותם.
 
 @ A pirate captain whose ship froze in the harbour. Loud, sparkly and kind-hearted.
 = קפטנית פיראטים שהספינה שלה קפאה בנמל. רועשת, נוצצת וטובת לב.
@@ -613,18 +639,23 @@
 
 @ Pay the spirit to raise the bridge to Mossy Meadow.
 = שלם לרוח כדי שתרים את הגשר אל אחו האזוב.
+~ שלמי לרוח כדי שתרים את הגשר אל אחו האזוב.
 
 @ Pay the spirit to raise the bridge to Pebble Cove.
 = שלם לרוח כדי שתרים את הגשר אל מפרץ החלוקים.
+~ שלמי לרוח כדי שתרים את הגשר אל מפרץ החלוקים.
 
 @ Pay the spirit to raise the bridge to Blossom Isle.
 = שלם לרוח כדי שתרים את הגשר אל אי הפריחה.
+~ שלמי לרוח כדי שתרים את הגשר אל אי הפריחה.
 
 @ Pay the spirit to raise the bridge to Barnacle Bay.
 = שלם לרוח כדי שתרים את הגשר אל מפרץ הצדפות.
+~ שלמי לרוח כדי שתרים את הגשר אל מפרץ הצדפות.
 
 @ Pay the spirit to raise the bridge to the Gloomfen.
 = שלם לרוח כדי שתרים את הגשר אל ביצת הקדרות.
+~ שלמי לרוח כדי שתרים את הגשר אל ביצת הקדרות.
 
 @ Goes fizz, then BOOM. Clears pests, and turns everything nearby back into bubbles.
 = עושה פשששש, ואז בום! מגרשת מזיקים והופכת את כל מה שסביבה בחזרה לבועות.
@@ -639,6 +670,7 @@
 
 @ Your first warm heart! Each one you find brings a little more warmth back to the islands.
 = הלב החם הראשון שלך! כל לב שתמצא מחזיר עוד קצת חום לאיים.
+~ הלב החם הראשון שלך! כל לב שתמצאי מחזיר עוד קצת חום לאיים.
 
 @ A Little Burrower
 = חופרת קטנה
@@ -663,6 +695,7 @@
 
 @ Sturdy tools for a sturdy builder.
 = כלים חסונים לבנאי חסון.
+~ כלים חסונים לבנאית חסונה.
 
 @ The Gold Store
 = חנות הזהב
@@ -717,6 +750,7 @@
 
 @ Miso said it first. Then you said it too.
 = מיסו אמרה את זה ראשונה. ואז גם אתה אמרת.
+~ מיסו אמרה את זה ראשונה. ואז גם את אמרת.
 
 @ Happily Ever After
 = ויחיו באושר ועושר
@@ -741,6 +775,7 @@
 
 @ A woolly capybara is chopping wood for Captain Wasabi. Look at that waddle.
 = קפיברה צמרירית חוטבת עצים בשביל קפטן וואסאבי. תראה איך היא מתנדנדת.
+~ קפיברה צמרירית חוטבת עצים בשביל קפטן וואסאבי. תראי איך היא מתנדנדת.
 
 @ Plum Orchard
 = מטע שזיפים
@@ -774,12 +809,15 @@
 
 @ Dressed Up
 = מגונדר
+~ מגונדרת
 
 @ You put together your very first outfit. Looking sharp!
 = הרכבת את התלבושת הראשונה שלך. אתה נראה מצוין!
+~ הרכבת את התלבושת הראשונה שלך. את נראית מצוין!
 
 @ Good Neighbour
 = שכן טוב
+~ שכנה טובה
 
 @ You visited three friends' islands. Island life is better together.
 = ביקרת באיים של שלושה חברים. חיי האי טובים יותר ביחד.
@@ -804,18 +842,22 @@
 
 @ Bird Spotter
 = צפר
+~ צפרית
 
 @ You spotted your first bird. Keep your eyes on the treetops.
 = זיהית את הציפור הראשונה שלך. תמשיך להביט בצמרות העצים.
+~ זיהית את הציפור הראשונה שלך. תמשיכי להביט בצמרות העצים.
 
 @ Published Author
 = סופר עם ספר
+~ סופרת עם ספר
 
 @ Your first book is on the shelf. Friends who visit can read it.
 = הספר הראשון שלך על המדף. חברים שבאים לבקר יכולים לקרוא אותו.
 
 @ Fashion Designer
 = מעצב אופנה
+~ מעצבת אופנה
 
 @ You sewed your first hat. Very stylish.
 = תפרת את הכובע הראשון שלך. ממש אופנתי.
@@ -834,15 +876,18 @@
 
 @ Bug Catcher
 = צייד חרקים
+~ ציידת חרקים
 
 @ Your first bug, safely netted and noted in your journal.
 = החרק הראשון שלך, נתפס ברשת בשלום ונרשם ביומן.
 
 @ Cat Person
 = איש של חתולים
+~ חובבת חתולים
 
 @ A cat has chosen you. Or you chose it. It's hard to tell with cats.
 = חתול בחר בך. או שאתה בחרת בו. עם חתולים קשה לדעת.
+~ חתול בחר בך. או שאת בחרת בו. עם חתולים קשה לדעת.
 
 @ It's the Thought That Counts
 = העיקר הכוונה
@@ -859,9 +904,11 @@
 # achievement ids with no StoryText entry: AchievementTitle falls back to the raw name
 @ Welcome Back
 = ברוך שובך
+~ ברוכה השבה
 
 @ Visit Forums
 = בקר בפורומים
+~ בקרי בפורומים
 
 # ---------------------------------------------------------------- discovery cards 1-35
 
@@ -879,6 +926,7 @@
 
 @ A rocky hill full of bronze. Put a mine beside it.
 = גבעה סלעית מלאה ארד. הצב לידה מכרה.
+~ גבעה סלעית מלאה ארד. הציבי לידה מכרה.
 
 @ Black Hill
 = גבעה שחורה
@@ -1013,27 +1061,31 @@
 
 @ There on the beach, {0} found a bubble with a sleepy old ghost inside...
 = שם על החוף, {0} מצא בועה ובתוכה רוח רפאים זקנה ומנומנמת...
+~ שם על החוף, {0} מצאה בועה ובתוכה רוח רפאים זקנה ומנומנמת...
 
 @ Pop! Oh my... green grass and warm sun! The Big Chill is over!
 = פופ! אוי ואבוי... דשא ירוק ושמש חמה! הקור הגדול נגמר!
 
 @ And you woke me, little {0}. Will you help me bring the islands back to life?
 = ואתה הערת אותי, {0} הקטן. תעזור לי להחזיר את האיים לחיים?
+~ ואת הערת אותי, {0} הקטנה. תעזרי לי להחזיר את האיים לחיים?
 
 @ Far out at sea, little {0} drifted on and on...
 = רחוק בלב הים, {0} הקטן נסחף ונסחף...
+~ רחוק בלב הים, {0} הקטנה נסחפה ונסחפה...
 
 @ ...until one morning, the tide brought {0} home.
 = ...עד שבוקר אחד, הגאות החזירה את {0} הביתה.
 
 @ Mmm... oh! A little capybara. I must have dozed off, it's been so cold for so long. Before I tell you how all this began: which language do you speak? And what shall I call you?
-= ממממ... אוי! קפיברה קטנה. כנראה נרדמתי, כל כך קר כבר כל כך הרבה זמן. לפני שאספר לך איך הכול התחיל: באיזו שפה אתה מדבר? ואיך לקרוא לך?
+= ממממ... אוי! קפיברה קטנה. כנראה נרדמתי, כל כך קר כבר כל כך הרבה זמן. לפני שאספר איך הכול התחיל: באיזו שפה נדבר? ואיך לקרוא לך?
 
 @ Continue
 = המשך
+~ המשיכי
 
 @ Tap the bubble!
-= הקש על הבועה!
+= להקיש על הבועה!
 
 @ As a worker
 = כעובד
@@ -1073,6 +1125,7 @@
 
 @ That's... me, from before. Don't be sad, little one. I'm right here.
 = זאת... אני, מפעם. אל תהיה עצוב, קטנטן. אני ממש כאן.
+~ זאת... אני, מפעם. אל תהיי עצובה, קטנטנה. אני ממש כאן.
 
 @ I lay down here on the coldest night. The snow melted long ago... but the ice never did.
 = נשכבתי כאן בלילה הכי קר. השלג נמס מזמן... אבל הקרח אף פעם לא.
@@ -1085,9 +1138,11 @@
 
 @ Every time a warm heart comes home, I feel it. Here. Could it be...? No. Let's not hope too hard.
 = בכל פעם שלב חם חוזר הביתה, אני מרגישה אותו. כאן. האם ייתכן...? לא. בוא לא נקווה יותר מדי.
+~ בכל פעם שלב חם חוזר הביתה, אני מרגישה אותו. כאן. האם ייתכן...? לא. בואי לא נקווה יותר מדי.
 
 @ I'm warm! I still can't get over it. Thank you, little one.
 = חם לי! אני עדיין לא מאמינה. תודה לך, קטנטן.
+~ חם לי! אני עדיין לא מאמינה. תודה לך, קטנטנה.
 
 @ My old knees are complaining again. I'd forgotten how much I missed them.
 = הברכיים הזקנות שלי שוב מתלוננות. שכחתי כמה התגעגעתי אליהן.
@@ -1106,27 +1161,32 @@
 
 @ Little one... every time a warm heart comes home, I feel it. Here.
 = קטנטן... בכל פעם שלב חם חוזר הביתה, אני מרגישה אותו. כאן.
+~ קטנטנה... בכל פעם שלב חם חוזר הביתה, אני מרגישה אותו. כאן.
 
 @ Could it be...? No. Let's not hope too hard. Keep going.
 = האם ייתכן...? לא. בוא לא נקווה יותר מדי. תמשיך.
+~ האם ייתכן...? לא. בואי לא נקווה יותר מדי. תמשיכי.
 
 @ I'm... warm.
 = חם... לי.
 
 @ I'm warm! I'm alive! Little {0}... you did this. Every warm heart you brought home.
 = חם לי! אני חיה! {0} הקטן... אתה עשית את זה. כל לב חם שהבאת הביתה.
+~ חם לי! אני חיה! {0} הקטנה... את עשית את זה. כל לב חם שהבאת הביתה.
 
 @ And now... I believe my granddaughter has a wedding to plan. I wouldn't miss it for anything!
 = ועכשיו... נדמה לי שלנכדה שלי יש חתונה לתכנן. לא הייתי מפספסת את זה בשום אופן!
 
 @ Bring every warm heart home
 = החזר כל לב חם הביתה
+~ החזירי כל לב חם הביתה
 
 @ When the cold came, I saved what I could in my bubbles, and I thought that was all I had left.
 = כשהקור הגיע, הצלתי מה שיכולתי בבועות שלי, וחשבתי שזה כל מה שנשאר לי.
 
 @ Then you washed up on my shore. Thank you for bringing everyone home, little {0}.
 = ואז נסחפת אל החוף שלי. תודה שהחזרת את כולם הביתה, {0} הקטן.
+~ ואז נסחפת אל החוף שלי. תודה שהחזרת את כולם הביתה, {0} הקטנה.
 
 @ Home Again
 = שוב בבית
@@ -1136,6 +1196,7 @@
 
 @ Look at it, little one. Steam in the spring, lanterns on the path... and everyone home.
 = תראה, קטנטן. אדים במעיין, פנסים על השביל... וכולם בבית.
+~ תראי, קטנטנה. אדים במעיין, פנסים על השביל... וכולם בבית.
 
 @ I've decided I'm going to live to be very, very old. Again.
 = החלטתי שאני הולכת לחיות עד גיל מאוד, מאוד מבוגר. שוב.
@@ -1148,12 +1209,14 @@
 
 @ Grandma says you can have a free soak in the spring any time. Forever. She made it official.
 = סבתא אומרת שמותר לך לטבול במעיין בחינם מתי שתרצה. לתמיד. היא עשתה את זה רשמי.
+~ סבתא אומרת שמותר לך לטבול במעיין בחינם מתי שתרצי. לתמיד. היא עשתה את זה רשמי.
 
 @ The spring is steaming, the lanterns are lit, and everyone's home. I keep pinching myself.
 = המעיין מעלה אדים, הפנסים דולקים, וכולם בבית. אני כל הזמן צובטת את עצמי.
 
 @ Remember the list of everything we built together? I ran out of paper.
 = זוכר את הרשימה של כל מה שבנינו יחד? נגמר לי הנייר.
+~ זוכרת את הרשימה של כל מה שבנינו יחד? נגמר לי הנייר.
 
 @ Yuzu's Lantern
 = הפנס של יוזו

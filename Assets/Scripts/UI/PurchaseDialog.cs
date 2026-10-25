@@ -9,6 +9,8 @@ namespace CapyIsland.UI
     /// The buy panel: item name, blurb, the three prices, and Cancel / Purchase — the same shape
     /// the original uses when you tap the sample beside a shop.
     ///
+    /// A tap around the panel cancels, like Cancel (TapOutside).
+    ///
     /// Listens for <see cref="ShopBuilding.Browsed"/> rather than being opened by the shop, so a
     /// shop needs no reference to any UI and new shops work without wiring.
     /// </summary>
@@ -29,6 +31,7 @@ namespace CapyIsland.UI
         [SerializeField] Color tooExpensive = new Color(1f, 0.45f, 0.4f);
 
         IPurchasable _item;
+        GameObject _outside;
 
         static PurchaseDialog _instance;
 
@@ -37,6 +40,15 @@ namespace CapyIsland.UI
         void Awake()
         {
             _instance = this;
+            if (panel != null)
+            {
+                // An invisible backdrop behind the panel, there while it is open, to hear taps around it.
+                var img = UiKit.Image(panel.transform.parent, "Outside", null, Color.clear, true);
+                UiKit.Stretch(img.rectTransform, -400f, -400f, -400f, -400f);
+                img.transform.SetSiblingIndex(panel.transform.GetSiblingIndex());
+                TapOutside.Add(img, (RectTransform)panel.transform, Close);
+                _outside = img.gameObject;
+            }
             Close();
         }
 
@@ -85,6 +97,7 @@ namespace CapyIsland.UI
                 purchaseButton.interactable = affordable && locked == null;
             }
             if (panel != null) panel.SetActive(true);
+            if (_outside != null) _outside.SetActive(true);
         }
 
         /// <summary>
@@ -181,6 +194,7 @@ namespace CapyIsland.UI
         {
             _item = null;
             if (panel != null) panel.SetActive(false);
+            if (_outside != null) _outside.SetActive(false);
         }
     }
 }

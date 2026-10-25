@@ -655,12 +655,12 @@ namespace CapyIsland.Game
                     var world = JsonUtility.FromJson<SaveData>(item.Value.GetAs<string>());
                     if (world != null) return world;
                 }
-                Hints.Show(UI.Loc.F("{0}'s island isn't ready for visitors yet. Try again later!", who.name));
+                Hints.Answer(UI.Loc.F("{0}'s island isn't ready for visitors yet. Try again later!", who.name));
             }
             catch (Exception e)
             {
                 Debug.Log("[RealFriends] Couldn't fetch a friend's island: " + e.Message);
-                Hints.Show("Can't reach the internet right now. Try again in a moment.");
+                Hints.Answer("Can't reach the internet right now. Try again in a moment.");
             }
             return null;
         }

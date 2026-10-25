@@ -37,6 +37,8 @@ namespace CapyIsland.UI
         {
             var scroll = UiKit.ScrollList(body, "List", out _list, 18f, new RectOffset(0, 0, 4, 28));
             UiKit.Stretch((RectTransform)scroll.transform);
+            // The podium, the table and the day's goal run on below the banner: a round button says so.
+            MoreBelowCue.Add(scroll, AccentColour);
         }
 
         protected override void OnOpen()
@@ -215,6 +217,9 @@ namespace CapyIsland.UI
             ends.enableAutoSizing = true;
             ends.fontSizeMin = 18f;
             ends.fontSizeMax = 26f;
+            // The pill grows (leftwards, from its corner) to hold the words as drawn: Easy Reading's
+            // size, or a longer translation. Padding: the calendar on the left, a margin on the right.
+            FitsText.Add(pill, ends, new Vector2(84f, 24f), wide: true, tall: true);
         }
 
         /// <summary>Three prize chips: the place, the gems, and the medal for first.</summary>
@@ -276,7 +281,9 @@ namespace CapyIsland.UI
             h.childControlWidth = h.childControlHeight = true;
             h.childForceExpandWidth = true;
             h.childForceExpandHeight = false;
-            stage.gameObject.AddComponent<LayoutElement>().preferredHeight = 400f;
+            var stageLayout = stage.gameObject.AddComponent<LayoutElement>();
+            stageLayout.preferredHeight = 400f;
+            GrowsWithText.Add(stageLayout, tall: 0.1f);   // room for the names' taller lines
 
             // Second on the left, first in the middle, third on the right.
             foreach (int i in new[] { 1, 0, 2 })
@@ -314,6 +321,9 @@ namespace CapyIsland.UI
                 var nle = name.gameObject.AddComponent<LayoutElement>();
                 nle.preferredWidth = 230f;
                 nle.preferredHeight = 32f;
+                // A name shrinks to fit its line: with Easy Reading the line grows, taller and a
+                // little wider than the step (the columns have the room).
+                GrowsWithText.Add(nle, tall: 1f, wide: 0.4f);
 
                 var step = UiKit.Image(col, "Step", UiKit.Rounded(22), PlaceColour(i));
                 var sle = step.gameObject.AddComponent<LayoutElement>();
@@ -361,7 +371,7 @@ namespace CapyIsland.UI
         {
             if (e.You)
             {
-                var me = new FriendProfile { name = e.Name, seed = 7 };
+                var me = new FriendProfile { name = e.Name, seed = 7, you = true };
                 foreach (WearSlot slot in System.Enum.GetValues(typeof(WearSlot)))
                 {
                     var worn = Wardrobe.Worn(slot);

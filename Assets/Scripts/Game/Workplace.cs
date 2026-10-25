@@ -8,8 +8,12 @@ namespace CapyIsland.Game
     /// inside its boundary — a fixed 800-unit circle in the original (MillItem.mBoundry), not the
     /// store item's outer radius. Hungry workers also only look for food inside it, so a garden must
     /// be planted within reach of the mill whose workers it is meant to feed.
+    ///
+    /// While any of its workers is asleep for want of something, the building gets one arrow at the
+    /// screen edge (and a pin on the map), showing what they dream of: one per building, not per
+    /// capybara, since a sleeper means the whole station has run short.
     /// </summary>
-    public class Workplace : MonoBehaviour
+    public class Workplace : MonoBehaviour, IMapMarker
     {
         [Header("What this building harvests")]
         [SerializeField] ResourceKind accepts = ResourceKind.Wood;
@@ -42,6 +46,35 @@ namespace CapyIsland.Game
         {
             if (worker == null) return;
             _workers.Remove(worker);
+        }
+
+        // ---------------------------------------------------------------- the sleepy arrow
+
+        void OnEnable() => MapMarkers.Register(this);
+        void OnDisable() => MapMarkers.Unregister(this);
+
+        /// <summary>The first of its workers asleep for want of something, or null.</summary>
+        Worker Sleeper
+        {
+            get
+            {
+                foreach (var w in _workers) if (w != null && w.Needs != null) return w;
+                return null;
+            }
+        }
+
+        public MarkerKind MarkerKind => MarkerKind.Asleep;
+        public bool MarkerActive => isActiveAndEnabled && Sleeper != null;
+        public Vector2 MarkerPosition => transform.position;
+
+        public Sprite MarkerIcon
+        {
+            get
+            {
+                var needs = Sleeper != null ? Sleeper.Needs : null;
+                var catalog = ItemCatalog.Instance;
+                return needs != null && catalog != null ? catalog.Icon(DreamGuide.DreamItem(needs.Value)) : null;
+            }
         }
 
         /// <summary>True when this building has anything of its kind in reach. Reserves nothing.</summary>

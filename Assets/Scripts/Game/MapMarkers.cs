@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace CapyIsland.Game
 {
-    public enum MarkerKind { Bubble, Pest, Quest, Tower, Guide, Friend }
+    public enum MarkerKind { Bubble, Pest, Quest, Tower, Guide, Friend, Asleep }
 
     /// <summary>Something worth finding: shown on the map, and at the screen edge while off screen.</summary>
     public interface IMapMarker

@@ -10,9 +10,13 @@ namespace CapyIsland.UI
     ///  * the opening is done → the goal card (your next goal is always there)
     ///  * the map is first opened → how to travel on it (from MapScreen); until then, a finger now
     ///    and then points at the Map button (<see cref="MapNudge"/>)
-    ///  * the first hobby is unlocked → Events, and the clock (creatures keep hours)
-    ///  * the first visitor lands → Friends and the emoji button
+    ///  * Events appears (a hobby a contest counts) → the clock (creatures keep hours)
+    ///  * the first visitor lands → the emoji button
     ///  * a lot of reaching for the screen edge to walk → Old Yuzu mentions tapping, and the joystick
+    ///
+    /// The side buttons (Map, Events, Friends, …) explain themselves as they first appear
+    /// (<see cref="HudReveal"/>), so they have no tips of their own here; a page that points at one
+    /// waits until it is there (<see cref="HudTour.Pump"/>).
     ///
     /// Each tip shows once, when <see cref="Attention"/> says the screen is free and you are not in
     /// the middle of dragging something.
@@ -30,9 +34,10 @@ namespace CapyIsland.UI
             if (Visit.Active || Attention.TutorialRunning) return;
 
             HudTour.Tip("goals");
-            if (HobbyLog.IsUnlocked(Hobby.Fishing) || HobbyLog.IsUnlocked(Hobby.Birding) || HobbyLog.IsUnlocked(Hobby.Bugs))
-                HudTour.Tip("events", "clock");
-            if (VisitorBot.Current != null) HudTour.Tip("friends", "hello");
+            // After Events has joined the column (and Old Yuzu has said what it's for), not alongside.
+            if (HudReveal.Shown(HudReveal.Events) && !Attention.Waiting(HudReveal.TurnKey))
+                HudTour.Tip("clock");
+            if (VisitorBot.Current != null) HudTour.Tip("hello");
             WalkTip();
             MapNudge.Tick();
 

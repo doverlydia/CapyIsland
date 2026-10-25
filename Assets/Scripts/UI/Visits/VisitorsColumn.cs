@@ -39,6 +39,14 @@ namespace CapyIsland.UI
 
         void Update()
         {
+            // Under the clock, wherever it is (it moves down when Easy Reading makes the goal card taller).
+            var clock = ClockPill.Instance;
+            if (clock != null)
+            {
+                var r = (RectTransform)transform;
+                float y = clock.Bottom - 16f;
+                if (!Mathf.Approximately(r.anchoredPosition.y, y)) r.anchoredPosition = new Vector2(r.anchoredPosition.x, y);
+            }
             if (Time.unscaledTime < _next) return;
             _next = Time.unscaledTime + 0.5f;
             var now = new List<VisitorBot>();
@@ -180,7 +188,7 @@ namespace CapyIsland.UI
                 {
                     if (bot.Remote) Live.AskToLeave(who);   // a real player: their game flies them home
                     else bot.SendHome();
-                    Hints.Show(Loc.F("{0} waves goodbye and heads home.", who.name));
+                    Hints.Answer(Loc.F("{0} waves goodbye and heads home.", who.name));
                 }, null, more);
                 return;
             }
@@ -190,7 +198,7 @@ namespace CapyIsland.UI
                 PromptScreen.Ask("Your friend", who, $"You're on {who.name}'s island.", "Unfriend", "Close", () =>
                 {
                     Friends.Remove(who);
-                    Hints.Show(who.name + " is no longer your friend.");
+                    Hints.Answer(who.name + " is no longer your friend.");
                 }, null, blockHost);
             else if (who.IsReal)
                 PromptScreen.Ask("Make a friend?", who, Loc.F("You're on {0}'s island. Ask them to be friends?", who.name), "Add friend", "Not now", () => Befriend(who), null, blockHost);
@@ -198,7 +206,7 @@ namespace CapyIsland.UI
                 PromptScreen.Ask("Make a friend?", who, $"You're on {who.name}'s island. Add them as a friend to visit again — their island will be kept.", "Add friend", "Not now", () =>
                 {
                     Visit.BefriendHost();
-                    Hints.Show(who.name + " is your friend now!");
+                    Hints.Answer(who.name + " is your friend now!");
                 });
         }
 
@@ -212,12 +220,12 @@ namespace CapyIsland.UI
             if (!who.IsReal)
             {
                 Friends.Add(who);
-                Hints.Show(who.name + " is your friend now!");
+                Hints.Answer(who.name + " is your friend now!");
                 return;
             }
-            if (string.IsNullOrEmpty(who.code)) { Hints.Show("Couldn't find their friend code just now. Try again in a moment."); return; }
+            if (string.IsNullOrEmpty(who.code)) { Hints.Answer("Couldn't find their friend code just now. Try again in a moment."); return; }
             string problem = await RealFriends.Add(who.code);
-            Hints.Show(problem ?? Loc.F("Request sent to {0}. You'll be friends once they accept.", who.name));
+            Hints.Answer(problem ?? Loc.F("Request sent to {0}. You'll be friends once they accept.", who.name));
         }
     }
 }

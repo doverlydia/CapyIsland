@@ -1,0 +1,45 @@
+# Hebrew: Old Yuzu's lines as each side button first appears (UI/HudReveal.cs, Game/StoryText.Hud.cs)
+
+@ With the bridge up, there's a whole new island to explore! The Map button shows every island, and takes you there in a flash.
+= עכשיו כשהגשר למעלה, יש אי חדש שלם לגלות! כפתור המפה מראה את כל האיים, ולוקח אותך אליהם בן רגע.
+
+@ See the new Collection button? Everything you find goes in there: cards, clothes, fish, bugs and more.
+= רואה את כפתור האוסף החדש? כל מה שתמצא נכנס לשם: כרטיסים, בגדים, דגים, חרקים ועוד.
+~ רואה את כפתור האוסף החדש? כל מה שתמצאי נכנס לשם: כרטיסים, בגדים, דגים, חרקים ועוד.
+
+@ A hobby! Tap Hobbies to see the ones you've taken up, and how good you're getting.
+= תחביב! הקש על תחביבים כדי לראות במה התחלת, ועד כמה אתה משתפר.
+~ תחביב! הקישי על תחביבים כדי לראות במה התחלת, ועד כמה את משתפרת.
+
+@ You came back! I saved you a little something. Tap Gifts: there's a new present every day you come.
+= חזרת! שמרתי לך משהו קטן. הקש על מתנות: יש מתנה חדשה בכל יום שאתה בא.
+~ חזרת! שמרתי לך משהו קטן. הקישי על מתנות: יש מתנה חדשה בכל יום שאת באה.
+
+@ Now you can enter contests! Tap Events: every few days, whoever catches the most wins prizes.
+= עכשיו אתה יכול להשתתף בתחרויות! הקש על אירועים: כל כמה ימים, מי שתופס הכי הרבה זוכה בפרסים.
+~ עכשיו את יכולה להשתתף בתחרויות! הקישי על אירועים: כל כמה ימים, מי שתופס הכי הרבה זוכה בפרסים.
+
+@ There are other capybaras out across the sea. Tap Friends to fly over and visit them, and invite them to your island.
+= יש עוד קפיברות מעבר לים. הקש על חברים כדי לטוס לבקר אותן, ולהזמין אותן לאי שלך.
+~ יש עוד קפיברות מעבר לים. הקישי על חברים כדי לטוס לבקר אותן, ולהזמין אותן לאי שלך.
+
+@ Load with a save code
+= טען עם קוד שמירה
+~ טעני עם קוד שמירה
+
+# ---------------------------------------------------------------- Old Yuzu in the goal card (UI/ObjectiveTracker.cs)
+
+@ From now on, I'll be up here. Tap me whenever you want to see what's next.
+= מעכשיו אני כאן למעלה. אפשר להקיש עליי בכל פעם שרוצים לראות מה הלאה.
+
+@ {0} has a reward waiting for you!
+= יש פרס בשבילך אצל {0}!
+
+@ {0} would like a word with you.
+= {0} רוצה לדבר איתך.
+
+@ A present is waiting for you today!
+= מחכה לך מתנה היום!
+
+@ That's every goal done! Now you can just enjoy your island.
+= כל המטרות הושלמו! עכשיו אפשר פשוט ליהנות מהאי.

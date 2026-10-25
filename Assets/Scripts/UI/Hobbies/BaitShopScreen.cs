@@ -71,6 +71,9 @@ namespace CapyIsland.UI
                 var ble = buy.transform.parent.gameObject.AddComponent<LayoutElement>();
                 ble.preferredWidth = ble.minWidth = 230f;
                 ble.preferredHeight = 84f;
+                // As wide as its price at Easy Reading's size (the coin, the gap and the button's
+                // padding beside it), and never squeezed below that by the blurb next to it.
+                FitsText.Add(ble, buy.GetComponentInChildren<TMP_Text>(), new Vector2(80f, 0f), firm: true);
                 _rows.Add((b, have, buy));
             }
         }

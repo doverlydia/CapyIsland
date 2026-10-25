@@ -58,7 +58,32 @@ namespace CapyIsland.UI
             UiKit.Stretch((RectTransform)_scroll.transform, 0f, 0f, 0f, 112f);
         }
 
-        protected override void OnOpen() => Refresh();
+        /// <summary>For the first-visit walk through (HudTour.GoalsPages).</summary>
+        public Transform ShowMeButton
+        {
+            get
+            {
+                if (_list == null) return null;
+                foreach (var t in _list.GetComponentsInChildren<RectTransform>())
+                    if (t.name == "Show") return t;   // UiKit.Button's root
+                return null;
+            }
+        }
+        public Transform QuestsTab => _tabs != null ? _tabs[0].transform : null;
+        public Transform AchievementsTab => _tabs != null ? _tabs[1].transform : null;
+
+        protected override void OnOpen()
+        {
+            Refresh();
+            // The first time (the soak at the end of the opening, usually): what this screen is.
+            if (!Guidance.Off && !HudTour.Seen(HudTour.GoalsPages[0]) && !Visit.Active) StartCoroutine(WalkThrough());
+        }
+
+        System.Collections.IEnumerator WalkThrough()
+        {
+            yield return new WaitForSecondsRealtime(0.45f);   // the sheet has popped in and laid out
+            if (IsOpen && !HudTour.IsOpen) HudTour.Begin(HudTour.GoalsPages);
+        }
 
         void Refresh()
         {
@@ -85,7 +110,8 @@ namespace CapyIsland.UI
         {
             _stripe = StoryColour;
             var tutorial = TutorialDirector.Instance;
-            if (tutorial != null && !tutorial.Finished && !string.IsNullOrEmpty(tutorial.CurrentGoal))
+            bool guide = tutorial != null && !tutorial.Finished && !string.IsNullOrEmpty(tutorial.CurrentGoal);
+            if (guide)
             {
                 SectionLabel(_list, "Getting started");
                 Row(IconPainter.Star, UiKit.Spring, "Your guide", tutorial.CurrentGoal, "Now", UiKit.Spring, tutorial.GoalPoint);
@@ -97,13 +123,28 @@ namespace CapyIsland.UI
             if (wedding)
             {
                 var g = Objectives.WeddingGoal(Priest.Instance);
-                string line = g.Step == null ? g.Title : g.Title + "\n<color=#C9653A>" + g.Step + "</color>";
+                var steps = new List<Objectives.Step>();
                 var step = Objectives.StepTo(g.Where.Value, out var ghost);
-                if (step != null) line += "\n<color=#C9653A>" + step + "</color>";
-                Row(g.Icon, Color.white, StoryText.Guide, line, "The wedding", UiKit.Danger,
-                    ghost != null ? (Vector2)ghost.transform.position : g.Where.Value, portrait: true);
+                if (step != null) steps.Add(new Objectives.Step(step, false));
+                if (g.Step != null) steps.Add(new Objectives.Step(g.Step, false));
+                Row(g.Icon, Color.white, StoryText.Guide, g.Title, "The wedding", UiKit.Danger,
+                    ghost != null ? (Vector2)ghost.transform.position : g.Where.Value, portrait: true, steps: steps);
             }
-            if (quests.Count == 0 && !wedding)
+            // Someone who has come but not settled (Miso in her bubble): the same first step the corner card shows.
+            var newcomers = Objectives.Newcomers();
+            foreach (var (giver, g) in newcomers)
+            {
+                Vector2? where = g.Where;
+                var steps = new List<Objectives.Step>();
+                if (where.HasValue)
+                {
+                    var step = Objectives.StepTo(where.Value, out var ghost);
+                    if (step != null) { steps.Add(new Objectives.Step(step, false)); where = ghost.transform.position; }
+                }
+                Row(giver.Portrait, Color.white, giver.Speaker, g.Title, "New", UiKit.Primary, where, portrait: true, steps: steps);
+            }
+            // (Not beside the guide's own step: "nobody needs you" right under "do this now" reads wrong.)
+            if (quests.Count == 0 && !wedding && newcomers.Count == 0 && !guide)
             {
                 Empty("Nobody needs a hand right now. Keep building, and new friends will turn up with requests.");
             }
@@ -111,27 +152,35 @@ namespace CapyIsland.UI
             {
                 string status; Color chip; string line;
                 if (q.Complete) { status = "Reward ready"; chip = UiKit.Sun; line = "Talk to " + giver.Speaker + " to collect your reward"; }
-                else if (q.Stage == QuestSystem.Stage.NotStarted) { status = "New"; chip = UiKit.Primary; line = "Talk to " + giver.Speaker + " to hear what they need"; }
+                else if (q.Stage == QuestSystem.Stage.NotStarted) { status = "New"; chip = UiKit.Primary; line = Objectives.WantsToTalk(giver.Speaker); }
                 else { status = "In progress"; chip = UiKit.Spring; line = Objectives.QuestGoal(q.Def); }
-                // On an island you have not opened yet: say what has to happen first.
                 // Where it happens: the task itself while in progress (a character elsewhere), otherwise the giver.
                 string first = null;
-                Vector2 where = q.Complete || q.Stage == QuestSystem.Stage.NotStarted
-                    ? (Vector2)giver.transform.position
-                    : Objectives.QuestWhere(q.Def, out first) ?? (Vector2)giver.transform.position;
-                if (first != null) line += "\n<color=#C9653A>" + first + "</color>";
+                bool underWay = !q.Complete && q.Stage != QuestSystem.Stage.NotStarted;
+                Vector2 where = underWay ? Objectives.QuestWhere(q.Def, out first) ?? (Vector2)giver.transform.position : (Vector2)giver.transform.position;
+                // What to do on the way, as a checklist under the task: a bridge to open first, then
+                // the shops to build and what to buy (each ticks off by itself).
+                var steps = new List<Objectives.Step>();
                 var step = Objectives.StepTo(where, out var ghost);
-                if (step != null) line += "\n<color=#C9653A>" + step + "</color>";
+                if (step != null) steps.Add(new Objectives.Step(step, false));
+                if (underWay)
+                {
+                    var chain = Objectives.StepsFor(q.Def);
+                    if (chain.Count > 0) steps.AddRange(chain);
+                    else if (first != null) steps.Add(new Objectives.Step(first, false));
+                }
                 // "Show me" goes where the task happens (roses for the Captain: to the Captain), or to
                 // the bridge ghost when that has to come first — not back to whoever asked.
                 Vector2 showMe = ghost != null ? (Vector2)ghost.transform.position : where;
-                Row(giver.Portrait, Color.white, giver.Speaker, line, status, chip, showMe, portrait: true);
+                Row(giver.Portrait, Color.white, giver.Speaker, line, status, chip, showMe, portrait: true, steps: steps);
             }
 
             // What the next achievement is, so the list never leaves you without a plan.
             foreach (var a in Objectives.AllAchievements())
             {
                 if (a.Done) continue;
+                // Not one a quest above is already asking for (the Spirit's burrow capybara).
+                if (quests.Exists(x => x.quest != null && x.quest.Def.CompleteMote == a.Def.Name)) continue;
                 SectionLabel(_list, "Next up");
                 Row(IconPainter.Heart, UiKit.Danger, a.Def.Title, a.Goal, null, default, null);
                 break;
@@ -285,7 +334,7 @@ namespace CapyIsland.UI
 
         void Row(Sprite icon, Color iconBack, string title, string line, string status, Color statusColour,
             Vector2? where, bool portrait = false, Color? iconTint = null, bool faded = false, WearItem reward = null,
-            System.Action open = null, string openLabel = null)
+            System.Action open = null, string openLabel = null, List<Objectives.Step> steps = null)
         {
             var rewardArt = Wardrobe.Art(reward);
             if (rewardArt != null)
@@ -306,7 +355,13 @@ namespace CapyIsland.UI
             var col = Column(card, 4f);
             var t = UiKit.Text(col, "Title", title, 34f, faded ? UiKit.InkSoft : UiKit.Ink, true);
             t.textWrappingMode = TextWrappingModes.Normal;
-            if (!string.IsNullOrEmpty(line))
+            if (steps != null && steps.Count > 0)
+            {
+                // A checklist: the task with its box, the steps on the way indented under it.
+                CheckLine(col, line, false, false);
+                foreach (var st in steps) CheckLine(col, st.Text, st.Done, true);
+            }
+            else if (!string.IsNullOrEmpty(line))
             {
                 var l = UiKit.Text(col, "Line", line, 28f, faded ? new Color(UiKit.InkSoft.r, UiKit.InkSoft.g, UiKit.InkSoft.b, 0.8f) : UiKit.InkSoft);
                 l.overflowMode = TextOverflowModes.Overflow;
@@ -336,6 +391,8 @@ namespace CapyIsland.UI
                 var le = chip.gameObject.AddComponent<LayoutElement>();
                 le.preferredHeight = 44f;
                 le.preferredWidth = cl.GetPreferredValues(status).x + 36f;
+                // Translated, at Easy Reading's size, and never squeezed by a long line beside it.
+                FitsText.Add(chip, cl, new Vector2(36f, 12f), wide: true, tall: true, firm: true);
             }
             if (where.HasValue)
             {
@@ -344,18 +401,75 @@ namespace CapyIsland.UI
                 {
                     Close();
                     PlayerAvatar.GoTo(spot);   // walk there: a camera peek that snaps back reads as nothing happening
+                    // And the hand over the very thing, for a while after you get there.
+                    var hand = FindFirstObjectByType<TutorialPointer>();
+                    if (hand != null) hand.PointAt(spot, 10f);
                 }, 26f);
                 var le = go.transform.parent.gameObject.AddComponent<LayoutElement>();
-                le.preferredWidth = 170f;
+                le.preferredWidth = le.minWidth = 170f;
                 le.preferredHeight = 64f;
             }
             else if (open != null)
             {
                 var go = UiKit.Button(right, "Open", openLabel ?? "Open", UiKit.ButtonStyle.Secondary, () => { Close(); open(); }, 26f);
                 var le = go.transform.parent.gameObject.AddComponent<LayoutElement>();
-                le.preferredWidth = 170f;
+                le.preferredWidth = le.minWidth = 170f;
                 le.preferredHeight = 64f;
             }
+        }
+
+        /// <summary>
+        /// One line of a checklist: a box (ticked when done) and its words. A step on the way sits
+        /// indented under the task with a little grip of dots, smaller, and faded once done.
+        /// </summary>
+        static void CheckLine(RectTransform col, string text, bool done, bool step)
+        {
+            var row = UiKit.Rect(step ? "Step" : "Task", col);
+            var h = row.gameObject.AddComponent<HorizontalLayoutGroup>();
+            h.padding = new RectOffset(step ? 6 : 0, 0, step ? 2 : 0, 0);
+            h.spacing = 10f;
+            h.childAlignment = TextAnchor.UpperLeft;
+            h.childControlWidth = h.childControlHeight = true;
+            h.childForceExpandWidth = h.childForceExpandHeight = false;
+
+            if (step)
+            {
+                // The grip: two columns of three dots.
+                var grip = UiKit.Rect("Grip", row);
+                var gle = grip.gameObject.AddComponent<LayoutElement>();
+                gle.minWidth = gle.preferredWidth = 12f;
+                gle.minHeight = gle.preferredHeight = 30f;
+                for (int i = 0; i < 6; i++)
+                {
+                    var dot = UiKit.Image(grip, "Dot", UiKit.Circle, new Color(UiKit.InkSoft.r, UiKit.InkSoft.g, UiKit.InkSoft.b, 0.45f));
+                    var d = dot.rectTransform;
+                    d.anchorMin = d.anchorMax = new Vector2(0f, 1f);
+                    d.sizeDelta = new Vector2(4.5f, 4.5f);
+                    d.anchoredPosition = new Vector2(3f + (i % 2) * 6f, -8f - (i / 2) * 6.5f);
+                }
+            }
+
+            float size = step ? 26f : 30f;
+            var box = UiKit.Image(row, "Box", UiKit.Rounded(8), done ? UiKit.Leaf : new Color(UiKit.InkSoft.r, UiKit.InkSoft.g, UiKit.InkSoft.b, 0.55f));
+            var ble = box.gameObject.AddComponent<LayoutElement>();
+            ble.minWidth = ble.preferredWidth = ble.minHeight = ble.preferredHeight = size;
+            if (done)
+            {
+                var tick = UiKit.Image(box.transform, "Tick", IconPainter.Check, Color.white);
+                tick.preserveAspect = true;
+                UiKit.Stretch(tick.rectTransform, 4f, 4f, 4f, 4f);
+            }
+            else
+            {
+                var inner = UiKit.Image(box.transform, "Inside", UiKit.Rounded(6), Color.white);
+                UiKit.Stretch(inner.rectTransform, 3f, 3f, 3f, 3f);
+            }
+
+            var soft = UiKit.InkSoft;
+            var t = UiKit.Text(row, "Text", text, step ? 25f : 28f, done ? new Color(soft.r, soft.g, soft.b, 0.5f) : step ? soft : UiKit.Ink);
+            t.textWrappingMode = TextWrappingModes.Normal;
+            t.overflowMode = TextOverflowModes.Overflow;
+            t.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1f;
         }
 
         /// <summary>The outfit an achievement awards, once the wardrobe has art.</summary>

@@ -69,28 +69,13 @@ namespace CapyIsland.Game
         static double Current => Visiting ?? Offset;
 
         /// <summary>0 at midnight, 0.5 at noon.</summary>
-        public static float TimeOfDay => Override ?? _held ?? (float)Frac(Seconds / DaySeconds + Current);
+        public static float TimeOfDay => Override ?? (float)Frac(Seconds / DaySeconds + Current);
 
-        static float? _held;
-
-        /// <summary>
-        /// Holds the island at one time of day (Old Yuzu's opening keeps to a sunny morning; an
-        /// island that is dark when it starts is moved to morning first). Letting go carries on
-        /// from the held time, so the clock never jumps.
-        /// </summary>
-        public static void Hold(bool hold)
+        /// <summary>A fresh island (Start over): its clock begins again at 07:00, like a first run.</summary>
+        public static void StartAfresh()
         {
-            if (hold == _held.HasValue) return;
-            if (hold)
-            {
-                float hour = Hour;
-                _held = (hour >= 8f && hour <= 15f ? hour : 9f) / 24f;
-                return;
-            }
-            _offset = _held.Value - Frac(Seconds / DaySeconds);
-            PlayerPrefs.SetString(OffsetKey, _offset.Value.ToString("R", System.Globalization.CultureInfo.InvariantCulture));
-            PlayerPrefs.Save();
-            _held = null;
+            PlayerPrefs.DeleteKey(OffsetKey);
+            _offset = null;
         }
 
         public static float Hour => TimeOfDay * 24f;
@@ -138,7 +123,6 @@ namespace CapyIsland.Game
         static void ResetSession()
         {
             _offset = null;
-            _held = null;
             Override = null;
             Visiting = null;
         }

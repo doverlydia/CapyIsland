@@ -143,7 +143,7 @@ namespace CapyIsland.Game
             if (dish == null) return;
             if (!HobbyLog.Take("dish:" + dish.Id))
             {
-                Hints.Show($"{c.Name} would love some {dish.Name}! Cook it at your stove: {Recipe(dish)}.");
+                Hints.Answer($"{c.Name} would love some {dish.Name}! Cook it at your stove: {Recipe(dish)}.");
                 return;
             }
 
@@ -172,7 +172,7 @@ namespace CapyIsland.Game
             Motes.Trigger("hobby_cook");
             VisitorBot.ShowEmoji(c.Body != null ? c.Body.transform : c.At, Emoji.Heart);
             Sfx.Play(SfxKind.Chest, 0.7f);
-            Hints.Show(line);
+            Hints.Answer(line);
 
             order.dish = null;
             order.nextTicks = DateTime.Now.AddMinutes(UnityEngine.Random.Range(4f, 9f)).Ticks;

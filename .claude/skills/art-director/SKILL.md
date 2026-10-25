@@ -5,8 +5,11 @@ description: Generate CapyIsland's 2D art (sprites, icons, tiles, UI, background
 
 # Art Director (ChatGPT via OpenAI)
 
-Bridge: `Tools/ChatGPT/chatgpt.mjs` (Node). Needs env var `OPENAI_API_KEY` — already set on this
-machine. If it's missing, point the user at `Tools/ChatGPT/README.md`.
+Bridge: `Tools/ChatGPT/chatgpt.mjs` (Node). By default it runs through the **Codex app's CLI**, signed
+in with the user's ChatGPT account, so it costs no API credits. `--via api` uses `OPENAI_API_KEY`
+instead (paid credits; only when asked). Via Codex there is no size/quality control: `--size` only
+sets the shape (output is ~1254px square, 1536x1024 landscape), and `--quality` is ignored.
+If Codex reports a usage limit, tell the user rather than switching to the API.
 
 CapyIsland is a capybara-themed recreation of **Bunni: How We First Met**. The art must read as that
 game's cozy island-builder look. Every asset goes through this bridge — no hand-drawn or stock art.

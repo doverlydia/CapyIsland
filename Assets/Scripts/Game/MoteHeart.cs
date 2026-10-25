@@ -5,11 +5,14 @@ namespace CapyIsland.Game
 {
     /// <summary>
     /// A bit of love (MapItems/Mote). When a mote fires, a glowing heart appears beside the king and
-    /// joins the trail, beating. Tap it and it flies to the Tower of Love
-    /// (15 units a frame) and adds to your score. With no Tower yet, it just dissolves.
+    /// joins the trail, beating. Tap it and it flies to the Tower of Love (in a second, from
+    /// anywhere) and adds to your score. With no Tower yet, it just dissolves.
     /// </summary>
     public class MoteHeart : MonoBehaviour, ITappable
     {
+        /// <summary>How long a tapped heart takes to reach the tower, near or far.</summary>
+        const float FlightSeconds = 1f;
+
         static Sprite _sprite;
 
         string _mote;
@@ -114,13 +117,14 @@ namespace CapyIsland.Game
                 return;
             }
 
-            // 15 world units a frame. Once Old Yuzu has started to feel them, they fly to her heart.
+            // Once Old Yuzu has started to feel them, they fly to her heart. Always the same short
+            // trip, however far away you are (the original's 15 units a frame kept you waiting
+            // seconds from across the island): a long way just means a faster flight.
             var yuzu = FrozenYuzu.Instance;
             bool toHer = yuzu != null && YuzuHeart.Shown >= YuzuHeart.Stage.Glow && !YuzuHeart.Alive;
-            Vector2 from = transform.position, to = toHer ? yuzu.HeartPoint : tower.TopOfTower;
-            float seconds = Mathf.Clamp(BunniSpace.WorldDistance(from, to) / (15f * 30f), 0.6f, 6f);
-            CameraRig.CameraFocus.Show(to, seconds + 0.8f);
-            transform.DOMove(new Vector3(to.x, to.y, transform.position.z), seconds).SetEase(Ease.InOutSine)
+            Vector2 to = toHer ? yuzu.HeartPoint : tower.TopOfTower;
+            CameraRig.CameraFocus.Show(to, FlightSeconds + 0.8f);
+            transform.DOMove(new Vector3(to.x, to.y, transform.position.z), FlightSeconds).SetEase(Ease.InOutSine)
                 .OnComplete(() =>
                 {
                     tower.MoteFound(_mote);

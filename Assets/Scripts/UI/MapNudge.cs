@@ -7,19 +7,33 @@ using UnityEngine.UI;
 namespace CapyIsland.UI
 {
     /// <summary>
-    /// Playtesters never found the map, and its tip only came once they opened it. So, a while after
-    /// the opening (or as soon as a bridge joins a second island, when travel starts to matter), a
-    /// pointing finger taps on the Map button, with a word on what it's for. It goes once the map
-    /// is opened, and comes back a couple more times, well spaced, until it is.
+    /// Playtesters never found the map, and its tip only came once they opened it. The Map button
+    /// joins the column when the first bridge rises (<see cref="HudReveal"/>); right after Old
+    /// Yuzu's word about it, a pointing finger taps on it, with a word on what it's for. It goes
+    /// once the map is opened, and comes back a couple more times, well spaced, until it is.
     /// </summary>
     public class MapNudge : MonoBehaviour
     {
         const string CountKey = "CapyIsland.MapNudges";
         const int MostTimes = 3;
-        const float FirstAfter = 240f, Between = 360f, ShowFor = 16f;
+        const float FirstAfter = 20f, Between = 360f, ShowFor = 16f;
 
         static float _readyAt = -1f;
+        static float _soonUntil = -1f;   // the finger is on its way (not forever: a chatty island can keep it waiting)
         static MapNudge _shown;
+
+        /// <summary>The finger is on screen, or about to be (just after Old Yuzu's word about the map).</summary>
+        public static bool Showing => _shown != null || (Time.unscaledTime < _soonUntil && Wanted);
+
+        /// <summary>Old Yuzu has just introduced the Map button: the finger follows once she has finished.</summary>
+        public static void Soon()
+        {
+            if (_shown != null) return;
+            _readyAt = Time.unscaledTime + 2f;
+            _soonUntil = Time.unscaledTime + 45f;
+        }
+
+        static bool Wanted => !Guidance.Off && !Visit.Active && !HudTour.Seen("map") && PlayerPrefs.GetInt(CountKey, 0) < MostTimes;
 
         RectTransform _hand;
         float _until;
@@ -27,10 +41,10 @@ namespace CapyIsland.UI
         /// <summary>Called by TipTriggers twice a second, once the opening is over.</summary>
         public static void Tick()
         {
-            if (_shown != null || Guidance.Off || Visit.Active || HudTour.Seen("map")) return;
-            if (PlayerPrefs.GetInt(CountKey, 0) >= MostTimes) return;
-            if (_readyAt < 0f) _readyAt = Time.unscaledTime + (AnyBridgeOpen ? 20f : FirstAfter);
-            else if (AnyBridgeOpen) _readyAt = Mathf.Min(_readyAt, Time.unscaledTime + 20f);
+            if (_shown != null || !Wanted) return;
+            // The button is only there once a bridge is, and Old Yuzu's word about it comes first.
+            if (!HudReveal.Shown(HudReveal.Map) || HudReveal.Waiting(HudReveal.Map)) return;
+            if (_readyAt < 0f) _readyAt = Time.unscaledTime + FirstAfter;
             if (Time.unscaledTime < _readyAt || !HudTour.Quiet || !Attention.Free(4f)) return;
             var hud = MobileHud.Instance;
             var map = hud != null ? (hud.transform.Find("SafeArea/SideButtons/Map") ?? hud.transform.Find("SideButtons/Map")) : null;
@@ -38,18 +52,8 @@ namespace CapyIsland.UI
             PlayerPrefs.SetInt(CountKey, PlayerPrefs.GetInt(CountKey, 0) + 1);
             PlayerPrefs.Save();
             _readyAt = Time.unscaledTime + Between;
+            _soonUntil = -1f;
             _shown = map.gameObject.AddComponent<MapNudge>();
-        }
-
-        static bool AnyBridgeOpen
-        {
-            get
-            {
-                var land = LandMap.Instance;
-                if (land == null) return false;
-                foreach (var p in land.Pieces) if (p.isBridge && p.open) return true;
-                return false;
-            }
         }
 
         void Start()

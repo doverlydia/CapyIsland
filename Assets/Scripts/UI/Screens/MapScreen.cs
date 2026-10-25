@@ -12,7 +12,9 @@ namespace CapyIsland.UI
     /// The whole archipelago at a glance: a live picture of every island taken by a second camera,
     /// with markers over it for you, bubbles, pests, anyone with news and the tower, and a badge on
     /// the island where a party or contest is going on (its shore glows in the picture). Islands you
-    /// cannot reach yet wear a padlock. Drag to look around; tap a spot to send the camera there.
+    /// cannot reach yet wear a padlock. Drag to look around. Tap a spot and you go there: your
+    /// marker hurries across the picture to it, then the map closes and you pop up on the spot.
+    /// Or drag your marker there yourself, which does the same.
     /// </summary>
     public class MapScreen : UiScreen
     {
@@ -104,9 +106,10 @@ namespace CapyIsland.UI
             // Only while a party or contest is on: the island with the glowing shore.
             _legendEvent = LegendItem(legend, UiKit.Hex("E58FB0"), "Event");
             _legendEvent.gameObject.SetActive(false);
-            var hint = UiKit.Text(strip, "Hint", "Tap to look · drag yourself to travel", 24f, UiKit.InkSoft, false, TextAlignmentOptions.Center);
+            var hint = UiKit.Text(strip, "Hint", "Tap a spot or drag yourself to travel", 24f, UiKit.InkSoft, false, TextAlignmentOptions.Center);
             hint.overflowMode = TextOverflowModes.Overflow;
             hint.gameObject.AddComponent<LayoutElement>().preferredHeight = 36f;
+            GrowsWithText.Add(hint);
         }
 
         static RectTransform LegendItem(RectTransform parent, Color colour, string label)
@@ -140,13 +143,19 @@ namespace CapyIsland.UI
             if (!Game.Guidance.Off && !HudTour.Seen("map"))
             {
                 HudTour.MarkSeen("map");
-                CardPopup.Show("Map", "See all the islands. Drag yourself on the map to travel.", IconPainter.Map);
+                CardPopup.Show("Map", "See all the islands. Tap a spot to go there, or drag yourself across the map.", IconPainter.Map);
             }
         }
 
         protected override void OnClose()
         {
             if (_camera != null) _camera.enabled = false;
+            // Shut mid-hurry (the back button): the trip is off, and the marker is yours again.
+            if (_hurrying)
+            {
+                _hurrying = false;
+                if (_king != null) { _king.DOKill(); _king.localScale = Vector3.one; }
+            }
         }
 
         protected override void Fit()
@@ -281,13 +290,16 @@ namespace CapyIsland.UI
             }
             foreach (var m in markers)
             {
+                bool show = m.MarkerActive || m.MarkerKind == MarkerKind.Tower;
                 var widget = Find(m);
                 if (widget == null)
                 {
+                    // Made the first time it shows, so its picture is the one it has then (a
+                    // station's is only there while its capybaras sleep).
+                    if (!show) continue;
                     widget = MakeMarker(m);
                     _widgets.Add((m, widget));
                 }
-                bool show = m.MarkerActive || m.MarkerKind == MarkerKind.Tower;
                 widget.gameObject.SetActive(show);
                 if (show) widget.anchoredPosition = ToMap(m.MarkerPosition);
             }
@@ -302,7 +314,7 @@ namespace CapyIsland.UI
                     _king.GetComponent<Image>().raycastTarget = true;
                     _king.gameObject.AddComponent<KingDrag>().Owner = this;
                 }
-                if (!_draggingKing) _king.anchoredPosition = ToMap(king.transform.position);
+                if (!_draggingKing && !_hurrying) _king.anchoredPosition = ToMap(king.transform.position);
                 _king.SetAsLastSibling();
             }
         }
@@ -328,6 +340,7 @@ namespace CapyIsland.UI
                 MarkerKind.Tower => (UiKit.Hex("E58FB0"), 76f),
                 MarkerKind.Guide => (UiKit.Primary, 60f),
                 MarkerKind.Friend => (UiKit.Hex("5B9BD5"), 64f),
+                MarkerKind.Asleep => (EdgeIndicators.AsleepColour, 60f),
                 _ => (UiKit.Spring, 52f),
             };
             return Pin(m.MarkerIcon, colour, size, null);
@@ -355,6 +368,8 @@ namespace CapyIsland.UI
                 tr.sizeDelta = new Vector2(84f, 36f);
                 var t = UiKit.Text(tag.transform, "Label", label, 24f, Color.white, true, TextAlignmentOptions.Center);
                 UiKit.Stretch(t.rectTransform);
+                t.textWrappingMode = TextWrappingModes.NoWrap;
+                FitsText.Add(tag, t, new Vector2(24f, 8f), wide: true, tall: true);
             }
             return ring.rectTransform;
         }
@@ -517,8 +532,10 @@ namespace CapyIsland.UI
             var t = UiKit.Text(pill.transform, "Label", text, size, Color.white, true, TextAlignmentOptions.Center);
             t.textWrappingMode = TextWrappingModes.NoWrap;
             t.overflowMode = TextOverflowModes.Overflow;
+            // Measured as it will be drawn: translated, and at Easy Reading's size.
+            t.GetComponent<LocText>().Refresh();
             var fits = t.GetPreferredValues(Loc.T(text));
-            var box = new Vector2(fits.x + size * 1.1f, size * 1.6f);
+            var box = new Vector2(fits.x + size * 1.1f, size * 1.6f * Accessibility.TextScale);
             pill.rectTransform.sizeDelta = box;
 
             Vector2 best = at;
@@ -558,6 +575,7 @@ namespace CapyIsland.UI
 
         void BeginTravelDrag(PointerEventData e)
         {
+            if (_hurrying) return;   // already on the way somewhere
             _draggingKing = true;
             _dragScreen = e.position;
             _dragCamera = e.pressEventCamera;
@@ -567,6 +585,7 @@ namespace CapyIsland.UI
 
         void TravelDrag(PointerEventData e)
         {
+            if (!_draggingKing) return;
             _dragScreen = e.position;
             _dragCamera = e.pressEventCamera;
             if (LocalPoint(e, out var local)) _king.anchoredPosition = local;
@@ -600,25 +619,32 @@ namespace CapyIsland.UI
 
         void EndTravelDrag(PointerEventData e)
         {
+            if (!_draggingKing) return;
             _king.DOKill();
             _king.DOScale(1f, 0.15f).SetUpdate(true);
             var king = FindFirstObjectByType<PlayerAvatar>();
             if (king == null || !LocalPoint(e, out var local)) { _draggingKing = false; return; }
             var world = ToWorld(local);
-            string why = null;
-            var land = LandMap.Instance;
-            if (!BunniSpace.PointOnLand(world)) why = "You can't stand in the sea! Drop yourself on land.";
-            else if (land != null && !land.Reachable(king.transform.position, world)) why = "That island is still closed. Open its bridge first!";
-            if (why != null)
-            {
-                _draggingKing = false;   // springs back to where you really are
-                Toast(why);
-                Sfx.Play(SfxKind.Tap, 0.4f);
-                return;
-            }
-            _draggingKing = false;
+            _draggingKing = false;   // on a refusal, springs back to where you really are
+            if (Refused(king, world)) return;
             Close();
             king.TravelTo(world);
+        }
+
+        /// <summary>
+        /// The sea, or an island whose bridge isn't open yet: says so, and the trip is off. The
+        /// same for a tap and a drag.
+        /// </summary>
+        bool Refused(PlayerAvatar king, Vector2 world)
+        {
+            string why = null;
+            var land = LandMap.Instance;
+            if (!BunniSpace.PointOnLand(world)) why = "You can't stand in the sea! Pick a spot on land.";
+            else if (land != null && !land.Reachable(king.transform.position, world)) why = "That island is still closed. Open its bridge first!";
+            if (why == null) return false;
+            Toast(why);
+            Sfx.Play(SfxKind.Tap, 0.4f);
+            return true;
         }
 
         void Toast(string line)
@@ -659,16 +685,47 @@ namespace CapyIsland.UI
 
         // ---------------------------------------------------------------- tapping
 
+        bool _hurrying;   // your marker is on its way across the map to a tapped spot
+
+        const float HurrySpeed = 2600f;   // canvas units a second across the map picture
+
+        /// <summary>
+        /// A tap on the map: go there. Your marker hurries across the picture to the spot (well
+        /// under a second, however far), then the map closes and you pop up there, just as if you
+        /// had dragged yourself. The sea or a closed island says why not, and nothing moves. Taps
+        /// while the marker is on its way are ignored.
+        /// </summary>
         internal void Clicked(PointerEventData e)
         {
-            if (e.dragging) return;
-            var content = _scroll.content;
-            if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(content, e.position, e.pressEventCamera, out var local)) return;
-            var size = content.rect.size;
-            var n = new Vector2(local.x / size.x + 0.5f, local.y / size.y + 0.5f);
-            var world = new Vector2(Mathf.Lerp(_world.min.x, _world.max.x, n.x), Mathf.Lerp(_world.min.y, _world.max.y, n.y));
-            Close();
-            CameraRig.CameraFocus.Show(world, 3f);
+            if (e.dragging || _hurrying || _draggingKing) return;
+            if (!LocalPoint(e, out var local)) return;
+            var world = ToWorld(local);
+
+            // No capybara to send (nobody to move): just look there, as the map used to.
+            var king = FindFirstObjectByType<PlayerAvatar>();
+            if (king == null || _king == null)
+            {
+                Close();
+                CameraRig.CameraFocus.Show(world, 3f);
+                return;
+            }
+            if (Refused(king, world)) return;
+
+            _hurrying = true;
+            Sfx.Play(SfxKind.Tap, 0.5f);
+            float seconds = Mathf.Clamp(Vector2.Distance(_king.anchoredPosition, local) / HurrySpeed, 0.25f, 0.55f);
+            _king.DOKill();
+            _king.SetAsLastSibling();
+            // Lifted a little for the trip, like a marker picked up and carried.
+            _king.DOScale(1.2f, 0.12f).SetUpdate(true);
+            _king.DOAnchorPos(local, seconds).SetEase(Ease.InOutQuad).SetUpdate(true).OnComplete(() =>
+            {
+                _hurrying = false;
+                if (_king != null) _king.localScale = Vector3.one;
+                if (king == null || !IsOpen) return;
+                Close();
+                king.TravelTo(world);
+            });
         }
 
         /// <summary>Forwards clicks on the picture without the scroll view swallowing drags.</summary>

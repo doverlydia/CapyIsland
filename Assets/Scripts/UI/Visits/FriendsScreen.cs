@@ -141,7 +141,7 @@ namespace CapyIsland.UI
                 else if (!online) go = UiKit.Button(row, "Visit", "Visit", UiKit.ButtonStyle.Secondary, () =>
                 {
                     Game.Sfx.Play(Game.SfxKind.Tap, 0.4f);
-                    Hints.Show(Loc.F("{0} is offline right now. You can visit when they're online!", who.name));
+                    Hints.Answer(Loc.F("{0} is offline right now. You can visit when they're online!", who.name));
                 }, 28f, IconPainter.Plane);
                 else go = UiKit.Button(row, "Visit", "Visit", UiKit.ButtonStyle.Primary, () => { Close(); Visit.Fly(who); }, 28f, IconPainter.Plane);
                 if (_blocked != null || !online) Greyed(go);
@@ -188,7 +188,7 @@ namespace CapyIsland.UI
                 {
                     SaveCodeScreen.CopyText(code);
                     Game.Sfx.Play(Game.SfxKind.Coin, 0.6f);
-                    Hints.Show("Copied! Send it to a friend so they can add you.");
+                    Hints.Answer("Copied! Send it to a friend so they can add you.");
                 }, 26f);
                 var cle = copy.transform.parent.gameObject.AddComponent<LayoutElement>();
                 cle.preferredWidth = 150f; cle.preferredHeight = 68f;
@@ -264,8 +264,8 @@ namespace CapyIsland.UI
                 var yes = UiKit.Button(row, "Accept", "Accept", UiKit.ButtonStyle.Primary, async () =>
                 {
                     NewStuff.Clear("friends/ask_" + memberId);
-                    if (await RealFriends.Accept(memberId)) { Game.Sfx.Play(Game.SfxKind.Chest, 0.5f); Hints.Show("You're friends now! Visit them from this list."); }
-                    else Hints.Show("Couldn't answer just now. Try again in a moment.");
+                    if (await RealFriends.Accept(memberId)) { Game.Sfx.Play(Game.SfxKind.Chest, 0.5f); Hints.Answer("You're friends now! Visit them from this list."); }
+                    else Hints.Answer("Couldn't answer just now. Try again in a moment.");
                 }, 26f);
                 var yle = yes.transform.parent.gameObject.AddComponent<LayoutElement>();
                 yle.preferredWidth = 150f; yle.preferredHeight = 68f;
@@ -285,7 +285,7 @@ namespace CapyIsland.UI
                 Friends.Remove(who);
                 var bot = VisitorBot.Current;
                 if (bot != null && bot.Who.id == who.id && bot.As == VisitorBot.Role.Guest) bot.SendHome();
-                Hints.Show(who.name + " is no longer your friend.");
+                Hints.Answer(who.name + " is no longer your friend.");
                 OnOpen();
             }, null, more);
         }
@@ -323,7 +323,7 @@ namespace CapyIsland.UI
                 var unblock = UiKit.Button(row, "Unblock", "Unblock", UiKit.ButtonStyle.Secondary, async () =>
                 {
                     await RealFriends.Unblock(member);
-                    Hints.Show(Loc.F("{0} is unblocked.", shown));
+                    Hints.Answer(Loc.F("{0} is unblocked.", shown));
                     Reopen();
                 }, 26f);
                 var ule = unblock.transform.parent.gameObject.AddComponent<LayoutElement>();
@@ -334,7 +334,7 @@ namespace CapyIsland.UI
         /// <summary>A locked Visit was tapped: say why, right here, and point at the fix.</summary>
         void Blocked()
         {
-            Hints.Show(_blocked);
+            Hints.Answer(_blocked);
             Game.Sfx.Play(Game.SfxKind.Tap, 0.4f);
             if (_fixCard == null) return;
             // The card explaining it is at the top of the list: bring it into view.
@@ -400,12 +400,13 @@ namespace CapyIsland.UI
             var build = UiKit.Button(card, "Build", "Build", UiKit.ButtonStyle.Primary, () =>
             {
                 var why = Airport.Build();
-                if (why != null) { Hints.Show(why); return; }
+                if (why != null) { Hints.Answer(why); return; }
                 Close();
-                Hints.Show("Here's your airstrip! Pop the bubble, then drag it wherever you'd like it to stand.");
+                Hints.Answer("Here's your airstrip! Pop the bubble, then drag it wherever you'd like it to stand.");
             }, 28f);
             var ble = build.transform.parent.gameObject.AddComponent<LayoutElement>();
-            ble.preferredWidth = 150f; ble.preferredHeight = 72f;
+            ble.minWidth = ble.preferredWidth = 150f; ble.preferredHeight = 72f;   // never squeezed by the words beside it
+            GrowsWithText.Add(ble, tall: 1f, wide: 0.6f);
         }
 
         // ---------------------------------------------------------------- the server
@@ -452,7 +453,7 @@ namespace CapyIsland.UI
                 {
                     SaveCodeScreen.CopyText(pretty);
                     Game.Sfx.Play(Game.SfxKind.Coin, 0.6f);
-                    Hints.Show(Loc.F("Copied {0}! Send it to friends so they can join.", pretty));
+                    Hints.Answer(Loc.F("Copied {0}! Send it to friends so they can join.", pretty));
                 });
                 SmallButton(buttons, "Leave", "Leave server", UiKit.ButtonStyle.Secondary, () =>
                     PromptScreen.Ask("Leave server?", null, Loc.F("Leave server {0}? You can come back any time with the code.", pretty),
@@ -471,12 +472,16 @@ namespace CapyIsland.UI
             var grid = UiKit.Rect("Slots", head);
             var g = grid.gameObject.AddComponent<GridLayoutGroup>();
             float width = Sheet.sizeDelta.x - 64f - 8f - 40f;
-            float cell = (width - 12f * 4f) / 5f;
+            // Five islands a row; with Easy Reading four, so each tile is wider and a name like
+            // "chestnut_kid" can be drawn big (in a fifth of the row it could only shrink).
+            int columns = Accessibility.TextScale > 1.2f ? 4 : 5;
+            int rows = Mathf.CeilToInt(Server.Slots / (float)columns);
+            float cell = (width - 12f * (columns - 1)) / columns;
             g.cellSize = new Vector2(cell, cell * 1.32f);
             g.spacing = new Vector2(12f, 12f);
             g.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-            g.constraintCount = 5;
-            grid.gameObject.AddComponent<LayoutElement>().preferredHeight = 2f * cell * 1.32f + 12f;
+            g.constraintCount = columns;
+            grid.gameObject.AddComponent<LayoutElement>().preferredHeight = rows * cell * 1.32f + (rows - 1) * 12f;
 
             var bySlot = new Server.Seat[Server.Slots];
             foreach (var seat in Server.Seats) bySlot[seat.Slot] = seat;
@@ -585,12 +590,12 @@ namespace CapyIsland.UI
         /// <summary>Someone on your private server who isn't your friend yet: ask to be friends.</summary>
         static void OfferFriendship(FriendProfile who)
         {
-            if (string.IsNullOrEmpty(who.code)) { Hints.Show("Couldn't find their friend code just now. Try again in a moment."); return; }
+            if (string.IsNullOrEmpty(who.code)) { Hints.Answer("Couldn't find their friend code just now. Try again in a moment."); return; }
             PromptScreen.Ask("Make a friend?", who, Loc.F("Ask {0} to be friends? Once they accept, you can visit each other.", who.name),
                 "Add friend", "Not now", async () =>
                 {
                     string problem = await RealFriends.Add(who.code);
-                    Hints.Show(problem ?? Loc.F("Request sent to {0}. You'll be friends once they accept.", who.name));
+                    Hints.Answer(problem ?? Loc.F("Request sent to {0}. You'll be friends once they accept.", who.name));
                 }, null, new System.Collections.Generic.List<(string, Action)> { ("Block", () => BlockPrompt.Ask(who)) });
         }
 
@@ -737,7 +742,23 @@ namespace CapyIsland.UI
             if (p.TitleLabel != null) p.TitleLabel.text = title;
             p.SetIcon(icon != null ? icon : IconPainter.Plane);
             ClearChildren(p._avatarSlot);
-            if (who != null) UiKit.Avatar(p._avatarSlot, who, 150f).anchoredPosition = Vector2.zero;
+            if (who != null)
+            {
+                UiKit.Avatar(p._avatarSlot, who, 150f).anchoredPosition = Vector2.zero;
+                // Who is this? An islander says so, on a ribbon across the bottom of their portrait.
+                if (who.IsIslander)
+                {
+                    var ribbon = UiKit.Image(p._avatarSlot, "Islander", UiKit.Rounded(18), UiKit.Hex("5DA34A"));
+                    ribbon.raycastTarget = false;
+                    UiKit.Place(ribbon.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, -4f), new Vector2(300f, 38f));
+                    var words = UiKit.Text(ribbon.transform, "Text", "Islander of the archipelago", 22f, Color.white, true, TextAlignmentOptions.Center);
+                    UiKit.Stretch(words.rectTransform, 10f, 0f, 10f, 0f);
+                    words.enableAutoSizing = true;
+                    words.fontSizeMin = 14f;
+                    words.fontSizeMax = 22f;
+                    words.textWrappingMode = TextWrappingModes.NoWrap;
+                }
+            }
             else
             {
                 // Nobody's face to show (a contest asking): its icon, large, rather than a gap.
@@ -832,12 +853,17 @@ namespace CapyIsland.UI
             _more.gameObject.SetActive(false);
         }
 
-        protected override void Fit()
+        // A small card in the middle of the screen, as tall as its face, its line and its buttons.
+        protected override bool FitToContent => true;
+
+        protected override float ContentHeight
         {
-            base.Fit();
-            float extra = _moreCount > 0 ? MoreHeight + MoreGap : 0f;
-            extra += _lineHeight - LineHeight;   // a long line: the card grows by what it needs
-            if (Sheet != null) Sheet.sizeDelta = new Vector2(Sheet.sizeDelta.x, Mathf.Min(Sheet.sizeDelta.y, 128f + 24f + 420f + 32f + extra));
+            get
+            {
+                float extra = _moreCount > 0 ? MoreHeight + MoreGap : 0f;
+                extra += _lineHeight - LineHeight;   // a long line: the card grows by what it needs
+                return 420f + extra;
+            }
         }
 
         /// <summary>

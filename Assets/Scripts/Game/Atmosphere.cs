@@ -10,7 +10,7 @@ namespace CapyIsland.Game
     ///  * Dawn: low mist drifting over grass and sea, burning off by mid-morning; dew glinting on
     ///    the grass. Mist comes back for a while after rain.
     ///  * Day: soft cloud shadows sliding over the island, sun glints on the water, foam along the
-    ///    beach, petals and the odd butterfly about the flower gardens.
+    ///    beach and petals about the flower gardens (the butterflies are real: Wildlife).
     ///  * Golden hour: warm light rays and drifting pollen.
     ///  * Night: fireflies that blink, gather by trees, flowers and the shore, scatter as you pass,
     ///    and a few of which light the grass; starlight twinkling on the water; a faint blue glow
@@ -34,7 +34,6 @@ namespace CapyIsland.Game
         ParticleSystem _dew, _glints, _foam, _pollen, _petals, _smoke, _zzz, _hearts, _snow, _bits;
         readonly List<SpriteRenderer> _mist = new(), _clouds = new(), _rays = new();
         readonly List<Firefly> _flies = new();
-        readonly List<Butterfly> _butterflies = new();
         ShootingStar _star;
 
         float _nextScan, _nextSmoke, _nextZ, _nextHeart, _nextStar, _nextPetal;
@@ -63,8 +62,7 @@ namespace CapyIsland.Game
             for (int i = 0; i < 6; i++) _mist.Add(Sheet("Mist", soft, AirOrder - 30, _lit));
             for (int i = 0; i < 3; i++) _clouds.Add(Sheet("CloudShadow", UI.IconPainter.Cloud, AirOrder - 40, _unlit));
             for (int i = 0; i < 3; i++) _rays.Add(Sheet("SunRay", RaySprite(), AirOrder - 20, _unlit));
-            for (int i = 0; i < 18; i++) _flies.Add(new Firefly(_root, glow, _unlit, withLight: i < 3));
-            for (int i = 0; i < 4; i++) _butterflies.Add(new Butterfly(_root, _lit, i));
+            for (int i = 0; i < 10; i++) _flies.Add(new Firefly(_root, glow, _unlit, withLight: i < 3));
             _star = new GameObject("ShootingStar").AddComponent<ShootingStar>();
             _star.transform.SetParent(_root, false);
             _star.Init(glow, dash, _unlit, OnWish);
@@ -84,6 +82,8 @@ namespace CapyIsland.Game
         static float Bell(float h, float a, float b, float c, float d) => Mathf.Min(Ramp(h, a, b), 1f - Ramp(h, c, d));
 
         static float Night(float h) => Mathf.Max(Ramp(h, 18.6f, 19.6f), 1f - Ramp(h, 4.4f, 5.4f));
+        /// <summary>0 by day, up to 1 once night has fully fallen.</summary>
+        public static float Darkness => Night(GameClock.Hour);
         static float Daylight(float h) => Bell(h, 5.8f, 7.2f, 17.6f, 19f);
 
         /// <summary>About one night in four is cold enough for a little snow.</summary>
@@ -121,7 +121,6 @@ namespace CapyIsland.Game
             Air(c, w, h, dt, golden, snow, dir);
             Life(dt, night, day);
             foreach (var f in _flies) f.Tick(c, w, h, you, night, _nature, dt);
-            foreach (var b in _butterflies) b.Tick(day, _gardens, dt);
             Stars(c, w, h, night);
         }
 
@@ -340,7 +339,7 @@ namespace CapyIsland.Game
             for (int i = 0; i < 18; i++)
                 Emit(_bits, at, Random.insideUnitCircle * Random.Range(0.8f, 2.4f), new Color(1f, 0.95f, 0.6f, 1f), Random.Range(0.18f, 0.3f));
             Sfx.Play(SfxKind.Heart, 0.7f);
-            Hints.Show($"A wish on a shooting star! +{gold} gold");
+            Hints.Answer($"A wish on a shooting star! +{gold} gold");
         }
 
         // ---------------------------------------------------------------- plumbing
@@ -570,70 +569,6 @@ namespace CapyIsland.Game
                 _sr.transform.localScale = Vector3.one * (0.22f + 0.08f * blink);
                 if (_light != null) _light.intensity = 0.55f * a;
             }
-        }
-
-        // ---------------------------------------------------------------- butterflies
-
-        class Butterfly
-        {
-            readonly SpriteRenderer _sr;
-            Vector2 _at, _target;
-            Transform _garden;
-            float _flap, _retarget, _alpha;
-
-            static readonly Color[] Colours = { new(1f, 0.95f, 0.75f), new(0.85f, 0.92f, 1f), new(1f, 0.82f, 0.9f), new(0.9f, 1f, 0.82f) };
-
-            public Butterfly(Transform parent, Material material, int i)
-            {
-                var go = new GameObject("Butterfly");
-                go.transform.SetParent(parent, false);
-                _sr = go.AddComponent<SpriteRenderer>();
-                _sr.sprite = Wings();
-                _sr.sharedMaterial = material;
-                _sr.sortingOrder = AirOrder + 1;
-                _sr.color = Colours[i % Colours.Length];
-                _sr.enabled = false;
-                _flap = Random.value * 6f;
-            }
-
-            public void Tick(float day, List<Transform> gardens, float dt)
-            {
-                bool want = day > 0.3f && gardens.Count > 0;
-                _alpha = Mathf.MoveTowards(_alpha, want ? 1f : 0f, dt * 0.8f);
-                if (_alpha <= 0f) { _sr.enabled = false; _garden = null; return; }
-                if (_garden == null && gardens.Count > 0)
-                {
-                    _garden = gardens[Random.Range(0, gardens.Count)];
-                    if (_garden == null) return;
-                    _at = (Vector2)_garden.position + new Vector2(Random.Range(-1f, 1f), Random.Range(0.3f, 1.2f));
-                    _target = _at;
-                }
-                if (_garden == null) return;
-                _sr.enabled = true;
-                _retarget -= dt;
-                if (_retarget <= 0f || Vector2.Distance(_at, _target) < 0.1f)
-                {
-                    _retarget = Random.Range(0.8f, 2f);
-                    _target = (Vector2)_garden.position + new Vector2(Random.Range(-1.3f, 1.3f), Random.Range(0.2f, 1.5f));
-                }
-                _at = Vector2.MoveTowards(_at, _target, 0.9f * dt);
-                _flap += dt * 14f;
-                var t = _sr.transform;
-                t.position = new Vector3(_at.x, _at.y + Mathf.Sin(_flap * 0.25f) * 0.08f, -0.5f);
-                float open = 0.35f + 0.65f * Mathf.Abs(Mathf.Sin(_flap));
-                t.localScale = new Vector3(0.22f * open * (_target.x < _at.x ? -1f : 1f), 0.22f, 1f);
-                var col = _sr.color; col.a = _alpha; _sr.color = col;
-            }
-
-            static Sprite _wings;
-            static Sprite Wings() => _wings != null ? _wings : _wings = Paint(48, 40, (u, v) =>
-            {
-                float x = u - 0.5f, y = v - 0.5f;
-                float upper = new Vector2((Mathf.Abs(x) - 0.22f) / 0.24f, (y - 0.1f) / 0.3f).sqrMagnitude;
-                float lower = new Vector2((Mathf.Abs(x) - 0.16f) / 0.16f, (y + 0.22f) / 0.2f).sqrMagnitude;
-                float body = new Vector2(x / 0.045f, y / 0.4f).sqrMagnitude;
-                return (upper < 1f || lower < 1f) ? 0.95f : body < 1f ? 1f : 0f;
-            });
         }
 
         // ---------------------------------------------------------------- the shooting star itself

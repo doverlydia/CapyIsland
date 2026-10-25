@@ -165,7 +165,10 @@ namespace CapyIsland.UI
             return root;
         }
 
-        /// <summary>A round portrait of a friend: their capybara, tinted, with their hat if there is art for it.</summary>
+        /// <summary>
+        /// A round portrait of a friend: their capybara, tinted, with their hat if there is art for it.
+        /// An islander (one the game plays, not a real player) wears a little leaf at the corner.
+        /// </summary>
         public static RectTransform Avatar(Transform parent, Game.FriendProfile who, float size)
         {
             float hue = Mathf.Repeat((who.seed % 997) * 0.618034f, 1f);
@@ -192,7 +195,39 @@ namespace CapyIsland.UI
                     r.sizeDelta = new Vector2(item.Width, item.Width) * size * 0.8f;
                 }
             }
+            if (who.IsIslander) IslanderLeaf(disc.transform, size);
             return disc.rectTransform;
+        }
+
+        /// <summary>
+        /// The islander's mark: a green leaf in a white disc at a portrait's lower left (the lower
+        /// right is where the "online" dot goes).
+        /// </summary>
+        static void IslanderLeaf(Transform portrait, float size)
+        {
+            float d = Mathf.Max(22f, size * 0.4f);
+            var badge = Image(portrait, "Islander", Circle, Color.white);
+            badge.raycastTarget = false;
+            var r = badge.rectTransform;
+            r.anchorMin = r.anchorMax = new Vector2(0f, 0f);
+            r.pivot = new Vector2(0.5f, 0.5f);
+            r.sizeDelta = new Vector2(d, d);
+            r.anchoredPosition = new Vector2(d * 0.18f, d * 0.18f);
+            var leaf = Image(badge.transform, "Leaf", IconPainter.Leaf, Hex("5DA34A"));
+            leaf.raycastTarget = false;
+            Stretch(leaf.rectTransform, d * 0.16f, d * 0.16f, d * 0.16f, d * 0.16f);
+            badge.gameObject.AddComponent<LayoutElement>().ignoreLayout = true;
+        }
+
+        /// <summary>The islander's leaf on its own, for a row that shows a name without a face (a contest board).</summary>
+        public static Image IslanderLeafIcon(Transform parent, float size)
+        {
+            var leaf = Image(parent, "Islander", IconPainter.Leaf, Hex("5DA34A"));
+            leaf.raycastTarget = false;
+            leaf.preserveAspect = true;
+            var le = leaf.gameObject.AddComponent<LayoutElement>();
+            le.preferredWidth = le.preferredHeight = le.minWidth = le.minHeight = size;
+            return leaf;
         }
 
         // ---------------------------------------------------------------- shapes
@@ -391,6 +426,9 @@ namespace CapyIsland.UI
                 t.enableAutoSizing = true;
                 t.fontSizeMin = fontSize * 0.55f;
                 t.fontSizeMax = fontSize;
+                // Its label shrinks to fit the button, so with Easy Reading the button grows a little
+                // (taller, and wider if it has a set width) to let the bigger words through.
+                GrowsWithText.Add(root, tall: 0.6f, wide: 0.4f);
             }
 
             var button = face.gameObject.AddComponent<Button>();
@@ -428,10 +466,13 @@ namespace CapyIsland.UI
                 Stretch(t.rectTransform, 6f, 0f, 6f, 0f);
                 t.textWrappingMode = TextWrappingModes.NoWrap;
                 t.overflowMode = TextOverflowModes.Overflow;
-                // A fixed pill: longer words (and bigger Easy Reading text) shrink to fit it.
+                // A pill sized for the button: longer words shrink to fit it. With Easy Reading the
+                // pill (and the button's slot, so the column spaces out) grows to hold bigger words.
                 t.enableAutoSizing = true;
                 t.fontSizeMin = 18f;
                 t.fontSizeMax = 28f;
+                GrowsWithText.Add(pill.rectTransform, tall: 1f, wide: 0.5f);
+                GrowsWithText.Add(root, tall: 36f / (size + 36f));
             }
 
             var button = disc.gameObject.AddComponent<Button>();
@@ -483,6 +524,9 @@ namespace CapyIsland.UI
             content.pivot = new Vector2(0.5f, 1f);
             content.sizeDelta = Vector2.zero;
             scroll.content = content;
+            // A round "more below" button at the bottom when the list runs on past it (only on a
+            // screen, and only up and down: it removes itself from the map and the chat).
+            MoreBelowCue.AddDefault(scroll);
             if (!stacked) return scroll;
             var v = content.gameObject.AddComponent<VerticalLayoutGroup>();
             v.spacing = spacing;

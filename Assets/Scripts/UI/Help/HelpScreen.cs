@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using CapyIsland.Game;
-using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,9 +16,11 @@ namespace CapyIsland.UI
     /// onto a sawmill, two fingers pinching), a few numbered steps, and a button that takes you
     /// there when there is somewhere to go.
     ///
-    /// Pages for things still ahead (a hobby not taken up yet) stay in the list, marked, so you
-    /// can see what's coming and how to get it. The pages themselves live in
-    /// <see cref="HelpTopics"/>, the movies in <see cref="HelpDemos"/>.
+    /// The list grows as you play: a page turns up once the thing it explains has come into your
+    /// game, with a red dot until you open it (<see cref="HelpUnlocks"/>), so a new player isn't
+    /// met by forty pages at once. A hobby you could take up but haven't yet is marked as not
+    /// started, with how to start it. The pages themselves live in <see cref="HelpTopics"/>, the
+    /// movies in <see cref="HelpDemos"/>.
     /// </summary>
     public class HelpScreen : UiScreen
     {
@@ -48,6 +49,8 @@ namespace CapyIsland.UI
             public GameObject NotStarted;
             public RectTransform Chevron;
             public int Order;
+            /// <summary>In the help yet (reached, or there from the start)?</summary>
+            public bool Shown;
             public string Hay, TitleHay, KeyHay;
         }
 
@@ -59,6 +62,7 @@ namespace CapyIsland.UI
         TMP_InputField _search;
         GameObject _clear, _empty;
         HelpMovie _movie;
+        MoreBelowCue _stepsCue;
         HelpTopic _topic;
         string _pending;
         int _hayVersion = -1;
@@ -89,7 +93,6 @@ namespace CapyIsland.UI
                 ShowList();
                 return;
             }
-            UpdateMoreCue();
             base.Update();
         }
 
@@ -103,7 +106,8 @@ namespace CapyIsland.UI
             _listScroll = UiKit.ScrollList(_listPage, "Topics", out _list, 14f);
             UiKit.Stretch((RectTransform)_listScroll.transform, 0f, 0f, 0f, 96f + 18f);
 
-            var empty = UiKit.Text(_list, "Nothing", "Nothing found. Try another word, like wood, map or food.", 30f, UiKit.InkSoft, false, TextAlignmentOptions.Center);
+            // Only pages already reached are searched, so the words suggested are from the first ones.
+            var empty = UiKit.Text(_list, "Nothing", "Nothing found. Try another word, like walk or zoom. More pages turn up as you play.", 30f, UiKit.InkSoft, false, TextAlignmentOptions.Center);
             empty.overflowMode = TextOverflowModes.Overflow;
             empty.margin = new Vector4(16f, 30f, 16f, 30f);
             _empty = empty.gameObject;
@@ -197,6 +201,9 @@ namespace CapyIsland.UI
             button.transition = Selectable.Transition.None;
             button.onClick.AddListener(() => { Sfx.Play(SfxKind.Tap, 0.45f); OpenTopic(topic); });
             row.gameObject.AddComponent<PressSquash>();
+            // Just reached, not opened yet.
+            string id = topic.Id;
+            NewDot.Live(row, () => HelpUnlocks.IsNew(id));
 
             return new Entry { Topic = topic, Card = row.gameObject, NotStarted = notStarted, Chevron = chevron.rectTransform, Order = order };
         }
@@ -233,75 +240,9 @@ namespace CapyIsland.UI
 
             _stepsScroll = UiKit.ScrollList(page, "Steps", out _steps, 18f, new RectOffset(4, 4, 4, 28));
             _stepsRoot = (RectTransform)_stepsScroll.transform;
-            BuildMoreCue();
-        }
-
-        CanvasGroup _more;
-        RectTransform _moreLayer;
-        RectTransform _moreButton;
-        Tween _moreScroll;
-
-        /// <summary>
-        /// When the steps run past the bottom (a phone on its side), a small round button floats at
-        /// the bottom of them with an arrow pointing down, bobbing gently, so it's clear there's
-        /// more to read. Tapping it glides the steps down a page; it fades away at the bottom.
-        /// </summary>
-        void BuildMoreCue()
-        {
-            // On a layer of its own over the steps (same place, same size), drawn after them: inside
-            // the scroll list the words were drawn over it.
-            _moreLayer = UiKit.Rect("MoreLayer", _stepsRoot.parent);
-            _moreLayer.SetAsLastSibling();
-            var holder = UiKit.Rect("More", _moreLayer);
-            UiKit.Place(holder, new Vector2(0.5f, 0f), new Vector2(0f, 14f), new Vector2(72f, 72f));
-            _more = holder.gameObject.AddComponent<CanvasGroup>();
-            _more.alpha = 0f;
-            _more.blocksRaycasts = _more.interactable = false;
-
-            var disc = UiKit.Image(holder, "Button", UiKit.Circle, Accent, true);
-            _moreButton = disc.rectTransform;
-            UiKit.Place(_moreButton, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(72f, 72f));
-            UiKit.AddShadow(_moreButton, 10f, 5f, 0.22f);
-            var arrow = UiKit.Image(disc.transform, "Arrow", IconPainter.Chevron, Color.white);
-            arrow.preserveAspect = true;
-            UiKit.Place(arrow.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0f, -2f), new Vector2(34f, 34f));
-            arrow.rectTransform.localRotation = Quaternion.Euler(0f, 0f, -90f);   // the chevron points right: turned to point down
-            var button = disc.gameObject.AddComponent<Button>();
-            button.transition = Selectable.Transition.None;
-            // It was born disabled (the group isn't interactable yet) while still on the default
-            // colour tint, which faded it to half: undo that, or it stays see-through for good.
-            disc.CrossFadeColor(Color.white, 0f, true, true);
-            button.onClick.AddListener(ScrollStepsDown);
-            disc.gameObject.AddComponent<PressSquash>();
-        }
-
-        /// <summary>The steps glide down most of a page (a line or two of the old one stays in view).</summary>
-        void ScrollStepsDown()
-        {
-            float spare = _steps.rect.height - _stepsRoot.rect.height;
-            if (spare <= 1f) return;
-            Sfx.Play(SfxKind.Tap, 0.4f);
-            _stepsScroll.StopMovement();
-            float from = _stepsScroll.verticalNormalizedPosition;
-            float to = Mathf.Clamp01(from - _stepsRoot.rect.height * 0.8f / spare);
-            _moreScroll?.Kill();
-            _moreScroll = DOTween.To(() => _stepsScroll.verticalNormalizedPosition, v => _stepsScroll.verticalNormalizedPosition = v, to, 0.45f)
-                .SetEase(Ease.OutCubic).SetUpdate(true);
-        }
-
-        void UpdateMoreCue()
-        {
-            if (_more == null) return;
-            // Keep the layer exactly over the steps, whichever way the screen is turned.
-            _moreLayer.anchorMin = _stepsRoot.anchorMin;
-            _moreLayer.anchorMax = _stepsRoot.anchorMax;
-            _moreLayer.pivot = _stepsRoot.pivot;
-            _moreLayer.offsetMin = _stepsRoot.offsetMin;
-            _moreLayer.offsetMax = _stepsRoot.offsetMax;
-            bool more = _topic != null && _steps.rect.height > _stepsRoot.rect.height + 4f && _stepsScroll.verticalNormalizedPosition > 0.02f;
-            _more.alpha = Mathf.MoveTowards(_more.alpha, more ? 1f : 0f, Time.unscaledDeltaTime * 5f);
-            _more.blocksRaycasts = _more.interactable = more;
-            if (_more.alpha > 0f) _moreButton.anchoredPosition = new Vector2(0f, 5f * Mathf.Abs(Mathf.Sin(Time.unscaledTime * 2.6f)));
+            // When the steps run past the bottom (a phone on its side), a round button at the
+            // bottom says there is more to read, and glides them down a page.
+            _stepsCue = MoreBelowCue.Add(_stepsScroll, Accent);
         }
 
         // ---------------------------------------------------------------- opening and closing
@@ -309,9 +250,11 @@ namespace CapyIsland.UI
         protected override void OnOpen()
         {
             _above.Clear();
+            HelpUnlocks.CheckNow();   // anything reached a moment ago is here too
             bool rtl = Loc.Rtl;
             foreach (var e in _entries)
             {
+                e.Shown = HelpUnlocks.Available(e.Topic);
                 if (e.NotStarted != null) e.NotStarted.SetActive(!Started(e.Topic));
                 // The chevron points the way you read: on into the page.
                 e.Chevron.localScale = new Vector3(rtl ? -1f : 1f, 1f, 1f);
@@ -348,6 +291,7 @@ namespace CapyIsland.UI
         void OpenTopic(HelpTopic topic)
         {
             _topic = topic;
+            HelpUnlocks.Seen(topic.Id);   // its red dot goes
             _listPage.gameObject.SetActive(false);
             _topicPage.gameObject.SetActive(true);
             if (_backIcon != null) _backIcon.localScale = new Vector3(Loc.Rtl ? 1f : -1f, 1f, 1f);   // pointing back
@@ -373,7 +317,7 @@ namespace CapyIsland.UI
                 var le = go.transform.parent.gameObject.AddComponent<LayoutElement>();
                 le.preferredHeight = le.minHeight = 96f;
             }
-            _moreScroll?.Kill();
+            if (_stepsCue != null) _stepsCue.Stop();
             _stepsScroll.verticalNormalizedPosition = 1f;
 
             StopMovie();
@@ -467,7 +411,8 @@ namespace CapyIsland.UI
         /// <summary>
         /// Keeps the cards whose words hold every word typed — title, line, steps and keywords, in
         /// English and, with Hebrew on, in Hebrew too — best matches first (a title match beats a
-        /// keyword, which beats a step). An empty box shows every page under its heading.
+        /// keyword, which beats a step). An empty box shows every page under its heading. Only pages
+        /// already reached are shown or searched, and a heading with none of them yet stays away.
         /// </summary>
         void Filter(string query)
         {
@@ -476,7 +421,7 @@ namespace CapyIsland.UI
             if (words.Count == 0)
             {
                 _empty.SetActive(false);
-                foreach (var s in _sections.Values) s.SetActive(true);
+                foreach (var s in _sections.Values) s.SetActive(false);
                 // Back to reading order: each heading, then its cards.
                 int i = 1;
                 HelpCategory? current = null;
@@ -487,8 +432,9 @@ namespace CapyIsland.UI
                         current = e.Topic.Category;
                         _sections[current.Value].transform.SetSiblingIndex(i++);
                     }
-                    e.Card.SetActive(true);
+                    e.Card.SetActive(e.Shown);
                     e.Card.transform.SetSiblingIndex(i++);
+                    if (e.Shown) _sections[current.Value].SetActive(true);
                 }
                 _listScroll.verticalNormalizedPosition = 1f;
                 return;
@@ -499,7 +445,7 @@ namespace CapyIsland.UI
             var hits = new List<(Entry e, int score)>();
             foreach (var e in _entries)
             {
-                int score = Score(e, words);
+                int score = e.Shown ? Score(e, words) : 0;
                 e.Card.SetActive(score > 0);
                 if (score > 0) hits.Add((e, score));
             }

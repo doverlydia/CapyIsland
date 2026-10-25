@@ -22,7 +22,7 @@ namespace CapyIsland.UI
             var go = new GameObject("[IntroCurtain]", typeof(Canvas));
             var canvas = go.GetComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = 440;   // under the awakening (460) and the movie (450), over everything else
+            canvas.sortingOrder = 440;   // under the awakening (460) and the movie (950), over everything else
             _instance = go.AddComponent<IntroCurtain>();
             var img = new GameObject("Black", typeof(RectTransform), typeof(Image));
             img.transform.SetParent(go.transform, false);

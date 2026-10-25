@@ -2,36 +2,45 @@
 
 @ Shake fruit trees: tap one and all its fruit falls. Sometimes a treasure chest falls instead, and some chests hold gems.
 = נער עצי פרי: הקש על עץ וכל הפירות שלו נופלים. לפעמים נופלת במקומם תיבת אוצר, ובחלק מהתיבות יש יהלומים.
+~ נערי עצי פרי: הקישי על עץ וכל הפירות שלו נופלים. לפעמים נופלת במקומם תיבת אוצר, ובחלק מהתיבות יש יהלומים.
 
 @ Pear and plum trees drop gems more often than apple trees.
 = עצי אגס ושזיף מפילים יהלומים לעתים קרובות יותר מעצי תפוח.
 
 @ Daily gifts: tap Gifts. Day 5 of your streak brings 10 gems.
 = מתנות יומיות: הקש על מתנות. היום החמישי ברצף מביא 10 יהלומים.
+~ מתנות יומיות: הקישי על מתנות. היום החמישי ברצף מביא 10 יהלומים.
 
 @ Fill a whole journal for 40 gems: every fish, bird, bug or crop. The fish, bird and bug journals give a hat too.
 = מלא יומן שלם וקבל 40 יהלומים: כל הדגים, הציפורים, החרקים או הגידולים. יומני הדגים, הציפורים והחרקים נותנים גם כובע.
+~ מלאי יומן שלם וקבלי 40 יהלומים: כל הדגים, הציפורים, החרקים או הגידולים. יומני הדגים, הציפורים והחרקים נותנים גם כובע.
 
 @ Contests: when one ends, tap Events, then Claim. The top three win 50, 30 or 15 gems, and everyone else who took part gets 3.
 = תחרויות: כשתחרות נגמרת, הקש על אירועים ואז על קבל. שלושת הראשונים זוכים ב־50, 30 או 15 יהלומים, וכל שאר המשתתפים מקבלים 3.
+~ תחרויות: כשתחרות נגמרת, הקישי על אירועים ואז על קבלי. שלושת הראשונים זוכים ב־50, 30 או 15 יהלומים, וכל שאר המשתתפים מקבלים 3.
 
 @ Your first shop, the General Store, comes from Miso's first quest.
 = החנות הראשונה שלך, חנות הכלבו, מגיעה מהמשימה הראשונה של מיסו.
 
 @ Tap the next shop where your shop sets it out, then Purchase. It joins your trail.
 = הקש על החנות הבאה בין הסחורות שהחנות שלך מציגה, ואז על קנייה. היא מצטרפת לשובל שלך.
+~ הקישי על החנות הבאה בין הסחורות שהחנות שלך מציגה, ואז על קנייה. היא מצטרפת לשובל שלך.
 
 @ Drag it out and plant it: the new shop opens and sets out its own wares, the next shop among them.
 = גרור אותה החוצה והצב אותה: החנות החדשה נפתחת ומציגה את הסחורות שלה, ובהן החנות הבאה.
+~ גררי אותה החוצה והציבי אותה: החנות החדשה נפתחת ומציגה את הסחורות שלה, ובהן החנות הבאה.
 
 @ Anything you can't afford yet looks faded. The Silver, Steel and Gold Stores are priced from how much you have and earn, so save up a little first.
 = מה שעוד אין לך מספיק כדי לקנות נראה דהוי. המחיר של חנויות הכסף, הפלדה והזהב נקבע לפי כמה שיש לך וכמה שאתה מרוויח, אז חסוך קצת קודם.
+~ מה שעוד אין לך מספיק כדי לקנות נראה דהוי. המחיר של חנויות הכסף, הפלדה והזהב נקבע לפי כמה שיש לך וכמה שאת מרוויחה, אז חסכי קצת קודם.
 
 @ Buy a Shoo Bomb at the Bronze Store and plant it right next to them. It fizzes for a few seconds, then they vanish in a puff, and nothing else is touched.
 = קנה פצצת קישטה בחנות הארד והצב אותה ממש לידם. היא תוססת כמה שניות, ואז הם נעלמים בענן, ושום דבר אחר לא נפגע.
+~ קני פצצת קישטה בחנות הארד והציבי אותה ממש לידם. היא תוססת כמה שניות, ואז הם נעלמים בענן, ושום דבר אחר לא נפגע.
 
 @ A Fizz Bomb (Silver Store) clears pests too, but it also turns everything nearby back into bubbles, workers too.
 = גם פצצת תסס (מחנות הכסף) מנקה מזיקים, אבל היא גם הופכת את כל מה שקרוב בחזרה לבועות, כולל פועלים.
 
 @ Or tap a zombie capybara and Pay 20 Gems for a warm bath: then it joins your trail and works for you.
 = או הקש על קפיברת זומבי ושלם 20 יהלומים על אמבטיה חמה: אז היא מצטרפת לשובל שלך ועובדת בשבילך.
+~ או הקישי על קפיברת זומבי ושלמי 20 יהלומים על אמבטיה חמה: אז היא מצטרפת לשובל שלך ועובדת בשבילך.

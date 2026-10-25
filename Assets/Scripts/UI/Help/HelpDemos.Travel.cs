@@ -75,7 +75,7 @@ namespace CapyIsland.UI
             LeftLabel(m, sheet, "Island Map", new Vector2(-240f, 174f), 24f, Color.white, 320f);
             var closeDisc = m.Shape("Close", UiKit.Circle, new Vector2(266f, 174f), new Vector2(32f, 32f), new Color(1f, 1f, 1f, 0.25f), sheet);
             m.Shape("X", IconPainter.Close, Vector2.zero, new Vector2(16f, 16f), Color.white, closeDisc.transform).preserveAspect = true;
-            const string hintWords = "Tap to look · drag yourself to travel";
+            const string hintWords = "Tap a spot or drag yourself to travel";
             Fit(m.Label("Hint", hintWords, new Vector2(0f, -173f), 15f, UiKit.InkSoft, sheet), hintWords, 560f);
 
             var frameAt = new Vector2(0f, -2f);

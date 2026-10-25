@@ -85,7 +85,7 @@ namespace CapyIsland.Game
             if (!_hinted)
             {
                 _hintTimer -= Time.deltaTime;
-                if (_hintTimer <= 0f) { _hinted = true; Hints.Island(ArrivalHint); }
+                if (_hintTimer <= 0f) { _hinted = true; Hints.Show(ArrivalHint); }
             }
 
             int frames = _clock.Consume(Time.deltaTime);

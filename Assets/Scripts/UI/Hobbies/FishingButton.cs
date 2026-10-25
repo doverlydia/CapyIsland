@@ -297,7 +297,7 @@ namespace CapyIsland.UI
             if (_tackleOpen) { CloseTackle(); return; }
             var f = Fishing.Instance;
             if (f == null) return;
-            if (f.Now == Fishing.State.Fight) { Hints.Show("Land this fish first!"); return; }
+            if (f.Now == Fishing.State.Fight) { Hints.Answer("Land this fish first!"); return; }
             _tackleOpen = true;
             _rowsShown = null;
             _outside.gameObject.SetActive(true);
@@ -505,9 +505,9 @@ namespace CapyIsland.UI
             var f = Fishing.Instance;
             if (f == null) { Baits.Select(b); return; }
             bool onLine = f.PutOnBait(b);
-            if (b == null) Hints.Show("Fishing without bait.");
-            else if (onLine || f.Now == Fishing.State.Idle) Hints.Show(string.Format("{0} on the hook!", b.Name));
-            else Hints.Show(string.Format("{0} goes on at your next cast.", b.Name));
+            if (b == null) Hints.Answer("Fishing without bait.");
+            else if (onLine || f.Now == Fishing.State.Idle) Hints.Answer(string.Format("{0} on the hook!", b.Name));
+            else Hints.Answer(string.Format("{0} goes on at your next cast.", b.Name));
         }
 
         /// <summary>
@@ -518,8 +518,8 @@ namespace CapyIsland.UI
         {
             CloseTackle();
             string why = MermaidCharms.Toss();
-            if (why != null) { Hints.Show(why); return; }
-            DOVirtual.DelayedCall(1.1f, () => Hints.Show(StoryText.Charm.Tossed)).SetLink(gameObject);
+            if (why != null) { Hints.Answer(why); return; }
+            DOVirtual.DelayedCall(1.1f, () => Hints.Answer(StoryText.Charm.Tossed)).SetLink(gameObject);
         }
 
         // ---------------------------------------------------------------- what's helping right now

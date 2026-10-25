@@ -34,11 +34,17 @@ namespace CapyIsland.Core
 #endif
             // What the player is told, readable from outside (hooked again after island swaps reset events).
             Game.Hints.Shown += LogHint;
-            UnityEngine.SceneManagement.SceneManager.sceneLoaded += (_, _) => { Game.Hints.Shown -= LogHint; Game.Hints.Shown += LogHint; };
+            Game.Hints.Answered += LogAnswer;
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded += (_, _) =>
+            {
+                Game.Hints.Shown -= LogHint; Game.Hints.Shown += LogHint;
+                Game.Hints.Answered -= LogAnswer; Game.Hints.Answered += LogAnswer;
+            };
             Debug.Log("[dev] ready");
         }
 
         static void LogHint(string line) => Debug.Log("[hint] " + line);
+        static void LogAnswer(string line) => Debug.Log("[answer] " + line);
 
         /// <summary>Ends the opening tutorial at once (a test player may fly straight away).</summary>
         public static string FinishTutorial()

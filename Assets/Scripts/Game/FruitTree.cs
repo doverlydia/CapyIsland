@@ -44,13 +44,11 @@ namespace CapyIsland.Game
         [SerializeField] float ripenSeconds = 4f;
 
         static float _saplingReadyAt;
-        static bool _anyShaken, _shakeHinted;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void ResetSaplingTimer()
         {
             _saplingReadyAt = BunniRules.SaplingIntervalSeconds;
-            _anyShaken = _shakeHinted = false;
         }
 
         class Fruit
@@ -159,12 +157,6 @@ namespace CapyIsland.Game
                     if (_fruit.Count < BunniRules.MaxFruitOnTree && Random.value < BunniRules.FruitChancePerFrame(kind))
                     {
                         AddFruit();
-                        // The fruit-tree card's line, for players who never picked one up.
-                        if (_fruit.Count == BunniRules.MaxFruitOnTree && !_anyShaken && !_shakeHinted)
-                        {
-                            _shakeHinted = true;
-                            Hints.Island("Tap fruit trees to shake them. All sorts of goodies fall out, sometimes even gems.");
-                        }
                     }
                     break;
 
@@ -200,8 +192,6 @@ namespace CapyIsland.Game
         /// <summary>The player tapped the tree (FruitTree.Click): shake down every fruit.</summary>
         public void PlayerShake()
         {
-            _anyShaken = true;
-            Hints.Island("You shook a <b>" + StoryText.Name(StoreName) + "</b>");
             if (!_canShake) { if (_sway != null) _sway.Kick(3f, 0.3f, 40f); return; }
             EnterShake();
             RemoveFruit();
@@ -293,21 +283,9 @@ namespace CapyIsland.Game
 
             // A third each: a monster, a deer, or a bomb comes out of the stump.
             float r = Random.value;
-            if (r < 0.33f)
-            {
-                Hints.Island("A worker ran out of trees and chopped down a fruit tree! Uh oh, a zombie capybara climbed out!");
-                Hazards.Spawn(HazardKind.Monster, at);
-            }
-            else if (r < 0.66f)
-            {
-                Hints.Island("A worker ran out of trees and chopped down a fruit tree! Uh oh, a guinea pig jumped out!");
-                Hazards.Spawn(HazardKind.Deer, at);
-            }
-            else
-            {
-                Hints.Island("A worker ran out of trees and chopped down a fruit tree, and a fizz bomb fell out! Stand back!");
-                Hazards.Spawn(HazardKind.Bomb, at);
-            }
+            if (r < 0.33f) Hazards.Spawn(HazardKind.Monster, at);
+            else if (r < 0.66f) Hazards.Spawn(HazardKind.Deer, at);
+            else Hazards.Spawn(HazardKind.Bomb, at);
 
             Destroy(gameObject);
         }

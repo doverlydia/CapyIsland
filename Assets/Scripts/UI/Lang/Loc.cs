@@ -17,6 +17,10 @@ namespace CapyIsland.UI
     /// Tables live in Resources/Lang/&lt;code&gt;/*.txt:
     ///   @ English
     ///   = translation
+    ///   ~ translation for a girl (optional)
+    /// Hebrew speaks to a boy and a girl differently ("הקש" / "הקישי"). The "=" line speaks to a
+    /// boy; where the words for a girl differ, a "~" line follows, used when the player said they
+    /// are a girl (<see cref="Feminine"/>, asked on the opening screen when Hebrew is picked).
     /// An English side with {0}, {1}… is a template: it matches any string of that shape, and each
     /// captured piece (an item name, a friend's island) is itself translated before it is put back.
     /// A string that matches nothing is split into lines and each line tried on its own, so a title
@@ -66,6 +70,39 @@ namespace CapyIsland.UI
             Changed?.Invoke();
         }
 
+        // ---------------------------------------------------------------- a boy or a girl
+
+        const string FemininePrefKey = "CapyIsland.Hebrew.Feminine";
+        static bool? _feminine;
+
+        /// <summary>True once the player has said how to be spoken to (only asked in Hebrew).</summary>
+        public static bool AddressChosen => PlayerPrefs.HasKey(FemininePrefKey);
+
+        /// <summary>
+        /// Speak to the player as a girl: Hebrew uses each entry's "~" line where it has one. A boy
+        /// (the "=" lines) until they say otherwise.
+        /// </summary>
+        public static bool Feminine
+        {
+            get
+            {
+                if (!_feminine.HasValue) _feminine = PlayerPrefs.GetInt(FemininePrefKey, 0) == 1;
+                return _feminine.Value;
+            }
+        }
+
+        public static void SetFeminine(bool feminine)
+        {
+            bool same = AddressChosen && Feminine == feminine;
+            PlayerPrefs.SetInt(FemininePrefKey, feminine ? 1 : 0);
+            PlayerPrefs.Save();
+            if (same) return;
+            _feminine = feminine;
+            _cache.Clear();
+            Version++;
+            Changed?.Invoke();
+        }
+
         /// <summary>The language's own name, written in that language, for the picker.</summary>
         public static string NativeName(Language l) => l == Language.Hebrew ? "עברית" : "English";
 
@@ -77,11 +114,13 @@ namespace CapyIsland.UI
         {
             public Regex Pattern;
             public string Translation;
+            public string Feminine;   // the "~" line, if the words for a girl differ
             public string Literal;   // the longest fixed piece of the English, for a cheap pre-check
             public int Specificity;
         }
 
         static readonly Dictionary<string, string> _exact = new(StringComparer.OrdinalIgnoreCase);
+        static readonly Dictionary<string, string> _exactFeminine = new(StringComparer.OrdinalIgnoreCase);
         static readonly List<Template> _templates = new();
         static readonly Dictionary<string, string> _cache = new();
         static Language? _loadedFor;
@@ -93,6 +132,7 @@ namespace CapyIsland.UI
             if (_loadedFor == Current) return;
             _loadedFor = Current;
             _exact.Clear();
+            _exactFeminine.Clear();
             _templates.Clear();
             _cache.Clear();
             if (Current == Language.English) return;
@@ -106,28 +146,45 @@ namespace CapyIsland.UI
 
         static void Parse(string text, string file)
         {
-            string key = null;
+            string key = null, last = null;
+            Template lastTemplate = null;
             int line = 0;
             foreach (var raw in text.Split('\n'))
             {
                 line++;
                 var l = raw.TrimEnd('\r');
-                if (l.StartsWith("@ ")) { key = Unescape(l.Substring(2)); continue; }
+                if (l.StartsWith("@ ")) { key = Unescape(l.Substring(2)); last = null; continue; }
+                if (l.StartsWith("~ ") && last != null)
+                {
+                    // For a girl: the entry just read, in her words.
+                    var feminine = Unescape(l.Substring(2));
+                    if (lastTemplate != null) lastTemplate.Feminine = feminine;
+                    else if (feminine.Length > 0)
+                    {
+                        _exactFeminine[last] = feminine;
+                        var trimmed = last.Trim();
+                        if (trimmed != last && !_exactFeminine.ContainsKey(trimmed)) _exactFeminine[trimmed] = feminine.Trim();
+                    }
+                    last = null;
+                    continue;
+                }
                 if (!l.StartsWith("= ") || key == null) continue;
-                Add(key, Unescape(l.Substring(2)), file, line);
+                lastTemplate = Add(key, Unescape(l.Substring(2)), file, line);
+                last = key;
                 key = null;
             }
         }
 
-        static void Add(string english, string translation, string file, int line)
+        /// <summary>Adds an entry; returns its template if the English is one, so a "~" line can join it.</summary>
+        static Template Add(string english, string translation, string file, int line)
         {
-            if (string.IsNullOrEmpty(english) || string.IsNullOrEmpty(translation)) return;
+            if (string.IsNullOrEmpty(english) || string.IsNullOrEmpty(translation)) return null;
             if (!Placeholder.IsMatch(english))
             {
                 _exact[english] = translation;
                 var trimmed = english.Trim();
                 if (trimmed != english && !_exact.ContainsKey(trimmed)) _exact[trimmed] = translation.Trim();
-                return;
+                return null;
             }
 
             // Build ^literal(?<p0>.+?)literal…$ from the English. A one-line template's
@@ -151,21 +208,24 @@ namespace CapyIsland.UI
             pattern.Append(Regex.Escape(tail)).Append('$');
             literal += tail.Length;
             if (tail.Trim().Length > longest.Length) longest = tail.Trim();
-            if (literal == 0) return;   // "{0}" alone would match everything
+            if (literal == 0) return null;   // "{0}" alone would match everything
 
             try
             {
-                _templates.Add(new Template
+                var template = new Template
                 {
                     Pattern = new Regex(pattern.ToString(), RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.CultureInvariant),
                     Translation = translation,
                     Literal = longest,
                     Specificity = literal,
-                });
+                };
+                _templates.Add(template);
+                return template;
             }
             catch (ArgumentException e)
             {
                 Debug.LogWarning($"Lang/{file}:{line}: bad template \"{english}\": {e.Message}");
+                return null;
             }
         }
 
@@ -248,10 +308,10 @@ namespace CapyIsland.UI
         {
             if (depth > 3 || string.IsNullOrEmpty(s)) return null;
             if (!HasLetter(s)) return s;
-            if (_exact.TryGetValue(s, out var exact)) return exact;
+            if (Exact(s, out var exact)) return exact;
 
             var trimmed = s.Trim();
-            if (trimmed.Length != s.Length && trimmed.Length > 0 && _exact.TryGetValue(trimmed, out exact))
+            if (trimmed.Length != s.Length && trimmed.Length > 0 && Exact(trimmed, out exact))
                 return s.Substring(0, s.IndexOf(trimmed, StringComparison.Ordinal)) + exact + s.Substring(s.IndexOf(trimmed, StringComparison.Ordinal) + trimmed.Length);
 
             foreach (var t in _templates)
@@ -259,7 +319,7 @@ namespace CapyIsland.UI
                 if (t.Literal.Length > 0 && s.IndexOf(t.Literal, StringComparison.OrdinalIgnoreCase) < 0) continue;
                 var m = t.Pattern.Match(s);
                 if (!m.Success) continue;
-                return Placeholder.Replace(t.Translation, p =>
+                return Placeholder.Replace(Feminine && t.Feminine != null ? t.Feminine : t.Translation, p =>
                 {
                     var g = m.Groups["p" + p.Groups[1].Value];
                     if (!g.Success) return p.Value;
@@ -291,6 +351,10 @@ namespace CapyIsland.UI
             }
             return null;
         }
+
+        /// <summary>An exact entry, in a girl's words when she is one and the entry has them.</summary>
+        static bool Exact(string s, out string translation) =>
+            (Feminine && _exactFeminine.TryGetValue(s, out translation)) || _exact.TryGetValue(s, out translation);
 
         /// <summary>
         /// Has English in it to translate: a Latin letter. Text that is already Hebrew (a card page
@@ -403,6 +467,7 @@ namespace CapyIsland.UI
         {
             Changed = null;
             _current = null;
+            _feminine = null;
             _loadedFor = null;
             _cache.Clear();
             _otherFor = null;

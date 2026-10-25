@@ -17,7 +17,7 @@ namespace CapyIsland.Game
             Lines("From any shore", When(f.Times, f.RainOnly), Level(Hobby.Fishing, "Needs fishing level {0}", f.MinLevel));
 
         public static string Bird(BirdKind b) =>
-            Lines(b.Wader ? "On rocks by the shore" : "Up in the trees", When(b.Times, b.RainOnly),
+            Lines(b.Sea ? "Over the sea and on the beach" : b.Wader ? "On rocks by the shore" : "Up in the trees", When(b.Times, b.RainOnly),
                 Level(Hobby.Birding, "Needs birdwatching level {0}", b.MinLevel));
 
         public static string Bug(BugKind b) =>
@@ -33,12 +33,12 @@ namespace CapyIsland.Game
         /// </summary>
         public static string Dish(DishKind d) =>
             !HobbyLog.IsUnlocked(Hobby.Cooking)
-                ? "Buy a stove from Chef Tofu by the hot spring"
+                ? HobbyLog.HowToUnlock(Hobby.Cooking)
                 : Lines(d.FreeWith switch
                     {
                         Hobby.Gardening => "Free when you take up gardening",
                         Hobby.Fishing => "Free when you take up fishing",
-                        _ => "Buy the recipe from Chef Tofu by the hot spring",
+                        _ => "Buy the recipe from Chef Tofu on Sunflower Farm",
                     },
                     Level(Hobby.Cooking, "Needs cooking level {0}", d.MinLevel));
 

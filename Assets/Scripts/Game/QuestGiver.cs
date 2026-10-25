@@ -23,7 +23,6 @@ namespace CapyIsland.Game
         Transform _body;
         SpriteRenderer _bodyRenderer;
         Placeable _placeable;
-        float _hintTimer = -1f;
         bool _departing;
 
         // Miso and the Captain stroll about their spot rather than standing like statues.
@@ -81,15 +80,31 @@ namespace CapyIsland.Game
             MapMarkers.Register(this);
             if (kind == Kind.Coriander) Purchasing.GiftGiven += OnGift;
 
-            // The original's nudges: Coriander at once, Peach and ghosts after a minute — only
-            // until you have talked to any of them.
-            _hintTimer = kind == Kind.Coriander ? 0.5f : 60f;
-
             if (kind == Kind.Ghost && _bodyRenderer != null)
             {
                 var c = _bodyRenderer.color; c.a = 0f; _bodyRenderer.color = c;
                 _bodyRenderer.DOFade(0.92f, 1.2f);
             }
+        }
+
+        System.Collections.IEnumerator Start()
+        {
+            yield return null;   // the save has been read and the trail laid out
+            DressAsSaved();
+            SettleIfCarried();
+        }
+
+        /// <summary>
+        /// Out of a bubble with no room beside it, or from an island saved while she rode in the
+        /// trail (before characters stepped straight out): she settles by the king instead of
+        /// waiting to be dragged, since there's no spot for the player to choose.
+        /// </summary>
+        void SettleIfCarried()
+        {
+            if (kind == Kind.Ghost || _placeable == null || _placeable.Placed) return;
+            if (!TryGetComponent<Follower>(out var follower) || !follower.Carried) return;
+            var king = FindFirstObjectByType<PlayerAvatar>();
+            if (king != null) _placeable.SettleNear(king.transform.position, 5f);
         }
 
         void OnDisable()
@@ -134,7 +149,20 @@ namespace CapyIsland.Game
 
         public bool IsInWorld => InWorld;
         public QuestSystem.Progress CurrentQuest => Progress;
-        public Sprite Portrait => _bodyRenderer != null ? _bodyRenderer.sprite : null;
+        public Sprite Portrait
+        {
+            get
+            {
+                // Still in her bubble she's switched off and hasn't woken (Awake), but the goals
+                // list and the corner card already want her face.
+                if (_bodyRenderer == null)
+                {
+                    var body = transform.Find("Sprite");
+                    if (body != null) _bodyRenderer = body.GetComponent<SpriteRenderer>();
+                }
+                return _bodyRenderer != null ? _bodyRenderer.sprite : null;
+            }
+        }
 
         public MarkerKind MarkerKind => MarkerKind.Quest;
         public bool MarkerActive => HasNews;
@@ -156,11 +184,6 @@ namespace CapyIsland.Game
                 _body.localPosition = new Vector3(0f, 0.25f + Mathf.Sin(Time.time * 1.6f) * 0.12f, 0f);
             else Stroll();
 
-            if (_hintTimer > 0f && InWorld)
-            {
-                _hintTimer -= Time.deltaTime;
-                if (_hintTimer <= 0f && !QuestSystem.AnyoneTalkedTo) Hints.Island(NudgeLine, () => !QuestSystem.AnyoneTalkedTo);
-            }
         }
 
         /// <summary>
@@ -211,7 +234,6 @@ namespace CapyIsland.Game
             if (_body != null) _body.localPosition = Vector3.Lerp(_body.localPosition, _bodyRest, Time.deltaTime * 10f);
         }
 
-        string NudgeLine => StoryText.NudgeFor(kind);
         bool _introduced;
 
         // ---------------------------------------------------------------- talking
@@ -227,16 +249,15 @@ namespace CapyIsland.Game
         public void Tap()
         {
             if (DishOrders.TryServe(transform)) return;   // the dish they wanted, if it's in your bag, comes first
+            if (HasNews) TapMeHint.Tapped();
             var qs = QuestSystem.Instance;
             if (qs == null) return;
             var q = Progress;
             var pages = qs.PagesFor(q, kind);
             var face = _bodyRenderer != null ? _bodyRenderer.sprite : null;
 
-            // Meeting Miso for the first time before Old Yuzu got to say who she is: Yuzu says it
-            // first, so it is never missed, and then Miso speaks.
-            if (kind == Kind.Coriander && !QuestSystem.AnyoneTalkedTo && !_introduced
-                && (UI.GhostDialogue.Instance == null || !UI.GhostDialogue.Instance.HasSaid(NudgeLine)))
+            // Meeting Miso for the first time: Old Yuzu says who she is first, and then Miso speaks.
+            if (kind == Kind.Coriander && !QuestSystem.AnyoneTalkedTo && !_introduced)
             {
                 _introduced = true;
                 var guide = UI.GhostDialogue.Instance != null ? UI.GhostDialogue.Instance.Face : null;
@@ -311,10 +332,9 @@ namespace CapyIsland.Game
         }
 
         /// <summary>After a load, she is still wearing everything you have given her.</summary>
-        System.Collections.IEnumerator Start()
+        void DressAsSaved()
         {
-            if (kind != Kind.Coriander) yield break;
-            yield return null;
+            if (kind != Kind.Coriander) return;
             if (Motes.Has("The Girl's New Dress")) Wear("Wedding Dress");
             if (Motes.Has("The Girl's New Necklace")) Wear("String of Pearls");
             if (Motes.Has("The Girl's Tiara")) Wear("Tiara");

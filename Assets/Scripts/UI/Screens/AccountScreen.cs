@@ -39,7 +39,13 @@ namespace CapyIsland.UI
         /// </summary>
         public static void ShowWelcome(Action done, bool signIn = false) => Open(signIn, done);
 
-        static void Open(bool signIn, Action welcomeDone = null)
+        /// <summary>
+        /// The opening's Continue with Google: the welcome window opens and Google is asked at once.
+        /// If Google says no (or is closed), the window stays, with the other ways in under it.
+        /// </summary>
+        public static void ShowWelcomeGoogle(Action done) => Open(false, done, true);
+
+        static void Open(bool signIn, Action welcomeDone = null, bool google = false)
         {
             var old = GameObject.Find(ObjectName);
             if (old != null) Destroy(old);
@@ -55,6 +61,7 @@ namespace CapyIsland.UI
             screen._signIn = signIn;
             screen._welcomeDone = welcomeDone;
             screen.Build();
+            if (google) screen.GoGoogle();
         }
 
         void Build()
@@ -65,6 +72,8 @@ namespace CapyIsland.UI
             UiKit.Stretch(scrim.rectTransform);
 
             var card = UiKit.Card(root, "Card", UiKit.Surface, 40);
+            // A tap around it is Cancel; the opening's window has no Cancel, so it waits for a choice.
+            TapOutside.Add(scrim, card.rectTransform, Close, () => _welcomeDone == null);
             _card = card.rectTransform;
             var cr = card.rectTransform;
             cr.anchorMin = new Vector2(0.06f, 0.5f);
@@ -147,6 +156,19 @@ namespace CapyIsland.UI
             }, 28f);
             other.transform.parent.gameObject.AddComponent<LayoutElement>().preferredHeight = 70f;
 
+            // Signing in is the way back to an island you had; a saved island code is the other one,
+            // so it lives here too (the opening has no separate button for it).
+            if (_signIn)
+            {
+                var load = UiKit.Button(card, "LoadSave", "Load with a save code", UiKit.ButtonStyle.Ghost, () =>
+                {
+                    if (_working) return;
+                    Destroy(gameObject);   // the opening stays underneath, if the code window is closed
+                    SaveCodeScreen.ShowImport();
+                }, 28f);
+                load.transform.parent.gameObject.AddComponent<LayoutElement>().preferredHeight = 70f;
+            }
+
             var line = UiKit.Image(card, "Line", UiKit.Rounded(4), UiKit.SurfaceSunk);
             line.gameObject.AddComponent<LayoutElement>().preferredHeight = 4f;
 
@@ -203,7 +225,7 @@ namespace CapyIsland.UI
             Busy(false);
             if (problem != null) { Say(problem, UiKit.Danger); return; }
             Sfx.Play(SfxKind.Chest, 0.6f);
-            Hints.Show(_signIn
+            Hints.Answer(_signIn
                 ? Loc.F("Signed in as {0}.", user)
                 : _welcomeDone != null
                     ? Loc.F("Your island is kept safe: {0}. Sign in with it on any device.", user)
@@ -234,7 +256,7 @@ namespace CapyIsland.UI
             Busy(false);
             if (problem != null) { Say(problem, UiKit.Danger); return; }
             Sfx.Play(SfxKind.Chest, 0.6f);
-            Hints.Show(switched
+            Hints.Answer(switched
                 ? "Signed in with Google."
                 : "Your island is now kept with your Google account. On your other device, choose Continue with Google.");
             Finish();

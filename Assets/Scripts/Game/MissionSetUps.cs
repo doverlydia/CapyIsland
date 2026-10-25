@@ -22,6 +22,7 @@ namespace CapyIsland.Game
             {
                 case "create_store":
                     Focus(catalog.MakeStore("General Store", beside));
+                    if (TutorialDirector.TakeStartGift()) StartGift(giver, kingAt);
                     break;
 
                 case "create_pete":
@@ -55,6 +56,21 @@ namespace CapyIsland.Game
                     Focus(catalog.MakeStore("Pirate Peach", beside));
                     break;
             }
+        }
+
+        /// <summary>
+        /// Miso's start-up gift, with the General Store. Not the original's: a new game starts with
+        /// 100 wood and 100 gold (not 1000 / 1500), and this hands over the difference just as the
+        /// first shop opens, so wood and gold arrive when there is something to spend them on.
+        /// Games that started with the old purse never get it (<see cref="TutorialDirector.TakeStartGift"/>).
+        /// </summary>
+        public const int StartGiftWood = 900, StartGiftGold = 1400;
+
+        static void StartGift(QuestGiver giver, Vector2 kingAt)
+        {
+            Vector2 from = giver != null ? (Vector2)giver.transform.position : kingAt;
+            QuestSystem.DropChests(QuestSystem.RewardSpot(from), StartGiftWood, StartGiftGold, 0);
+            if (giver != null) UI.SpeechDialog.Show(giver.Portrait, giver.Speaker, new[] { StoryText.Spring.MisoGift });
         }
 
         /// <summary>The original's focus arrow: point the player at what just appeared.</summary>

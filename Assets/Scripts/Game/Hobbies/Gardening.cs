@@ -89,7 +89,7 @@ namespace CapyIsland.Game
                 if (fresh && !SaveGame.Restoring && !Farm.LayingOut)
                 {
                     Sfx.PlayAt(SfxKind.Plop, at);
-                    Hints.Show("Tap your plot to plant some seeds.");
+                    Hints.Answer("Tap your plot to plant some seeds.");
                 }
             }
 
@@ -239,12 +239,12 @@ namespace CapyIsland.Game
                 if (d == null) return;
                 if (Locked && string.IsNullOrEmpty(d.crop))
                 {
-                    Hints.Show(WhyNot);
+                    Hints.Answer(WhyNot);
                     return;
                 }
                 if (string.IsNullOrEmpty(d.crop))
                 {
-                    Hints.Show("Buy seeds at the barn, then drag them from your trail onto an empty plot.");
+                    Hints.Answer("Buy seeds at the barn, then drag them from your trail onto an empty plot.");
                     return;
                 }
                 var kind = HobbyData.Crop(d.crop);
@@ -253,7 +253,7 @@ namespace CapyIsland.Game
                 {
                     double left = kind.Minutes * (1f - p);
                     string when = left < 1 ? "less than a minute" : $"about {Math.Ceiling(left)} min";
-                    Hints.Show($"Your {kind.Name.ToLower()} will be ready in {when}.");
+                    Hints.Answer($"Your {kind.Name.ToLower()} will be ready in {when}.");
                     return;
                 }
                 Harvest(kind);
@@ -291,7 +291,7 @@ namespace CapyIsland.Game
                 Sfx.PlayAt(SfxKind.Plop, transform.position);
                 transform.DOPunchScale(Vector3.one * 0.08f, 0.3f, 6, 0.6f);
                 Refresh();
-                Hints.Show($"{kind.Name} seeds planted! Ready in {kind.Minutes:0} min.");
+                Hints.Answer($"{kind.Name} seeds planted! Ready in {kind.Minutes:0} min.");
             }
 
             void Harvest(CropKind kind)
@@ -305,8 +305,8 @@ namespace CapyIsland.Game
                 var fx = HarvestEffects.Instance;
                 if (fx != null) fx.Twinkle(transform.position + Vector3.up * 0.4f, 8);
                 Sfx.PlayAt(SfxKind.Rustle, transform.position);
-                Hints.Show($"You harvested {kind.Yield} {kind.Name.ToLower()}{(kind.Yield > 1 ? "s" : "")}! They're in your bag.");
-                if (first) Hints.Show(UI.Loc.F("New in your vegetable journal: {0}!", UI.Loc.T(kind.Name)));
+                Hints.Answer($"You harvested {kind.Yield} {kind.Name.ToLower()}{(kind.Yield > 1 ? "s" : "")}! They're in your bag.");
+                if (first) Hints.Answer(UI.Loc.F("New in your vegetable journal: {0}!", UI.Loc.T(kind.Name)));
                 Refresh();
             }
         }

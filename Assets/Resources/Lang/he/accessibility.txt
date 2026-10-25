@@ -41,12 +41,14 @@
 
 @ Skip
 = דלג
+~ דלגי
 
 @ Next
 = הבא
 
 @ Let's play!
 = בוא נשחק!
+~ בואי נשחק!
 
 @ Easy Reading: On
 = קריאה נוחה: פועלת
@@ -58,36 +60,58 @@
 
 @ Welcome to Capy Island!
 = ברוך הבא לאי הקפיברות!
+~ ברוכה הבאה לאי הקפיברות!
 
 @ Before we start, pick your language. If the words are hard to read, turn on Easy Reading for bigger text.
 = לפני שמתחילים, בחר שפה. אם קשה לקרוא את המילים, הפעל קריאה נוחה לטקסט גדול יותר.
+~ לפני שמתחילים, בחרי שפה. אם קשה לקרוא את המילים, הפעילי קריאה נוחה לטקסט גדול יותר.
 
 @ Your treasure
 = האוצר שלך
 
 @ Wood, gold and gems. Your capybaras gather wood and gold; you spend them in the shops.
 = עץ, זהב ויהלומים. הקפיברות שלך אוספות עץ וזהב, ואתה מוציא אותם בחנויות.
+~ עץ, זהב ויהלומים. הקפיברות שלך אוספות עץ וזהב, ואת מוציאה אותם בחנויות.
 
 @ What to do next
 = מה עושים עכשיו
 
 @ Your next goal is always here. Tap it to see every goal and quest.
 = המטרה הבאה שלך תמיד כאן. הקש עליה כדי לראות את כל המטרות והמשימות.
+~ המטרה הבאה שלך תמיד כאן. הקישי עליה כדי לראות את כל המטרות והמשימות.
+
+@ Your goals
+= המטרות שלך
+
+@ Quests come first: what Old Yuzu and your neighbours are asking for right now. The one you're on also waits at the top of the screen.
+= קודם המשימות: מה שסבתא יוזו והשכנים שלך מבקשים עכשיו. המשימה שאתה עושה מחכה גם בראש המסך.
+~ קודם המשימות: מה שסבתא יוזו והשכנים שלך מבקשים עכשיו. המשימה שאת עושה מחכה גם בראש המסך.
+
+@ Not sure where to go? Tap Show me and you'll see where it happens.
+= לא בטוח לאן ללכת? הקש על "הראה לי" ותראה איפה זה קורה.
+~ לא בטוחה לאן ללכת? הקישי על "הראי לי" ותראי איפה זה קורה.
+
+@ Bigger things to do around the island, for whenever you like. Each one brings a heart home to the Steam Tower.
+= דברים גדולים יותר לעשות באי, מתי שבא לך. כל אחד מחזיר לב הביתה למגדל האדים.
 
 @ You
 = זה אתה
+~ זו את
 
 @ This is your capybara. Hold your finger on the ground and it walks toward your finger. Let go to stop.
 = זו הקפיברה שלך. החזק את האצבע על הקרקע והיא תלך לכיוון האצבע. הרם את האצבע כדי לעצור.
+~ זו הקפיברה שלך. החזיקי את האצבע על הקרקע והיא תלך לכיוון האצבע. הרימי את האצבע כדי לעצור.
 
 @ Arrows at the edge
 = חצים בקצה המסך
 
 @ An arrow at the edge of the screen points at something you can't see yet. The picture inside shows what it is. Tap the arrow and your capybara walks there.
 = חץ בקצה המסך מצביע על משהו שעוד לא רואים. התמונה בתוכו מראה מה זה. הקש על החץ והקפיברה שלך תלך לשם.
+~ חץ בקצה המסך מצביע על משהו שעוד לא רואים. התמונה בתוכו מראה מה זה. הקישי על החץ והקפיברה שלך תלך לשם.
 
 @ Where Old Yuzu wants you to go
 = לאן סבתא יוזו רוצה שתלך
+~ לאן סבתא יוזו רוצה שתלכי
 
 @ Someone with a quest for you
 = מישהו עם משימה בשבילך
@@ -101,11 +125,15 @@
 @ A friend visiting
 = חבר שבא לבקר
 
+@ Sleepy capybaras: the cloud shows what they need
+= קפיברות ישנוניות: הענן מראה מה חסר להן
+
 @ Placing things
 = להניח דברים
 
 @ Things you collect follow you in a line. Drag one onto the ground to place it.\nWhile you drag, a circle shows the space it needs:
 = דברים שאתה אוסף הולכים אחריך בשורה. גרור אחד מהם אל הקרקע כדי להניח אותו.\nבזמן הגרירה, עיגול מראה כמה מקום הוא צריך:
+~ דברים שאת אוספת הולכים אחרייך בשורה. גררי אחד מהם אל הקרקע כדי להניח אותו.\nבזמן הגרירה, עיגול מראה כמה מקום הוא צריך:
 
 @ Green: you can let go here
 = ירוק: אפשר לשחרר כאן
@@ -115,6 +143,7 @@
 
 @ Want to put it further away? Drag it to the edge of the screen and your capybara walks that way.
 = רוצה להניח אותו רחוק יותר? גרור אותו לקצה המסך והקפיברה שלך תלך לשם.
+~ רוצה להניח אותו רחוק יותר? גררי אותו לקצה המסך והקפיברה שלך תלך לשם.
 
 @ Old Yuzu
 = סבתא יוזו
@@ -127,15 +156,18 @@
 
 @ See all the islands. Drag yourself on the map to travel.
 = כל האיים במבט אחד. גרור את עצמך על המפה כדי לנסוע.
+~ כל האיים במבט אחד. גררי את עצמך על המפה כדי לנסוע.
 
 @ Daily gifts
 = מתנות יומיות
 
 @ A present every day you play. A red dot means one is waiting.
 = מתנה בכל יום שאתה משחק. נקודה אדומה אומרת שמתנה מחכה לך.
+~ מתנה בכל יום שאת משחקת. נקודה אדומה אומרת שמתנה מחכה לך.
 
 @ Fly to your friends' islands and invite them to visit yours.
 = טוס לאיים של החברים שלך והזמן אותם לבקר באי שלך.
+~ טוסי לאיים של החברים שלך והזמיני אותם לבקר באי שלך.
 
 @ Your profile
 = הפרופיל שלך
@@ -148,9 +180,11 @@
 
 @ Send a wave, a heart or a smile to anyone visiting.
 = שלח נפנוף, לב או חיוך למי שבא לבקר.
+~ שלחי נפנוף, לב או חיוך למי שבא לבקר.
 
 @ Need help later?
 = צריך עזרה אחר כך?
+~ צריכה עזרה אחר כך?
 
 @ Bigger text, tap-to-read and the language are in Settings, the gear on the right. You can watch this tour again there too.
 = טקסט גדול, הקשה לקריאה והשפה נמצאים בהגדרות, גלגל השיניים מימין. שם אפשר גם לצפות שוב בסיור.
@@ -159,6 +193,7 @@
 
 @ See the circle around it? Green means there's room to plant it there. Red means something is in the way, so move it a little. Let go to plant it.
 = רואה את העיגול סביבו? ירוק אומר שיש מקום לשתול אותו שם. אדום אומר שמשהו מפריע, אז הזז אותו קצת. שחרר כדי לשתול.
+~ רואה את העיגול סביבו? ירוק אומר שיש מקום לשתול אותו שם. אדום אומר שמשהו מפריע, אז הזיזי אותו קצת. שחררי כדי לשתול.
 
 @ Previous
 = הקודם
@@ -173,6 +208,7 @@
 
 @ Go here
 = לך לכאן
+~ לכי לכאן
 
 @ Quest
 = משימה
@@ -186,10 +222,14 @@
 @ Bubble
 = בועה
 
+@ Asleep
+= ישנים
+
 # ---- feedback when a drop doesn't take, and walking to an arrow
 
 @ Not enough room there. Drop it where the circle turns green.
 = אין שם מספיק מקום. שחרר אותו במקום שבו העיגול נהיה ירוק.
+~ אין שם מספיק מקום. שחררי אותו במקום שבו העיגול נהיה ירוק.
 
 @ That's water! Things can only be planted on land.
 = זה מים! אפשר לשתול רק על היבשה.
@@ -205,6 +245,7 @@
 
 @ Stop walking
 = עצור
+~ עצרי
 
 # ---- hold a counter to see what it is
 
@@ -327,6 +368,7 @@
 
 @ Bait goes on your hook as you cast, one per cast. Tap the bait button while fishing to choose.
 = הפיתיון עולה על הקרס כשאתה זורק את החכה, אחד בכל זריקה. בזמן הדיג הקש על כפתור הפיתיון כדי לבחור.
+~ הפיתיון עולה על הקרס כשאת זורקת את החכה, אחד בכל זריקה. בזמן הדיג הקישי על כפתור הפיתיון כדי לבחור.
 
 @ You have {0}
 = יש לך {0}
@@ -348,12 +390,14 @@
 
 @ Fishing without bait.
 = דג בלי פיתיון.
+~ דגה בלי פיתיון.
 
 @ {0}: {1}
 = {0}: {1}
 
 @ Ahoy! The fish are biting. My rod and bait are laid out on the sand, take your pick. And I've empty bottles, if you've a message for the sea.
 = אהוי! הדגים נושכים היום. החכה והפיתיונות שלי פרושים על החול, בחר מה שתרצה. ויש לי גם בקבוקים ריקים, אם יש לך הודעה לים.
+~ אהוי! הדגים נושכים היום. החכה והפיתיונות שלי פרושים על החול, בחרי מה שתרצי. ויש לי גם בקבוקים ריקים, אם יש לך הודעה לים.
 
 @ Ahoy! The fish are biting. I've bait for an easier catch, and empty bottles if you've a message for the sea.
 = אהוי! הדגים נושכים היום. יש לי פיתיונות לדיג קל יותר, ובקבוקים ריקים אם יש לך הודעה לים.
@@ -428,6 +472,7 @@
 
 @ {0} (you)
 = {0} (אתה)
+~ {0} (את)
 
 @ Reward: {0}
 = פרס: {0}
@@ -443,54 +488,65 @@
 
 @ Claim reward
 = קבל את הפרס
+~ קבלי את הפרס
 
 @ Claimed! A new goal comes tomorrow.
 = קיבלת! מחר תחכה מטרה חדשה.
 
 @ Get a fishing rod, binoculars or a bug net, and a new goal will be waiting here every day.
 = השג חכה, משקפת או רשת חרקים, וכל יום תחכה כאן מטרה חדשה.
+~ השיגי חכה, משקפת או רשת חרקים, וכל יום תחכה כאן מטרה חדשה.
 
 @ Night Fishing
 = דיג לילה
 
 @ Catch 5 fish after dark.
 = תפוס 5 דגים אחרי החשיכה.
+~ תפסי 5 דגים אחרי החשיכה.
 
 @ Golden Hour
 = שעת הזהב
 
 @ Spot 3 birds at dawn or dusk.
 = גלה 3 ציפורים בשחר או בדמדומים.
+~ גלי 3 ציפורים בשחר או בדמדומים.
 
 @ Bug Hunt
 = ציד חרקים
 
 @ Catch 6 bugs.
 = תפוס 6 חרקים.
+~ תפסי 6 חרקים.
 
 @ Something Fancy
 = משהו מיוחד
 
 @ Catch 3 fish that are uncommon or rarer.
 = תפוס 3 דגים לא שכיחים או נדירים יותר.
+~ תפסי 3 דגים לא שכיחים או נדירים יותר.
 
 @ Birdwatcher
 = צפר
+~ צפרית
 
 @ Spot 5 birds.
 = גלה 5 ציפורים.
+~ גלי 5 ציפורים.
 
 @ Busy Angler
 = דייג חרוץ
+~ דייגת חרוצה
 
 @ Catch 8 fish.
 = תפוס 8 דגים.
+~ תפסי 8 דגים.
 
 @ Moonlight Bugs
 = חרקי אור ירח
 
 @ Catch 3 bugs after dark.
 = תפוס 3 חרקים אחרי החשיכה.
+~ תפסי 3 חרקים אחרי החשיכה.
 
 @ {0}: you came first!
 = {0}: הגעת למקום הראשון!
@@ -536,6 +592,7 @@
 
 @ You
 = אתה
+~ את
 
 @ gems
 = יהלומים
@@ -571,6 +628,7 @@
 
 @ The rain has stopped. Look, a rainbow!
 = הגשם נפסק. תראה, קשת בענן!
+~ הגשם נפסק. תראי, קשת בענן!
 
 @ The sun is coming up.
 = השמש זורחת.
@@ -595,9 +653,11 @@
 
 @ Found {0} of {1}. Find them all for {2} gems and the {3}.
 = נמצאו {0} מתוך {1}. מצא את כולם ותקבל {2} יהלומים ואת {3}.
+~ נמצאו {0} מתוך {1}. מצאי את כולם ותקבלי {2} יהלומים ואת {3}.
 
 @ Found {0} of {1}. Find them all for {2} gems.
 = נמצאו {0} מתוך {1}. מצא את כולם ותקבל {2} יהלומים.
+~ נמצאו {0} מתוך {1}. מצאי את כולם ותקבלי {2} יהלומים.
 
 @ The fish journal is complete!
 = יומן הדגים הושלם!
@@ -628,12 +688,15 @@
 
 @ Complete the fish journal
 = השלם את יומן הדגים
+~ השלימי את יומן הדגים
 
 @ Complete the bird journal
 = השלם את יומן הציפורים
+~ השלימי את יומן הציפורים
 
 @ Complete the bug journal
 = השלם את יומן החרקים
+~ השלימי את יומן החרקים
 
 # ---- tips
 
@@ -642,15 +705,18 @@
 
 @ Old Yuzu talks to you here, and her words tell you what to try next. When she goes quiet, tap her picture to hear her again.
 = כאן סבתא יוזו מדברת איתך, והמילים שלה אומרות לך מה לנסות עכשיו. כשהיא שותקת, הקש על התמונה שלה כדי לשמוע אותה שוב.
+~ כאן סבתא יוזו מדברת איתך, והמילים שלה אומרות לך מה לנסות עכשיו. כשהיא שותקת, הקישי על התמונה שלה כדי לשמוע אותה שוב.
 
 @ Everything else lives here: your goals, the map, your collection, the wardrobe and your hobbies.
 = כל השאר נמצא כאן: המטרות, המפה, האוסף, ארון הבגדים והתחביבים.
 
 @ End tutorial
 = סיים הדרכה
+~ סיימי הדרכה
 
 @ Skip
 = דלג
+~ דלגי
 
 @ Tutorial and tips
 = הדרכה וטיפים
@@ -660,23 +726,27 @@
 
 @ An empty bottle for your trail. Drop it on the beach and write a note to put inside.
 = בקבוק ריק לשובל שלך. הנח אותו על החוף וכתוב פתק לשים בתוכו.
+~ בקבוק ריק לשובל שלך. הניחי אותו על החוף וכתבי פתק לשים בתוכו.
 
 @ The story so far
 = הסיפור עד כה
 
 @ Watch
 = צפה
+~ צפי
 
 # ---------------------------------------------------------------- Game/Hobbies/MessageBottle.cs
 
 @ Drag your bottle to the beach and drop it on the sand by the water.
 = גרור את הבקבוק לחוף והנח אותו על החול ליד המים.
+~ גררי את הבקבוק לחוף והניחי אותו על החול ליד המים.
 
 @ Bottles go on the sand, right by the water.
 = בקבוקים מניחים על החול, ממש ליד המים.
 
 @ Your note is tucked inside. Tap the bottle to change it.
 = הפתק שלך בתוך הבקבוק. הקש על הבקבוק כדי לשנות אותו.
+~ הפתק שלך בתוך הבקבוק. הקישי על הבקבוק כדי לשנות אותו.
 
 @ Your note is updated.
 = הפתק שלך עודכן.
@@ -691,9 +761,11 @@
 
 @ Hide
 = הסתר
+~ הסתירי
 
 @ Show
 = הצג
+~ הציגי
 
 @ The vegetable journal is complete!
 = יומן הירקות הושלם!

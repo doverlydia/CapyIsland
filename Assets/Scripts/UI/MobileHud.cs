@@ -212,7 +212,7 @@ namespace CapyIsland.UI
             _tuckChevron.SetSiblingIndex(tucked ? 0 : 1);
         }
 
-        /// <summary>Keeps the pill just under the last button (the column changes on a visit).</summary>
+        /// <summary>Keeps the pill just under the last button (the column changes on a visit, and grows as buttons appear).</summary>
         void PlaceTuck()
         {
             float height = 0f;
@@ -223,7 +223,8 @@ namespace CapyIsland.UI
                 height += child.sizeDelta.y;
                 shown++;
             }
-            height += Mathf.Max(0, shown - 1) * SideSpacing + 8f;   // the last caption hangs a little lower
+            // The last caption hangs a little lower, and lower still with Easy Reading's taller captions.
+            height += Mathf.Max(0, shown - 1) * SideSpacing + 8f + 40f * (Accessibility.TextScale - 1f);
             // A short screen (a phone on its side): the column shrinks to fit, pill and all.
             float top = -_side.anchoredPosition.y;
             float room = ((RectTransform)_safe).rect.height - top - _tuck.sizeDelta.y - 40f;
@@ -236,9 +237,19 @@ namespace CapyIsland.UI
         bool SideHasDot()
         {
             foreach (Transform button in _side)
+            {
+                if (!button.gameObject.activeSelf) continue;   // not in the column yet (HudReveal)
                 foreach (var t in button.GetComponentsInChildren<Transform>(false))
                     if (t.name == "Dot" || t.name == "NewDot") return true;
+            }
             return false;
+        }
+
+        /// <summary>Brings the column back if it was tucked away (a new button wants to be seen).</summary>
+        public void ShowSide()
+        {
+            if (_tucked && _side != null) Tuck(false, true);
+            if (_side != null) PlaceTuck();
         }
 
         void BorrowResourceIcons()
@@ -276,13 +287,12 @@ namespace CapyIsland.UI
             gameObject.AddComponent<Ambience>();
             gameObject.AddComponent<Atmosphere>();
             gameObject.AddComponent<DayNight>();
-            gameObject.AddComponent<WorldMoments>();
             gameObject.AddComponent<NightLights>();
             gameObject.AddComponent<MusicPlayer>();
             gameObject.AddComponent<TipTriggers>();
             gameObject.AddComponent<Fishing>();
-            gameObject.AddComponent<Birding>();
-            gameObject.AddComponent<BugCatching>();
+            gameObject.AddComponent<Wildlife>();   // birds and bugs about the island (and birdwatching, bug catching)
+            gameObject.AddComponent<TapMeHint>();  // the hand taps on someone with news, until you've got the idea
             gameObject.AddComponent<Gardening>();
             gameObject.AddComponent<Farm>();
             gameObject.AddComponent<CatCare>();
@@ -345,7 +355,7 @@ namespace CapyIsland.UI
             UiKit.RoundButton(side, "Settings", IconPainter.Gear, "Settings", UiKit.Hex("6B8FA8"), () => settings.Open());
             // "How do I…?": straight under Settings, where someone stuck looks first.
             MakeScreen<HelpScreen>(screens, "HelpScreen");
-            UiKit.RoundButton(side, "Help", HelpArt.Question, "Help", HelpScreen.Accent, () => HelpScreen.Show());
+            NewDot.Live(UiKit.RoundButton(side, "Help", HelpArt.Question, "Help", HelpScreen.Accent, () => HelpScreen.Show()).transform, () => !Attention.TutorialRunning && HelpUnlocks.AnyNew);   // a help page just reached
             if (Visit.Active)
             {
                 // Away from home the column is short: only what helps on someone else's island
@@ -359,25 +369,33 @@ namespace CapyIsland.UI
                 _addFriend = UiKit.RoundButton(side, "AddFriend", IconPainter.AddFriend, "Add", UiKit.Leaf, () =>
                 {
                     Visit.BefriendHost();
-                    Hints.Show(Visit.Host.name + " is now your friend! Their island will be here next time.");
+                    Hints.Answer(Visit.Host.name + " is now your friend! Their island will be here next time.");
                     if (VisitorBot.Current != null) VisitorBot.Current.Emote(Game.Emoji.Heart);
                 }).transform.parent.gameObject;
             }
             else
             {
-                var mapButton = UiKit.RoundButton(side, "Map", IconPainter.Map, "Map", UiKit.Spring, () => map.Open());
-                NewDot.Live(mapButton.transform, () => !Attention.TutorialRunning && NewStuff.Any("map/"));
-                var hobbiesButton = UiKit.RoundButton(side, "Hobbies", IconPainter.Rod, "Hobbies", UiKit.Hex("3E9C8F"), () => HobbiesScreen.Show());
-                NewDot.Live(hobbiesButton.transform, () => !Attention.TutorialRunning && NewStuff.Any("hobbies/"));
-                var collectionButton = UiKit.RoundButton(side, "Collection", IconPainter.Cards, "Collection", UiKit.Hex("A77BD6"), () => collection.Open());
-                NewDot.Live(collectionButton.transform, () => !Attention.TutorialRunning && CollectionScreen.AnyNews());
-                var giftButton = UiKit.RoundButton(side, "Gifts", IconPainter.Gift, "Gifts", UiKit.Hex("E3A92B"), () => gifts.Open());
+                // At home the column grows as you play (HudReveal): each button below waits, hidden,
+                // for its moment, then pops in with a "new" dot and a word from Old Yuzu. The column
+                // closes up around the missing ones, and red dots only ever sit on buttons that are there.
+                var reveal = gameObject.AddComponent<HudReveal>();
+                Button Side(string id, string name, Sprite icon, Color fill, System.Action open, System.Func<bool> news = null)
+                {
+                    var b = UiKit.RoundButton(side, name, icon, name, fill, open);
+                    b.onClick.AddListener(() => HudReveal.Tapped(id));
+                    NewDot.Live(b.transform, () => !Attention.TutorialRunning && (HudReveal.IsNew(id) || (news != null && news())));
+                    reveal.Add(id, b.transform.parent.gameObject);
+                    return b;
+                }
+                Side(HudReveal.Map, "Map", IconPainter.Map, UiKit.Spring, () => map.Open(), () => NewStuff.Any("map/"));
+                Side(HudReveal.Hobbies, "Hobbies", IconPainter.Rod, UiKit.Hex("3E9C8F"), () => HobbiesScreen.Show(), () => HobbiesScreen.HasNews());   // only news the hub can show (and clear)
+                Side(HudReveal.Collection, "Collection", IconPainter.Cards, UiKit.Hex("A77BD6"), () => collection.Open(), CollectionScreen.AnyNews);
+                var giftButton = Side(HudReveal.Gifts, "Gifts", IconPainter.Gift, UiKit.Hex("E3A92B"), () => gifts.Open());
                 var dot = UiKit.Image(giftButton.transform, "Dot", UiKit.Circle, UiKit.Danger);
                 UiKit.Place(dot.rectTransform, new Vector2(1f, 1f), new Vector2(2f, 2f), new Vector2(34f, 34f));
                 _giftDot = dot.gameObject;
-                var friendsButton = UiKit.RoundButton(side, "Friends", IconPainter.Plane, "Friends", UiKit.Hex("5B9BD5"), () => friends.Open());
-                NewDot.Live(friendsButton.transform, () => !Attention.TutorialRunning && NewStuff.Any("friends/"));
-                var eventsButton = UiKit.RoundButton(side, "Events", IconPainter.Trophy, "Events", UiKit.Hex("E3A92B"), () => events.Open());
+                Side(HudReveal.Friends, "Friends", IconPainter.Plane, UiKit.Hex("5B9BD5"), () => friends.Open(), () => NewStuff.Any("friends/"));
+                var eventsButton = Side(HudReveal.Events, "Events", IconPainter.Trophy, UiKit.Hex("E3A92B"), () => events.Open());
                 var edot = UiKit.Image(eventsButton.transform, "Dot", UiKit.Circle, UiKit.Danger);
                 UiKit.Place(edot.rectTransform, new Vector2(1f, 1f), new Vector2(2f, 2f), new Vector2(34f, 34f));
                 _eventsDot = edot.gameObject;

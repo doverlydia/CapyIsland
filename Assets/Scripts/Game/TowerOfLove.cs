@@ -127,14 +127,18 @@ namespace CapyIsland.Game
         {
             if (_bodyRenderer == null) return -1f;
             if (_spring != null && _spring.PoolContains(worldPoint)) return Vector2.Distance(_spring.PoolBounds.center, worldPoint);
+            if (_spring != null && _spring.PitContains(worldPoint)) return Vector2.Distance(_spring.PitPoint, worldPoint);
             var b = _bodyRenderer.bounds;
             if (!b.Contains(new Vector3(worldPoint.x, worldPoint.y, b.center.z))) return -1f;
             return Vector2.Distance(b.center, worldPoint);
         }
 
-        /// <summary>Opens the goals list on its achievements, with how the island is feeling on top.</summary>
+        /// <summary>Opens the goals list on its quests (what to do next comes first), with how the island is feeling on top.</summary>
         public void Tap()
         {
+            // Still iced over (the opening): no soak yet. The spring says why, and how to warm it.
+            if (_spring != null && _spring.Frozen) { _spring.TapFrozen(); return; }
+
             // The same count as the achievements list below it: one number, never two.
             int total = Motes.Total, found = Motes.CollectedCount;
             int percent = total > 0 ? Mathf.RoundToInt(100f * found / total) : 0;
@@ -149,7 +153,7 @@ namespace CapyIsland.Game
             string banner = $"<b>{mood}.</b> {left}";
             // A soak in the spring first; the page opens while the capybara relaxes in the water,
             // and closing it sends the capybara climbing back out.
-            void Open(Action climbOut) => UI.ObjectivesScreen.Show(UI.ObjectivesScreen.Tab.Achievements, banner,
+            void Open(Action climbOut) => UI.ObjectivesScreen.Show(UI.ObjectivesScreen.Tab.Quests, banner,
                 () => { DiaryClosed?.Invoke(); climbOut?.Invoke(); });
             if (_spring != null) _spring.Visit(Open);
             else Open(null);

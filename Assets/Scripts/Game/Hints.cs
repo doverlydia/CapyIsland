@@ -4,9 +4,16 @@ using System.Collections.Generic;
 namespace CapyIsland.Game
 {
     /// <summary>
-    /// The original's hint line (Tasks.HintTextEvent / HintTextMouse): short messages about what just
-    /// happened on the island — a worker out of trees, a shaken fruit tree, a monster on the loose.
-    /// Anything can post one; the ghost dialogue shows them.
+    /// Short messages to the player, of two kinds:
+    ///
+    ///  * <see cref="Show"/> — news: something happened that you didn't just do (a friend landed, a
+    ///    cat brought you something, a new button joined the column). Old Yuzu says it from her
+    ///    corner, fading in for the line and out again.
+    ///  * <see cref="Answer"/> — the answer to something you just did ("too far", "Copied!", "no
+    ///    room there"): a small note by your finger that fades by itself (UI.TapAnswer).
+    ///
+    /// Remarks about the island itself (a hungry worker, a forest chopped bare, nightfall) aren't
+    /// made at all: the island shows those — a sleeper's thought cloud, the arrows at the edge.
     /// </summary>
     public static class Hints
     {
@@ -20,9 +27,9 @@ namespace CapyIsland.Game
         static readonly Dictionary<string, Func<bool>> _while = new();
 
         /// <summary>
-        /// A hint that only makes sense while <paramref name="stillTrue"/> holds ("go and talk to
-        /// Miso", until you have). The ghost may have to wait for a popup or the tutorial before she
-        /// says it; if by then it no longer holds, she drops it instead of saying it late.
+        /// News that only makes sense while <paramref name="stillTrue"/> holds ("Map is new", until
+        /// you've tapped it). The ghost may have to wait for a popup before she says it; if by then
+        /// it no longer holds, she drops it instead of saying it late.
         /// </summary>
         public static void Show(string line, Func<bool> stillTrue)
         {
@@ -31,25 +38,28 @@ namespace CapyIsland.Game
             Show(line);
         }
 
+        /// <summary>
+        /// A condition for a line said some other way (the tutorial's story lines): once it no longer
+        /// holds, the ghost drops the line, waiting or showing, as she does a hint's.
+        /// </summary>
+        public static void While(string line, Func<bool> stillTrue)
+        {
+            if (!string.IsNullOrEmpty(line) && stillTrue != null) _while[line] = stillTrue;
+        }
+
         /// <summary>False once a hint posted with a condition no longer applies.</summary>
         public static bool StillTrue(string line) =>
             string.IsNullOrEmpty(line) || !_while.TryGetValue(line, out var f) || f == null || f();
 
-        static readonly HashSet<string> _island = new();
+        /// <summary>Raised with every answer, for the dev log.</summary>
+        public static event Action<string> Answered;
 
-        /// <summary>
-        /// Old Yuzu talking about the island itself (a hungry worker, a forest chopped bare,
-        /// nightfall). On someone else's island it isn't said at all: it's their island, and she
-        /// only keeps an eye on yours. Everything else (what you did, who came and went) is still
-        /// shown there, at the top of the screen instead of in her corner.
-        /// </summary>
-        public static void Island(string line, Func<bool> stillTrue = null)
+        /// <summary>The answer to something the player just did: a small note by their finger, fading by itself.</summary>
+        public static void Answer(string line)
         {
             if (string.IsNullOrEmpty(line)) return;
-            _island.Add(line);
-            Show(line, stillTrue);
+            Answered?.Invoke(line);
+            UI.TapAnswer.Show(line);
         }
-
-        public static bool IsAboutIsland(string line) => line != null && _island.Contains(line);
     }
 }

@@ -22,6 +22,7 @@
 
 @ Add
 = הוסף
+~ הוסיפי
 
 @ Gifts
 = מתנות
@@ -86,6 +87,7 @@
 
 @ Done! Collect your reward under Events
 = הושלם! אסוף את הפרס שלך באירועים
+~ הושלם! אספי את הפרס שלך באירועים
 
 @ Next goal
 = המטרה הבאה
@@ -117,9 +119,11 @@
 
 @ tap to close
 = הקש לסגירה
+~ הקישי לסגירה
 
 @ tap to continue
 = הקש להמשך
+~ הקישי להמשך
 
 # ---------------------------------------------------------------- ObjectivesScreen
 
@@ -137,12 +141,15 @@
 
 @ Nobody needs a hand right now. Keep building, and new friends will turn up with requests.
 = אף אחד לא צריך עזרה כרגע. המשך לבנות, וחברים חדשים יגיעו עם בקשות.
+~ אף אחד לא צריך עזרה כרגע. המשיכי לבנות, וחברים חדשים יגיעו עם בקשות.
 
 @ Talk to {0} to collect your reward
 = דבר עם {0} כדי לקבל את הפרס שלך
+~ דברי עם {0} כדי לקבל את הפרס שלך
 
 @ Talk to {0} to hear what they need
 = דבר עם {0} כדי לשמוע מה צריך
+~ דברי עם {0} כדי לשמוע מה צריך
 
 @ New
 = חדש
@@ -173,6 +180,7 @@
 
 @ Show me
 = הראה לי
+~ הראי לי
 
 # ---------------------------------------------------------------- DailyGiftScreen
 
@@ -184,9 +192,11 @@
 
 @ Welcome! Come back every day and the gifts grow bigger.
 = ברוך הבא! חזור כל יום, והמתנות יגדלו.
+~ ברוכה הבאה! חזרי כל יום, והמתנות יגדלו.
 
 @ Day {0} of your streak — keep it going!
 = יום {0} ברצף שלך — המשך כך!
+~ יום {0} ברצף שלך — המשיכי כך!
 
 @ <size=80%>Miss a day and the streak starts again from day 1.</size>
 = <size=80%>פספסת יום? הרצף מתחיל מחדש מיום 1.</size>
@@ -196,12 +206,15 @@
 
 @ Collect
 = אסוף
+~ אספי
 
 @ Collect day {0}
 = אסוף את יום {0}
+~ אספי את יום {0}
 
 @ Come back tomorrow
 = חזור מחר
+~ חזרי מחר
 
 # ---------------------------------------------------------------- CollectionScreen
 
@@ -215,6 +228,7 @@
 
 @ You
 = אתה
+~ את
 
 @ Bubble
 = בועה
@@ -227,17 +241,21 @@
 
 @ Tap to look · drag yourself to travel
 = הקש כדי להסתכל · גרור את עצמך כדי לנסוע
+~ הקישי כדי להסתכל · גררי את עצמך כדי לנסוע
 
-@ You can't stand in the sea! Drop yourself on land.
-= אי אפשר לעמוד בים! הנח את עצמך על היבשה.
+@ You can't stand in the sea! Pick a spot on land.
+= אי אפשר לעמוד בים! בחר מקום על היבשה.
+~ אי אפשר לעמוד בים! בחרי מקום על היבשה.
 
 @ That island is still closed. Open its bridge first!
 = האי הזה עדיין סגור. קודם פתח את הגשר שלו!
+~ האי הזה עדיין סגור. קודם פתחי את הגשר שלו!
 
 # ---------------------------------------------------------------- ProfileScreen
 
 @ Change outfit
 = החלף בגדים
+~ החליפי בגדים
 
 @ Your island life
 = החיים שלך באי
@@ -309,6 +327,7 @@
 
 @ {0} of {1} pieces collected · tap one to try it on
 = נאספו {0} מתוך {1} פריטים · הקש על אחד כדי למדוד
+~ נאספו {0} מתוך {1} פריטים · הקישי על אחד כדי למדוד
 
 # ---------------------------------------------------------------- SettingsScreen
 
@@ -323,9 +342,11 @@
 
 @ Start a new island
 = התחל אי חדש
+~ התחילי אי חדש
 
 @ Start over
 = התחל מחדש
+~ התחילי מחדש
 
 @ This erases your island, your capybaras and every goal you've earned. It can't be undone. Your wardrobe and daily streak stay with you.
 = זה ימחק את האי שלך, את הקפיברות שלך ואת כל המטרות שהשגת. אי אפשר לבטל את זה. ארון הבגדים והרצף היומי שלך יישארו איתך.
@@ -335,6 +356,7 @@
 
 @ Erase it
 = מחק אותו
+~ מחקי אותו
 
 @ <b>Capy Island</b>
 = <b>אי הקפיברות</b>
@@ -358,9 +380,11 @@
 
 @ It's in your bag. Tap them to serve it.
 = זה בתיק שלך. הקש עליהם כדי להגיש.
+~ זה בתיק שלך. הקישי עליהם כדי להגיש.
 
 @ Cook it at your stove: {0}
 = בשל את זה בכיריים: {0}
+~ בשלי את זה בכיריים: {0}
 
 @ Ready to serve
 = מוכן להגשה
@@ -373,12 +397,15 @@
 
 @ You're number {0}. {1} left.
 = אתה במקום {0}. נשארו {1}.
+~ את במקום {0}. נשארו {1}.
 
 @ Open
 = פתח
+~ פתחי
 
 @ Claim
 = קבל
+~ קבלי
 
 @ Done
 = הושלם
@@ -393,75 +420,94 @@
 
 @ Pop the bubble to meet {0}
 = פוצץ את הבועה כדי להכיר את {0}
+~ פוצצי את הבועה כדי להכיר את {0}
 
 @ Drag {0} onto the grass to settle in
 = גרור את {0} אל הדשא, אל הבית החדש
+~ גררי את {0} אל הדשא, אל הבית החדש
 
 @ Show all {0} goals
 = הצג את כל {0} המטרות
+~ הציגי את כל {0} המטרות
 
 @ <b>{0}</b> is waiting for you in the Wardrobe. To try it on, tap your picture at the top left, then Change outfit.
 = <b>{0}</b> מחכה לך בארון הבגדים. כדי למדוד, הקש על התמונה שלך למעלה משמאל, ואז על "החלף בגדים".
+~ <b>{0}</b> מחכה לך בארון הבגדים. כדי למדוד, הקישי על התמונה שלך למעלה משמאל, ואז על "החליפי בגדים".
 
 @ Load a save
 = טען שמירה
+~ טעני שמירה
 
 @ Your save code
 = קוד השמירה שלך
 
 @ Paste the save code you kept in a note, and your island comes back just as you left it.
 = הדבק את קוד השמירה ששמרת בפתק, והאי שלך יחזור בדיוק כמו שהשארת אותו.
+~ הדביקי את קוד השמירה ששמרת בפתק, והאי שלך יחזור בדיוק כמו שהשארת אותו.
 
 @ Copy it and paste it into a note somewhere safe. To bring this island back, on this phone or another device, choose "Load a save" on the first screen and paste it in.
 = העתק אותו והדבק אותו בפתק במקום בטוח. כדי להחזיר את האי הזה, בטלפון הזה או במכשיר אחר, בחר "טען שמירה" במסך הראשון והדבק אותו שם.
+~ העתיקי אותו והדביקי אותו בפתק במקום בטוח. כדי להחזיר את האי הזה, בטלפון הזה או במכשיר אחר, בחרי "טען שמירה" במסך הראשון והדביקי אותו שם.
 
 @ Paste your save code here
 = הדבק כאן את קוד השמירה
+~ הדביקי כאן את קוד השמירה
 
 @ Copy
 = העתק
+~ העתיקי
 
 @ Paste
 = הדבק
+~ הדביקי
 
 @ Load
 = טען
+~ טעני
 
 @ Export
 = ייצוא
 
 @ Keep a copy of your island
 = שמור עותק של האי שלך
+~ שמרי עותק של האי שלך
 
 @ {0} characters
 = {0} תווים
 
 @ Copied! Now paste it into a note.
 = הועתק! עכשיו הדבק אותו בפתק.
+~ הועתק! עכשיו הדביקי אותו בפתק.
 
 @ Nothing to paste. Copy your save code first, or paste it into the box.
 = אין מה להדביק. העתק קודם את קוד השמירה, או הדבק אותו בתיבה.
+~ אין מה להדביק. העתיקי קודם את קוד השמירה, או הדביקי אותו בתיבה.
 
 @ Save code found. Tap Load to bring your island back.
 = קוד השמירה נמצא. הקש טען כדי להחזיר את האי שלך.
+~ קוד השמירה נמצא. הקישי טעני כדי להחזיר את האי שלך.
 
 @ That doesn't look like a Capy Island save code.
 = זה לא נראה כמו קוד שמירה של Capy Island.
 
 @ Paste your save code first.
 = הדבק קודם את קוד השמירה שלך.
+~ הדביקי קודם את קוד השמירה שלך.
 
 @ That save code is missing its island. Copy the whole code and try again.
 = בקוד השמירה הזה חסר האי. העתק את כל הקוד ונסה שוב.
+~ בקוד השמירה הזה חסר האי. העתיקי את כל הקוד ונסי שוב.
 
 @ That save code is cut short or changed. Copy the whole code and try again.
 = קוד השמירה הזה קטוע או שונה. העתק את כל הקוד ונסה שוב.
+~ קוד השמירה הזה קטוע או שונה. העתיקי את כל הקוד ונסי שוב.
 
 @ Bring back a saved island
 = להחזיר אי שמור
 
 @ Paste the save code you kept in a note. The island you're on now gives way to that one, so export this one first if you want to keep it.
 = הדבק את קוד השמירה ששמרת בפתק. האי שאתה נמצא בו עכשיו יוחלף באי מהקוד, אז ייצא את האי הזה קודם אם אתה רוצה לשמור אותו.
+~ הדביקי את קוד השמירה ששמרת בפתק. האי שאת נמצאת בו עכשיו יוחלף באי מהקוד, אז ייצאי את האי הזה קודם אם את רוצה לשמור אותו.
 
 @ Play on another device
 = לשחק במכשיר אחר
@@ -480,9 +526,11 @@
 
 @ Signed in as {0}
 = מחובר בתור {0}
+~ מחוברת בתור {0}
 
 @ Signed in as {0}.
 = מחובר בתור {0}.
+~ מחוברת בתור {0}.
 
 @ Username
 = שם משתמש
@@ -492,21 +540,25 @@
 
 @ Open the island from your other device. If the two islands are different, you'll choose which one to keep.
 = פתח את האי מהמכשיר האחר שלך. אם שני האיים שונים, תבחר איזה מהם לשמור.
+~ פתחי את האי מהמכשיר האחר שלך. אם שני האיים שונים, תבחרי איזה מהם לשמור.
 
 @ Keep this island in an account, and open it on another device too.
 = שמור את האי הזה בחשבון, ותוכל לפתוח אותו גם במכשיר אחר.
+~ שמרי את האי הזה בחשבון, ותוכלי לפתוח אותו גם במכשיר אחר.
 
 @ Continue with Google
-= המשך עם Google
+= להמשיך עם Google
 
 @ Or pick a username and password:
 = או בחר שם משתמש וסיסמה:
+~ או בחרי שם משתמש וסיסמה:
 
 @ Or with your username and password:
 = או עם שם המשתמש והסיסמה שלך:
 
 @ 8 to 30 characters, with a capital letter, a small letter, a number and a symbol. Write it down: it can't be reset.
 = 8 עד 30 תווים, עם אות גדולה, אות קטנה, מספר וסימן (באנגלית). רשום אותה: אי אפשר לאפס אותה.
+~ 8 עד 30 תווים, עם אות גדולה, אות קטנה, מספר וסימן (באנגלית). רשמי אותה: אי אפשר לאפס אותה.
 
 @ Signing in…
 = מתחבר…
@@ -516,6 +568,7 @@
 
 @ Your island now has an account: {0}. Sign in with it on your other device.
 = לאי שלך יש עכשיו חשבון: {0}. היכנס איתו במכשיר האחר שלך.
+~ לאי שלך יש עכשיו חשבון: {0}. היכנסי איתו במכשיר האחר שלך.
 
 @ A username needs 3 to 20 letters or numbers.
 = שם משתמש צריך 3 עד 20 אותיות או מספרים.
@@ -531,12 +584,15 @@
 
 @ Can't reach the internet right now. Try again in a moment.
 = אין חיבור לאינטרנט כרגע. נסה שוב עוד רגע.
+~ אין חיבור לאינטרנט כרגע. נסי שוב עוד רגע.
 
 @ That username is taken. Try another one.
 = שם המשתמש הזה תפוס. נסה שם אחר.
+~ שם המשתמש הזה תפוס. נסי שם אחר.
 
 @ Type your username and password.
 = הקלד את שם המשתמש והסיסמה שלך.
+~ הקלידי את שם המשתמש והסיסמה שלך.
 
 @ This device is already signed in to that account.
 = המכשיר הזה כבר מחובר לחשבון הזה.
@@ -546,27 +602,33 @@
 
 @ Something went wrong. Try again in a moment.
 = משהו השתבש. נסה שוב עוד רגע.
+~ משהו השתבש. נסי שוב עוד רגע.
 
 @ Waiting for Google…
 = מחכה ל־Google…
 
 @ Signed in with Google
 = מחובר עם Google
+~ מחוברת עם Google
 
 @ Signed in with Google.
 = מחובר עם Google.
+~ מחוברת עם Google.
 
 @ Your island is now kept with your Google account. On your other device, choose Continue with Google.
 = האי שלך שמור עכשיו בחשבון ה־Google שלך. במכשיר האחר, בחר "המשך עם Google".
+~ האי שלך שמור עכשיו בחשבון ה־Google שלך. במכשיר האחר, בחרי "המשך עם Google".
 
 @ Google sign-in isn't available here.
 = כניסה עם Google לא זמינה כאן.
 
 @ Add a Google account to this phone first, in its settings.
 = הוסף קודם חשבון Google לטלפון הזה, בהגדרות שלו.
+~ הוסיפי קודם חשבון Google לטלפון הזה, בהגדרות שלו.
 
 @ Google sign-in didn't work. Try again in a moment.
 = הכניסה עם Google לא הצליחה. נסה שוב עוד רגע.
+~ הכניסה עם Google לא הצליחה. נסי שוב עוד רגע.
 
 @ Delete my account
 = מחיקת החשבון שלי
@@ -576,6 +638,7 @@
 
 @ This deletes your island from the cloud, and your account with its username or Google sign-in, for good. It can't be undone. The island on this device stays; to erase it too, choose Start over.
 = פעולה זו מוחקת את האי שלך מהענן, ואת החשבון שלך עם שם המשתמש או הכניסה עם Google, לתמיד. אי אפשר לבטל את זה. האי במכשיר הזה נשאר; כדי למחוק גם אותו, בחר "התחל מחדש".
+~ פעולה זו מוחקת את האי שלך מהענן, ואת החשבון שלך עם שם המשתמש או הכניסה עם Google, לתמיד. אי אפשר לבטל את זה. האי במכשיר הזה נשאר; כדי למחוק גם אותו, בחרי "התחילי מחדש".
 
 @ Keep it
 = להשאיר
@@ -591,9 +654,11 @@
 
 @ Claim your contest prize in Events
 = אסוף את פרס התחרות שלך באירועים
+~ אספי את פרס התחרות שלך באירועים
 
 @ Your {0} prize is waiting! Claim it in Events.
 = הפרס שלך מ{0} מחכה! אסוף אותו באירועים.
+~ הפרס שלך מ{0} מחכה! אספי אותו באירועים.
 
 @ You came first with {0}.
 = הגעת למקום הראשון עם {0}.
@@ -648,6 +713,7 @@
 
 @ It's far too big for in here, so it's in your trail. Go outside and put it up somewhere on your island, then tap it to shop for your burrow.
 = היא גדולה מדי בשביל כאן, אז היא בשובל שלך. צא החוצה והקם אותה איפשהו באי, ואז הקש עליה כדי לקנות דברים למחילה שלך.
+~ היא גדולה מדי בשביל כאן, אז היא בשובל שלך. צאי החוצה והקימי אותה איפשהו באי, ואז הקישי עליה כדי לקנות דברים למחילה שלך.
 
 @ Sign up
 = הרשמה
@@ -657,27 +723,45 @@
 
 @ Keep your island safe
 = שמור על האי שלך
+~ שמרי על האי שלך
 
 @ Sign in, and the island you already have comes back.
 = היכנס, והאי שכבר יש לך יחזור.
+~ היכנסי, והאי שכבר יש לך יחזור.
 
 @ Sign up, and your island is kept safe in the cloud. Lose your phone or delete the game, and it all comes back when you sign in.
 = הירשם, והאי שלך יישמר בבטחה בענן. גם אם הטלפון יאבד או שהמשחק יימחק, הכול יחזור כשתיכנס.
+~ הירשמי, והאי שלך יישמר בבטחה בענן. גם אם הטלפון יאבד או שהמשחק יימחק, הכול יחזור כשתיכנסי.
 
 @ New here? Sign up
 = חדש כאן? הרשמה
+~ חדשה כאן? הרשמה
 
 @ Have an account? Sign in
 = יש לך חשבון? כניסה
 
 @ As a guest, your island lives only on this device. If the game is deleted or the phone is lost, your island could be lost forever.
 = כאורח, האי שלך שמור רק במכשיר הזה. אם המשחק יימחק או שהטלפון יאבד, האי שלך עלול ללכת לאיבוד לתמיד.
+~ כאורחת, האי שלך שמור רק במכשיר הזה. אם המשחק יימחק או שהטלפון יאבד, האי שלך עלול ללכת לאיבוד לתמיד.
 
 @ Continue as guest
-= המשך כאורח
+= להמשיך בלי חשבון
 
 @ Your island is kept safe: {0}. Sign in with it on any device.
 = האי שלך שמור בבטחה: {0}. היכנס איתו בכל מכשיר.
+~ האי שלך שמור בבטחה: {0}. היכנסי איתו בכל מכשיר.
 
 @ Tap the map to see every island, and travel there fast!
 = הקש על המפה כדי לראות את כל האיים, ולטוס אליהם מהר!
+~ הקישי על המפה כדי לראות את כל האיים, ולטוס אליהם מהר!
+
+# ---------------------------------------------------------------- a boy or a girl (UI/Lang/AddressChoice.cs)
+
+@ How should I talk to you?
+= איך לפנות אליך?
+
+@ As a boy
+= בן
+
+@ As a girl
+= בת

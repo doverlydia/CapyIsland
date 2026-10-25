@@ -124,7 +124,11 @@ namespace CapyIsland.UI
             return tile;
         }
 
-        protected override void OnOpen() => Refresh();
+        protected override void OnOpen()
+        {
+            Refresh();
+            Fit();   // again, now the line at the top has its words to measure
+        }
 
         void Refresh()
         {
@@ -182,8 +186,11 @@ namespace CapyIsland.UI
             float cell = (width - _grid.spacing.x * 3f) / 4f;
             _grid.cellSize = new Vector2(cell, Mathf.Min(cell * 1.15f, 260f));
             _gridSize.preferredHeight = 2f * _grid.cellSize.y + _grid.spacing.y;
-            // A short card, sized to its content.
-            float h = 128f + 24f + 100f + 2f * (_grid.cellSize.y) + _grid.spacing.y + 110f + 22f * 2f + 32f;
+            // A short card, sized to its content: the line at the top as it will be drawn (translated,
+            // and at Easy Reading's size), at least the two lines it was made for.
+            _subtitle.GetComponent<LocText>()?.Refresh();
+            float subtitle = Mathf.Max(100f, _subtitle.GetPreferredValues(_subtitle.text, width, 0f).y + 8f);
+            float h = 128f + 24f + subtitle + 2f * (_grid.cellSize.y) + _grid.spacing.y + 110f + 22f * 2f + 32f;
             Sheet.sizeDelta = new Vector2(Sheet.sizeDelta.x, Mathf.Min(Sheet.sizeDelta.y, h));
         }
     }

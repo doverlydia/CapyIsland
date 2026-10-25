@@ -85,7 +85,7 @@ namespace CapyIsland.Game
 
             var tutorial = TutorialDirector.Instance;
             if (tutorial != null && !tutorial.Finished && !string.IsNullOrEmpty(tutorial.CurrentGoal))
-                return new Goal { Source = Source.Tutorial, Title = tutorial.CurrentGoal, Where = tutorial.GoalPoint };
+                return new Goal { Source = Source.Tutorial, Title = tutorial.CurrentGoal, Where = tutorial.GoalPoint, Step = tutorial.CurrentGoalNote };
 
             // Someone waiting to hand over a reward beats everything: it is free and immediate.
             foreach (var giver in Givers())
@@ -96,7 +96,14 @@ namespace CapyIsland.Game
             // Old Yuzu back and waiting at the chapel: the story's last step leads.
             if (YuzuHeart.WeddingDue && Priest.Instance != null) return WeddingGoal(Priest.Instance);
 
-            // A quest in progress next.
+            // Someone with something new to tell you: like a reward, quick and free, so it comes
+            // before a quest already under way (which is back as soon as you've talked to them).
+            foreach (var giver in Givers())
+                if (giver.HasNews)
+                    return new Goal { Source = Source.Talk, Title = WantsToTalk(giver.Speaker), From = giver.Speaker,
+                        Where = giver.transform.position, Icon = giver.Portrait };
+
+            // Then a quest in progress.
             foreach (var giver in Givers())
             {
                 var q = giver.CurrentQuest;
@@ -105,22 +112,10 @@ namespace CapyIsland.Game
                 return new Goal { Source = Source.Quest, Title = QuestGoal(q.Def), From = giver.Speaker, Icon = giver.Portrait, Where = where, Step = first };
             }
 
-            // Then someone with a new quest to tell you about.
-            foreach (var giver in Givers())
-                if (giver.HasNews)
-                    return new Goal { Source = Source.Talk, Title = "Talk to " + giver.Speaker, From = giver.Speaker,
-                        Where = giver.transform.position, Icon = giver.Portrait };
-
             // Someone new still in a bubble, or following you waiting for a home: let them in first
             // (after the opening, that's Miso, whose quests lead the story).
-            foreach (var b in Object.FindObjectsByType<Bubble>(FindObjectsSortMode.None))
-                if (!b.Taken && b.Contents != null && b.Contents.TryGetComponent<QuestGiver>(out var newcomer))
-                    return new Goal { Source = Source.Talk, Title = "Pop the bubble to meet " + newcomer.Speaker, From = newcomer.Speaker,
-                        Where = b.transform.position };
-            foreach (var giver in Object.FindObjectsByType<QuestGiver>(FindObjectsSortMode.None))
-                if (giver.GiverKind != QuestGiver.Kind.Ghost && !giver.IsInWorld && giver.TryGetComponent<Placeable>(out var p) && !p.Placed)
-                    return new Goal { Source = Source.Talk, Title = "Drag " + giver.Speaker + " onto the grass to settle in", From = giver.Speaker,
-                        Icon = giver.Portrait };
+            var newcomers = Newcomers();
+            if (newcomers.Count > 0) return newcomers[0].goal;
 
             // The story has nothing for you right now: the island's everyday things.
             return Everyday() ?? new Goal { Source = Source.Done, Title = "Every goal complete. Enjoy your island!" };
@@ -220,6 +215,28 @@ namespace CapyIsland.Game
             return goal;
         }
 
+        /// <summary>
+        /// Characters who have come but not settled: still in a bubble, or following you until you
+        /// set them down on the grass. The goals list shows them too, so it never says nobody needs
+        /// you while the corner card asks you to pop Miso's bubble.
+        /// </summary>
+        public static List<(QuestGiver giver, Goal goal)> Newcomers()
+        {
+            var list = new List<(QuestGiver, Goal)>();
+            foreach (var b in Object.FindObjectsByType<Bubble>(FindObjectsSortMode.None))
+                if (!b.Taken && b.Contents != null && b.Contents.TryGetComponent<QuestGiver>(out var newcomer))
+                    list.Add((newcomer, new Goal { Source = Source.Talk, Title = "Pop the bubble to meet " + newcomer.Speaker, From = newcomer.Speaker,
+                        Where = b.transform.position, Icon = newcomer.Portrait }));
+            foreach (var giver in Object.FindObjectsByType<QuestGiver>(FindObjectsSortMode.None))
+                if (giver.GiverKind != QuestGiver.Kind.Ghost && !giver.IsInWorld && giver.TryGetComponent<Placeable>(out var p) && !p.Placed)
+                    list.Add((giver, new Goal { Source = Source.Talk, Title = "Drag " + giver.Speaker + " onto the grass to settle in", From = giver.Speaker,
+                        Icon = giver.Portrait }));
+            return list;
+        }
+
+        /// <summary>The line for someone with news ("Miso wants to talk to you"), on the corner card and in the goals list.</summary>
+        public static string WantsToTalk(string who) => who + " wants to talk to you";
+
         /// <summary>Quests that have been started and not yet handed in.</summary>
         public static List<(QuestGiver giver, QuestSystem.Progress quest)> ActiveQuests()
         {
@@ -259,7 +276,7 @@ namespace CapyIsland.Game
 
             // A task done by buying (or buying and planting) something: the stand that sells it — or,
             // when nothing sells it yet, the stand selling the shop that will.
-            if (ForSale.TryGetValue(m.Func, out var item))
+            if (ForSale.TryGetValue(m.Func, out var item) || WorkerWanted.TryGetValue(m.Func, out item))
             {
                 var stand = BuyPath(item, out firstStep, 0);
                 if (stand.HasValue) return stand;
@@ -323,6 +340,21 @@ namespace CapyIsland.Game
                 return ForSale.TryGetValue(waitsFor, out var needed) ? BuyPath(needed, out _, depth + 1) : null;
             }
 
+            // A worker is sold beside its house: no house yet, so the house comes first.
+            if (StoreData.WorkerHome.TryGetValue(item, out var home))
+            {
+                if (Placed(home)) return null;   // standing, but not selling yet (a story step)
+                if (Carried(home))
+                {
+                    firstStep = "First: put down the " + StoryText.Name(home);
+                    var you = UnityEngine.Object.FindFirstObjectByType<PlayerAvatar>();
+                    return you != null ? (Vector2)you.transform.position : null;
+                }
+                var house = BuyPath(home, out var sooner, depth + 1);
+                if (house.HasValue) firstStep = sooner ?? "First: build the " + StoryText.Name(home);
+                return house;
+            }
+
             foreach (var kv in StoreData.Lists)
             {
                 if (!ShopBuilding.TryGetValue(kv.Key, out var shop)) continue;
@@ -357,7 +389,10 @@ namespace CapyIsland.Game
             { "fancy_store", "Fancy Store" }, { "garden_store", "Garden Shop" },
         };
 
-        static bool Matches(string sold, string item) => item == "Mine" ? sold == "Mine" : sold.Contains(item);
+        // A worker is sold by its house under its own name ("Fox"), which the house's name contains
+        // ("Fox House"): only the exact name is the worker.
+        static bool Matches(string sold, string item) =>
+            item == "Mine" || StoreData.WorkerHome.ContainsKey(item) ? sold == item : sold.Contains(item);
 
         static bool Placed(string name)
         {
@@ -390,6 +425,89 @@ namespace CapyIsland.Game
                 if (score < bestScore) { bestScore = score; best = at; }
             }
             return best;
+        }
+
+        // ---------------------------------------------------------------- a quest's steps
+
+        /// <summary>One line of a goal's checklist: something to do on the way, and whether it's done.</summary>
+        public struct Step
+        {
+            public string Text;
+            public bool Done;
+            public Step(string text, bool done) { Text = text; Done = done; }
+        }
+
+        /// <summary>Tasks done by buying a worker: the worker, sold by its house.</summary>
+        static readonly Dictionary<string, string> WorkerWanted = new()
+        {
+            { "fox1", "Fox" }, { "fox5", "Fox" }, { "panda1", "Panda" }, { "panda_sawmill", "Panda" },
+        };
+
+        /// <summary>
+        /// The steps under a quest in the goals list, in order: the shops to build on the way to
+        /// whatever it needs, then buying it (and putting it to work, when that's the task). Worked
+        /// out from the stock lists and the island as it stands, so each one ticks off by itself;
+        /// the one already done just before (its shop built) shows ticked. Empty when the task
+        /// isn't about buying something, or there's nothing left to do on the way.
+        /// </summary>
+        public static List<Step> StepsFor(QuestDef q)
+        {
+            var steps = new List<Step>();
+            if (string.IsNullOrEmpty(q.CompleteMote) || !Motes.TryGetByName(q.CompleteMote, out var m)) return steps;
+            if (WorkerWanted.TryGetValue(m.Func, out var worker))
+            {
+                ChainTo(worker, 0, steps);
+                if (m.Func == "panda_sawmill") steps.Add(new Step(string.Format("Put the {0} to work at a sawmill", StoryText.Name(worker)), false));
+            }
+            else if (ForSale.TryGetValue(m.Func, out var item)) ChainTo(item, 0, steps);
+            return steps;
+        }
+
+        /// <summary>
+        /// What has to happen for <paramref name="item"/> to be bought: its seller built first (and
+        /// that seller's own seller, back down the chain), then the purchase itself. At the top
+        /// (<paramref name="depth"/> 0) a building's purchase is the quest's own line, so only a
+        /// worker gets a "buy" step there.
+        /// </summary>
+        static void ChainTo(string item, int depth, List<Step> steps)
+        {
+            if (depth > 5) return;
+            // Its plans wait for a story step: that's the thing to do for now.
+            if (StoreData.UnlockedBy(item) is string waitsFor && Motes.TryGetByFunc(waitsFor, out var story) && !Motes.Has(story.Name))
+            {
+                steps.Add(new Step(GoalFor(story), false));
+                return;
+            }
+            string seller = SellerOf(item);
+            bool worker = StoreData.WorkerHome.ContainsKey(item);
+            if (seller != null)
+            {
+                if (Placed(seller)) { if (depth == 0) steps.Add(new Step(string.Format("Build the {0}", StoryText.Name(seller)), true)); }
+                else if (Carried(seller)) steps.Add(new Step(string.Format("Put down the {0}", StoryText.Name(seller)), false));
+                else ChainTo(seller, depth + 1, steps);
+            }
+            if (depth > 0) steps.Add(new Step(string.Format("Build the {0}", StoryText.Name(item)), false));
+            else if (worker && seller != null) steps.Add(new Step(string.Format("Buy a {0} at the {1}", StoryText.Name(item), StoryText.Name(seller)), false));
+        }
+
+        /// <summary>
+        /// The building that sells <paramref name="item"/>: a worker's house, or a shop whose stock
+        /// has it (one already built, if several do). Null when nothing does (the General Store).
+        /// </summary>
+        static string SellerOf(string item)
+        {
+            if (StoreData.WorkerHome.TryGetValue(item, out var home)) return home;
+            string first = null;
+            foreach (var kv in StoreData.Lists)
+            {
+                if (!ShopBuilding.TryGetValue(kv.Key, out var shop)) continue;
+                bool stocks = false;
+                foreach (var n in kv.Value) if (Matches(n, item)) { stocks = true; break; }
+                if (!stocks) continue;
+                if (Placed(shop)) return shop;
+                first ??= shop;
+            }
+            return first;
         }
 
         static Vector2? GiverOf(QuestGiver.Kind kind)

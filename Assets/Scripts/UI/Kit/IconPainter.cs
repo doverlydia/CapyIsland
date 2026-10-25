@@ -330,6 +330,25 @@ namespace CapyIsland.UI
             return d;
         }, 0.07f, 256);
 
+        /// <summary>
+        /// A thought: a puffy cloud with crisp edges, for what a sleeping capybara dreams of. A
+        /// cloud is a want, never something to pop — the round bubbles are the ones with things in.
+        /// </summary>
+        public static Sprite ThoughtCloud => Cached("ThoughtCloud", ThoughtCloudShape, 192);
+
+        /// <summary>The same cloud a little fatter, drawn behind it as its outline.</summary>
+        public static Sprite ThoughtCloudRim => Cached("ThoughtCloudRim", (x, y) => ThoughtCloudShape(x, y) - 0.07f, 192);
+
+        static float ThoughtCloudShape(float x, float y)
+        {
+            float d = Disc(x, y, -0.5f, -0.1f, 0.34f);
+            d = Union(d, Disc(x, y, -0.18f, 0.24f, 0.38f));
+            d = Union(d, Disc(x, y, 0.24f, 0.26f, 0.36f));
+            d = Union(d, Disc(x, y, 0.54f, -0.06f, 0.32f));
+            d = Union(d, Box(x, y, 0f, -0.24f, 0.7f, 0.26f, 0.24f));
+            return d;
+        }
+
         // Emoji features, drawn dark over a coloured disc.
         public static Sprite FaceSmile => Cached("FaceSmile", (x, y) =>
         {
@@ -468,6 +487,20 @@ namespace CapyIsland.UI
         {
             float ax = Mathf.Abs(x), ay = Mathf.Abs(y);
             return Mathf.Pow(ax, 0.5f) + Mathf.Pow(ay, 0.5f) - 0.9f;
+        });
+
+        /// <summary>A leaf, tip up and to the right, with its vein cut out: an islander's mark.</summary>
+        public static Sprite Leaf => Cached("Leaf", (x, y) =>
+        {
+            // Turned 40 degrees, so the leaf leans like one blown on the wind.
+            float c = 0.766f, s = 0.643f;
+            float u = x * c + y * s, v = -x * s + y * c;
+            // A plump ellipse, pinched toward the tip so it reads as a leaf, not a feather.
+            float pinch = 1f + Mathf.Max(0f, u) * 0.55f;
+            float blade = Mathf.Sqrt(u * u / 0.62f + v * v * pinch * pinch / 0.3f) - 0.8f;
+            float stem = Capsule(x, y, -0.46f, -0.4f, -0.74f, -0.68f, 0.08f);
+            float vein = Capsule(u, v, -0.5f, 0f, 0.3f, 0f, 0.04f);
+            return Union(Cut(blade, vein), stem);
         });
 
         public static Sprite Cards => Cached("Cards", (x, y) =>

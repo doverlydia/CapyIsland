@@ -290,7 +290,7 @@ namespace CapyIsland.Game
         public static async void Host(GatheringKind kind)
         {
             var why = WhyCantHost(kind);
-            if (why != null) { Hints.Show(why); return; }
+            if (why != null) { Hints.Answer(why); return; }
             var king = UnityEngine.Object.FindFirstObjectByType<PlayerAvatar>();
             Hosting = true;
             Kind = kind;
@@ -303,7 +303,7 @@ namespace CapyIsland.Game
             _players.Add(new Player { id = Live.MyId, name = PlayerProfile.Name });
             _botsComing.Clear();
             Notify();
-            Hints.Show("Opening your island…");
+            Hints.Answer("Opening your island…");
 
             string code = await Live.OpenIsland();
             if (!Hosting) return;   // ended meanwhile
@@ -313,13 +313,13 @@ namespace CapyIsland.Game
                 _players.Clear();
                 EventIsland = -1;
                 Notify();
-                Hints.Show("Couldn't open your island just now. Try again in a moment.");
+                Hints.Answer("Couldn't open your island just now. Try again in a moment.");
                 return;
             }
             _code = code;
             int asked = SendInvitations();
             Sfx.Play(SfxKind.Chest, 0.6f);
-            Hints.Show(kind == GatheringKind.Party
+            Hints.Answer(kind == GatheringKind.Party
                 ? UI.Loc.F("Party invitations sent to {0} islanders! Guests will turn up soon.", asked)
                 : UI.Loc.F("Invitations sent to {0} islanders! Press Start once someone has arrived.", asked));
             Broadcast();
@@ -361,7 +361,7 @@ namespace CapyIsland.Game
         public static void Start()
         {
             if (!Hosting || !IsContest || Now == Phase.Running) return;
-            if (Present() < 2) { Hints.Show("Wait for someone to arrive: a contest needs at least 2 players."); return; }
+            if (Present() < 2) { Hints.Answer("Wait for someone to arrive: a contest needs at least 2 players."); return; }
             Now = Phase.Running;
             Round++;
             EndsAt = Time.realtimeSinceStartup + ContestSeconds;
@@ -499,7 +499,7 @@ namespace CapyIsland.Game
         static void Join(FriendProfile host, GatheringKind kind, string code)
         {
             var why = Visit.WhyCantFly();
-            if (why != null) { Hints.Show(why); return; }
+            if (why != null) { Hints.Answer(why); return; }
             JoiningSomething = true;
             Kind = kind;
             HostName = host.name;
@@ -906,7 +906,7 @@ namespace CapyIsland.Game
             _rejoinRound = round;
             _rejoinedAt = Time.realtimeSinceStartup;
             Sfx.Play(SfxKind.Chest, 0.5f);
-            Hints.Show("You're back in this round. Good luck!");
+            Hints.Answer("You're back in this round. Good luck!");
             if (Hosting) Broadcast();
             else Live.TellHost("in");
             Notify();

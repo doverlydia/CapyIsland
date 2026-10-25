@@ -57,7 +57,7 @@ namespace CapyIsland.Game
     {
         public override void Tap()
         {
-            if (Visit.Active) { Hints.Show("That's your friend's burrow. Pop down into your own when you're home!"); return; }
+            if (Visit.Active) { Hints.Answer("That's your friend's burrow. Pop down into your own when you're home!"); return; }
             Sfx.Play(SfxKind.Tap, 0.5f);
             UI.TunnelCutscene.Show(UI.BurrowScreen.Show);
         }

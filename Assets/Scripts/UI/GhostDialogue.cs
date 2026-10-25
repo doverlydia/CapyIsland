@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using CapyIsland.Game;
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -21,6 +22,9 @@ namespace CapyIsland.UI
     /// Once a line has been up long enough to read, the bubble tucks away and only the portrait
     /// stays, so it never sits on the island for long. Tap the portrait to bring the line back, and
     /// again to step back through earlier ones; tap the bubble to tuck it away sooner.
+    ///
+    /// Once the opening is over she moves up into the goal card (<see cref="ObjectiveTracker"/>)
+    /// and the corner is empty (<see cref="Retired"/>): she only comes back to it for news.
     /// </summary>
     public class GhostDialogue : MonoBehaviour
     {
@@ -50,6 +54,8 @@ namespace CapyIsland.UI
         static bool PopupOpen =>
             HudTour.IsOpen || UiScreen.AnyOpen || SpeechDialog.IsOpen || CardPopup.IsShowing || PurchaseDialog.IsOpen
             || Cutscene.Playing || AwakeningScreen.IsOpen || IntroAudio.Active || TextReader.IsOpen
+            || ObjectiveTracker.Arriving   // she's busy moving up into the goal card
+
             || (Fishing.Instance != null && Fishing.Instance.Mode);   // fishing has its own words, at the top
 
         /// <summary>Her picture, for the tip popup to show her in.</summary>
@@ -217,20 +223,61 @@ namespace CapyIsland.UI
         /// <summary>Raised when the bubble tucks away (the first time is when the tip about tapping her shows).</summary>
         public static event System.Action Tucked;
 
-        /// <summary>Hides the bubble, keeping the portrait to tap.</summary>
+        /// <summary>Hides the bubble, keeping the portrait to tap (once she has retired, the portrait goes too).</summary>
         void Collapse()
         {
             if (_collapsed) return;
             _collapsed = true;
             Tucked?.Invoke();
             if (_bubble != null) _bubble.gameObject.SetActive(false);
+            if (Retired) FadePanel(false);
         }
 
         void Expand()
         {
             _collapsed = false;
             if (_bubble != null) _bubble.gameObject.SetActive(true);
-            if (panel != null) panel.SetActive(true);
+            if (panel != null && !panel.activeSelf && Retired) FadePanel(true);
+            else if (panel != null) panel.SetActive(true);
+        }
+
+        // ---------------------------------------------------------------- after the opening
+
+        /// <summary>
+        /// The opening is over and she has moved up into the goal card (ObjectiveTracker): the corner
+        /// stays empty, and she only comes back to it for news (a friend landing, a new button),
+        /// fading in for the line and out again once it's read.
+        /// </summary>
+        public bool Retired { get; private set; }
+
+        public void Retire()
+        {
+            if (Retired) return;
+            Retired = true;
+            if (panel != null && (_collapsed || !IsSpeaking)) { _collapsed = true; panel.SetActive(false); }
+        }
+
+        /// <summary>Her picture in the corner, for the goal card to fly her up from.</summary>
+        public RectTransform PortraitRect => portrait != null ? portrait.rectTransform : null;
+
+        CanvasGroup _panelGroup;
+
+        void FadePanel(bool show)
+        {
+            if (panel == null) return;
+            if (_panelGroup == null && !panel.TryGetComponent(out _panelGroup)) _panelGroup = panel.AddComponent<CanvasGroup>();
+            _panelGroup.DOKill();
+            if (show)
+            {
+                panel.SetActive(true);
+                _panelGroup.alpha = 0f;
+                _panelGroup.DOFade(1f, 0.3f).SetUpdate(true);
+            }
+            else
+            {
+                _panelGroup.DOFade(0f, 0.4f).SetUpdate(true)
+                    .OnComplete(() => { if (panel != null && _collapsed) { panel.SetActive(false); _panelGroup.alpha = 1f; } });
+            }
         }
 
         /// <summary>
@@ -328,6 +375,26 @@ namespace CapyIsland.UI
             if (!IsSpeaking || _collapsed || _currentIsInstruction) { if (_queue.Count == 1) Advance(); }
         }
 
+        /// <summary>
+        /// The tutorial moved on a step: instructions still waiting belong to the step that's done,
+        /// so they go, and one on screen is tucked away. Story lines stay.
+        /// </summary>
+        public void DropInstructions()
+        {
+            if (_queue.Count > 0)
+            {
+                var keep = new List<string>();
+                foreach (var q in _queue) if (!_instructions.Contains(q)) keep.Add(q);
+                _queue.Clear();
+                foreach (var q in keep) _queue.Enqueue(q);
+            }
+            if (_currentIsInstruction && IsSpeaking && !_collapsed)
+            {
+                if (_queue.Count > 0) Advance();
+                else Collapse();
+            }
+        }
+
         /// <summary>Clears everything and hides the panel.</summary>
         public void Clear()
         {
@@ -339,6 +406,8 @@ namespace CapyIsland.UI
 
         void Advance()
         {
+            // Moving up into the goal card: news waits until she has arrived and said her piece.
+            if (Retired && _collapsed && ObjectiveTracker.Arriving) return;
             // Lines that went stale while they waited (you already did what they ask) are dropped.
             while (_queue.Count > 0 && !Game.Hints.StillTrue(_queue.Peek())) _queue.Dequeue();
             if (_queue.Count == 0)

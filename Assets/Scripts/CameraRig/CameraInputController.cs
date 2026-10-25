@@ -12,7 +12,8 @@ namespace CapyIsland.CameraRig
     /// * press on an item — pick it up and drag it
     /// * press on the ground and hold — the king walks toward your finger, tracking it as it moves;
     ///   or, with the joystick on (Settings), a stick appears under the thumb and steers him
-    /// * quick tap — a bubble or shop takes it; on bare ground the king walks to that spot
+    /// * quick tap — a bubble or shop takes it; on bare ground the king walks to that spot, and on
+    ///   the sea to the nearest shore he can reach (PlayerAvatar.OnGroundTapped)
     ///
     /// The joystick is a floating one: its centre is wherever the thumb landed, shown on screen,
     /// and it is dragged along once the thumb pulls past its rim, so it never drifts out of reach.
@@ -44,6 +45,17 @@ namespace CapyIsland.CameraRig
 
         /// <summary>Raised on a quick tap that did not land on an item.</summary>
         public event Action<Vector2> Tapped;
+
+        /// <summary>
+        /// Raised when the player zooms: once a pinch has really changed the view, and on each turn
+        /// of the mouse wheel. The tutorial's zoom beat listens for it.
+        /// </summary>
+        public static event Action Zoomed;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetSession() => Zoomed = null;
+
+        bool _pinchCounted;
 
         /// <summary>World point the player is pointing at, or null when not steering.</summary>
         public Vector2? SteerTarget { get; private set; }
@@ -130,12 +142,19 @@ namespace CapyIsland.CameraRig
                 EndStick();
                 _pinchStartDistance = distance;
                 _pinchStartZoom = _rig.Zoom;
+                _pinchCounted = false;
                 return;
             }
 
             // Fingers apart = see more world = larger orthographic size = higher zoom value here.
             float ratio = _pinchStartDistance / Mathf.Max(1f, distance);
             _rig.Zoom = _pinchStartZoom * Mathf.Lerp(1f, ratio, pinchSensitivity);
+            // A real pinch, not two fingers resting: counted once it has moved the view a little.
+            if (!_pinchCounted && Mathf.Abs(_rig.Zoom - _pinchStartZoom) > 0.04f)
+            {
+                _pinchCounted = true;
+                Zoomed?.Invoke();
+            }
         }
 
         void HandleScrollZoom()
@@ -143,6 +162,7 @@ namespace CapyIsland.CameraRig
             float scroll = Input.mouseScrollDelta.y;
             if (Mathf.Abs(scroll) < 0.01f) return;
             _rig.Zoom -= Mathf.Sign(scroll) * scrollSensitivity;
+            Zoomed?.Invoke();
         }
 
         void HandlePointer()
@@ -243,7 +263,8 @@ namespace CapyIsland.CameraRig
                 {
                     var tapped = _pendingTap;
                     _pendingTap = null;
-                    if (!_movedBeyondSlop) tapped.Tap();
+                    // A movie or window that opened while the finger was down gets this tap, not the island.
+                    if (!_movedBeyondSlop && !ModalOpen) tapped.Tap();
                     return;
                 }
 
@@ -334,7 +355,7 @@ namespace CapyIsland.CameraRig
             return screen.x < band || screen.x > Screen.width - band || screen.y < band || screen.y > Screen.height - band;
         }
 
-        static bool ModalOpen => UI.TextReader.IsOpen || UI.HudTour.IsOpen || UI.SpeechDialog.IsOpen || UI.CardPopup.IsShowing || UI.PurchaseDialog.IsOpen || UI.UiScreen.AnyOpen;
+        static bool ModalOpen => UI.Cutscene.Playing || UI.TextReader.IsOpen || UI.HudTour.IsOpen || UI.SpeechDialog.IsOpen || UI.CardPopup.IsShowing || UI.PurchaseDialog.IsOpen || UI.UiScreen.AnyOpen;
 
         static bool PointerOverUI()
         {

@@ -25,13 +25,20 @@ namespace CapyIsland.Game
 
         public bool IsReal => !string.IsNullOrEmpty(member);
 
+        /// <summary>You, drawn among the others (the events board): never marked as an islander.</summary>
+        [NonSerialized] public bool you;
+
+        /// <summary>One of the archipelago's islanders, whom the game plays: their portrait wears a leaf.</summary>
+        public bool IsIslander => !IsReal && !you;
+
         public DateTime LastVisit => lastVisitTicks > 0 ? new DateTime(lastVisitTicks) : DateTime.MinValue;
     }
 
     /// <summary>
-    /// Your friends list, kept on this device. There is no server: every "player" here is a bot,
-    /// made to feel like a person — a name, a look, an island at its own stage that carries on
-    /// growing between your visits.
+    /// Your friends list, kept on this device: the archipelago's islanders the game plays (a name
+    /// of their own place, a look, an island at its own stage that carries on growing between your
+    /// visits), beside the real players from RealFriends. Islanders are never passed off as
+    /// players: their portraits wear a leaf, and their names say where they're from.
     /// </summary>
     public static class Friends
     {
@@ -41,16 +48,48 @@ namespace CapyIsland.Game
 
         static List<FriendProfile> _all;
 
-        static readonly string[] Names =
+        // An islander is called by name and by home, like "Tilly of Driftwood Bay": a character of the
+        // archipelago, not a player's handle. None of the cast's names (Nori, Mochi, Tofu…), and none of
+        // your own islands' or seas'.
+        static readonly string[] FirstNames =
         {
-            "mochi_dreams", "SleepyTofu", "capy.queen", "NoriNoodle", "biscuit_bay", "Pudding42", "yuzu_fan",
-            "sesame.seed", "HotSpringHannah", "chestnut_kid", "MatchaMaker", "lazy.river", "Kombu_Kid", "waddle_bee",
-            "sunny_soak", "plumtastic", "TeaCupTaro", "LittleLantern", "bubbles4ever", "GingerSnapper", "mossy.moss",
-            "PebblePaws", "snoozy_suki", "BathBomber", "fluffcaptain", "OnsenOtis", "tulip.tilly", "RiverRoo",
+            "Tilly", "Suki", "Otis", "Taro", "Hannah", "Roo", "Bea", "Pip", "Juniper", "Biscuit", "Sesame",
+            "Pudding", "Chestnut", "Ginger", "Poppy", "Hazel", "Basil", "Clem", "Momo", "Kiki", "Rosie",
+            "Mabel", "Ollie", "Fig", "Bun", "Dot", "Toffee", "Bean", "Lulu", "Wren",
         };
 
-        /// <summary>Every name a bot capybara can have (event leaderboards borrow them too).</summary>
-        public static IReadOnlyList<string> NamePool => Names;
+        static readonly string[] Places =
+        {
+            "Driftwood Bay", "Teacup Isle", "Fern Hollow", "Willow Shoals", "Clover Cay", "Saltbreeze Point",
+            "Honeydew Isle", "Maple Sands", "Starfish Reef", "Cocoa Key", "Bamboo Bluff", "Firefly Glen",
+            "Pinecone Point", "Seashell Shore", "Moonpetal Isle", "Cinnamon Cove", "Bluebell Bay", "Otter Rock",
+            "Snailshell Isle", "Puffin Rock",
+        };
+
+        /// <summary>An islander's name for <paramref name="seed"/>: always the same for the same seed.</summary>
+        public static string IslanderName(int seed)
+        {
+            uint h = (uint)seed * 2654435761u;
+            return FirstNames[h % (uint)FirstNames.Length] + " of " + Places[(h / (uint)FirstNames.Length) % (uint)Places.Length];
+        }
+
+        static List<string> _pool;
+
+        /// <summary>Names for islanders who never get a profile (event leaderboards, help pictures).</summary>
+        public static IReadOnlyList<string> NamePool
+        {
+            get
+            {
+                if (_pool != null) return _pool;
+                _pool = new List<string>();
+                for (int i = 1; _pool.Count < 30 && i < 400; i++)
+                {
+                    var n = IslanderName(i * 7919);
+                    if (!_pool.Contains(n)) _pool.Add(n);
+                }
+                return _pool;
+            }
+        }
 
         /// <summary>Every friend: the islanders the game made up and the real players (RealFriends), side by side.</summary>
         public static IReadOnlyList<FriendProfile> All
@@ -102,11 +141,11 @@ namespace CapyIsland.Game
             var who = new FriendProfile
             {
                 id = Guid.NewGuid().ToString("N").Substring(0, 12),
-                name = Names[rng.Next(Names.Length)],
                 level = 1 + rng.Next(IslandGenerator.MaxLevel),
                 seed = rng.Next(),
                 tint = (float)(rng.NextDouble() * 2.0 - 1.0),
             };
+            who.name = IslanderName(who.seed);
             // Most people wear something; a hat more often than not.
             foreach (var slot in new[] { WearSlot.Hat, WearSlot.Neck, WearSlot.Face, WearSlot.Back })
             {
@@ -152,6 +191,12 @@ namespace CapyIsland.Game
                 if (stored?.friends != null) _all = stored.friends;
             }
             catch (Exception e) { Debug.LogWarning("[Friends] list unreadable: " + e.Message); }
+            // Islanders met before they had names of their own places (handles like "tulip.tilly"):
+            // named once, from their seed, so the same islander always gets the same name.
+            bool renamed = false;
+            foreach (var f in _all)
+                if (!f.IsReal && (string.IsNullOrEmpty(f.name) || !f.name.Contains(" of "))) { f.name = IslanderName(f.seed); renamed = true; }
+            if (renamed) PlayerPrefs.SetString(Key, JsonUtility.ToJson(new Stored { friends = _all }));
         }
     }
 }

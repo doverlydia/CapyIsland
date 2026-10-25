@@ -9,6 +9,10 @@ namespace CapyIsland.Game
     ///
     /// Lives in world space rather than on the canvas so it can sit over a moving target without
     /// any screen-space conversion, and so it is hidden by the same camera bounds as everything else.
+    ///
+    /// It never slides across the island: sent somewhere new, it fades out where it is and fades in
+    /// at the new spot. It steps aside (fades) while a window, speech box or movie is up, and lets go
+    /// as soon as the thing it points at is gone (a bubble popped).
     /// </summary>
     public class TutorialPointer : MonoBehaviour, IMapMarker
     {
@@ -22,8 +26,17 @@ namespace CapyIsland.Game
         [Tooltip("How far above the target the fingertip sits.")]
         [SerializeField] float heightAboveTarget = 1.5f;
 
-        [Tooltip("Seconds to glide to a new target, so the hand does not teleport.")]
+        [Tooltip("Seconds to settle over a target that moves (a capybara walking).")]
         [SerializeField] float travelSeconds = 0.35f;
+
+        /// <summary>A new target further than this from the old one: fade out, jump, fade in.</summary>
+        const float JumpDistance = 1.2f;
+        /// <summary>How fast the hand fades in and out (a full fade in about a sixth of a second).</summary>
+        const float FadeRate = 6f;
+
+        float _shown;      // 0..1: how visible it is, on top of its own drag-cycle fades
+        bool _jumping;     // fading out, to reappear at a new target
+        bool _snapNext;    // just shown: appear at the target, rather than travel there
 
         Transform _followTarget;
         Vector3 _staticTarget;
@@ -47,6 +60,8 @@ namespace CapyIsland.Game
             if (hand == null) hand = GetComponentInChildren<SpriteRenderer>();
             // Over the bubbles it points at (they float above every prop).
             if (hand != null) hand.sortingOrder = Bubble.SortBase + 4500;
+            // Always bright: a guide, not part of the island, so the night doesn't dim it.
+            if (hand != null) hand.sharedMaterial = HarvestEffects.SpriteMaterial();
             Hide();
         }
 
@@ -91,6 +106,7 @@ namespace CapyIsland.Game
         /// <summary>Point at a moving object.</summary>
         public void PointAt(Transform target)
         {
+            if (target != null) JumpIfFar(target.position);
             _dragging = false;
             _hideAt = -1f;
             _followTarget = target;
@@ -101,11 +117,28 @@ namespace CapyIsland.Game
         /// <summary>Point at a fixed spot on the ground.</summary>
         public void PointAt(Vector2 worldPoint)
         {
+            JumpIfFar(worldPoint);
             _dragging = false;
+            _hideAt = -1f;
             _followTarget = null;
             _staticTarget = new Vector3(worldPoint.x, worldPoint.y, 0f);
             _hasStatic = true;
             Show(true);
+        }
+
+        /// <summary>Point at a spot for a while, then let go ("Show me").</summary>
+        public void PointAt(Vector2 worldPoint, float seconds)
+        {
+            PointAt(worldPoint);
+            _hideAt = Time.time + seconds;
+        }
+
+        /// <summary>Already showing somewhere else: it fades out there and in at the new target.</summary>
+        void JumpIfFar(Vector2 to)
+        {
+            if (hand == null || !hand.enabled || _dragging) return;
+            var from = Target;
+            if (from.HasValue && Vector2.Distance(from.Value, to) > JumpDistance) _jumping = true;
         }
 
         float _hideAt = -1f;
@@ -148,8 +181,13 @@ namespace CapyIsland.Game
 
         void Show(bool visible)
         {
-            if (hand != null) hand.enabled = visible;
-            enabled = true;   // keep ticking so a re-show glides rather than snapping
+            if (hand != null)
+            {
+                // Showing from nothing: it fades in right at the target, never flies in from the last one.
+                if (visible && !hand.enabled) { _snapNext = true; _jumping = false; _shown = 0f; }
+                hand.enabled = visible;
+            }
+            enabled = true;
         }
 
         /// <summary>
@@ -221,7 +259,11 @@ namespace CapyIsland.Game
         {
             if (hand == null || !hand.enabled) return;
             if (_hideAt > 0f && Time.time > _hideAt) { _hideAt = -1f; Hide(); return; }
-            if (_dragging) { TickDrag(); return; }
+            // What it pointed at is gone (a bubble popped, a heart sent home): let go at once.
+            if (_followTarget != null && !_followTarget.gameObject.activeInHierarchy) { Hide(); return; }
+            // A window, speech box or movie is up: step aside until it's gone, then come back.
+            bool covered = Attention.ScreenBusy;
+            if (_dragging) { TickDrag(); Fade(covered ? 0f : 1f); return; }
 
             Vector3 anchor;
             if (_followTarget != null) anchor = _followTarget.position;
@@ -232,11 +274,30 @@ namespace CapyIsland.Game
             { var c = hand.color; c.a = 1f; hand.color = c; }
             if (_ghost != null) _ghost.enabled = false;
             var destination = anchor + Vector3.up * heightAboveTarget;
-            transform.position = Vector3.SmoothDamp(transform.position, destination, ref _velocity, travelSeconds);
+            if (_snapNext || (_jumping && _shown <= 0.01f))
+            {
+                // Just shown, or faded out at the old target: appear at the new one.
+                transform.position = destination;
+                _velocity = Vector3.zero;
+                _snapNext = _jumping = false;
+            }
+            else if (!_jumping)
+                transform.position = Vector3.SmoothDamp(transform.position, destination, ref _velocity, travelSeconds);
 
             // Bob on the spot so it reads as "here", not as part of the scenery.
             float bob = Mathf.Abs(Mathf.Sin(Time.time * bobRate * Mathf.PI)) * bobHeight;
             hand.transform.localPosition = new Vector3(0f, bob, 0f);
+            Fade(covered || _jumping ? 0f : 1f);
+        }
+
+        /// <summary>Eases the hand's visibility toward <paramref name="target"/>, on top of the alpha set this frame.</summary>
+        void Fade(float target)
+        {
+            _shown = Mathf.MoveTowards(_shown, target, Time.unscaledDeltaTime * FadeRate);
+            var c = hand.color;
+            c.a *= _shown;
+            hand.color = c;
+            if (_ghost != null && _ghost.enabled) { var g = _ghost.color; g.a *= _shown; _ghost.color = g; }
         }
     }
 }

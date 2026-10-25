@@ -25,8 +25,14 @@ namespace CapyIsland.Game
             }
         }
 
-        /// <summary>Something has the screen right now: a movie, a window, a card, a tour, fishing.</summary>
-        public static bool Busy =>
+        /// <summary>
+        /// Something has the screen right now: a movie, a window, a card, a tour, fishing — or Old
+        /// Yuzu arriving in the goal card at the end of the opening.
+        /// </summary>
+        public static bool Busy => ScreenBusy || UI.ObjectiveTracker.Arriving;
+
+        /// <summary><see cref="Busy"/>, less Old Yuzu's arrival: what the goal card itself waits for.</summary>
+        public static bool ScreenBusy =>
             UI.Cutscene.Playing || UI.AwakeningScreen.IsOpen || UI.IntroAudio.Active
             || UI.HudTour.IsOpen || UI.UiScreen.AnyOpen || UI.SpeechDialog.IsOpen || UI.CardPopup.IsShowing
             || UI.PurchaseDialog.IsOpen || UI.TextReader.IsOpen
