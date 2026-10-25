@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "tint": "#EEF3FF",
+  "sprites": [
+    "Toro", "Lantern_Float", "Torii_Front", "Torii_Side",
+    "Deco_GrassTuft", "Deco_Wildflowers",
+    "Land_00_CapyIsland_Grass", "Land_01_HeartoftheIsles_Grass", "Land_02_GingerCove_Grass",
+    "Land_03_VerdantBay_Grass", "Land_04_WeddingIsle_Grass", "Land_05_PirateCove_Grass",
+    "Land_06_MonsterIsle_Grass", "Land_07_first_bridge_Grass", "Land_08_second_bridge_Grass",
+    "Land_09_pete_isle_Grass", "Land_10_pirate_cove_Grass", "Land_11_wedding_isle_Grass",
+    "Land_12_monster_isle_Grass", "Land_13_FarmIsle_Grass", "Land_14_farm_bridge_Grass"
+  ],
+  "decor": [
+    { "file": "decor/XmasTree.png", "count": 5, "height": 2.0 },
+    { "file": "decor/Snowcapy.png", "count": 4, "height": 1.3 },
+    { "file": "decor/Presents.png", "count": 6, "height": 0.8 }
+  ],
+  "falling": { "file": "fx/Snowflake.png", "count": 70, "size": 0.012, "speed": 0.07, "sway": 0.02, "spin": false },
+  "greeting": {
+    "title": "Merry Christmas!",
+    "body": "Snow has dusted the whole island, and someone built a capybara out of it! Old Yuzu hopes you stay warm and cozy.",
+    "titleHe": "חג מולד שמח!",
+    "bodyHe": "שלג כיסה את כל האי, ומישהו בנה ממנו קפיברה! סבתא יוזו מקווה שיהיה לך חם ונעים.",
+    "picture": "decor/Snowcapy.png"
+  }
+}
