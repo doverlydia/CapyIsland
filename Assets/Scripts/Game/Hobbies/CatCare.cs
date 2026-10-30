@@ -134,6 +134,9 @@ namespace CapyIsland.Game
         {
             // Adopted cats go looking for something to bring you, fish or no fish.
             foreach (var c in HobbyLog.Cats) CatGifts.Tick(c);
+            // Not during the opening (a cat carried over to a new island): a present can be a family
+            // of guinea pigs, and with no shops yet, a garden they eat can't be replaced.
+            if (Attention.TutorialRunning) return;
             if (UI.UiScreen.AnyOpen || UI.Cutscene.Playing || Time.timeScale <= 0f) return;
             foreach (var cat in FindObjectsByType<CatView>(FindObjectsSortMode.None))
                 if (cat.Delivering) return;

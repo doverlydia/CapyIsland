@@ -236,16 +236,19 @@ namespace CapyIsland.Game
         /// <summary>
         /// A brand-new island: no pests yet, nothing on the shelves from before, and the cards are
         /// announced afresh. The hobbies themselves (and the cards already spent) are the player's
-        /// and stay.
+        /// and stay — adopted cats too, but their homes were on the old island (perhaps across a
+        /// bridge not raised yet on this one), so each settles near you instead (CatCare).
         /// </summary>
         public static void NewIsland()
         {
             var d = D;
-            if (!d.pestSeen && d.oldStock.Count == 0 && !d.stockPending && d.cardsShown == 0) return;
+            bool oldHomes = d.cats.Exists(c => c.adopted && !c.unplaced && !Horaira.Is(c));
+            if (!oldHomes && !d.pestSeen && d.oldStock.Count == 0 && !d.stockPending && d.cardsShown == 0) return;
             d.pestSeen = false;
             d.oldStock.Clear();
             d.stockPending = false;
             d.cardsShown = 0;
+            foreach (var c in d.cats) if (c.adopted && !Horaira.Is(c)) c.unplaced = true;
             Store();
         }
 

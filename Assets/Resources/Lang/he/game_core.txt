@@ -119,6 +119,14 @@
 = שתול את הגינה קרוב לקפיברה המנומנמת, כדי שתוכל להגיע לפרחים.
 ~ שתלי את הגינה קרוב לקפיברה המנומנמת, כדי שתוכל להגיע לפרחים.
 
+@ Oh dear, those guinea pigs ate every flower! I've shooed them away. Here's a fresh garden: plant it by your capybara so it can eat and get back to work.
+= אוי ואבוי, השרקנים האלה אכלו את כל הפרחים! גירשתי אותם. הנה גינה חדשה: שתול אותה ליד הקפיברה שלך, כדי שתוכל לאכול ולחזור לעבודה.
+~ אוי ואבוי, השרקנים האלה אכלו את כל הפרחים! גירשתי אותם. הנה גינה חדשה: שתלי אותה ליד הקפיברה שלך, כדי שתוכל לאכול ולחזור לעבודה.
+
+@ Your capybara has no flowers left to eat! Here's a fresh garden: plant it by your capybara so it can get back to work.
+= לקפיברה שלך לא נשארו פרחים לאכול! הנה גינה חדשה: שתול אותה ליד הקפיברה שלך, כדי שתוכל לחזור לעבודה.
+~ לקפיברה שלך לא נשארו פרחים לאכול! הנה גינה חדשה: שתלי אותה ליד הקפיברה שלך, כדי שתוכל לחזור לעבודה.
+
 @ Oh! A warm heart! All your building is waking the island up. The spirits can feel it.
 = אוי! לב חם! כל מה שאתה בונה מעורר את האי. הרוחות מרגישות את זה.
 ~ אוי! לב חם! כל מה שאת בונה מעורר את האי. הרוחות מרגישות את זה.

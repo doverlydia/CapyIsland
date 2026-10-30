@@ -498,6 +498,7 @@ namespace CapyIsland.Game
                 case Step.OpenTower: TickOpenTower(); break;
             }
             TickZoomBeat();
+            TickGardenGone();
             // The tutorial was ended: its steps still move the story on, but nothing points. Once it
             // is over the hand belongs to the story (a quest's focus, the chapel), so leave it be.
             if (Guidance.Off && _step != Step.Done && pointer != null) pointer.Hide();
@@ -697,6 +698,60 @@ namespace CapyIsland.Game
             Tell("Oh! A warm heart! All your building is waking the island up. The spirits can feel it.", Step.ClickMote);
             _stepTimer = 6f;
             Advance(Step.ClickMote);
+        }
+
+        float _gardenGoneFor;
+
+        /// <summary>
+        /// Every flower gone before the spring is lit (guinea pigs eat a garden whole, parent and
+        /// all) and no shops yet to buy another: the capybara would sleep hungry for good and the
+        /// fire never get its wood. Old Yuzu shoos off any pests and hands over a fresh garden.
+        /// </summary>
+        void TickGardenGone()
+        {
+            bool needWood = _step is >= Step.ClickMote and < Step.OpenTower && WoodHeld + _fed < FireWood;
+            if (!needWood || Visit.Active || AnyFlowers()) { _gardenGoneFor = 0f; return; }
+            _gardenGoneFor += Time.deltaTime;
+            if (_gardenGoneFor < 4f) return;
+            _gardenGoneFor = 0f;
+
+            var catalog = ItemCatalog.Instance;
+            var king = FindFirstObjectByType<PlayerAvatar>();
+            if (catalog == null || king == null) return;
+            bool shooed = ShooPests();
+            catalog.MakeStore("Small Posie Garden", (Vector2)king.transform.position + new Vector2(2.4f, -2.2f));
+            Tell(shooed
+                ? "Oh dear, those guinea pigs ate every flower! I've shooed them away. Here's a fresh garden: plant it by your capybara so it can eat and get back to work."
+                : "Your capybara has no flowers left to eat! Here's a fresh garden: plant it by your capybara so it can get back to work.");
+        }
+
+        /// <summary>Flowers growing, or a garden waiting in a bubble or your trail.</summary>
+        static bool AnyFlowers()
+        {
+            foreach (var n in FindObjectsByType<Harvestable>(FindObjectsSortMode.None))
+                if (n.InWorld && n.Family == NodeFamily.Flower) return true;
+            foreach (var b in FindObjectsByType<Bubble>(FindObjectsSortMode.None))
+                if (!b.Taken && b.Contents != null && b.Contents.TryGetComponent<CatalogItem>(out var inside) && IsGarden(inside)) return true;
+            foreach (var c in FindObjectsByType<CatalogItem>(FindObjectsSortMode.None))
+                if (IsGarden(c) && c.TryGetComponent<Placeable>(out var p) && !p.Placed) return true;
+            return false;
+
+            static bool IsGarden(CatalogItem c) => StoreData.TryGet(c.StoreName, out var def) && def.Kind == StoreItemKind.Garden;
+        }
+
+        /// <summary>Puffs away every guinea pig and wild zombie capybara. True if there were any.</summary>
+        static bool ShooPests()
+        {
+            var pests = new System.Collections.Generic.List<GameObject>();
+            foreach (var d in FindObjectsByType<DeerAnimal>(FindObjectsSortMode.None)) pests.Add(d.gameObject);
+            foreach (var m in FindObjectsByType<MonsterAnimal>(FindObjectsSortMode.None)) if (!m.Tame) pests.Add(m.gameObject);
+            var fx = HarvestEffects.Instance;
+            foreach (var p in pests)
+            {
+                if (fx != null) fx.Poof(p.transform.position, Color.white);
+                Destroy(p);
+            }
+            return pests.Count > 0;
         }
 
         void TickClickMote()
